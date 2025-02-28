@@ -1,7 +1,11 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-11-01',
-    // Define app head configuration
+    runtimeConfig: {
+        public: {
+            apiUrl: process.env.API_URL,
+        },
+    },
     app: {
         head: {
             titleTemplate: '%s | Transcribo',
