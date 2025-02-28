@@ -20,6 +20,8 @@ jobs:
       - name: Install Bun
         run: npm install -g bun
       - run: bun install
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: bun generate
       - run: bun run test --coverage
       - name: Upload coverage reports to Codecov
