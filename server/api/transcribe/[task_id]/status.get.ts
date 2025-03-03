@@ -1,8 +1,11 @@
+import { verboseFetch } from "~/server/utils/verboseFetch";
+import { TaskStatus } from "~/types/task";
+
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
     const taskId = getRouterParam(event, 'task_id');
 
-    return $fetch(`${config.public.apiUrl}/task/${taskId}/status`, {
+    return verboseFetch<TaskStatus>(`${config.public.apiUrl}/task/${taskId}/status`, {
         method: 'GET',
     });
 });

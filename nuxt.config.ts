@@ -31,6 +31,7 @@ export default defineNuxtConfig({
         '@nuxt/ui',
         '@nuxtjs/i18n',
         '@dcc-bs/common-ui.bs.js',
+        '@dcc-bs/event-system.bs.js',
         '@nuxt/eslint',
     ],
     devtools: { enabled: true },

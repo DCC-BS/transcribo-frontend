@@ -1,3 +1,6 @@
+import { verboseFetch } from "~/server/utils/verboseFetch";
+import { TaskStatus } from "~/types/task";
+
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
 
@@ -9,9 +12,10 @@ export default defineEventHandler(async (event) => {
     }
 
     const formData = new FormData()
-    formData.append('file', fileContent, fileContent.name);
+    formData.append('audio_file', fileContent, fileContent.name);
 
-    const response = await $fetch(`${config.public.apiUrl}/transcribe`, {
+    // Attempt to make the API request
+    const response = await verboseFetch<TaskStatus>(`${config.public.apiUrl}/transcribe`, {
         method: 'POST',
         body: formData,
     });

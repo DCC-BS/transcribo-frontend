@@ -1,6 +1,9 @@
+import { verboseFetch } from "~/server/utils/verboseFetch";
+import { TranscriptionResponse } from "~/types/transcriptionResponse";
+
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
     const taskId = getRouterParam(event, 'task_id');
 
-    return $fetch(`${config.public.apiUrl}/task/${taskId}/result`);
+    return verboseFetch<TranscriptionResponse>(`${config.public.apiUrl}/task/${taskId}/result`);
 });

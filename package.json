@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@dcc-bs/common-ui.bs.js": "^0.1.2",
+        "@dcc-bs/event-system.bs.js": "^1.0.3",
         "@nuxt/eslint": "1.1.0",
         "@nuxt/ui": "^2.21.0",
         "@nuxtjs/i18n": "^9.2.1",
