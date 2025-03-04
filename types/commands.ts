@@ -37,6 +37,5 @@ export class ZoomToCommand implements ICommand {
     readonly $type = 'ZoomToCommand';
 
     constructor(public posX: number, public zoomX: number) {
-        this.zoomX = Math.max(0.1, Math.min(10, zoomX));
     }
 }

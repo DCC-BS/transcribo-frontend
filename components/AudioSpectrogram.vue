@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, nextTick, onMounted, onUnmounted, computed } from 'vue';
+import type { StageConfig } from 'konva/lib/Stage';
+import type { LineConfig } from 'konva/lib/shapes/Line';
+import type { ImageConfig } from 'konva/lib/shapes/Image';
+import type { RectConfig } from 'konva/lib/shapes/Rect';
+import type { TextConfig } from 'konva/lib/shapes/Text';
 import { SeekToSecondsCommand, ZoomToCommand } from '~/types/commands';
 
 interface AudioSpectrogramProps {
@@ -17,35 +22,30 @@ const { renderSpectrogram } = useSpectrogramRenderer();
 const { executeCommand } = useCommandBus();
 
 // Component state variables with proper typing
-const spectrogramCanvas = ref<HTMLCanvasElement | null>(null); // Reference to the canvas element
+const container = ref<HTMLDivElement | null>(null); // Container div reference
 const audioContext = ref<AudioContext | null>(null); // Web Audio API context
 const audioBuffer = ref<AudioBuffer | null>(null); // Decoded audio data
 const audioSrc = ref<string>(''); // URL to the audio file
 const audioLoaded = ref<boolean>(false); // Flag to indicate if audio is loaded
 const audioDuration = ref<number>(0); // Total audio duration in seconds
-const canvasWidth = ref<number>(800); // Width of the spectrogram canvas
-const canvasHeight = ref<number>(200); // Height of the spectrogram canvas
+const canvasWidth = ref<number>(800); // Width of the spectrogram
+const canvasHeight = ref<number>(200); // Height of the spectrogram
 const spectrogramData = ref<Uint8Array[]>([]);
-const spectogramImgCanvas = ref<HTMLCanvasElement | null>(null);
+const spectrogramImage = ref<HTMLImageElement | null>(null);
 
-// Mouse tracking state variables
-const isMouseDown = ref<boolean>(false); // Track if mouse button is pressed
-
+// Mouse state tracking
+const isMouseDown = ref<boolean>(false);
+const stage = ref<any>(null);
 
 onMounted(() => {
     // Initialize AudioContext on component mount
     audioContext.value = new AudioContext();
     loadAudio(props.audioFile);
-
-    // Add global mouse up listener to handle when user releases outside the canvas
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('mousemove', handleMouseMove);
 });
 
 onUnmounted(() => {
-    // Clean up event listeners when component is unmounted
-    document.removeEventListener('mouseup', handleMouseUp);
-    document.removeEventListener('mousemove', handleMouseMove);
+    // Cleanup event listeners when component unmounts
+    isMouseDown.value = false;
 });
 
 watch(
@@ -57,11 +57,26 @@ watch(
     },
 );
 
-watch(
-    () => props.currentTime,
-    () => {
-        draw();
-    },
+// Konva stage configuration
+const stageWidth = computed(() => container.value?.clientWidth ?? canvasWidth.value);
+const stageHeight = computed(() => canvasHeight.value);
+
+const { toPixelScale, playheadLineConfig } = useMediaTimeline({
+    mediaDuration: computed(() => props.duration),
+    stageWidth,
+    stageHeight,
+    zoomX: computed(() => props.zoomX),
+    offsetX: computed(() => props.offsetX),
+    currentTime: computed(() => props.currentTime),
+});
+
+const configKonva = computed(
+    () => ({
+        width: stageWidth.value,
+        height: stageHeight.value,
+        offsetX: props.offsetX,
+        scaleX: props.zoomX,
+    }) as StageConfig,
 );
 
 /**
@@ -83,183 +98,97 @@ const loadAudio = async (file: Blob): Promise<void> => {
     audioBuffer.value = await audioContext.value.decodeAudioData(arrayBuffer);
     audioDuration.value = audioBuffer.value.duration;
 
+    // Render spectrogram to an image
     const result = renderSpectrogram(
         spectrogramData.value,
         specResult.sampleRate,
         { colorMap: 'magma' },
     );
-    spectogramImgCanvas.value = result.canvas;
 
-    audioLoaded.value = true;
-    nextTick(() => drawSpectrogram());
+    // Create an image from the canvas
+    const img = new Image();
+    img.src = result.canvas.toDataURL();
+    img.onload = () => {
+        spectrogramImage.value = img;
+        audioLoaded.value = true;
+    };
 };
 
-/**
- * Draws the spectrogram on the canvas
- * Using logarithmic scaling to better represent how humans perceive sound frequencies
- */
-const drawSpectrogram = (): void => {
-    if (
-        !spectrogramCanvas.value ||
-        !spectogramImgCanvas.value ||
-        !audioBuffer.value
-    ) {
-        return;
-    }
+// Spectrogram image configuration
+const spectrogramImageConfig = computed(() => ({
+    image: spectrogramImage.value,
+    width: stageWidth.value,
+    height: stageHeight.value,
+    listening: false,
+}) as ImageConfig);
 
-    const canvas: HTMLCanvasElement = spectrogramCanvas.value;
-    const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
+// Background rectangle for capturing events
+const backgroundRectConfig = computed(() => ({
+    x: 0,
+    y: 0,
+    width: stageWidth.value,
+    height: stageHeight.value,
+    fill: 'transparent',
+}) as RectConfig);
 
-    if (!ctx) {
-        console.error('Failed to get 2D context from canvas');
-        return;
-    }
+// Frequency labels
+const frequencyLabels = computed(() => {
+    if (!audioBuffer.value || stageHeight.value <= 50) return [];
 
-    const dataWidth: number = spectogramImgCanvas.value.width;
-    const dataHeight: number = spectogramImgCanvas.value.height;
+    const labels: TextConfig[] = [];
+    const audioSampleRate: number = audioBuffer.value?.sampleRate || 44100;
+    const nyquist: number = audioSampleRate / 2; // Highest possible frequency
 
-    // Clear the main canvas before drawing new content
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Create logarithmically spaced frequency points (e.g., 100Hz, 1kHz, 10kHz)
+    const freqPoints: number[] = [
+        100, 200, 500, 1000, 2000, 5000, 10000, 20000,
+    ].filter((f) => f < nyquist);
 
-    // Draw the temp canvas onto the main canvas with proper scaling
-    // This properly scales the spectrogram to fit the canvas dimensions
-    ctx.drawImage(
-        spectogramImgCanvas.value,
-        0,
-        0,
-        dataWidth,
-        dataHeight,
-        0,
-        0,
-        canvas.width,
-        canvas.height,
-    );
+    freqPoints.forEach((freq: number) => {
+        // Logarithmic mapping
+        const logFreqRatio: number = 1 - Math.log(freq) / Math.log(nyquist);
+        const yPos: number = Math.floor(logFreqRatio * stageHeight.value);
 
-    // Add frequency axis labels with logarithmic scale marks
-    if (canvas.height > 50) {
-        // Only add labels if canvas is tall enough
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-        ctx.fillRect(0, 0, 40, canvas.height);
+        // Format frequency label (e.g., 1000Hz as "1kHz")
+        const freqLabel: string = freq < 1000 ? `${freq}Hz` : `${freq / 1000}kHz`;
 
-        ctx.fillStyle = 'black';
-        ctx.font = '10px Arial';
+        labels.push({
+            x: 8,
+            y: yPos,
+            text: freqLabel,
+            fontSize: 10,
+            fontFamily: 'Arial',
+            fill: 'black',
+        } as TextConfig);
+    });
 
-        // Draw logarithmically spaced frequency labels
-        const audioSampleRate: number = audioBuffer.value?.sampleRate || 44100;
-        const nyquist: number = audioSampleRate / 2; // Highest possible frequency
+    return labels;
+});
 
-        // Create logarithmically spaced frequency points (e.g., 100Hz, 1kHz, 10kHz)
-        const freqPoints: number[] = [
-            100, 200, 500, 1000, 2000, 5000, 10000, 20000,
-        ].filter((f) => f < nyquist);
-
-        freqPoints.forEach((freq: number) => {
-            // Logarithmic mapping
-            const logFreqRatio: number = 1 - Math.log(freq) / Math.log(nyquist);
-            const yPos: number = Math.floor(logFreqRatio * canvas.height);
-
-            // Draw tick mark and label
-            ctx.fillStyle = 'black';
-            ctx.fillRect(0, yPos, 5, 1);
-
-            // Format frequency label (e.g., 1000Hz as "1kHz")
-            const freqLabel: string =
-                freq < 1000 ? `${freq}Hz` : `${freq / 1000}kHz`;
-            ctx.fillText(freqLabel, 8, yPos + 4);
-        });
-    }
-};
+// Frequency axis background
+const freqAxisBackground = computed(() => ({
+    x: 0,
+    y: 0,
+    width: 40,
+    height: stageHeight.value,
+    fill: 'rgba(255, 255, 255, 0.7)',
+    opacity: 0.7,
+}) as RectConfig);
 
 /**
- * Draws the playhead indicator on top of the spectrogram
+ * Handles clicks on the spectrogram to seek to a specific position
+ * @param {KonvaEventObject} event - Konva click event
  */
-const draw = (): void => {
-    if (!spectrogramCanvas.value) return;
+const handleStageClick = (event: any): void => {
+    if (audioDuration.value === 0) return;
 
-    const canvas: HTMLCanvasElement = spectrogramCanvas.value;
-    const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
+    // Get stage-relative coordinates
+    const stage = event.target.getStage();
+    const pointerPosition = stage.getPointerPosition();
+    if (!pointerPosition) return;
 
-    if (!ctx) return;
-
-    const x: number = (props.currentTime / audioDuration.value) * canvas.width;
-
-    // Redraw the spectrogram to clear the previous playhead
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    drawSpectrogram();
-
-    // Draw the playhead
-    ctx.strokeStyle = 'red';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, canvas.height);
-    ctx.stroke();
-};
-
-/**
- * Handles clicks on the spectrogram canvas to seek to a specific position
- * @param {MouseEvent} event - Mouse click event
- */
-const handleCanvasClick = (event: MouseEvent): void => {
-    if (!spectrogramCanvas.value || audioDuration.value === 0) return;
-
-    // Get the canvas-relative coordinates and seek to position
-    seekToPosition(event);
-};
-
-/**
- * Handles mouse down events on the canvas to start dragging
- * @param {MouseEvent} event - Mouse down event
- */
-const handleMouseDown = (event: MouseEvent): void => {
-    if (!spectrogramCanvas.value || audioDuration.value === 0) return;
-
-    isMouseDown.value = true;
-
-    // Immediately seek when mouse is pressed down
-    seekToPosition(event);
-};
-
-/**
- * Handles mouse move events when mouse is down for continuous seeking
- * @param {MouseEvent} event - Mouse move event
- */
-const handleMouseMove = (event: MouseEvent): void => {
-    if (!isMouseDown.value || !spectrogramCanvas.value) return;
-
-    // Only process mouse move if it's over our canvas
-    const rect = spectrogramCanvas.value.getBoundingClientRect();
-    if (
-        event.clientX >= rect.left &&
-        event.clientX <= rect.right &&
-        event.clientY >= rect.top &&
-        event.clientY <= rect.bottom
-    ) {
-        // Seek to the new position while dragging
-        seekToPosition(event);
-    }
-};
-
-/**
- * Handles mouse up events to end dragging
- */
-const handleMouseUp = (): void => {
-    isMouseDown.value = false;
-};
-
-/**
- * Seeks to audio position based on mouse event coordinates
- * @param {MouseEvent} event - Mouse event with coordinates
- */
-const seekToPosition = (event: MouseEvent): void => {
-    if (!spectrogramCanvas.value || audioDuration.value === 0) return;
-
-    // Get the canvas-relative coordinates
-    const rect = spectrogramCanvas.value.getBoundingClientRect();
-    const clickX = event.clientX - rect.left;
-
-    // Calculate the proportion of the click position relative to canvas width
-    const clickProportion = clickX / rect.width;
+    // Calculate the proportion of the click position relative to stage width
+    const clickProportion = pointerPosition.x / stage.width();
 
     // Ensure the proportion is within bounds (0-1)
     const boundedProportion = Math.max(0, Math.min(1, clickProportion));
@@ -271,30 +200,120 @@ const seekToPosition = (event: MouseEvent): void => {
     executeCommand(new SeekToSecondsCommand(clickTime));
 };
 
-function handleScroll(event: WheelEvent): void {
-    if (!spectrogramCanvas.value) return;
+/**
+ * Calculates and seeks to time position based on mouse x coordinate
+ * @param {any} stageRef - Reference to the Konva stage
+ * @param {number} x - Mouse x coordinate
+ */
+const seekToPosition = (stageRef: any, x: number): void => {
+    if (audioDuration.value === 0 || !stageRef) return;
 
+    // Calculate the proportion of the mouse position relative to stage width
+    const clickProportion = x / stageRef.width();
+
+    // Ensure the proportion is within bounds (0-1)
+    const boundedProportion = Math.max(0, Math.min(1, clickProportion));
+
+    // Calculate the corresponding time in the audio
+    const seekTime = boundedProportion * audioDuration.value;
+
+    // Update current time and seek to that position
+    executeCommand(new SeekToSecondsCommand(seekTime));
+};
+
+/**
+ * Handles mouse down events on the spectrogram
+ * @param {any} event - Konva mouse down event
+ */
+const handleMouseDown = (event: any): void => {
+    isMouseDown.value = true;
+    stage.value = event.target.getStage();
+
+    // Also seek immediately on mouse down
+    const pointerPosition = stage.value.getPointerPosition();
+    if (pointerPosition) {
+        seekToPosition(stage.value, pointerPosition.x);
+    }
+};
+
+/**
+ * Handles mouse move events for seeking when mouse is down
+ * @param {any} event - Konva mouse move event
+ */
+const handleMouseMove = (event: any): void => {
+    if (!isMouseDown.value || !stage.value) return;
+
+    const pointerPosition = stage.value.getPointerPosition();
+    if (pointerPosition) {
+        seekToPosition(stage.value, pointerPosition.x);
+    }
+};
+
+/**
+ * Handles mouse up events to stop seeking
+ */
+const handleMouseUp = (): void => {
+    isMouseDown.value = false;
+};
+
+/**
+ * Handles wheel events for zooming centered at the mouse position
+ * @param {KonvaEventObject} event - Konva wheel event
+ */
+function handleWheel(event: any): void {
     // Prevent the default scroll behavior
-    event.preventDefault();
+    event.evt.preventDefault();
 
-    const newZoom = props.zoomX * (event.deltaY > 0 ? 0.9 : 1.1);
-    const newOffset = event.offsetX;
+    const stage = event.target.getStage();
+    const pointerPos = stage.getPointerPosition();
+    if (!pointerPos) return;
 
-    console.log('Scrolling', event.deltaY, newZoom, newOffset);
+    // Get the pointer position relative to the current view
+    const mousePointTo = {
+        x: (pointerPos.x + props.offsetX) / props.zoomX,
+        y: pointerPos.y / props.zoomX
+    };
 
-    // Update the canvas width based on the scroll direction
-    executeCommand(new ZoomToCommand(newOffset, newZoom));
+    // Calculate zoom factor based on wheel direction
+    // Use smaller increments for smoother zooming
+    const zoomStep = 0.05;
+    const zoomFactor = event.evt.deltaY > 0 ? 1 - zoomStep : 1 + zoomStep;
+    const newZoom = clamp(props.zoomX * zoomFactor, 1, 50);
+
+    // Calculate new offsetX so that the mouse position stays fixed
+    // This is the key to zooming at mouse position
+    const newOffsetX = clamp(mousePointTo.x * newZoom - pointerPos.x, 0, stage.width());
+
+    console.log('Zoom:', newZoom, 'Offset:', newOffsetX, 'zoomFactor', zoomFactor, 'props.zoomX', props.zoomX);
+
+    // Update zoom and offset
+    executeCommand(new ZoomToCommand(newOffsetX, newZoom));
 }
-
 </script>
 
 <template>
-    <div class="audio-spectrogram">
-        <!-- Audio player and spectrogram display, shown when audio is loaded -->
+    <div ref="container" class="audio-spectrogram">
+        <!-- Audio spectrogram display using Konva, shown when audio is loaded -->
         <div v-if="audioLoaded">
-            <!-- Canvas for displaying the spectrogram visualization with mouse events -->
-            <canvas ref="spectrogramCanvas" :width="canvasWidth" :height="canvasHeight" @click="handleCanvasClick"
-                @mousedown="handleMouseDown" @wheel="handleScroll" />
+            <v-stage :config="configKonva" @click="handleStageClick" @wheel="handleWheel" @mousedown="handleMouseDown"
+                @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
+                <v-layer>
+                    <!-- Spectrogram image -->
+                    <v-image :config="spectrogramImageConfig" />
+
+                    <!-- Frequency axis background -->
+                    <v-rect :config="freqAxisBackground" />
+
+                    <!-- Frequency labels -->
+                    <v-text v-for="(labelConfig, index) in frequencyLabels" :key="index" :config="labelConfig" />
+
+                    <!-- Playhead line -->
+                    <v-line :config="playheadLineConfig" />
+
+                    <!-- Transparent rectangle to capture events -->
+                    <v-rect :config="backgroundRectConfig" />
+                </v-layer>
+            </v-stage>
         </div>
         <div v-else>
             <USkeleton :style="{ width: `${canvasWidth}px`, height: `${canvasHeight}px` }" />
@@ -308,30 +327,7 @@ function handleScroll(event: WheelEvent): void {
     margin: 0 auto;
     user-select: none;
     /* Prevent text selection while dragging */
-}
-
-canvas {
-    width: 100%;
-    height: auto;
-    border: 1px solid #ccc;
     cursor: pointer;
-    /* Show pointer cursor to indicate clickable area */
-}
-
-.controls {
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-input[type='range'] {
-    flex-grow: 1;
-}
-
-/* Add some button styling */
-button {
-    padding: 5px 10px;
-    cursor: pointer;
+    /* Show pointer cursor to indicate the area is clickable */
 }
 </style>

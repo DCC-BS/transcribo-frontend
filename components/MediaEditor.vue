@@ -11,6 +11,9 @@ const duration = ref<number>(0); // Total audio duration in seconds
 const zoomX = ref<number>(1);
 const offsetX = ref<number>(0);
 
+const range = ref([25, 75])
+
+
 const transcriptionStore = useTranscriptionsStore();
 const { registerHandler, unregisterHandler } = useCommandBus();
 
@@ -108,6 +111,8 @@ async function handleZoomTo(command: ZoomToCommand): Promise<void> {
             <ClientOnly>
                 <TimelineView :current-time="currentTime" :duration="duration" :zoomX="zoomX" :offsetX="offsetX" />
             </ClientOnly>
+
+            <USlider v-model="range" />
 
             <!-- Playback controls -->
             <div class="controls">

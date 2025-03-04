@@ -44,6 +44,15 @@ const stageWidth = computed(() => container.value?.clientWidth ?? 100);
 const selectedSegment = ref<string>();
 const stageHeight = computed(() => speakers.value.length * heightPerSpeaker);
 
+const { toPixelScale, playheadLineConfig } = useMediaTimeline({
+    mediaDuration: computed(() => props.duration),
+    stageWidth,
+    stageHeight,
+    zoomX: computed(() => props.zoomX),
+    offsetX: computed(() => props.offsetX),
+    currentTime: computed(() => props.currentTime),
+});
+
 const configKonva = computed(
     () =>
         ({
@@ -53,22 +62,6 @@ const configKonva = computed(
             scaleX: props.zoomX,
         }) as StageConfig,
 );
-
-// Calculate scaling factor based on the last segment's end time and stage width
-const scaleFactor = computed(() => {
-    console.log('duration', props.duration)
-
-    // Calculate scaling factor to fit all segments within stage width
-    return stageWidth.value / props.duration;
-});
-
-function toPixelScale(value: number): number {
-    return value * scaleFactor.value * props.zoomX + props.offsetX;
-}
-
-watch(scaleFactor, () => {
-    console.log('Scale factor changed', scaleFactor.value);
-});
 
 const rectConfigs = computed(() =>
     transcriptions.value.map(
@@ -103,15 +96,6 @@ const rectConfigs = computed(() =>
     ),
 );
 
-const trackLineConfig = computed(() => ({
-    points: [
-        toPixelScale(props.currentTime), 0,
-        toPixelScale(props.currentTime), stageHeight.value,
-    ],
-    stroke: 'red',
-    strokeWidth: 1,
-} as LineConfig));
-
 watch(
     () => transcriptionStore.currentTranscription,
     (currentTranscription) => {
@@ -140,7 +124,7 @@ function onScroll(event: WheelEvent): void {
             <v-layer>
                 <v-rect @click="onSegmentClicked(rectConfig.id!)" v-for="(rectConfig, index) in rectConfigs"
                     :key="index" :config="rectConfig" />
-                <v-line :config="trackLineConfig" />
+                <v-line :config="playheadLineConfig" />
             </v-layer>
         </v-stage>
     </div>
