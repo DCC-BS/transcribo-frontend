@@ -9,6 +9,7 @@
         "generate": "nuxt generate",
         "lint:js": "eslint --ext \".ts,.js,.vue\" .",
         "lint": "bun lint:js",
+        "lint:fix": "bun lint:js --fix",
         "prettier": "prettier --write \"**/*.{js,ts,vue,json,css,scss,md}\""
     },
     "dependencies": {
@@ -17,8 +18,12 @@
         "@nuxt/eslint": "1.1.0",
         "@nuxt/ui": "^2.21.0",
         "@nuxtjs/i18n": "^9.2.1",
+        "@pinia/nuxt": "0.10.1",
+        "konva": "^9.3.18",
         "nuxt": "^3.15.4",
+        "nuxt3-winston-log": "^0.5.0",
         "vue": "latest",
+        "vue-konva": "^3.2.0",
         "vue-router": "latest"
     },
     "devDependencies": {

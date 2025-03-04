@@ -5,14 +5,14 @@ export type Methods = 'get' | 'post' | 'put' | 'delete' | 'patch';
 // Update the generic type parameters to handle the response type correctly
 export async function verboseFetch<T>(
     url: string,
-    init?: NitroFetchOptions<NitroFetchRequest, Methods>)
-    : Promise<T> {
-
+    init?: NitroFetchOptions<NitroFetchRequest, Methods>,
+): Promise<T> {
     try {
         // Use type assertion to specify that the return value will be of type T
         // This tells TypeScript that we're handling the conversion from TypedInternalResponse to T
-        return await $fetch(url, init) as T;
-    } catch (error: unknown) { // Use unknown as it's safer for caught errors
+        return (await $fetch(url, init)) as T;
+    } catch (error: unknown) {
+        // Use unknown as it's safer for caught errors
         // Cast to a more specific type that we expect from $fetch errors
         const fetchError = error as {
             message: string;
@@ -20,7 +20,7 @@ export async function verboseFetch<T>(
                 status: number;
                 headers: Headers;
             };
-            data?: any
+            data?: unknown;
         };
 
         // Handle errors and attempt to log the error details
@@ -42,7 +42,7 @@ export async function verboseFetch<T>(
         throw createError({
             statusCode: fetchError.response?.status ?? 500,
             statusMessage: 'Transcription request failed',
-            data: fetchError.data
+            data: fetchError.data,
         });
     }
 }

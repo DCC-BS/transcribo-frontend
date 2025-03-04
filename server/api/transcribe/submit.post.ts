@@ -1,5 +1,5 @@
-import { verboseFetch } from "~/server/utils/verboseFetch";
-import { TaskStatus } from "~/types/task";
+import { verboseFetch } from '~/server/utils/verboseFetch';
+import type { TaskStatus } from '~/types/task';
 
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
@@ -8,17 +8,23 @@ export default defineEventHandler(async (event) => {
     const fileContent = inputFormData.get('file') as File;
 
     if (!fileContent) {
-        throw createError({ statusCode: 400, statusMessage: 'File not provided' });
+        throw createError({
+            statusCode: 400,
+            statusMessage: 'File not provided',
+        });
     }
 
-    const formData = new FormData()
+    const formData = new FormData();
     formData.append('audio_file', fileContent, fileContent.name);
 
     // Attempt to make the API request
-    const response = await verboseFetch<TaskStatus>(`${config.public.apiUrl}/transcribe`, {
-        method: 'POST',
-        body: formData,
-    });
+    const response = await verboseFetch<TaskStatus>(
+        `${config.public.apiUrl}/transcribe`,
+        {
+            method: 'POST',
+            body: formData,
+        },
+    );
 
     return response;
 });

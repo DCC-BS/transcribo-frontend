@@ -1,20 +1,18 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue';
+import { SeekToSecondsCommand } from '~/types/commands';
 
 interface AudioSpectrogramProps {
-    audioFile: File;
+    audioFile: File | Blob;
     currentTime: number;
     duration: number;
 }
 
 const props = defineProps<AudioSpectrogramProps>();
 
-const emit = defineEmits<{
-    (e: 'onSeeked', time: number): void;
-}>();
-
 const { generateFromFile } = useSpectrogramGenerator();
 const { renderSpectrogram } = useSpectrogramRenderer();
+const { executeCommand } = useCommandBus();
 
 // Component state variables with proper typing
 const spectrogramCanvas = ref<HTMLCanvasElement | null>(null); // Reference to the canvas element
@@ -22,7 +20,7 @@ const audioContext = ref<AudioContext | null>(null); // Web Audio API context
 const audioBuffer = ref<AudioBuffer | null>(null); // Decoded audio data
 const audioSrc = ref<string>(''); // URL to the audio file
 const audioLoaded = ref<boolean>(false); // Flag to indicate if audio is loaded
-const duration = ref<number>(0); // Total audio duration in seconds
+const audioDuration = ref<number>(0); // Total audio duration in seconds
 const canvasWidth = ref<number>(800); // Width of the spectrogram canvas
 const canvasHeight = ref<number>(200); // Height of the spectrogram canvas
 const spectrogramData = ref<Uint8Array[]>([]);
@@ -34,21 +32,27 @@ onMounted(() => {
     loadAudio(props.audioFile);
 });
 
-watch(() => props.audioFile, async (newFile) => {
-    if (newFile) {
-        await loadAudio(newFile);
-    }
-});
+watch(
+    () => props.audioFile,
+    async (newFile) => {
+        if (newFile) {
+            await loadAudio(newFile);
+        }
+    },
+);
 
-watch(() => props.currentTime, () => {
-    draw();
-});
+watch(
+    () => props.currentTime,
+    () => {
+        draw();
+    },
+);
 
 /**
  * Loads and processes the audio file
  * @param {File} file - The audio file to be loaded
  */
-const loadAudio = async (file: File): Promise<void> => {
+const loadAudio = async (file: Blob): Promise<void> => {
     if (!audioContext.value) {
         return;
     }
@@ -61,9 +65,13 @@ const loadAudio = async (file: File): Promise<void> => {
 
     const arrayBuffer: ArrayBuffer = await file.arrayBuffer();
     audioBuffer.value = await audioContext.value.decodeAudioData(arrayBuffer);
-    duration.value = audioBuffer.value.duration;
+    audioDuration.value = audioBuffer.value.duration;
 
-    const result = renderSpectrogram(spectrogramData.value, specResult.sampleRate, { colorMap: 'magma' });
+    const result = renderSpectrogram(
+        spectrogramData.value,
+        specResult.sampleRate,
+        { colorMap: 'magma' },
+    );
     spectogramImgCanvas.value = result.canvas;
 
     audioLoaded.value = true;
@@ -75,7 +83,11 @@ const loadAudio = async (file: File): Promise<void> => {
  * Using logarithmic scaling to better represent how humans perceive sound frequencies
  */
 const drawSpectrogram = (): void => {
-    if (!spectrogramCanvas.value || !spectogramImgCanvas.value || !audioBuffer.value) {
+    if (
+        !spectrogramCanvas.value ||
+        !spectogramImgCanvas.value ||
+        !audioBuffer.value
+    ) {
         return;
     }
 
@@ -83,7 +95,7 @@ const drawSpectrogram = (): void => {
     const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
 
     if (!ctx) {
-        console.error("Failed to get 2D context from canvas");
+        console.error('Failed to get 2D context from canvas');
         return;
     }
 
@@ -95,10 +107,21 @@ const drawSpectrogram = (): void => {
 
     // Draw the temp canvas onto the main canvas with proper scaling
     // This properly scales the spectrogram to fit the canvas dimensions
-    ctx.drawImage(spectogramImgCanvas.value, 0, 0, dataWidth, dataHeight, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(
+        spectogramImgCanvas.value,
+        0,
+        0,
+        dataWidth,
+        dataHeight,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+    );
 
     // Add frequency axis labels with logarithmic scale marks
-    if (canvas.height > 50) { // Only add labels if canvas is tall enough
+    if (canvas.height > 50) {
+        // Only add labels if canvas is tall enough
         ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
         ctx.fillRect(0, 0, 40, canvas.height);
 
@@ -110,11 +133,13 @@ const drawSpectrogram = (): void => {
         const nyquist: number = audioSampleRate / 2; // Highest possible frequency
 
         // Create logarithmically spaced frequency points (e.g., 100Hz, 1kHz, 10kHz)
-        const freqPoints: number[] = [100, 200, 500, 1000, 2000, 5000, 10000, 20000].filter(f => f < nyquist);
+        const freqPoints: number[] = [
+            100, 200, 500, 1000, 2000, 5000, 10000, 20000,
+        ].filter((f) => f < nyquist);
 
         freqPoints.forEach((freq: number) => {
             // Logarithmic mapping
-            const logFreqRatio: number = 1 - (Math.log(freq) / Math.log(nyquist));
+            const logFreqRatio: number = 1 - Math.log(freq) / Math.log(nyquist);
             const yPos: number = Math.floor(logFreqRatio * canvas.height);
 
             // Draw tick mark and label
@@ -122,7 +147,8 @@ const drawSpectrogram = (): void => {
             ctx.fillRect(0, yPos, 5, 1);
 
             // Format frequency label (e.g., 1000Hz as "1kHz")
-            let freqLabel: string = freq < 1000 ? `${freq}Hz` : `${freq / 1000}kHz`;
+            const freqLabel: string =
+                freq < 1000 ? `${freq}Hz` : `${freq / 1000}kHz`;
             ctx.fillText(freqLabel, 8, yPos + 4);
         });
     }
@@ -139,7 +165,7 @@ const draw = (): void => {
 
     if (!ctx) return;
 
-    const x: number = (props.currentTime / duration.value) * canvas.width;
+    const x: number = (props.currentTime / audioDuration.value) * canvas.width;
 
     // Redraw the spectrogram to clear the previous playhead
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -158,7 +184,7 @@ const draw = (): void => {
  * @param {MouseEvent} event - Mouse click event
  */
 const handleCanvasClick = (event: MouseEvent): void => {
-    if (!spectrogramCanvas.value || duration.value === 0) return;
+    if (!spectrogramCanvas.value || audioDuration.value === 0) return;
 
     // Get the canvas-relative coordinates
     const rect = spectrogramCanvas.value.getBoundingClientRect();
@@ -168,11 +194,11 @@ const handleCanvasClick = (event: MouseEvent): void => {
     const clickProportion = clickX / rect.width;
 
     // Calculate the corresponding time in the audio
-    const clickTime = clickProportion * duration.value;
+    const clickTime = clickProportion * audioDuration.value;
 
     // Update current time and seek to that position
-    emit('onSeeked', clickTime);
-}
+    executeCommand(new SeekToSecondsCommand(clickTime));
+};
 </script>
 
 <template>
@@ -180,8 +206,12 @@ const handleCanvasClick = (event: MouseEvent): void => {
         <!-- Audio player and spectrogram display, shown when audio is loaded -->
         <div v-if="audioLoaded">
             <!-- Canvas for displaying the spectrogram visualization with click event -->
-            <canvas ref="spectrogramCanvas" :width="canvasWidth" :height="canvasHeight"
-                @click="handleCanvasClick"></canvas>
+            <canvas
+                ref="spectrogramCanvas"
+                :width="canvasWidth"
+                :height="canvasHeight"
+                @click="handleCanvasClick"
+            />
         </div>
     </div>
 </template>
@@ -207,7 +237,7 @@ canvas {
     gap: 10px;
 }
 
-input[type="range"] {
+input[type='range'] {
     flex-grow: 1;
 }
 

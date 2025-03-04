@@ -1,25 +1,39 @@
 <script lang="ts" setup>
+import type { SeekToSecondsCommand } from '~/types/commands';
+import { Cmds } from '~/types/commands';
 
 const audioElement = ref<HTMLAudioElement>(); // Reference to the audio element
 const isPlaying = ref<boolean>(false); // Flag to indicate playback status
-const audioFile = ref<File>(); // Reference to the uploaded audio file
+const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const audioSrc = ref<string>(''); // URL to the audio file
 const currentTime = ref<number>(0); // Current playback position in seconds
 const duration = ref<number>(0); // Total audio duration in seconds
 
-const loadAudio = async (event: Event): Promise<void> => {
-    if (!event.target) {
-        return;
-    }
+const transcriptionStore = useTranscriptionsStore();
+const { registerHandler, unregisterHandler } = useCommandBus();
 
-    const target = event.target as HTMLInputElement;
-    if (!target.files || target.files.length === 0) {
-        return;
-    }
+onMounted(() => {
+    registerHandler(Cmds.SeekToSecondsCommand, handleSeekToSeconds);
+});
 
-    audioFile.value = target.files[0]; // Update the reference to the uploaded audio file
-    audioSrc.value = URL.createObjectURL(audioFile.value); // Create a URL for the audio file
-};
+onUnmounted(() => {
+    unregisterHandler(Cmds.SeekToSecondsCommand, handleSeekToSeconds);
+});
+
+watch(
+    () => transcriptionStore.currentTranscription,
+    (currentTranscription) => {
+        if (!currentTranscription?.audioFile) {
+            return;
+        }
+
+        audioFile.value = currentTranscription.audioFile;
+        audioSrc.value = URL.createObjectURL(audioFile.value);
+        duration.value = currentTranscription.audioDuration ?? 0;
+        currentTime.value = 0;
+    },
+    { immediate: true },
+);
 
 /**
  * Toggles audio playback
@@ -67,29 +81,39 @@ const formatTime = (time: number): string => {
     const seconds: number = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
+
+async function handleSeekToSeconds(
+    command: SeekToSecondsCommand,
+): Promise<void> {
+    seekTo(command.seconds);
+}
 </script>
 
 <template>
     <div>
-        <!-- File input for audio upload -->
-        <input type="file" @change="loadAudio" accept="audio/*" />
-
         <div v-if="audioFile">
             <!-- Audio element with references for control -->
-            <audio ref="audioElement" :src="audioSrc" @timeupdate="updatePosition" @seeked="updatePosition"></audio>
+            <audio ref="audioElement" :src="audioSrc" @timeupdate="updatePosition" @seeked="updatePosition" />
 
-            <AudioSpectrogram :audioFile="audioFile" :currentTime="currentTime" :duration="duration"
-                @onSeeked="seekTo" />
+            <AudioSpectrogram :audio-file="audioFile" :current-time="currentTime" :duration="duration"
+                @on-seeked="seekTo" />
+
+            <ClientOnly>
+                <TimelineView :current-time="currentTime" />
+            </ClientOnly>
 
             <!-- Playback controls -->
             <div class="controls">
-                <UButton @click="togglePlay">{{ isPlaying ? 'Pause' : 'Play' }}</UButton>
-                <input type="range" :min="0" :max="duration" v-model="currentTime" @input="seek" step="0.1" />
-                <span>{{ formatTime(currentTime) }} / {{ formatTime(duration) }}</span>
+                <UButton @click="togglePlay">
+                    {{ isPlaying ? 'Pause' : 'Play' }}
+                </UButton>
+                <input v-model="currentTime" type="range" :min="0" :max="duration" step="0.1" @input="seek">
+                <span>
+                    {{ formatTime(currentTime) }} / {{ formatTime(duration) }}
+                </span>
             </div>
         </div>
     </div>
 </template>
-
 
 <style></style>

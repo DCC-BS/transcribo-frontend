@@ -12,10 +12,13 @@ const status = ref<TaskStatus>();
 
 const { executeCommand } = useCommandBus();
 
-watch(() => props.initalTaskStatus, () => {
-    status.value = props.initalTaskStatus;
-    fetchTaskStatus();
-});
+watch(
+    () => props.initalTaskStatus,
+    () => {
+        status.value = props.initalTaskStatus;
+        fetchTaskStatus();
+    },
+);
 
 const fetchTaskStatus = async (): Promise<void> => {
     if (!taskId.value || !status.value) {
@@ -29,7 +32,9 @@ const fetchTaskStatus = async (): Promise<void> => {
 
     let result: TranscriptionResponse | undefined = undefined;
     if (status.value?.status == TaskStatusEnum.SUCCESS) {
-        result = await $fetch<TranscriptionResponse>(`/api/transcribe/${taskId.value}`);
+        result = await $fetch<TranscriptionResponse>(
+            `/api/transcribe/${taskId.value}`,
+        );
     }
 
     executeCommand(new TranscriptionFinishedCommand(status.value, result));

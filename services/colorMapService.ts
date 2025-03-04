@@ -1,7 +1,12 @@
 /**
  * Available color map types for spectrograms and visualizations
  */
-export type ColorMapType = 'rainbow' | 'grayscale' | 'viridis' | 'inferno' | 'magma';
+export type ColorMapType =
+    | 'rainbow'
+    | 'grayscale'
+    | 'viridis'
+    | 'inferno'
+    | 'magma';
 
 /**
  * RGB color representation
@@ -24,7 +29,9 @@ export const colorMapService = {
     rainbow(normalizedValue: number): RGBColor {
         // Ensure value is in valid range
         const value = Math.max(0, Math.min(1, normalizedValue));
-        let r = 0, g = 0, b = 0;
+        let r = 0,
+            g = 0,
+            b = 0;
 
         if (value < 0.2) {
             // Blue to Cyan (0-0.2)
@@ -49,8 +56,8 @@ export const colorMapService = {
         } else {
             // Red to White (0.8-1.0)
             r = 255;
-            g = Math.floor((value - 0.8) / 0.2 * 255);
-            b = Math.floor((value - 0.8) / 0.2 * 255);
+            g = Math.floor(((value - 0.8) / 0.2) * 255);
+            b = Math.floor(((value - 0.8) / 0.2) * 255);
         }
 
         return { r, g, b };
@@ -77,7 +84,9 @@ export const colorMapService = {
     viridis(normalizedValue: number): RGBColor {
         // Ensure value is in valid range
         const value = Math.max(0, Math.min(1, normalizedValue));
-        let r = 0, g = 0, b = 0;
+        let r = 0,
+            g = 0,
+            b = 0;
 
         if (value < 0.33) {
             // Dark blue to teal
@@ -111,7 +120,9 @@ export const colorMapService = {
     inferno(normalizedValue: number): RGBColor {
         // Ensure value is in valid range
         const value = Math.max(0, Math.min(1, normalizedValue));
-        let r = 0, g = 0, b = 0;
+        let r = 0,
+            g = 0,
+            b = 0;
 
         if (value < 0.25) {
             // Black to purple
@@ -151,7 +162,9 @@ export const colorMapService = {
     magma(normalizedValue: number): RGBColor {
         // Ensure value is in valid range
         const value = Math.max(0, Math.min(1, normalizedValue));
-        let r = 0, g = 0, b = 0;
+        let r = 0,
+            g = 0,
+            b = 0;
 
         if (value < 0.25) {
             // Dark purple to purple
@@ -189,12 +202,17 @@ export const colorMapService = {
      */
     getColorMap(type: ColorMapType): (value: number) => RGBColor {
         switch (type) {
-            case 'grayscale': return this.grayscale;
-            case 'viridis': return this.viridis;
-            case 'inferno': return this.inferno;
-            case 'magma': return this.magma;
+            case 'grayscale':
+                return this.grayscale;
+            case 'viridis':
+                return this.viridis;
+            case 'inferno':
+                return this.inferno;
+            case 'magma':
+                return this.magma;
             case 'rainbow':
-            default: return this.rainbow;
+            default:
+                return this.rainbow;
         }
-    }
+    },
 };

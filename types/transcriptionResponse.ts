@@ -18,8 +18,10 @@ export interface Segment {
     start: number;
     end: number;
     text: string;
-    speaker: string | null;
+    speaker?: string;
 }
+
+export type SegementWithId = Segment & { id: string };
 
 /**
  * Interface representing a transcription response

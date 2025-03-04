@@ -1,26 +1,33 @@
-import type { ICommand } from "#build/types/commands";
-import type { TaskStatus } from "./task";
-import type { TranscriptionResponse } from "./transcriptionResponse";
+import type { ICommand } from '#build/types/commands';
+import type { TaskStatus } from './task';
+import type { TranscriptionResponse } from './transcriptionResponse';
 
 export const Cmds = {
-    StartTranscriptionCommand: "StartTranscriptionCommand",
-    TranscriptionFinishedCommand: "TranscriptionFinishedCommand",
-}
+    StartTranscriptionCommand: 'StartTranscriptionCommand',
+    TranscriptionFinishedCommand: 'TranscriptionFinishedCommand',
+    SeekToSecondsCommand: 'SeekToSecondsCommand',
+};
 
 export class StartTranscriptionCommand implements ICommand {
-    readonly $type = "StartTranscriptionCommand";
+    readonly $type = 'StartTranscriptionCommand';
 
     constructor(
         public taskId: string,
-        public audio: File) {
-    }
+        public audio: File,
+    ) {}
 }
 
 export class TranscriptionFinishedCommand implements ICommand {
-    readonly $type = "ReportTranscriptionCommandFinished";
+    readonly $type = 'TranscriptionFinishedCommand';
 
     constructor(
         public status: TaskStatus,
-        public result?: TranscriptionResponse) {
-    }
+        public result?: TranscriptionResponse,
+    ) {}
+}
+
+export class SeekToSecondsCommand implements ICommand {
+    readonly $type = 'SeekToSecondsCommand';
+
+    constructor(public seconds: number) {}
 }
