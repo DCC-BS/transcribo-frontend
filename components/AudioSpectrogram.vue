@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import type { StageConfig } from 'konva/lib/Stage';
-import type { LineConfig } from 'konva/lib/shapes/Line';
 import type { ImageConfig } from 'konva/lib/shapes/Image';
 import type { RectConfig } from 'konva/lib/shapes/Rect';
 import type { TextConfig } from 'konva/lib/shapes/Text';
-import { SeekToSecondsCommand, ZoomToCommand } from '~/types/commands';
+import { SeekToSecondsCommand } from '~/types/commands';
 
 interface AudioSpectrogramProps {
     audioFile: File | Blob;
     currentTime: number;
     duration: number;
     zoomX: number;
-    offsetX: number;
+    startTime: number;
 }
 
 const props = defineProps<AudioSpectrogramProps>();
@@ -28,8 +27,6 @@ const audioBuffer = ref<AudioBuffer | null>(null); // Decoded audio data
 const audioSrc = ref<string>(''); // URL to the audio file
 const audioLoaded = ref<boolean>(false); // Flag to indicate if audio is loaded
 const audioDuration = ref<number>(0); // Total audio duration in seconds
-const canvasWidth = ref<number>(800); // Width of the spectrogram
-const canvasHeight = ref<number>(200); // Height of the spectrogram
 const spectrogramData = ref<Uint8Array[]>([]);
 const spectrogramImage = ref<HTMLImageElement | null>(null);
 
@@ -58,15 +55,15 @@ watch(
 );
 
 // Konva stage configuration
-const stageWidth = computed(() => container.value?.clientWidth ?? canvasWidth.value);
-const stageHeight = computed(() => canvasHeight.value);
+const stageWidth = computed(() => container.value?.clientWidth ?? 800);
+const stageHeight = computed(() => 200);
 
-const { toPixelScale, playheadLineConfig } = useMediaTimeline({
+const { playheadLineConfig, offsetX } = useMediaTimeline({
     mediaDuration: computed(() => props.duration),
     stageWidth,
     stageHeight,
     zoomX: computed(() => props.zoomX),
-    offsetX: computed(() => props.offsetX),
+    startTime: computed(() => props.startTime),
     currentTime: computed(() => props.currentTime),
 });
 
@@ -74,7 +71,7 @@ const configKonva = computed(
     () => ({
         width: stageWidth.value,
         height: stageHeight.value,
-        offsetX: props.offsetX,
+        offsetX: offsetX.value,
         scaleX: props.zoomX,
     }) as StageConfig,
 );
@@ -187,17 +184,7 @@ const handleStageClick = (event: any): void => {
     const pointerPosition = stage.getPointerPosition();
     if (!pointerPosition) return;
 
-    // Calculate the proportion of the click position relative to stage width
-    const clickProportion = pointerPosition.x / stage.width();
-
-    // Ensure the proportion is within bounds (0-1)
-    const boundedProportion = Math.max(0, Math.min(1, clickProportion));
-
-    // Calculate the corresponding time in the audio
-    const clickTime = boundedProportion * audioDuration.value;
-
-    // Update current time and seek to that position
-    executeCommand(new SeekToSecondsCommand(clickTime));
+    seekToPosition(stage, pointerPosition.x);
 };
 
 /**
@@ -215,7 +202,7 @@ const seekToPosition = (stageRef: any, x: number): void => {
     const boundedProportion = Math.max(0, Math.min(1, clickProportion));
 
     // Calculate the corresponding time in the audio
-    const seekTime = boundedProportion * audioDuration.value;
+    const seekTime = (boundedProportion / props.zoomX) * audioDuration.value + props.startTime;
 
     // Update current time and seek to that position
     executeCommand(new SeekToSecondsCommand(seekTime));
@@ -255,47 +242,13 @@ const handleMouseMove = (event: any): void => {
 const handleMouseUp = (): void => {
     isMouseDown.value = false;
 };
-
-/**
- * Handles wheel events for zooming centered at the mouse position
- * @param {KonvaEventObject} event - Konva wheel event
- */
-function handleWheel(event: any): void {
-    // Prevent the default scroll behavior
-    event.evt.preventDefault();
-
-    const stage = event.target.getStage();
-    const pointerPos = stage.getPointerPosition();
-    if (!pointerPos) return;
-
-    // Get the pointer position relative to the current view
-    const mousePointTo = {
-        x: (pointerPos.x + props.offsetX) / props.zoomX,
-        y: pointerPos.y / props.zoomX
-    };
-
-    // Calculate zoom factor based on wheel direction
-    // Use smaller increments for smoother zooming
-    const zoomStep = 0.05;
-    const zoomFactor = event.evt.deltaY > 0 ? 1 - zoomStep : 1 + zoomStep;
-    const newZoom = clamp(props.zoomX * zoomFactor, 1, 50);
-
-    // Calculate new offsetX so that the mouse position stays fixed
-    // This is the key to zooming at mouse position
-    const newOffsetX = clamp(mousePointTo.x * newZoom - pointerPos.x, 0, stage.width());
-
-    console.log('Zoom:', newZoom, 'Offset:', newOffsetX, 'zoomFactor', zoomFactor, 'props.zoomX', props.zoomX);
-
-    // Update zoom and offset
-    executeCommand(new ZoomToCommand(newOffsetX, newZoom));
-}
 </script>
 
 <template>
     <div ref="container" class="audio-spectrogram">
         <!-- Audio spectrogram display using Konva, shown when audio is loaded -->
         <div v-if="audioLoaded">
-            <v-stage :config="configKonva" @click="handleStageClick" @wheel="handleWheel" @mousedown="handleMouseDown"
+            <v-stage :config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
                 @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
                 <v-layer>
                     <!-- Spectrogram image -->
@@ -316,14 +269,13 @@ function handleWheel(event: any): void {
             </v-stage>
         </div>
         <div v-else>
-            <USkeleton :style="{ width: `${canvasWidth}px`, height: `${canvasHeight}px` }" />
+            <USkeleton :style="{ width: `${stageWidth}px`, height: `${stageHeight}px` }" />
         </div>
     </div>
 </template>
 
 <style scoped>
 .audio-spectrogram {
-    max-width: 800px;
     margin: 0 auto;
     user-select: none;
     /* Prevent text selection while dragging */

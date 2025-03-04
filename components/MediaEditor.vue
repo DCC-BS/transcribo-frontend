@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { SeekToSecondsCommand, ZoomToCommand } from '~/types/commands';
 import { Cmds } from '~/types/commands';
+import VideoView from './VideoView.vue';
 
 const audioElement = ref<HTMLAudioElement>(); // Reference to the audio element
 const isPlaying = ref<boolean>(false); // Flag to indicate playback status
@@ -9,10 +10,9 @@ const audioSrc = ref<string>(''); // URL to the audio file
 const currentTime = ref<number>(0); // Current playback position in seconds
 const duration = ref<number>(0); // Total audio duration in seconds
 const zoomX = ref<number>(1);
-const offsetX = ref<number>(0);
+const startTime = ref<number>(0);
 
-const range = ref([25, 75])
-
+const timeRange = ref([0, duration.value]);
 
 const transcriptionStore = useTranscriptionsStore();
 const { registerHandler, unregisterHandler } = useCommandBus();
@@ -42,14 +42,19 @@ watch(
         audio.src = audioSrc.value;
 
         audio.onloadedmetadata = () => {
-            console.log('Duration:', audio.duration);
             duration.value = audio.duration;
+            timeRange.value = [0, audio.duration];
         };
 
         currentTime.value = 0;
     },
     { immediate: true },
 );
+
+watch(timeRange, ([start, end]) => {
+    zoomX.value = duration.value / (end - start);
+    startTime.value = start;
+});
 
 /**
  * Toggles audio playback
@@ -95,7 +100,7 @@ async function handleSeekToSeconds(
 
 async function handleZoomTo(command: ZoomToCommand): Promise<void> {
     zoomX.value = command.zoomX;
-    offsetX.value = command.posX;
+    startTime.value = command.posX;
 }
 </script>
 
@@ -105,14 +110,15 @@ async function handleZoomTo(command: ZoomToCommand): Promise<void> {
             <!-- Audio element with references for control -->
             <audio ref="audioElement" :src="audioSrc" @timeupdate="updatePosition" @seeked="updatePosition" />
 
+            <VideoView :currentTime="currentTime" :duration="duration" />
             <AudioSpectrogram :audio-file="audioFile" :current-time="currentTime" :duration="duration" :zoomX="zoomX"
-                :offsetX="offsetX" />
+                :startTime="startTime" />
 
             <ClientOnly>
-                <TimelineView :current-time="currentTime" :duration="duration" :zoomX="zoomX" :offsetX="offsetX" />
+                <TimelineView :current-time="currentTime" :duration="duration" :zoomX="zoomX" :startTime="startTime" />
             </ClientOnly>
 
-            <USlider v-model="range" />
+            <USlider v-model="timeRange" :min="0" :max="duration" />
 
             <!-- Playback controls -->
             <div class="controls">

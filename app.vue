@@ -1,7 +1,7 @@
 <script setup lang="ts"></script>
 
 <template>
-    <div>
+    <UApp>
         <TranscribeView />
-    </div>
+    </UApp>
 </template>

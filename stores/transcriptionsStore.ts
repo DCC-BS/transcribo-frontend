@@ -307,10 +307,16 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
 
             // Create a new Promise with non-async executor function
             return new Promise((resolve, reject) => {
+
+                const clonedTranscription = JSON.parse(JSON.stringify(existingTranscription));
+
                 // Update the transcription with new data and update timestamp
                 const updatedTranscription: StoredTranscription = {
-                    ...existingTranscription,
-                    ...updates,
+                    ...clonedTranscription,
+                    // Only apply updates for properties that exist in the updates object
+                    ...(updates.segments ? { segments: JSON.parse(JSON.stringify(updates.segments)) } : {}),
+                    ...(updates.mediaFileName ? { mediaFileName: updates.mediaFileName } : {}),
+                    ...(updates.audioFileId ? { audioFileId: updates.audioFileId } : {}),
                     updatedAt: new Date(),
                 };
 
@@ -324,6 +330,30 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
                     if (!updatedTranscription.audioFileId) {
                         updatedTranscription.audioFileId = uuidv4();
                     }
+                } else if (existingTranscription.mediaFile) {
+                    // Keep the existing media file if present
+                    updatedTranscription.mediaFile = existingTranscription.mediaFile;
+                }
+
+                // Validate data before writing to IndexedDB
+                // Ensure segments array is serializable
+                if (updatedTranscription.segments) {
+                    // Check if segments is actually an array
+                    if (!Array.isArray(updatedTranscription.segments)) {
+                        console.error('Segments is not an array:', updatedTranscription.segments);
+                        reject(new Error('Segments must be an array'));
+                        return;
+                    }
+
+                    // Ensure all segments have the expected structure
+                    updatedTranscription.segments = updatedTranscription.segments.map(segment => ({
+                        id: segment.id,
+                        start: segment.start,
+                        end: segment.end,
+                        text: segment.text,
+                        // Add only properties that you know are serializable
+                        // Avoid including any methods or complex objects
+                    }));
                 }
 
                 const transaction = this.db!.transaction(

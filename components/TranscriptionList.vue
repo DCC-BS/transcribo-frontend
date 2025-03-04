@@ -34,15 +34,21 @@ async function removeSegment(segment: SegementWithId): Promise<void> {
         segments: transcriptions.value.filter((s) => s !== segment),
     });
 }
+
+function onSegmentChange(): void {
+    transcriptionsStore.updateCurrentTrascription({
+        segments: transcriptions.value,
+    });
+}
 </script>
 
 <template>
-    <div>
+    <div class="flex flex-col gap-4">
         <div v-for="segment in transcriptions" :key="segment.text + segment.start">
-            <UTextarea v-model="segment.text" />
+            <DelayedSyncTextarea v-model="segment.text" class="w-full" @update:model-value="onSegmentChange" />
 
             <div class="flex gap-2">
-                <USelectMenu v-model="segment.speaker" :options="speakers" />
+                <USelectMenu v-model="segment.speaker" :items="speakers" />
                 <div>
                     <a @click="() => seekTo(segment.start)">
                         {{ formatTime(segment.start) }}
@@ -50,7 +56,7 @@ async function removeSegment(segment: SegementWithId): Promise<void> {
                     -
                     <a @click="() => seekTo(segment.end)">{{ formatTime(segment.end) }}</a>
                 </div>
-                <UButton color="red" icon="i-heroicons-trash" @click="removeSegment(segment)" />
+                <UButton color="error" icon="i-heroicons-trash" @click="removeSegment(segment)" />
             </div>
         </div>
     </div>

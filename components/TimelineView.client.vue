@@ -2,14 +2,13 @@
 import type { StageConfig } from 'konva/lib/Stage';
 import type { RectConfig } from 'konva/lib/shapes/Rect';
 import type { Vector2d } from 'konva/lib/types';
-import type { LineConfig } from 'konva/lib/shapes/Line';
 import { ZoomToCommand } from '~/types/commands';
 
 interface TimelineViewProps {
     currentTime: number;
     duration: number;
     zoomX: number;
-    offsetX: number;
+    startTime: number;
 }
 
 const props = defineProps<TimelineViewProps>();
@@ -44,12 +43,12 @@ const stageWidth = computed(() => container.value?.clientWidth ?? 100);
 const selectedSegment = ref<string>();
 const stageHeight = computed(() => speakers.value.length * heightPerSpeaker);
 
-const { toPixelScale, playheadLineConfig } = useMediaTimeline({
+const { fromTimetoPixelSpace, playheadLineConfig, scaleFactor, offsetX } = useMediaTimeline({
     mediaDuration: computed(() => props.duration),
     stageWidth,
     stageHeight,
     zoomX: computed(() => props.zoomX),
-    offsetX: computed(() => props.offsetX),
+    startTime: computed(() => props.startTime),
     currentTime: computed(() => props.currentTime),
 });
 
@@ -58,7 +57,7 @@ const configKonva = computed(
         ({
             width: stageWidth.value,
             height: stageHeight.value,
-            offsetX: props.offsetX,
+            offsetX: offsetX.value,
             scaleX: props.zoomX,
         }) as StageConfig,
 );
@@ -69,9 +68,9 @@ const rectConfigs = computed(() =>
             ({
                 id: segment.id,
                 // Scale x position and width to fit stage width
-                x: toPixelScale(segment.start),
+                x: fromTimetoPixelSpace(segment.start),
                 y: speakerToIndex.value[segment.speaker ?? 'unknown'] * heightPerSpeaker,
-                width: toPixelScale(segment.end - segment.start),
+                width: fromTimetoPixelSpace(segment.end - segment.start),
                 height: heightPerSpeaker,
                 fill: selectedSegment.value == segment.id ? 'green' : 'blue',
                 // Add stroke to make segments visually distinct
@@ -82,7 +81,7 @@ const rectConfigs = computed(() =>
                 draggable: true,
                 dragBoundFunc: (pos: Vector2d) => {
                     const width =
-                        toPixelScale(segment.end - segment.start);
+                        fromTimetoPixelSpace(segment.end - segment.start);
                     const newX = Math.max(
                         0,
                         Math.min(stageWidth.value - width, pos.x),
@@ -104,15 +103,13 @@ watch(
 );
 
 function onSegmentClicked(segmentId: string): void {
-    console.log('Segment clicked', segmentId);
-
     selectedSegment.value = segmentId;
 }
 
 function onScroll(event: WheelEvent): void {
     const xZoom = event.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = props.zoomX * xZoom;
-    const newOffset = props.offsetX + (event.deltaY > 0 ? 10 : -10);
+    const newOffset = props.startTime + (event.deltaY > 0 ? 10 : -10);
 
     executeCommand(new ZoomToCommand(newZoom, newOffset));
 }

@@ -5,28 +5,34 @@ export function useMediaTimeline(inputs: {
     stageWidth: Ref<number>,
     stageHeight: Ref<number>,
     zoomX: Ref<number>,
-    offsetX: Ref<number>,
+    startTime: Ref<number>,
     currentTime: Ref<number>
 }) {
 
-    const { mediaDuration, stageWidth, stageHeight, zoomX, offsetX, currentTime } = inputs;
+    const { mediaDuration, stageWidth, stageHeight, startTime, currentTime } = inputs;
 
     const scaleFactor = computed(() => {
-        return (stageWidth.value / mediaDuration.value) * zoomX.value
+        return (stageWidth.value / mediaDuration.value)
     });
 
-    function toPixelScale(value: number): number {
-        return value * scaleFactor.value + offsetX.value;
+    function fromTimetoPixelSpace(value: number): number {
+        return value * scaleFactor.value;
+    }
+
+    function fromPixeltoTimeSpace(value: number): number {
+        return value / scaleFactor.value;
     }
 
     const playheadLineConfig = computed(() => ({
         points: [
-            toPixelScale(currentTime.value), 0,
-            toPixelScale(currentTime.value), stageHeight.value,
+            fromTimetoPixelSpace(currentTime.value), 0,
+            fromTimetoPixelSpace(currentTime.value), stageHeight.value,
         ],
         stroke: 'red',
         strokeWidth: 1,
     } as LineConfig));
 
-    return { scaleFactor, playheadLineConfig, toPixelScale }
+    const offsetX = computed(() => startTime.value * scaleFactor.value);
+
+    return { scaleFactor, offsetX, playheadLineConfig, fromTimetoPixelSpace, fromPixeltoTimeSpace }
 }
