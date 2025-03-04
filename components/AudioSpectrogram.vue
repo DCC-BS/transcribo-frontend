@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, nextTick, onMounted } from 'vue';
-import { SeekToSecondsCommand } from '~/types/commands';
+import { ref, nextTick, onMounted, onUnmounted } from 'vue';
+import { SeekToSecondsCommand, ZoomToCommand } from '~/types/commands';
 
 interface AudioSpectrogramProps {
     audioFile: File | Blob;
     currentTime: number;
     duration: number;
+    zoomX: number;
+    offsetX: number;
 }
 
 const props = defineProps<AudioSpectrogramProps>();
@@ -26,10 +28,24 @@ const canvasHeight = ref<number>(200); // Height of the spectrogram canvas
 const spectrogramData = ref<Uint8Array[]>([]);
 const spectogramImgCanvas = ref<HTMLCanvasElement | null>(null);
 
+// Mouse tracking state variables
+const isMouseDown = ref<boolean>(false); // Track if mouse button is pressed
+
+
 onMounted(() => {
     // Initialize AudioContext on component mount
     audioContext.value = new AudioContext();
     loadAudio(props.audioFile);
+
+    // Add global mouse up listener to handle when user releases outside the canvas
+    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+});
+
+onUnmounted(() => {
+    // Clean up event listeners when component is unmounted
+    document.removeEventListener('mouseup', handleMouseUp);
+    document.removeEventListener('mousemove', handleMouseMove);
 });
 
 watch(
@@ -173,6 +189,7 @@ const draw = (): void => {
 
     // Draw the playhead
     ctx.strokeStyle = 'red';
+    ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, canvas.height);
@@ -186,6 +203,57 @@ const draw = (): void => {
 const handleCanvasClick = (event: MouseEvent): void => {
     if (!spectrogramCanvas.value || audioDuration.value === 0) return;
 
+    // Get the canvas-relative coordinates and seek to position
+    seekToPosition(event);
+};
+
+/**
+ * Handles mouse down events on the canvas to start dragging
+ * @param {MouseEvent} event - Mouse down event
+ */
+const handleMouseDown = (event: MouseEvent): void => {
+    if (!spectrogramCanvas.value || audioDuration.value === 0) return;
+
+    isMouseDown.value = true;
+
+    // Immediately seek when mouse is pressed down
+    seekToPosition(event);
+};
+
+/**
+ * Handles mouse move events when mouse is down for continuous seeking
+ * @param {MouseEvent} event - Mouse move event
+ */
+const handleMouseMove = (event: MouseEvent): void => {
+    if (!isMouseDown.value || !spectrogramCanvas.value) return;
+
+    // Only process mouse move if it's over our canvas
+    const rect = spectrogramCanvas.value.getBoundingClientRect();
+    if (
+        event.clientX >= rect.left &&
+        event.clientX <= rect.right &&
+        event.clientY >= rect.top &&
+        event.clientY <= rect.bottom
+    ) {
+        // Seek to the new position while dragging
+        seekToPosition(event);
+    }
+};
+
+/**
+ * Handles mouse up events to end dragging
+ */
+const handleMouseUp = (): void => {
+    isMouseDown.value = false;
+};
+
+/**
+ * Seeks to audio position based on mouse event coordinates
+ * @param {MouseEvent} event - Mouse event with coordinates
+ */
+const seekToPosition = (event: MouseEvent): void => {
+    if (!spectrogramCanvas.value || audioDuration.value === 0) return;
+
     // Get the canvas-relative coordinates
     const rect = spectrogramCanvas.value.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
@@ -193,25 +261,43 @@ const handleCanvasClick = (event: MouseEvent): void => {
     // Calculate the proportion of the click position relative to canvas width
     const clickProportion = clickX / rect.width;
 
+    // Ensure the proportion is within bounds (0-1)
+    const boundedProportion = Math.max(0, Math.min(1, clickProportion));
+
     // Calculate the corresponding time in the audio
-    const clickTime = clickProportion * audioDuration.value;
+    const clickTime = boundedProportion * audioDuration.value;
 
     // Update current time and seek to that position
     executeCommand(new SeekToSecondsCommand(clickTime));
 };
+
+function handleScroll(event: WheelEvent): void {
+    if (!spectrogramCanvas.value) return;
+
+    // Prevent the default scroll behavior
+    event.preventDefault();
+
+    const newZoom = props.zoomX * (event.deltaY > 0 ? 0.9 : 1.1);
+    const newOffset = event.offsetX;
+
+    console.log('Scrolling', event.deltaY, newZoom, newOffset);
+
+    // Update the canvas width based on the scroll direction
+    executeCommand(new ZoomToCommand(newOffset, newZoom));
+}
+
 </script>
 
 <template>
     <div class="audio-spectrogram">
         <!-- Audio player and spectrogram display, shown when audio is loaded -->
         <div v-if="audioLoaded">
-            <!-- Canvas for displaying the spectrogram visualization with click event -->
-            <canvas
-                ref="spectrogramCanvas"
-                :width="canvasWidth"
-                :height="canvasHeight"
-                @click="handleCanvasClick"
-            />
+            <!-- Canvas for displaying the spectrogram visualization with mouse events -->
+            <canvas ref="spectrogramCanvas" :width="canvasWidth" :height="canvasHeight" @click="handleCanvasClick"
+                @mousedown="handleMouseDown" @wheel="handleScroll" />
+        </div>
+        <div v-else>
+            <USkeleton :style="{ width: `${canvasWidth}px`, height: `${canvasHeight}px` }" />
         </div>
     </div>
 </template>
@@ -220,6 +306,8 @@ const handleCanvasClick = (event: MouseEvent): void => {
 .audio-spectrogram {
     max-width: 800px;
     margin: 0 auto;
+    user-select: none;
+    /* Prevent text selection while dragging */
 }
 
 canvas {

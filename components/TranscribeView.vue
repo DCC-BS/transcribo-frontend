@@ -67,8 +67,8 @@ async function handleTranscriptionFinished(
                 ...x,
                 id: uuidv4(),
             })),
-            audioFile: audioFile.value,
-            audioFileName: audioFile.value?.name,
+            mediaFile: audioFile.value,
+            mediaFileName: audioFile.value?.name,
         });
 
         transcriptionsStore.setCurrentTranscription(transcription.id);
@@ -82,7 +82,7 @@ async function handleTranscriptionFinished(
         <SplitView>
             <template #a>
                 <!-- File input for audio upload -->
-                <input type="file" accept="audio/*" @change="loadAudio" >
+                <input type="file" accept="audio/*" @change="loadAudio">
                 <MediaEditor />
             </template>
             <template #b>

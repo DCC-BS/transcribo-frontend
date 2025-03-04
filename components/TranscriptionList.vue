@@ -38,26 +38,19 @@ async function removeSegment(segment: SegementWithId): Promise<void> {
 
 <template>
     <div>
-        <div
-            v-for="segment in transcriptions"
-            :key="segment.text + segment.start"
-        >
+        <div v-for="segment in transcriptions" :key="segment.text + segment.start">
             <UTextarea v-model="segment.text" />
 
             <div class="flex gap-2">
                 <USelectMenu v-model="segment.speaker" :options="speakers" />
                 <div>
                     <a @click="() => seekTo(segment.start)">
-                        {{ segment.start }}
+                        {{ formatTime(segment.start) }}
                     </a>
                     -
-                    <a @click="() => seekTo(segment.end)">{{ segment.end }}</a>
+                    <a @click="() => seekTo(segment.end)">{{ formatTime(segment.end) }}</a>
                 </div>
-                <UButton
-                    color="red"
-                    icon="i-heroicons-trash"
-                    @click="removeSegment(segment)"
-                />
+                <UButton color="red" icon="i-heroicons-trash" @click="removeSegment(segment)" />
             </div>
         </div>
     </div>

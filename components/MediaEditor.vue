@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SeekToSecondsCommand } from '~/types/commands';
+import type { SeekToSecondsCommand, ZoomToCommand } from '~/types/commands';
 import { Cmds } from '~/types/commands';
 
 const audioElement = ref<HTMLAudioElement>(); // Reference to the audio element
@@ -8,28 +8,41 @@ const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const audioSrc = ref<string>(''); // URL to the audio file
 const currentTime = ref<number>(0); // Current playback position in seconds
 const duration = ref<number>(0); // Total audio duration in seconds
+const zoomX = ref<number>(1);
+const offsetX = ref<number>(0);
 
 const transcriptionStore = useTranscriptionsStore();
 const { registerHandler, unregisterHandler } = useCommandBus();
 
 onMounted(() => {
     registerHandler(Cmds.SeekToSecondsCommand, handleSeekToSeconds);
+    registerHandler(Cmds.ZoomToCommand, handleZoomTo);
 });
 
 onUnmounted(() => {
     unregisterHandler(Cmds.SeekToSecondsCommand, handleSeekToSeconds);
+    unregisterHandler(Cmds.ZoomToCommand, handleZoomTo);
 });
 
 watch(
     () => transcriptionStore.currentTranscription,
     (currentTranscription) => {
-        if (!currentTranscription?.audioFile) {
+        if (!currentTranscription?.mediaFile) {
             return;
         }
 
-        audioFile.value = currentTranscription.audioFile;
+        audioFile.value = currentTranscription.mediaFile;
         audioSrc.value = URL.createObjectURL(audioFile.value);
-        duration.value = currentTranscription.audioDuration ?? 0;
+
+        // calculate duration
+        const audio = new Audio();
+        audio.src = audioSrc.value;
+
+        audio.onloadedmetadata = () => {
+            console.log('Duration:', audio.duration);
+            duration.value = audio.duration;
+        };
+
         currentTime.value = 0;
     },
     { immediate: true },
@@ -71,21 +84,15 @@ const seekTo = (time: number): void => {
     currentTime.value = time;
 };
 
-/**
- * Formats time in seconds to MM:SS display
- * @param {number} time - Time in seconds
- * @returns {string} Formatted time string
- */
-const formatTime = (time: number): string => {
-    const minutes: number = Math.floor(time / 60);
-    const seconds: number = Math.floor(time % 60);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-};
-
 async function handleSeekToSeconds(
     command: SeekToSecondsCommand,
 ): Promise<void> {
     seekTo(command.seconds);
+}
+
+async function handleZoomTo(command: ZoomToCommand): Promise<void> {
+    zoomX.value = command.zoomX;
+    offsetX.value = command.posX;
 }
 </script>
 
@@ -95,11 +102,11 @@ async function handleSeekToSeconds(
             <!-- Audio element with references for control -->
             <audio ref="audioElement" :src="audioSrc" @timeupdate="updatePosition" @seeked="updatePosition" />
 
-            <AudioSpectrogram :audio-file="audioFile" :current-time="currentTime" :duration="duration"
-                @on-seeked="seekTo" />
+            <AudioSpectrogram :audio-file="audioFile" :current-time="currentTime" :duration="duration" :zoomX="zoomX"
+                :offsetX="offsetX" />
 
             <ClientOnly>
-                <TimelineView :current-time="currentTime" />
+                <TimelineView :current-time="currentTime" :duration="duration" :zoomX="zoomX" :offsetX="offsetX" />
             </ClientOnly>
 
             <!-- Playback controls -->

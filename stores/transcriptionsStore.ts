@@ -10,9 +10,8 @@ export interface StoredTranscription {
     createdAt: Date;
     updatedAt: Date;
     audioFileId?: string;
-    audioFile?: Blob;
-    audioFileName?: string;
-    audioDuration?: number;
+    mediaFile?: Blob;
+    mediaFileName?: string;
 }
 
 // Database configuration
@@ -229,25 +228,11 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
 
             // Add audio file if provided
             if (audioFile) {
-                newTranscription.audioFile = audioFile;
-                newTranscription.audioFileName = audioFileName ?? 'audio-file';
+                newTranscription.mediaFile = audioFile;
+                newTranscription.mediaFileName = audioFileName ?? 'audio-file';
 
                 // Generate a unique audioFileId
                 newTranscription.audioFileId = uuidv4();
-
-                // Get audio duration if it's a File and has audio metadata
-                if (
-                    audioFile instanceof File &&
-                    audioFile.type.startsWith('audio/')
-                ) {
-                    try {
-                        const audioDuration =
-                            await this.getAudioDuration(audioFile);
-                        newTranscription.audioDuration = audioDuration;
-                    } catch (error) {
-                        console.warn('Could not get audio duration:', error);
-                    }
-                }
             }
 
             return new Promise((resolve, reject) => {
@@ -260,7 +245,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
 
                 request.onsuccess = () => {
                     // Add to local state, but without the audio blob
-                    const { audioFile, ...transcriptionWithoutAudio } =
+                    const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
                         newTranscription;
                     this.transcriptions.push(transcriptionWithoutAudio);
                     resolve(newTranscription);
@@ -270,31 +255,6 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
                     this.error = `Failed to add transcription: ${(event.target as IDBRequest).error?.message}`;
                     reject(new Error(this.error));
                 };
-            });
-        },
-
-        /**
-         * Get audio duration from a file
-         */
-        async getAudioDuration(file: File | Blob): Promise<number> {
-            return new Promise((resolve, reject) => {
-                // Create a temporary URL for the blob
-                const url = URL.createObjectURL(file);
-                const audio = new Audio();
-
-                audio.addEventListener('loadedmetadata', () => {
-                    // Get duration in seconds
-                    resolve(audio.duration);
-                    // Clean up
-                    URL.revokeObjectURL(url);
-                });
-
-                audio.addEventListener('error', (err) => {
-                    URL.revokeObjectURL(url);
-                    reject(err);
-                });
-
-                audio.src = url;
             });
         },
 
@@ -356,32 +316,13 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
 
                 // Update audio file if provided
                 if (audioFile) {
-                    updatedTranscription.audioFile = audioFile;
-                    updatedTranscription.audioFileName =
+                    updatedTranscription.mediaFile = audioFile;
+                    updatedTranscription.mediaFileName =
                         audioFileName ?? 'audio-file';
 
                     // Generate a new audioFileId if one doesn't already exist
                     if (!updatedTranscription.audioFileId) {
                         updatedTranscription.audioFileId = uuidv4();
-                    }
-
-                    // Get audio duration if it's a File and has audio metadata
-                    if (
-                        audioFile instanceof File &&
-                        audioFile.type.startsWith('audio/')
-                    ) {
-                        // Use Promise.catch() rather than try/catch with an unawaited promise
-                        this.getAudioDuration(audioFile)
-                            .then((audioDuration) => {
-                                updatedTranscription.audioDuration =
-                                    audioDuration;
-                            })
-                            .catch((error) => {
-                                console.warn(
-                                    'Could not get audio duration:',
-                                    error,
-                                );
-                            });
                     }
                 }
 
@@ -394,7 +335,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
 
                 request.onsuccess = () => {
                     // Update local state, but without the audio blob
-                    const { audioFile, ...transcriptionWithoutAudio } =
+                    const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
                         updatedTranscription;
 
                     const index = this.transcriptions.findIndex(
