@@ -1,5 +1,5 @@
 import {
-    colorMapService,
+    getColorMap,
     type ColorMapType,
 } from '../services/colorMapService';
 
@@ -108,7 +108,7 @@ export function useSpectrogramRenderer() {
             const logRange: number = logMax - logMin;
 
             // Get the appropriate color mapping function
-            const getColor = colorMapService.getColorMap(colorMap);
+            const getColor = getColorMap(colorMap);
 
             // Create image data for pixel manipulation
             const imageData: ImageData = tempCtx.createImageData(

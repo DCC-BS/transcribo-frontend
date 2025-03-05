@@ -30,6 +30,7 @@ export function useMediaTimeline(inputs: {
         ],
         stroke: 'red',
         strokeWidth: 1,
+        strokeScaleEnabled: false,
     } as LineConfig));
 
     const offsetX = computed(() => startTime.value * scaleFactor.value);
