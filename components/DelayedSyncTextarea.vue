@@ -2,8 +2,6 @@
 // Component that only syncs v-model on blur and enter key press
 const props = defineProps<{
     modelValue: string;
-    // Allow all UTextarea props to be passed through
-    [key: string]: any;
 }>();
 
 const emit = defineEmits<{
@@ -47,21 +45,17 @@ function handleBlur() {
 function handleFocus() {
     isFocused.value = true;
 }
-
-// Extract UTextarea props by removing modelValue from props
-const textareaProps = computed(() => {
-    const { modelValue, ...rest } = props;
-    return rest;
-});
 </script>
 
 <template>
     <div class="relative w-full">
         <!-- Tooltip that shows when textarea is dirty and focused -->
-        <UTooltip :text="'Textfeld verlassen oder Enter drücken, um Änderungen zu übernehmen'"
+        <UTooltip
+:text="'Textfeld verlassen oder Enter drücken, um Änderungen zu übernehmen'"
             :popper="{ placement: 'top' }" :open="isFocused && isDirty" class="w-full">
-            <UTextarea v-bind="textareaProps" :model-value="localValue" @update:model-value="localValue = $event"
-                @blur="handleBlur" @focus="handleFocus" @keydown="handleKeydown" />
+            <UTextarea
+:model-value="localValue" @update:model-value="localValue = $event as string" @blur="handleBlur"
+                @focus="handleFocus" @keydown="handleKeydown" />
         </UTooltip>
     </div>
 </template>

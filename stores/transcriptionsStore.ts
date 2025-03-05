@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia';
 import { v4 as uuidv4 } from 'uuid';
 import type { SegementWithId } from '../types/transcriptionResponse';
+import { initDB } from '~/services/indexDbService';
 
 // Define the structure of a stored transcription
 export interface StoredTranscription {
     id: string;
     segments: SegementWithId[]; // Using Segment[] instead of text
-    // title removed as it's not needed
+    name: string; // Added name property for the transcription
     createdAt: Date;
     updatedAt: Date;
     audioFileId?: string;
@@ -15,80 +16,41 @@ export interface StoredTranscription {
 }
 
 // Database configuration
-const DB_NAME = 'transcribo-db';
 const STORE_NAME = 'transcriptions';
-const DB_VERSION = 1;
 
 /**
  * Store to manage transcriptions with IndexedDB persistence
  */
 export const useTranscriptionsStore = defineStore('transcriptions', {
-    state: () => ({
-        transcriptions: [] as StoredTranscription[],
-        currentTranscription: undefined as StoredTranscription | undefined,
-        isLoading: false,
-        error: null as string | null,
-        db: null as IDBDatabase | null,
-    }),
+    state: () => {
+        return {
+            transcriptions: [] as StoredTranscription[],
+            currentTranscription: undefined as StoredTranscription | undefined,
+            isLoading: false,
+            error: null as string | null,
+            db: null as IDBDatabase | null,
+        }
+    },
 
     actions: {
         /**
          * Initialize the IndexedDB database
          */
         async initDB() {
-            return new Promise<void>((resolve, reject) => {
-                if (this.db) {
-                    resolve();
-                    return;
+            try {
+                this.db = await initDB();
+                this.isLoading = false;
+                this.loadAllTranscriptions();
+            }
+            catch (e: unknown) {
+                if (e instanceof Error) {
+                    console.error(e.message);
+                } else {
+                    console.error('Unknown error initializing database', e);
                 }
 
-                this.isLoading = true;
-
-                // Open database connection
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-
-                // Handle database upgrade (first time or version change)
-                request.onupgradeneeded = (event) => {
-                    const db = (event.target as IDBOpenDBRequest).result;
-
-                    // Create object store for transcriptions if it doesn't exist
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        const store = db.createObjectStore(STORE_NAME, {
-                            keyPath: 'id',
-                        });
-
-                        // Create indexes for faster queries
-                        store.createIndex('createdAt', 'createdAt', {
-                            unique: false,
-                        });
-                        store.createIndex('updatedAt', 'updatedAt', {
-                            unique: false,
-                        });
-                        store.createIndex('audioFileId', 'audioFileId', {
-                            unique: false,
-                        });
-                        // Add index for audio file name
-                        store.createIndex('audioFileName', 'audioFileName', {
-                            unique: false,
-                        });
-                    }
-                };
-
-                // Handle successful connection
-                request.onsuccess = (event) => {
-                    this.db = (event.target as IDBOpenDBRequest).result;
-                    this.isLoading = false;
-                    this.loadAllTranscriptions();
-                    resolve();
-                };
-
-                // Handle errors
-                request.onerror = (event) => {
-                    this.error = `Database error: ${(event.target as IDBOpenDBRequest).error?.message}`;
-                    this.isLoading = false;
-                    reject(new Error(this.error));
-                };
-            });
+                this.isLoading = false;
+            }
         },
 
         /**
@@ -222,6 +184,8 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
             const newTranscription: StoredTranscription = {
                 ...transcription,
                 id: uuidv4(), // Generate unique ID
+                // Use provided name if available, otherwise use mediaFileName or default
+                name: transcription.name || audioFileName || `Transcription ${now.toLocaleString()}`,
                 createdAt: now,
                 updatedAt: now,
             };
@@ -230,6 +194,11 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
             if (audioFile) {
                 newTranscription.mediaFile = audioFile;
                 newTranscription.mediaFileName = audioFileName ?? 'audio-file';
+
+                // If name wasn't explicitly set and we have a mediaFileName, use that
+                if (!transcription.name && audioFileName) {
+                    newTranscription.name = audioFileName;
+                }
 
                 // Generate a unique audioFileId
                 newTranscription.audioFileId = uuidv4();
@@ -308,7 +277,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
             // Create a new Promise with non-async executor function
             return new Promise((resolve, reject) => {
 
-                const clonedTranscription = JSON.parse(JSON.stringify(existingTranscription));
+                const clonedTranscription = JSON.parse(JSON.stringify(existingTranscription)) as StoredTranscription;
 
                 // Update the transcription with new data and update timestamp
                 const updatedTranscription: StoredTranscription = {
@@ -317,6 +286,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
                     ...(updates.segments ? { segments: JSON.parse(JSON.stringify(updates.segments)) } : {}),
                     ...(updates.mediaFileName ? { mediaFileName: updates.mediaFileName } : {}),
                     ...(updates.audioFileId ? { audioFileId: updates.audioFileId } : {}),
+                    ...(updates.name ? { name: updates.name } : {}), // Apply name updates if present
                     updatedAt: new Date(),
                 };
 
@@ -325,6 +295,11 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
                     updatedTranscription.mediaFile = audioFile;
                     updatedTranscription.mediaFileName =
                         audioFileName ?? 'audio-file';
+
+                    // If updating audio and name wasn't provided in updates, update name to match new audio filename
+                    if (!updates.name && audioFileName && !clonedTranscription.name) {
+                        updatedTranscription.name = audioFileName;
+                    }
 
                     // Generate a new audioFileId if one doesn't already exist
                     if (!updatedTranscription.audioFileId) {
@@ -344,16 +319,6 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
                         reject(new Error('Segments must be an array'));
                         return;
                     }
-
-                    // Ensure all segments have the expected structure
-                    updatedTranscription.segments = updatedTranscription.segments.map(segment => ({
-                        id: segment.id,
-                        start: segment.start,
-                        end: segment.end,
-                        text: segment.text,
-                        // Add only properties that you know are serializable
-                        // Avoid including any methods or complex objects
-                    }));
                 }
 
                 const transaction = this.db!.transaction(

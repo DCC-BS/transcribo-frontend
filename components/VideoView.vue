@@ -1,12 +1,12 @@
 <script lang="ts" setup>
+import { Cmds, TogglePlayCommand, type SeekToSecondsCommand } from '~/types/commands';
+
 
 interface VideoViewProps {
-    currentTime: number;
     duration: number;
 }
 
 const props = defineProps<VideoViewProps>();
-
 const transcriptionStore = useTranscriptionsStore();
 
 const mediaFile = ref<Blob | null>(null);
@@ -15,7 +15,23 @@ const segments = ref(transcriptionStore.currentTranscription?.segments ?? []);
 const videoElement = ref<HTMLVideoElement | null>(null);
 const isPlaying = ref<boolean>(false);
 const isVideoFile = ref<boolean>(false);
-const speakerColors = ref<Record<string, string>>({});
+
+const audioElement = ref<HTMLAudioElement>();
+
+const { getSpeakerColor } = useSpeakerColor(computed(() => Array.from(getUniqueSpeakers(segments.value))));
+const { registerHandler, unregisterHandler } = useCommandBus();
+
+const currentTime = defineModel<number>({ default: 0 });
+
+onMounted(() => {
+    registerHandler(Cmds.SeekToSecondsCommand, handleSeekToSeconds);
+    registerHandler(Cmds.TogglePlayCommand, handleTooglePlayCommand);
+});
+
+onUnmounted(() => {
+    unregisterHandler(Cmds.SeekToSecondsCommand, handleSeekToSeconds);
+    unregisterHandler(Cmds.TogglePlayCommand, handleTooglePlayCommand);
+});
 
 // Function to check if the file is a video
 const checkIfVideoFile = (file: Blob): boolean => {
@@ -23,32 +39,40 @@ const checkIfVideoFile = (file: Blob): boolean => {
     return file.type.startsWith('video/');
 };
 
-// Function to generate consistent colors for speakers
-const generateSpeakerColors = () => {
-    const colors = ['#FF5733', '#33A8FF', '#33FF57', '#B533FF', '#FF33E9', '#FFD133', '#33FFE1'];
-    const colorMap: Record<string, string> = {};
-
-    if (transcriptionStore.currentTranscription?.segments) {
-        const uniqueSpeakers = Array.from(new Set(
-            transcriptionStore.currentTranscription.segments.map(segment => segment.speaker)
-        ));
-
-        uniqueSpeakers.forEach((speaker, index) => {
-            colorMap[speaker] = colors[index % colors.length];
-        });
-    }
-
-    speakerColors.value = colorMap;
-};
-
 // Function to get currently visible segments based on current time
 const currentSegments = computed(() => {
     // Return segments that include the current time
     return segments.value.filter(segment =>
-        props.currentTime >= segment.start &&
-        props.currentTime <= segment.end
+        currentTime.value >= segment.start &&
+        currentTime.value < segment.end
     );
 });
+
+async function handleTooglePlayCommand(_: TogglePlayCommand) {
+    togglePlay();
+}
+
+/**
+ * Toggles audio playback
+ */
+const togglePlay = (): void => {
+    if (videoElement.value) {
+        if (isPlaying.value) {
+            videoElement.value.pause();
+        } else {
+            videoElement.value.play();
+        }
+    }
+    else if (audioElement.value) {
+        if (isPlaying.value) {
+            audioElement.value.pause();
+        } else {
+            audioElement.value.play();
+        }
+    }
+
+    isPlaying.value = !isPlaying.value;
+};
 
 watch(() => transcriptionStore.currentTranscription, (currentTranscription) => {
     if (!currentTranscription?.mediaFile) {
@@ -62,43 +86,73 @@ watch(() => transcriptionStore.currentTranscription, (currentTranscription) => {
     segments.value = currentTranscription.segments ?? [];
     isVideoFile.value = checkIfVideoFile(currentTranscription.mediaFile);
 
-    // Generate colors for different speakers
-    generateSpeakerColors();
-
     isPlaying.value = false;
 },
     { immediate: true },
 );
 
-watch(() => props.currentTime, (currentTime) => {
-    if (videoElement.value) {
-        videoElement.value.currentTime = currentTime;
-    }
-});
+const seekTo = (time: number): void => {
+    if (audioElement.value && audioElement.value.currentTime !== time) {
+        audioElement.value.currentTime = time;
 
+    } else if (videoElement.value && videoElement.value.currentTime !== time) {
+        videoElement.value.currentTime = time;
+    }
+
+    currentTime.value = time;
+};
+
+function onTimeUpdate(): void {
+    if (videoElement.value) {
+        currentTime.value = videoElement.value.currentTime;
+    }
+    else if (audioElement.value) {
+        currentTime.value = audioElement.value.currentTime;
+    }
+}
+
+async function handleSeekToSeconds(
+    command: SeekToSecondsCommand,
+): Promise<void> {
+    seekTo(command.seconds);
+}
 </script>
 
 <template>
     <div class="media-container">
         <!-- Show video if it's a video file -->
-        <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player">
+        <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player" @timeupdate="onTimeUpdate"
+            @click="togglePlay">
             <source :src="mediaSrc" type="video/mp4">
         </video>
 
         <!-- Show audio visualization if it's not a video file -->
-        <div v-else class="audio-visualization">
-            <!-- Black bar as a simple placeholder for audio -->
-            <div class="audio-bar"></div>
+        <div v-else class="audio-bar">
+            <!-- Audio element with references for control -->
+            <audio ref="audioElement" :src="mediaSrc" @timeupdate="onTimeUpdate" />
         </div>
 
         <!-- Subtitles section - now positioned at the bottom of the media -->
         <div class="subtitles-container">
             <div v-for="segment in currentSegments" :key="segment.id" class="subtitle-segment"
-                :style="{ color: speakerColors[segment.speaker] || '#FFFFFF' }">
+                :style="{ color: getSpeakerColor(segment.speaker ?? 'unknown').toString() || '#FFFFFF' }">
                 <span class="speaker-label">{{ segment.speaker }}:</span>
                 <span class="subtitle-text">{{ segment.text }}</span>
             </div>
         </div>
+    </div>
+    <!-- Playback controls -->
+    <div class="controls">
+        <UButton @click="togglePlay">
+            {{ isPlaying ? 'Pause' : 'Play' }}
+        </UButton>
+
+        <USlider v-model="currentTime" :min="0" :max="props.duration" :step="0.1"
+            @update:model-value="v => seekTo(v as number)">
+        </USlider>
+        <span>
+            {{ formatTime(currentTime) }} / {{ formatTime(props.duration) }}
+        </span>
     </div>
 </template>
 
@@ -117,21 +171,9 @@ watch(() => props.currentTime, (currentTime) => {
     border-radius: 4px;
 }
 
-.audio-visualization {
-    width: 100%;
-    height: 80px;
-    background-color: #000;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .audio-bar {
-    width: 90%;
-    height: 20px;
-    background-color: #000;
-    border-radius: 2px;
+    width: 100%;
+    height: 100px;
 }
 
 .subtitles-container {

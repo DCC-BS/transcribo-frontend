@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue';
-import type { StageConfig } from 'konva/lib/Stage';
+import type { Stage, StageConfig } from 'konva/lib/Stage';
 import type { ImageConfig } from 'konva/lib/shapes/Image';
 import type { RectConfig } from 'konva/lib/shapes/Rect';
 import type { TextConfig } from 'konva/lib/shapes/Text';
 import { SeekToSecondsCommand } from '~/types/commands';
+import type { KonvaPointerEvent } from 'konva/lib/PointerEvents';
 
 interface AudioSpectrogramProps {
     audioFile: File | Blob;
@@ -32,7 +33,6 @@ const spectrogramImage = ref<HTMLImageElement | null>(null);
 
 // Mouse state tracking
 const isMouseDown = ref<boolean>(false);
-const stage = ref<any>(null);
 
 onMounted(() => {
     // Initialize AudioContext on component mount
@@ -176,23 +176,21 @@ const freqAxisBackground = computed(() => ({
  * Handles clicks on the spectrogram to seek to a specific position
  * @param {KonvaEventObject} event - Konva click event
  */
-const handleStageClick = (event: any): void => {
+const handleStageClick = (event: KonvaPointerEvent): void => {
     if (audioDuration.value === 0) return;
 
     // Get stage-relative coordinates
     const stage = event.target.getStage();
+
+    if (!stage) return;
+
     const pointerPosition = stage.getPointerPosition();
     if (!pointerPosition) return;
 
     seekToPosition(stage, pointerPosition.x);
 };
 
-/**
- * Calculates and seeks to time position based on mouse x coordinate
- * @param {any} stageRef - Reference to the Konva stage
- * @param {number} x - Mouse x coordinate
- */
-const seekToPosition = (stageRef: any, x: number): void => {
+const seekToPosition = (stageRef: Stage, x: number): void => {
     if (audioDuration.value === 0 || !stageRef) return;
 
     // Calculate the proportion of the mouse position relative to stage width
@@ -208,18 +206,16 @@ const seekToPosition = (stageRef: any, x: number): void => {
     executeCommand(new SeekToSecondsCommand(seekTime));
 };
 
-/**
- * Handles mouse down events on the spectrogram
- * @param {any} event - Konva mouse down event
- */
-const handleMouseDown = (event: any): void => {
+const handleMouseDown = (event: KonvaPointerEvent): void => {
     isMouseDown.value = true;
-    stage.value = event.target.getStage();
+    const stage = event.target.getStage();
+
+    if (!stage) return;
 
     // Also seek immediately on mouse down
-    const pointerPosition = stage.value.getPointerPosition();
+    const pointerPosition = stage.getPointerPosition();
     if (pointerPosition) {
-        seekToPosition(stage.value, pointerPosition.x);
+        seekToPosition(stage, pointerPosition.x);
     }
 };
 
@@ -227,12 +223,16 @@ const handleMouseDown = (event: any): void => {
  * Handles mouse move events for seeking when mouse is down
  * @param {any} event - Konva mouse move event
  */
-const handleMouseMove = (event: any): void => {
-    if (!isMouseDown.value || !stage.value) return;
+const handleMouseMove = (event: KonvaPointerEvent): void => {
+    if (!isMouseDown.value) return;
 
-    const pointerPosition = stage.value.getPointerPosition();
+    const stage = event.target.getStage();
+
+    if (!stage) return;
+
+    const pointerPosition = stage.getPointerPosition();
     if (pointerPosition) {
-        seekToPosition(stage.value, pointerPosition.x);
+        seekToPosition(stage, pointerPosition.x);
     }
 };
 
@@ -248,7 +248,8 @@ const handleMouseUp = (): void => {
     <div ref="container" class="audio-spectrogram">
         <!-- Audio spectrogram display using Konva, shown when audio is loaded -->
         <div v-if="audioLoaded">
-            <v-stage :config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
+            <v-stage
+:config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
                 @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
                 <v-layer>
                     <!-- Spectrogram image -->

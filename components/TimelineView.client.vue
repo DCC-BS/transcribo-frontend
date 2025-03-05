@@ -39,11 +39,13 @@ const speakerToIndex = computed(() =>
     }, {} as Record<string, number>),
 );
 
+const { getSpeakerColor } = useSpeakerColor(speakers);
+
 const stageWidth = computed(() => container.value?.clientWidth ?? 100);
 const selectedSegment = ref<string>();
 const stageHeight = computed(() => speakers.value.length * heightPerSpeaker);
 
-const { fromTimetoPixelSpace, playheadLineConfig, scaleFactor, offsetX } = useMediaTimeline({
+const { fromTimetoPixelSpace, playheadLineConfig, offsetX } = useMediaTimeline({
     mediaDuration: computed(() => props.duration),
     stageWidth,
     stageHeight,
@@ -72,11 +74,11 @@ const rectConfigs = computed(() =>
                 y: speakerToIndex.value[segment.speaker ?? 'unknown'] * heightPerSpeaker,
                 width: fromTimetoPixelSpace(segment.end - segment.start),
                 height: heightPerSpeaker,
-                fill: selectedSegment.value == segment.id ? 'green' : 'blue',
+                fill: getSpeakerColor(segment.speaker).toString(),
                 // Add stroke to make segments visually distinct
-                stroke: 'black',
-                strokeWidth: 1,
+                stroke: selectedSegment.value == segment.id ? 'yellow' : 'black',
                 strokeEnabled: true,
+                strokeScaleEnabled: false,
                 fillEnabled: true,
                 draggable: true,
                 dragBoundFunc: (pos: Vector2d) => {
@@ -88,12 +90,20 @@ const rectConfigs = computed(() =>
                     );
                     return {
                         x: newX,
-                        y: 0,
+                        y: speakerToIndex.value[segment.speaker ?? 'unknown'] * heightPerSpeaker,
                     };
                 },
             }) as RectConfig,
     ),
 );
+
+onMounted(() => {
+    window.addEventListener('keyup', handleKeyUp);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keyup', handleKeyUp);
+});
 
 watch(
     () => transcriptionStore.currentTranscription,
@@ -101,6 +111,21 @@ watch(
         transcriptions.value = currentTranscription?.segments ?? [];
     },
 );
+
+function handleKeyUp(e: KeyboardEvent) {
+    if (!selectedSegment.value) return;
+    const segement = transcriptions.value.find((s) => s.id === selectedSegment.value);
+
+    if (!segement) return;
+
+    if (e.key === 'ArrowRight') {
+        segement.start += 0.5;
+        segement.end += 0.5;
+    } else if (e.key === 'ArrowLeft') {
+        segement.start -= 0.5;
+        segement.end -= 0.5;
+    }
+}
 
 function onSegmentClicked(segmentId: string): void {
     selectedSegment.value = segmentId;
@@ -119,8 +144,9 @@ function onScroll(event: WheelEvent): void {
     <div ref="container" class="w-full">
         <v-stage :config="configKonva" @scroll="onScroll">
             <v-layer>
-                <v-rect @click="onSegmentClicked(rectConfig.id!)" v-for="(rectConfig, index) in rectConfigs"
-                    :key="index" :config="rectConfig" />
+                <v-rect
+v-for="(rectConfig, index) in rectConfigs" :key="index" :config="rectConfig"
+                    @click="onSegmentClicked(rectConfig.id!)" />
                 <v-line :config="playheadLineConfig" />
             </v-layer>
         </v-stage>

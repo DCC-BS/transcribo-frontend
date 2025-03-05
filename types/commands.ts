@@ -7,6 +7,7 @@ export const Cmds = {
     TranscriptionFinishedCommand: 'TranscriptionFinishedCommand',
     SeekToSecondsCommand: 'SeekToSecondsCommand',
     ZoomToCommand: 'ZoomToCommand',
+    TogglePlayCommand: 'TogglePlayCommand',
 };
 
 export class StartTranscriptionCommand implements ICommand {
@@ -38,4 +39,8 @@ export class ZoomToCommand implements ICommand {
 
     constructor(public posX: number, public zoomX: number) {
     }
+}
+
+export class TogglePlayCommand implements ICommand {
+    readonly $type = 'TogglePlayCommand';
 }
