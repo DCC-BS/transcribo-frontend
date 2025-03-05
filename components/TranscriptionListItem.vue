@@ -20,14 +20,11 @@ const internalSegment = ref<SegementWithId>({ ...props.segment });
 const isDirty = ref(false);
 
 watch(() => props.segment, (segment) => {
-    console.log('watching props.segment');
     internalSegment.value = { ...segment };
     isDirty.value = false;
 });
 
 watch(internalSegment, () => {
-    console.log('watching internalSegment');
-
     if (isDirty.value) {
         return;
     }

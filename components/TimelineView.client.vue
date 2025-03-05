@@ -142,15 +142,12 @@ function onScroll(event: WheelEvent): void {
 
 <template>
     <div ref="container" class="w-full">
-        <v-stage :config="configKonva" @scroll="onScroll">
+        <v-stage :config="configKonva" v-if="transcriptions.length > 0" @scroll="onScroll">
             <v-layer>
-                <v-rect
-v-for="(rectConfig, index) in rectConfigs" :key="index" :config="rectConfig"
+                <v-rect v-for="(rectConfig, index) in rectConfigs" :key="index" :config="rectConfig"
                     @click="onSegmentClicked(rectConfig.id!)" />
                 <v-line :config="playheadLineConfig" />
             </v-layer>
         </v-stage>
     </div>
 </template>
-
-<style></style>

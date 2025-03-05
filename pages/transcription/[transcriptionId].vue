@@ -42,15 +42,14 @@ function handleNameChange(name: string | number): void {
 </script>
 
 <template>
-    <div>
+    <div class="p-2">
         <UInput :model-value="currentTranscription?.name" class="w-full p-2" @update:model-value="handleNameChange" />
-
         <SplitView>
             <template #a>
                 <MediaEditor />
             </template>
             <template #b>
-                <TranscriptionList />
+                <TranscriptionList class="p-2" />
             </template>
         </SplitView>
     </div>

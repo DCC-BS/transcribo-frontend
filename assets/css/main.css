@@ -1,2 +1,4 @@
 @import "tailwindcss" theme(static);
 @import "@nuxt/ui";
+
+@source "@dcc-bs/common-ui.bs.js";

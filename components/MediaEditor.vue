@@ -62,10 +62,11 @@ async function handleZoomTo(command: ZoomToCommand): Promise<void> {
     <div>
         <div v-if="audioFile">
             <VideoView v-model="currentTime" :duration="duration" />
-            <AudioSpectrogram :audio-file="audioFile" :current-time="currentTime" :duration="duration" :zoomX="zoomX"
+                
+            <ClientOnly>
+                <AudioSpectrogram :audio-file="audioFile" :current-time="currentTime" :duration="duration" :zoomX="zoomX"
                 :startTime="startTime" />
 
-            <ClientOnly>
                 <TimelineView :current-time="currentTime" :duration="duration" :zoomX="zoomX" :startTime="startTime" />
             </ClientOnly>
 
