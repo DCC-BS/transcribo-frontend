@@ -58,7 +58,7 @@ watch(
 const stageWidth = computed(() => container.value?.clientWidth ?? 800);
 const stageHeight = computed(() => 200);
 
-const { playheadLineConfig, offsetX } = useMediaTimeline({
+const { playheadLineConfig, transformedLayerConfig, offsetX } = useMediaTimeline({
     mediaDuration: computed(() => props.duration),
     stageWidth,
     stageHeight,
@@ -71,8 +71,6 @@ const configKonva = computed(
     () => ({
         width: stageWidth.value,
         height: stageHeight.value,
-        offsetX: offsetX.value,
-        scaleX: props.zoomX,
     }) as StageConfig,
 );
 
@@ -108,6 +106,8 @@ const loadAudio = async (file: Blob): Promise<void> => {
     img.onload = () => {
         spectrogramImage.value = img;
         audioLoaded.value = true;
+
+        console.log("spec img size", img.width, img.height);
     };
 };
 
@@ -248,24 +248,26 @@ const handleMouseUp = (): void => {
     <div ref="container" class="audio-spectrogram">
         <!-- Audio spectrogram display using Konva, shown when audio is loaded -->
         <div v-if="audioLoaded">
-            <v-stage
-:config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
+            <v-stage :config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
                 @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
-                <v-layer>
+
+                <v-layer :config="transformedLayerConfig">
                     <!-- Spectrogram image -->
                     <v-image :config="spectrogramImageConfig" />
-
+                </v-layer>
+                <v-layer>
                     <!-- Frequency axis background -->
                     <v-rect :config="freqAxisBackground" />
 
                     <!-- Frequency labels -->
                     <v-text v-for="(labelConfig, index) in frequencyLabels" :key="index" :config="labelConfig" />
 
-                    <!-- Playhead line -->
-                    <v-line :config="playheadLineConfig" />
-
                     <!-- Transparent rectangle to capture events -->
                     <v-rect :config="backgroundRectConfig" />
+                </v-layer>
+                <v-layer :config="transformedLayerConfig">
+                    <!-- Playhead line -->
+                    <v-line :config="playheadLineConfig" />
                 </v-layer>
             </v-stage>
         </div>

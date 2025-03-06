@@ -12,8 +12,6 @@ if (transcriptionId) {
     transcriptionStore.setCurrentTranscription(transcriptionId);
 }
 
-const currentTranscription = transcriptionStore.currentTranscription;
-
 onMounted(() => {
     window.addEventListener('keydown', handleDownUp);
 });
@@ -42,16 +40,24 @@ function handleNameChange(name: string | number): void {
 </script>
 
 <template>
-    <div class="p-2">
-        <UInput :model-value="currentTranscription?.name" class="w-full p-2" @update:model-value="handleNameChange" />
+    <div class="p-2" v-if="transcriptionStore.currentTranscription">
+        <div class="flex justify-items-stretch p-2 gap-2">
+            <UInput class="grow" :model-value="transcriptionStore.currentTranscription.name"
+                @update:model-value="handleNameChange" />
+            <ExportToolbar />
+        </div>
+
         <SplitView>
             <template #a>
-                <MediaEditor />
+                <MediaEditor class="sticky" />
             </template>
             <template #b>
                 <TranscriptionList class="p-2" />
             </template>
         </SplitView>
+    </div>
+    <div v-else>
+        <p>Loading...</p>
     </div>
 </template>
 

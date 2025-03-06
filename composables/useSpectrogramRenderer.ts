@@ -161,6 +161,47 @@ export function useSpectrogramRenderer() {
             // Put image data on temporary canvas
             tempCtx.putImageData(imageData, 0, 0);
 
+            // Scale down the canvas if it's taller than 400 pixels
+            if (canvas.height > 400) {
+                const scaledCanvas = document.createElement('canvas');
+                const scaleFactor = 400 / canvas.height;
+
+                // Calculate scaled dimensions
+                scaledCanvas.width = Math.floor(canvas.width * scaleFactor);
+                scaledCanvas.height = 400;
+
+                // Get context for scaling
+                const scaledCtx = scaledCanvas.getContext('2d');
+
+                if (!scaledCtx) {
+                    throw new Error('Failed to get 2D context for scaled canvas');
+                }
+
+                // Use built-in canvas scaling for better quality
+                scaledCtx.imageSmoothingEnabled = true;
+                scaledCtx.imageSmoothingQuality = 'high';
+
+                // Draw the original canvas onto the scaled canvas
+                scaledCtx.drawImage(
+                    canvas,
+                    0, 0, canvas.width, canvas.height,
+                    0, 0, scaledCanvas.width, scaledCanvas.height
+                );
+
+                // Create new image data from scaled canvas
+                const scaledImageData = scaledCtx.getImageData(
+                    0, 0, scaledCanvas.width, scaledCanvas.height
+                );
+
+                console.log(`Scaled spectrogram from ${canvas.width}x${canvas.height} to ${scaledCanvas.width}x${scaledCanvas.height}`);
+
+                // Return the scaled canvas
+                return {
+                    canvas: scaledCanvas,
+                    imageData: scaledImageData
+                };
+            }
+
             return {
                 canvas,
                 imageData,

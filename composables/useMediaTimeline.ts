@@ -1,3 +1,4 @@
+import type { LayerConfig } from "konva/lib/Layer";
 import type { LineConfig } from "konva/lib/shapes/Line";
 
 export function useMediaTimeline(inputs: {
@@ -9,7 +10,7 @@ export function useMediaTimeline(inputs: {
     currentTime: Ref<number>
 }) {
 
-    const { mediaDuration, stageWidth, stageHeight, startTime, currentTime } = inputs;
+    const { mediaDuration, stageWidth, stageHeight, startTime, currentTime, zoomX } = inputs;
 
     const scaleFactor = computed(() => {
         return (stageWidth.value / mediaDuration.value)
@@ -33,7 +34,13 @@ export function useMediaTimeline(inputs: {
         strokeScaleEnabled: false,
     } as LineConfig));
 
+    const transformedLayerConfig = computed(() => ({
+        offsetX: offsetX.value,
+        scaleX: zoomX.value,
+        y: 0,
+    } as LayerConfig));
+
     const offsetX = computed(() => startTime.value * scaleFactor.value);
 
-    return { scaleFactor, offsetX, playheadLineConfig, fromTimetoPixelSpace, fromPixeltoTimeSpace }
+    return { scaleFactor, offsetX, playheadLineConfig, transformedLayerConfig, fromTimetoPixelSpace, fromPixeltoTimeSpace }
 }

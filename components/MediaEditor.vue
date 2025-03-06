@@ -13,29 +13,53 @@ const timeRange = ref([0, duration.value]);
 
 const transcriptionStore = useTranscriptionsStore();
 
-watch(
-    () => transcriptionStore.currentTranscription,
-    (currentTranscription) => {
-        if (!currentTranscription?.mediaFile) {
-            return;
-        }
+onMounted(() => {
+    const currentTranscription = transcriptionStore.currentTranscription;
 
-        audioFile.value = currentTranscription.mediaFile;
-        audioSrc.value = URL.createObjectURL(audioFile.value);
+    if (!currentTranscription?.mediaFile) {
+        return;
+    }
 
-        // calculate duration
-        const audio = new Audio();
-        audio.src = audioSrc.value;
+    audioFile.value = currentTranscription.mediaFile;
+    audioSrc.value = URL.createObjectURL(audioFile.value);
 
-        audio.onloadedmetadata = () => {
-            duration.value = audio.duration;
-            timeRange.value = [0, audio.duration];
-        };
+    // calculate duration
+    const audio = new Audio();
+    audio.src = audioSrc.value;
 
-        currentTime.value = 0;
-    },
-    { immediate: true },
-);
+    audio.onloadedmetadata = () => {
+        duration.value = audio.duration;
+        timeRange.value = [0, audio.duration];
+    };
+
+    currentTime.value = 0;
+});
+
+// watch(
+//     () => transcriptionStore.currentTranscription,
+//     (currentTranscription) => {
+//         if (!currentTranscription?.mediaFile) {
+//             return;
+//         }
+
+//         if (audioFile.value !== currentTranscription.mediaFile) {
+//             audioFile.value = currentTranscription.mediaFile;
+//             audioSrc.value = URL.createObjectURL(audioFile.value);
+
+//             // calculate duration
+//             const audio = new Audio();
+//             audio.src = audioSrc.value;
+
+//             audio.onloadedmetadata = () => {
+//                 duration.value = audio.duration;
+//                 timeRange.value = [0, audio.duration];
+//             };
+
+//             currentTime.value = 0;
+//         }
+//     },
+//     { immediate: true },
+// );
 
 watch(timeRange, ([start, end]) => {
     zoomX.value = duration.value / (end - start);

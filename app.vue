@@ -4,6 +4,9 @@ import { useInitDialog } from './composables/dialog';
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
 
+const app = useNuxtApp();
+
+
 </script>
 
 <template>
