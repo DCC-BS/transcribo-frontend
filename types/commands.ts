@@ -6,7 +6,6 @@ export const Cmds = {
     StartTranscriptionCommand: 'StartTranscriptionCommand',
     TranscriptionFinishedCommand: 'TranscriptionFinishedCommand',
     SeekToSecondsCommand: 'SeekToSecondsCommand',
-    ZoomToCommand: 'ZoomToCommand',
     TogglePlayCommand: 'TogglePlayCommand',
 };
 
@@ -32,13 +31,6 @@ export class SeekToSecondsCommand implements ICommand {
     readonly $type = 'SeekToSecondsCommand';
 
     constructor(public seconds: number) { }
-}
-
-export class ZoomToCommand implements ICommand {
-    readonly $type = 'ZoomToCommand';
-
-    constructor(public posX: number, public zoomX: number) {
-    }
 }
 
 export class TogglePlayCommand implements ICommand {

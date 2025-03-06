@@ -66,5 +66,3 @@ function addSegmentAfter(segment: SegementWithId): void {
         </div>
     </div>
 </template>
-
-<style></style>
