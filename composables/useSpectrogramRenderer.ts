@@ -42,6 +42,56 @@ export function useSpectrogramRenderer() {
     const error = ref<string | null>(null);
 
     /**
+     * Downsamples spectrogram data to improve performance
+     * @param {Uint8Array[]} data - The original spectrogram data
+     * @param {number} targetHeight - The desired height after downsampling
+     * @returns {Uint8Array[]} - Downsampled spectrogram data
+     */
+    function downsampleSpectrogramData(data: Uint8Array[], targetHeight: number): Uint8Array[] {
+        const originalWidth = data.length;
+        const originalHeight = data[0].length;
+
+        // If original height is already below target, return the original data
+        if (originalHeight <= targetHeight) {
+            return data;
+        }
+
+        console.log(`Downsampling spectrogram from height ${originalHeight} to ${targetHeight}`);
+
+        // Calculate the sampling step (how many original rows to combine into one)
+        const samplingFactor = originalHeight / targetHeight;
+
+        // Create a new array for downsampled data
+        const downsampled: Uint8Array[] = new Array(originalWidth);
+
+        // For each column in the original data
+        for (let x = 0; x < originalWidth; x++) {
+            downsampled[x] = new Uint8Array(targetHeight);
+
+            // For each row in the target height
+            for (let y = 0; y < targetHeight; y++) {
+                // Calculate the range of rows to average from original data
+                const startRow = Math.floor(y * samplingFactor);
+                const endRow = Math.floor((y + 1) * samplingFactor);
+
+                // Average the values in this range
+                let sum = 0;
+                let count = 0;
+
+                for (let j = startRow; j < endRow && j < originalHeight; j++) {
+                    sum += data[x][j];
+                    count++;
+                }
+
+                // Set the downsampled value (average of original values)
+                downsampled[x][y] = count > 0 ? Math.floor(sum / count) : 0;
+            }
+        }
+
+        return downsampled;
+    }
+
+    /**
      * Renders spectrogram data to a canvas with various visualization options
      * @param {Uint8Array[]} spectrogramData - The frequency data from spectrogram analysis
      * @param {number} sampleRate - The audio sample rate in Hz
@@ -68,9 +118,18 @@ export function useSpectrogramRenderer() {
                 throw new Error('No spectrogram data provided');
             }
 
-            // Create dimensions based on data
-            const dataWidth: number = spectrogramData.length;
-            const dataHeight: number = spectrogramData[0].length;
+            // Get original dimensions based on data
+            const originalWidth: number = spectrogramData.length;
+            const originalHeight: number = spectrogramData[0].length;
+
+            // Downsample the data if it's taller than 400 pixels
+            const processedData = originalHeight > 400
+                ? downsampleSpectrogramData(spectrogramData, 400)
+                : spectrogramData;
+
+            // Get new dimensions after potential downsampling
+            const dataWidth: number = processedData.length;
+            const dataHeight: number = processedData[0].length;
 
             // Create a temporary canvas for the raw spectrogram data
             const canvas = document.createElement('canvas');
@@ -86,18 +145,22 @@ export function useSpectrogramRenderer() {
             }
 
             // Find data range for normalization
-            const maxFrequency: number = spectrogramData.reduce(
+            const maxFrequency: number = processedData.reduce(
                 (max: number, data: Uint8Array) =>
                     Math.max(max, ...Array.from(data)),
                 0,
             );
-            const minFrequency: number = spectrogramData.reduce(
+            const minFrequency: number = processedData.reduce(
                 (min: number, data: Uint8Array) =>
                     Math.min(min, ...Array.from(data)),
                 255,
             );
 
             console.log('Frequency range:', minFrequency, 'to', maxFrequency);
+
+            if (originalHeight > 400) {
+                console.log(`Using downsampled data: ${originalWidth}x${originalHeight} → ${dataWidth}x${dataHeight}`);
+            }
 
             // Ensure valid range
             const range: number = maxFrequency - minFrequency || 1;
@@ -136,7 +199,7 @@ export function useSpectrogramRenderer() {
 
                     // Get frequency value
                     const value: number =
-                        spectrogramData[x][dataHeight - scaledY - 1] || 0;
+                        processedData[x][dataHeight - scaledY - 1] || 0;
 
                     // Calculate index in image data array
                     const index: number = (y * dataWidth + x) * 4;
@@ -160,47 +223,6 @@ export function useSpectrogramRenderer() {
 
             // Put image data on temporary canvas
             tempCtx.putImageData(imageData, 0, 0);
-
-            // Scale down the canvas if it's taller than 400 pixels
-            if (canvas.height > 400) {
-                const scaledCanvas = document.createElement('canvas');
-                const scaleFactor = 400 / canvas.height;
-
-                // Calculate scaled dimensions
-                scaledCanvas.width = Math.floor(canvas.width * scaleFactor);
-                scaledCanvas.height = 400;
-
-                // Get context for scaling
-                const scaledCtx = scaledCanvas.getContext('2d');
-
-                if (!scaledCtx) {
-                    throw new Error('Failed to get 2D context for scaled canvas');
-                }
-
-                // Use built-in canvas scaling for better quality
-                scaledCtx.imageSmoothingEnabled = true;
-                scaledCtx.imageSmoothingQuality = 'high';
-
-                // Draw the original canvas onto the scaled canvas
-                scaledCtx.drawImage(
-                    canvas,
-                    0, 0, canvas.width, canvas.height,
-                    0, 0, scaledCanvas.width, scaledCanvas.height
-                );
-
-                // Create new image data from scaled canvas
-                const scaledImageData = scaledCtx.getImageData(
-                    0, 0, scaledCanvas.width, scaledCanvas.height
-                );
-
-                console.log(`Scaled spectrogram from ${canvas.width}x${canvas.height} to ${scaledCanvas.width}x${scaledCanvas.height}`);
-
-                // Return the scaled canvas
-                return {
-                    canvas: scaledCanvas,
-                    imageData: scaledImageData
-                };
-            }
 
             return {
                 canvas,
