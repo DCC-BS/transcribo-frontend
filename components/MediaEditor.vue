@@ -5,6 +5,7 @@ import CurrentSegementEditor from './media/CurrentSegementEditor.vue';
 import TimelineView from './media/TimelineView.client.vue';
 import VideoView from './media/VideoView.vue';
 import RenameSpeakerView from './RenameSpeakerView.vue';
+import { match, P } from 'ts-pattern';
 
 const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const audioSrc = ref<string>(''); // URL to the audio file
@@ -78,19 +79,49 @@ function handleMouseUp(event: MouseEvent) {
 
 function handleMouseMove(event: MouseEvent) {
     if (mouseDownStart.value !== undefined) {
-        const delta = (event.clientX - mouseDownStart.value);
+        // Calculate how many pixels we moved
+        const pixelDelta = event.clientX - mouseDownStart.value;
 
-        const start = timeRange.value[0] - delta;
-        const end = timeRange.value[1] - delta;
+        // Convert pixels to time using the current zoom level
+        // Negative because dragging left (negative pixels) should move timeline right (positive time)
+        const timeDelta = -pixelDelta / zoomX.value;
 
-        if (end <= start || start < 0 || end > duration.value) {
-            return;
+        // Calculate new time range
+        const start = timeRange.value[0] + timeDelta;
+        const end = timeRange.value[1] + timeDelta;
+
+        // Safety checks
+        if (start < 0) {
+            // Don't go before the beginning
+            timeRange.value = [0, timeRange.value[1] - timeRange.value[0]];
+        } else if (end > duration.value) {
+            // Don't go past the end
+            timeRange.value = [duration.value - (timeRange.value[1] - timeRange.value[0]), duration.value];
+        } else {
+            // Normal case - move the window
+            timeRange.value = [start, end];
         }
 
-        timeRange.value[0] = Math.max(0, start);
-        timeRange.value[1] = Math.min(duration.value, end);
-
+        // Update the mouse position for next movement
         mouseDownStart.value = event.clientX;
+    }
+}
+
+function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'ArrowLeft') {
+        handleLeftPress(event);
+    } else if (event.key === 'ArrowRight') {
+        handleRightPress(event);
+    } else if (event.key === ' ') {
+        // Space handling moved here
+        handleSpaceDown(event);
+    }
+}
+
+function handleKeyUp(event: KeyboardEvent) {
+    // Handle key up events
+    if (event.key === ' ') {
+        handleSpaceUp(event);
     }
 }
 
@@ -99,34 +130,63 @@ function handleSpaceDown(event: KeyboardEvent) {
 }
 
 function handleSpaceUp(event: KeyboardEvent) {
-    togglePlay(event);
+    executeCommand(new TogglePlayCommand());
     event.preventDefault();
 }
 
+const getSkipTime = (event: KeyboardEvent) =>
+    match(event)
+        .with({ shiftKey: true }, () => 30)
+        .with({ ctrlKey: true }, () => 1)
+        .otherwise(() => 5);
+
 function handleLeftPress(event: KeyboardEvent) {
-    const newTime = Math.max(0, currentTime.value - 5);
+    const skipTime = getSkipTime(event);
+
+    const newTime = Math.max(0, currentTime.value - skipTime);
     executeCommand(new SeekToSecondsCommand(newTime));
     event.preventDefault();
 }
 
 function handleRightPress(event: KeyboardEvent) {
-    const newTime = Math.min(duration.value, currentTime.value + 5);
+    const skipTime = getSkipTime(event);
+
+    const newTime = Math.min(duration.value, currentTime.value + skipTime);
     executeCommand(new SeekToSecondsCommand(newTime));
     event.preventDefault();
 }
 
-function togglePlay(event: KeyboardEvent) {
-    executeCommand(new TogglePlayCommand());
-    event.preventDefault();
-}
+// Watch the current time to ensure it stays within the visible range
+watch(currentTime, (newTime) => {
+    // If current time moves outside the visible range
+    if (newTime < timeRange.value[0] || newTime > timeRange.value[1]) {
+        // Calculate the current view width/duration
+        const rangeWidth = timeRange.value[1] - timeRange.value[0];
+
+        // Determine new start and end positions
+        let newStart: number;
+        let newEnd: number;
+
+        if (newTime < timeRange.value[0]) {
+            // If current time is before visible range, align to left edge
+            newStart = Math.max(0, newTime);
+            newEnd = newStart + rangeWidth;
+        } else {
+            // If current time is after visible range, align to right edge
+            newEnd = Math.min(duration.value, newTime);
+            newStart = Math.max(0, newEnd - rangeWidth);
+        }
+
+        // Update the time range
+        timeRange.value = [newStart, newEnd];
+    }
+});
 </script>
 
 <template>
     <div>
         <div v-if="audioFile && duration > 0">
-
-            <div @keyup.space="handleSpaceUp" @keydown.space="handleSpaceDown" @keypress.left="handleLeftPress"
-                @keypress.right="handleRightPress" tabindex="0">
+            <div @keydown="handleKeyDown" @keyup="handleKeyUp" tabindex="0">
                 <VideoView v-model="currentTime" :duration="duration" />
 
                 <ClientOnly>

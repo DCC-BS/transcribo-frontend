@@ -22,22 +22,26 @@ const { renderSpectrogram } = useSpectrogramRenderer();
 const { executeCommand } = useCommandBus();
 
 // Component state variables with proper typing
-const container = ref<HTMLDivElement | null>(null); // Container div reference
-const audioContext = ref<AudioContext | null>(null); // Web Audio API context
-const audioBuffer = ref<AudioBuffer | null>(null); // Decoded audio data
+const container = ref<HTMLDivElement>(); // Container div reference
+const audioContext = ref<AudioContext>(); // Web Audio API context
+const audioBuffer = ref<AudioBuffer>(); // Decoded audio data
 const audioSrc = ref<string>(''); // URL to the audio file
 const audioLoaded = ref<boolean>(false); // Flag to indicate if audio is loaded
 const audioDuration = ref<number>(0); // Total audio duration in seconds
 const spectrogramData = ref<Uint8Array[]>([]);
-const spectrogramImage = ref<HTMLImageElement | null>(null);
+const spectrogramImage = ref<HTMLImageElement>();
 
 // Mouse state tracking
 const isMouseDown = ref<boolean>(false);
+
+const { observe } = useResizeObserver(container);
 
 onMounted(() => {
     // Initialize AudioContext on component mount
     audioContext.value = new AudioContext();
     loadAudio(props.audioFile);
+    updateStageSize();
+    observe(updateStageSize);
 });
 
 onUnmounted(() => {
@@ -55,7 +59,7 @@ watch(
 );
 
 // Konva stage configuration
-const stageWidth = computed(() => container.value?.clientWidth ?? 800);
+const stageWidth = ref(800);
 const stageHeight = computed(() => 200);
 
 const { playheadLineConfig, transformedLayerConfig, offsetX } = useMediaTimeline({
@@ -73,6 +77,12 @@ const configKonva = computed(
         height: stageHeight.value,
     }) as StageConfig,
 );
+
+function updateStageSize(): void {
+    if (container.value) {
+        stageWidth.value = container.value.clientWidth;
+    }
+}
 
 /**
  * Loads and processes the audio file

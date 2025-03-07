@@ -22,6 +22,7 @@
         "konva": "^9.3.18",
         "nuxt": "^3.15.4",
         "nuxt3-winston-log": "^0.5.0",
+        "ts-pattern": "^5.6.2",
         "uuid": "^11.1.0",
         "vue": "latest",
         "vue-konva": "^3.2.0",

@@ -7,6 +7,10 @@ import type { TransformerConfig } from 'konva/lib/shapes/Transformer';
 import TimeAxisLayer from '~/components/timeline/TimeAxisLayer.vue';
 import { UpdateSegementCommand } from '~/types/commands';
 
+// -----------------------------------------------------------------
+// Props and constants
+// -----------------------------------------------------------------
+
 interface TimelineViewProps {
     currentTime: number;
     duration: number;
@@ -20,13 +24,37 @@ const props = defineProps<TimelineViewProps>();
 const marginTop = 20;
 const heightPerSpeaker = 50;
 
+// -----------------------------------------------------------------
+// Composables
+// -----------------------------------------------------------------
+
 const { executeCommand } = useCommandBus();
 const { checkSnap, createDragBoundFunc, findSnapPoints } = useTimelineSegment(computed(() => props.zoomX));
-
 const { segments } = useCurrentTranscription();
 
-const container = ref<HTMLDivElement | null>(null);
+// -----------------------------------------------------------------
+// References and state
+// -----------------------------------------------------------------
 
+const container = ref<HTMLDivElement>();
+const stageWidth = ref<number>(100);
+const selectedSegment = ref<string>();
+const transformerNode = ref<Rect>();
+const transformerVisible = ref(false);
+
+// Tooltip state
+const tooltipText = ref<string>('');
+const tooltipVisible = ref<boolean>(false);
+const tooltipPosition = ref<{ x: number, y: number }>({ x: 0, y: 0 });
+const timeInfoVisible = ref<boolean>(false);
+
+// -----------------------------------------------------------------
+// Computed properties
+// -----------------------------------------------------------------
+
+/**
+ * List of unique speakers extracted from segments
+ */
 const speakers = computed(() =>
     Array.from(
         new Set(
@@ -35,6 +63,9 @@ const speakers = computed(() =>
     ),
 );
 
+/**
+ * Maps speaker names to their vertical position indices
+ */
 const speakerToIndex = computed(() =>
     speakers.value.reduce((acc, speaker, index) => {
         acc[speaker] = index;
@@ -42,13 +73,20 @@ const speakerToIndex = computed(() =>
     }, {} as Record<string, number>),
 );
 
-const { getSpeakerColor } = useSpeakerColor(speakers);
-
-const stageWidth = computed(() => container.value?.clientWidth ?? 100);
-const selectedSegment = ref<string>();
+/**
+ * Calculate stage height based on number of speakers
+ */
 const stageHeight = computed(() => speakers.value.length * heightPerSpeaker + marginTop);
 
-const { fromTimetoPixelSpace, fromPixeltoTimeSpace, playheadLineConfig, transformedLayerConfig, offsetX } = useMediaTimeline({
+const { getSpeakerColor } = useSpeakerColor(speakers);
+const { observe } = useResizeObserver(container);
+
+const {
+    fromTimetoPixelSpace,
+    fromPixeltoTimeSpace,
+    playheadLineConfig,
+    transformedLayerConfig,
+} = useMediaTimeline({
     mediaDuration: computed(() => props.duration),
     stageWidth,
     stageHeight,
@@ -57,6 +95,9 @@ const { fromTimetoPixelSpace, fromPixeltoTimeSpace, playheadLineConfig, transfor
     currentTime: computed(() => props.currentTime),
 });
 
+/**
+ * Configuration for the Konva stage
+ */
 const configKonva = computed(
     () =>
         ({
@@ -65,74 +106,22 @@ const configKonva = computed(
         }) as StageConfig,
 );
 
+/**
+ * Layer configuration for the player header
+ */
 const playerHeaderLayerConfig = computed(() => transformedLayerConfig.value);
+
+/**
+ * Layer configuration for timeline segments with vertical offset
+ */
 const timelineLayerConfig = computed(() => ({
     ...transformedLayerConfig.value,
     y: marginTop,
 } as LayerConfig));
 
-// Add state for tooltip
-const tooltipText = ref<string>('');
-const tooltipVisible = ref<boolean>(false);
-const tooltipPosition = ref<{ x: number, y: number }>({ x: 0, y: 0 });
-
-// Add state for time display during resize
-const timeInfoVisible = ref<boolean>(false);
-
-const rectConfigs = computed(() =>
-    segments.value.map(
-        (segment) =>
-            ({
-                id: segment.id,
-                // Scale x position and width to fit stage width
-                x: fromTimetoPixelSpace(segment.start),
-                y: speakerToIndex.value[segment.speaker ?? 'unknown'] * heightPerSpeaker,
-                width: fromTimetoPixelSpace(segment.end - segment.start),
-                height: heightPerSpeaker,
-                fill: getSpeakerColor(segment.speaker).toString(),
-                // Add stroke to make segments visually distinct
-                stroke: 'black',
-                strokeScaleEnabled: false,
-                draggable: true,
-                // Store segment text as a property for hover access
-                text: segment.text,
-                dragBoundFunc: createDragBoundFunc(
-                    segment,
-                    stageWidth.value,
-                    speakerToIndex.value[segment.speaker ?? 'unknown'],
-                    heightPerSpeaker, fromTimetoPixelSpace,
-                    marginTop),
-            }) as RectConfig & { text?: string },
-    ),
-);
-
-onMounted(() => {
-    window.addEventListener('keyup', handleKeyUp);
-});
-
-onUnmounted(() => {
-    window.removeEventListener('keyup', handleKeyUp);
-});
-
-function handleKeyUp(e: KeyboardEvent) {
-    if (!selectedSegment.value) return;
-    const segement = segments.value.find((s) => s.id === selectedSegment.value);
-
-    if (!segement) return;
-
-    if (e.key === 'ArrowRight') {
-        segement.start += 0.5;
-        segement.end += 0.5;
-    } else if (e.key === 'ArrowLeft') {
-        segement.start -= 0.5;
-        segement.end -= 0.5;
-    }
-}
-
-const transformerNode = ref<Rect>();
-const transformerVisible = ref(false);
-
-// Configuration for the transformer
+/**
+ * Configuration for the transformer tool
+ */
 const transformerConfig = computed(() => ({
     node: transformerNode.value,
     visible: transformerVisible.value,
@@ -157,17 +146,109 @@ const transformerConfig = computed(() => ({
     },
 } as TransformerConfig));
 
-function showTransformer(rect: Rect) {
+/**
+ * Generate rectangle configurations for all segments
+ */
+const rectConfigs = computed(() =>
+    segments.value.map(
+        (segment) =>
+            ({
+                id: segment.id,
+                // Scale x position and width to fit stage width
+                x: fromTimetoPixelSpace(segment.start),
+                y: speakerToIndex.value[segment.speaker ?? 'unknown'] * heightPerSpeaker,
+                width: fromTimetoPixelSpace(segment.end - segment.start),
+                height: heightPerSpeaker,
+                fill: getSpeakerColor(segment.speaker).toString(),
+                // Add stroke to make segments visually distinct
+                stroke: 'black',
+                strokeScaleEnabled: false,
+                draggable: true,
+                // Store segment text as a property for hover access
+                text: segment.text,
+                dragBoundFunc: createDragBoundFunc(
+                    segment,
+                    stageWidth.value,
+                    speakerToIndex.value[segment.speaker ?? 'unknown'],
+                    heightPerSpeaker,
+                    fromTimetoPixelSpace,
+                    marginTop
+                ),
+            }) as RectConfig & { text?: string },
+    ),
+);
+
+// -----------------------------------------------------------------
+// Lifecycle hooks
+// -----------------------------------------------------------------
+
+onMounted(() => {
+    window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('resize', updateStageWidth);
+    // Initialize the stage width and the resize observer
+    updateStageWidth();
+    observe(() => updateStageWidth());
+});
+
+onUnmounted(() => {
+    window.removeEventListener('keyup', handleKeyUp);
+    window.removeEventListener('resize', updateStageWidth);
+});
+
+// -----------------------------------------------------------------
+// Functions
+// -----------------------------------------------------------------
+
+/**
+ * Updates the stage width based on the container's current dimensions
+ */
+function updateStageWidth(): void {
+    if (container.value) {
+        stageWidth.value = container.value.clientWidth;
+    }
+}
+
+/**
+ * Handles keyboard navigation for selected segments
+ */
+function handleKeyUp(e: KeyboardEvent): void {
+    if (!selectedSegment.value) return;
+    const segement = segments.value.find((s) => s.id === selectedSegment.value);
+
+    if (!segement) return;
+
+    if (e.key === 'ArrowRight') {
+        segement.start += 0.5;
+        segement.end += 0.5;
+    } else if (e.key === 'ArrowLeft') {
+        segement.start -= 0.5;
+        segement.end -= 0.5;
+    }
+}
+
+/**
+ * Shows the transformer tool for the given rectangle
+ */
+function showTransformer(rect: Rect): void {
     transformerNode.value = rect;
     transformerVisible.value = true;
 }
 
-function hideTransformer() {
+/**
+ * Hides the transformer tool
+ */
+function hideTransformer(): void {
     transformerVisible.value = false;
 }
 
-// Handle rectangle drag end to update segment times
-function onDragEnd(e: KonvaEventObject<Rect, Event>): void {
+// -----------------------------------------------------------------
+// Event handlers
+// -----------------------------------------------------------------
+
+/**
+ * Handles drag end event to update segment times
+ */
+function onDragEnd(e: KonvaEventObject<MouseEvent, Rect>): void {
     if (!selectedSegment.value) return;
 
     const rect = e.target;
@@ -187,8 +268,10 @@ function onDragEnd(e: KonvaEventObject<Rect, Event>): void {
     }));
 }
 
-// Handle transform end to update segment times
-function onTransformEnd(e: KonvaEventObject<Rect, Event>): void {
+/**
+ * Handles transform end event to update segment times after resizing
+ */
+function onTransformEnd(e: KonvaEventObject<MouseEvent, Rect>): void {
     if (!selectedSegment.value) return;
 
     const rect = e.target as Rect;
@@ -212,17 +295,22 @@ function onTransformEnd(e: KonvaEventObject<Rect, Event>): void {
     timeInfoVisible.value = false;
 }
 
-// Handle drag move to implement snapping
+/**
+ * Handles drag move event to implement snapping
+ */
 function onDragMove(e: KonvaEventObject<MouseEvent, Rect>): void {
     const rect = e.target;
+
+    if (e.evt.altKey) return;
+
+    const leftEdge = rect.x();
+    const rightEdge = leftEdge + rect.width();
     const snapPoints = findSnapPoints(rectConfigs.value, selectedSegment.value);
 
     // Check for snap on left edge (start time)
-    const leftEdge = rect.x();
     const snappedLeft = checkSnap(leftEdge, [...snapPoints.starts, ...snapPoints.ends]);
 
     // Check for snap on right edge (end time)
-    const rightEdge = leftEdge + rect.width();
     const snappedRight = checkSnap(rightEdge, [...snapPoints.starts, ...snapPoints.ends]);
 
     // Apply snapping if needed
@@ -233,9 +321,14 @@ function onDragMove(e: KonvaEventObject<MouseEvent, Rect>): void {
     }
 }
 
-// Handle transform move for snapping during resize
-function onTransform(e: KonvaEventObject<Event, Rect>): void {
+/**
+ * Handles transform move for snapping during resize
+ */
+function onTransform(e: KonvaEventObject<MouseEvent, Rect>): void {
     const rect = e.target;
+
+    if (e.evt.altKey) return;
+
     const snapPoints = findSnapPoints(rectConfigs.value, selectedSegment.value);
 
     // Check for snap on left edge (if middle-left anchor is being dragged)
@@ -261,27 +354,29 @@ function onTransform(e: KonvaEventObject<Event, Rect>): void {
     }
 }
 
+/**
+ * Handles segment click to select it
+ */
 function onSegmentClicked(e: KonvaEventObject<MouseEvent, Rect>, segmentId: string): void {
-    // Deselect previous selection
     selectedSegment.value = segmentId;
     showTransformer(e.target as Rect);
 }
 
-// Clear selection when clicking on empty space
+/**
+ * Clears selection when clicking on empty space
+ */
 function clearSelection(e: KonvaEventObject<MouseEvent, Stage>): void {
     // Only clear if clicking on the stage background, not on a shape
     if (e.target === e.currentTarget) {
         selectedSegment.value = undefined;
-
-        // Clear transformer
         hideTransformer();
-
-        // Hide time info
         timeInfoVisible.value = false;
     }
 }
 
-// Handle mouse enter to show tooltip
+/**
+ * Shows tooltip when hovering over a segment
+ */
 function onSegmentMouseEnter(e: any, text: string): void {
     // Display the tooltip with segment text
     tooltipText.value = text || 'No transcription available';
@@ -298,12 +393,16 @@ function onSegmentMouseEnter(e: any, text: string): void {
     }
 }
 
-// Handle mouse leave to hide tooltip
+/**
+ * Hides tooltip when mouse leaves a segment
+ */
 function onSegmentMouseLeave(): void {
     tooltipVisible.value = false;
 }
 
-// Handle pointer move to update tooltip position
+/**
+ * Updates tooltip position as mouse moves
+ */
 function onPointerMove(e: any): void {
     if (tooltipVisible.value) {
         const stage = e.target.getStage();
@@ -316,14 +415,13 @@ function onPointerMove(e: any): void {
         }
     }
 }
-
 </script>
 
 <template>
     <div ref="container" class="w-full">
         <v-stage :config="configKonva" v-if="segments.length > 0" @mousemove="onPointerMove" @click="clearSelection">
 
-            <!-- Time Axis layer - replaced with component -->F
+            <!-- Time Axis layer -->
             <TimeAxisLayer :start-time="props.startTime" :end-time="props.endTime" :zoom-x="props.zoomX"
                 :stage-width="stageWidth" />
 
@@ -337,7 +435,6 @@ function onPointerMove(e: any): void {
             </v-layer>
 
             <v-layer :config="playerHeaderLayerConfig">
-                <!-- Add transformer for resizing -->
                 <v-line :config="playheadLineConfig" />
             </v-layer>
 
