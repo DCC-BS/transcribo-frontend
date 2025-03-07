@@ -29,9 +29,11 @@ onMounted(() => {
                 isLoaded.value = true;
             }
             else {
+                errorMessage.value = 'No media file found for task';
                 console.error('No media file found for task', taskId);
             }
         }).catch(e => {
+            errorMessage.value = 'Failed to get task';
             console.error('Failed to get task', taskId, e);
         });
 });
@@ -48,6 +50,8 @@ async function handleTranscriptionFinished(command: TranscriptionFinishedCommand
         const transcription = await transcriptionsStore.addTranscriptions({
             segments: command.result.segments.map((x) => ({
                 ...x,
+                text: x.text?.trim() ?? '',
+                speaker: x.speaker?.trim().toUpperCase() ?? 'UNKNOWN',
                 id: uuidv4(),
             })),
             mediaFile: audioFile.value,
@@ -62,12 +66,9 @@ async function handleTranscriptionFinished(command: TranscriptionFinishedCommand
 </script>
 
 <template>
-    <div>
+    <UContainer>
         <TaskStatusView v-if="taskId && isLoaded" :task-id="taskId" />
-        <div v-else>
-            <p>Loading task...</p>
-        </div>
-
-        <div v-if="errorMessage" class="error">{{ errorMessage }}</div>
-    </div>
+        <UAlert v-if="errorMessage" color="error" :title="errorMessage" icon="i-heroicons-exclamation-circle"
+            type="error"></UAlert>
+    </UContainer>
 </template>

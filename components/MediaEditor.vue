@@ -5,7 +5,7 @@ import CurrentSegementEditor from './media/CurrentSegementEditor.vue';
 import TimelineView from './media/TimelineView.client.vue';
 import VideoView from './media/VideoView.vue';
 import RenameSpeakerView from './RenameSpeakerView.vue';
-import { match, P } from 'ts-pattern';
+import { match } from 'ts-pattern';
 
 const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const audioSrc = ref<string>(''); // URL to the audio file
@@ -53,14 +53,15 @@ function handleWheel(event: WheelEvent): void {
     const start = timeRange.value[0] + (delta * startFactor);
     const end = timeRange.value[1] - (delta * endFactor);
 
-    if (end <= start) {
+    event.preventDefault();
+
+    if (end <= start + 0.01) {
         return;
     }
 
     timeRange.value[0] = Math.max(0, start);
     timeRange.value[1] = Math.min(duration.value, end);
 
-    event.preventDefault();
 }
 
 const mouseDownStart = ref<number>();

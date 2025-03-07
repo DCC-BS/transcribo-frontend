@@ -75,6 +75,22 @@ function handleCreateSpeaker(speaker: string): void {
     // Set the new speaker as the current speaker
     internalSegment.value.speaker = speaker;
 }
+
+// Round a number to two decimal places
+function roundToTwoDecimals(value: number): number {
+    return Math.round(value * 100) / 100;
+}
+
+// Computed properties for rounded input values
+const startTimeFormatted = computed({
+    get: () => roundToTwoDecimals(internalSegment.value.start),
+    set: (value: number) => { internalSegment.value.start = value }
+});
+
+const endTimeFormatted = computed({
+    get: () => roundToTwoDecimals(internalSegment.value.end),
+    set: (value: number) => { internalSegment.value.end = value }
+});
 </script>
 
 <template>
@@ -94,25 +110,47 @@ function handleCreateSpeaker(speaker: string): void {
             ]" />
         <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" />
 
-        <div class="flex gap-2" @keydown="handleKeydown">
+        <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
             <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
                 @create="handleCreateSpeaker" />
-            <div>
-                <!-- <UInputNumber v-model="internalSegment.start" type="number" :step="0.1" @keydown="handleKeydown" /> -->
+
+            <div class="flex gap-2">
+                <UInput type="number" class="w-[100px]" v-model="startTimeFormatted" :step="0.1"
+                    @keydown="handleKeydown">
+                    <template #trailing>
+                        <span class="text-xs">s</span>
+                    </template>
+                </UInput>
                 <a @click="() => seekTo(internalSegment.start)">
                     {{ formatTime(internalSegment.start) }}
                 </a>
                 -
                 <a @click="() => seekTo(internalSegment.end)">{{ formatTime(internalSegment.end) }}</a>
-                <!-- <UInputNumber v-model="internalSegment.end" type="number" :step="0.1" @keydown="handleKeydown" /> -->
+                <UInput type="number" class="w-[100px]" v-model="endTimeFormatted" :step="0.1" @keydown="handleKeydown">
+                    <template #trailing>
+                        <span class="text-xs">s</span>
+                    </template>
+                </UInput>
             </div>
-            <UButton color="primary" icon="i-heroicons-arrow-up-on-square-stack"
-                @click="addSegmentBefore(internalSegment)" />
-            <UButton color="primary" icon="i-heroicons-arrow-down-on-square-stack"
-                @click="addSegmentAfter(internalSegment)" />
-            <UButton color="error" icon="i-heroicons-trash" @click="removeSegment(internalSegment)" />
+
+            <div class="flex gap-2">
+                <UButton color="primary" icon="i-heroicons-arrow-up-on-square-stack"
+                    @click="addSegmentBefore(internalSegment)" />
+                <UButton color="primary" icon="i-heroicons-arrow-down-on-square-stack"
+                    @click="addSegmentAfter(internalSegment)" />
+                <UButton color="error" icon="i-heroicons-trash" @click="removeSegment(internalSegment)" />
+            </div>
         </div>
     </UCard>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+a {
+    cursor: pointer;
+    color: var(--color-primary-500);
+}
+
+a:hover {
+    text-decoration: underline;
+}
+</style>

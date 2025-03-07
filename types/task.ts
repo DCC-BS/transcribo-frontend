@@ -18,4 +18,5 @@ export interface TaskStatus {
     status: TaskStatusEnum;
     created_at: string | null; // ISO date string or null
     executed_at: string | null; // ISO date string or null
+    progress: number | null;
 }

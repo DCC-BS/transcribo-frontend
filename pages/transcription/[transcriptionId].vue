@@ -11,25 +11,11 @@ const { registerService, unRegisterServer } = useTranscriptionService(transcript
 
 onMounted(() => {
     registerService();
-    window.addEventListener('keydown', handleDownUp);
 });
 
 onUnmounted(() => {
     unRegisterServer();
-    window.removeEventListener('keydown', handleDownUp);
 });
-
-function handleDownUp(event: KeyboardEvent): void {
-    return;
-
-    // Check for space key using both event.code and event.key for better browser compatibility
-    if (event.code === 'Space' || event.key === ' ') {
-        // Prevent default scrolling behavior when space is pressed
-        event.preventDefault();
-        // Execute the toggle play command
-        executeCommand(new TogglePlayCommand());
-    }
-}
 
 async function handleNameChange(name: string | number) {
     if (typeof name === 'string') {
