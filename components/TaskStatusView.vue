@@ -45,7 +45,6 @@ const fetchTaskStatus = async (): Promise<void> => {
 
 const loadTaskStatus = async (taskId: string): Promise<void> => {
     status.value = await $fetch<TaskStatus>(`/api/transcribe/${taskId}/status`);
-    console.log('Task status:', status.value);
 };
 </script>
 

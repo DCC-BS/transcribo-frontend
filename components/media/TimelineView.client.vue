@@ -5,6 +5,7 @@ import type { Stage, StageConfig } from 'konva/lib/Stage';
 import type { RectConfig, Rect } from 'konva/lib/shapes/Rect';
 import type { TransformerConfig } from 'konva/lib/shapes/Transformer';
 import TimeAxisLayer from '~/components/timeline/TimeAxisLayer.vue';
+import { UpdateSegementCommand } from '~/types/commands';
 
 interface TimelineViewProps {
     currentTime: number;
@@ -19,19 +20,17 @@ const props = defineProps<TimelineViewProps>();
 const marginTop = 20;
 const heightPerSpeaker = 50;
 
-const transcriptionStore = useTranscriptionsStore();
-const { checkSnap, createDragBoundFunc, findSnapPoints } = useTimelineSegment();
+const { executeCommand } = useCommandBus();
+const { checkSnap, createDragBoundFunc, findSnapPoints } = useTimelineSegment(computed(() => props.zoomX));
 
-const transcriptions = ref(
-    transcriptionStore.currentTranscription?.segments ?? [],
-);
+const { segments } = useCurrentTranscription();
 
 const container = ref<HTMLDivElement | null>(null);
 
 const speakers = computed(() =>
     Array.from(
         new Set(
-            transcriptions.value.map((segment) => segment.speaker ?? 'unknown'),
+            segments.value.map((segment) => segment.speaker ?? 'unknown'),
         ),
     ),
 );
@@ -81,7 +80,7 @@ const tooltipPosition = ref<{ x: number, y: number }>({ x: 0, y: 0 });
 const timeInfoVisible = ref<boolean>(false);
 
 const rectConfigs = computed(() =>
-    transcriptions.value.map(
+    segments.value.map(
         (segment) =>
             ({
                 id: segment.id,
@@ -115,20 +114,9 @@ onUnmounted(() => {
     window.removeEventListener('keyup', handleKeyUp);
 });
 
-watch(
-    () => transcriptionStore.currentTranscription,
-    (currentTranscription) => {
-        transcriptions.value = currentTranscription?.segments ?? [];
-    },
-);
-
-watch(() => [props.startTime, props.endTime], () => {
-    transformerNode.value = undefined;
-});
-
 function handleKeyUp(e: KeyboardEvent) {
     if (!selectedSegment.value) return;
-    const segement = transcriptions.value.find((s) => s.id === selectedSegment.value);
+    const segement = segments.value.find((s) => s.id === selectedSegment.value);
 
     if (!segement) return;
 
@@ -142,10 +130,12 @@ function handleKeyUp(e: KeyboardEvent) {
 }
 
 const transformerNode = ref<Rect>();
+const transformerVisible = ref(false);
 
 // Configuration for the transformer
 const transformerConfig = computed(() => ({
     node: transformerNode.value,
+    visible: transformerVisible.value,
     // Only allow horizontal resizing
     enabledAnchors: ['middle-left', 'middle-right'],
     // Disable rotation
@@ -167,30 +157,34 @@ const transformerConfig = computed(() => ({
     },
 } as TransformerConfig));
 
+function showTransformer(rect: Rect) {
+    transformerNode.value = rect;
+    transformerVisible.value = true;
+}
+
+function hideTransformer() {
+    transformerVisible.value = false;
+}
+
 // Handle rectangle drag end to update segment times
 function onDragEnd(e: KonvaEventObject<Rect, Event>): void {
     if (!selectedSegment.value) return;
 
     const rect = e.target;
-    const segmentIndex = transcriptions.value.findIndex(s => s.id === selectedSegment.value);
+    const segmentIndex = segments.value.findIndex(s => s.id === selectedSegment.value);
     if (segmentIndex === -1) return;
 
     // Calculate new times based on position
-    const segment = transcriptions.value[segmentIndex];
-    const newStart = props.startTime + rect.x() / props.zoomX / stageWidth.value * (props.endTime - props.startTime);
-    const duration = segment.end - segment.start;
+    const newStart = fromPixeltoTimeSpace(rect.x());
+    const newEnd = fromPixeltoTimeSpace(rect.x() + rect.width() * rect.scaleX());
+
+    const segmentId = segments.value[segmentIndex].id;
 
     // Update the segment with new times
-    // TODO
-
-    // executeCommand({
-    //     type: 'update-segment',
-    //     payload: {
-    //         id: segment.id,
-    //         start: Math.max(0, newStart),
-    //         end: Math.max(duration, newStart + duration)
-    //     }
-    // });
+    executeCommand(new UpdateSegementCommand(segmentId, {
+        start: Math.max(0, newStart),
+        end: Math.max(newStart + 0.5, newEnd)
+    }));
 }
 
 // Handle transform end to update segment times
@@ -198,27 +192,18 @@ function onTransformEnd(e: KonvaEventObject<Rect, Event>): void {
     if (!selectedSegment.value) return;
 
     const rect = e.target as Rect;
-    const segmentIndex = transcriptions.value.findIndex(s => s.id === selectedSegment.value);
+    const segmentIndex = segments.value.findIndex(s => s.id === selectedSegment.value);
     if (segmentIndex === -1) return;
 
     // Calculate new times based on position and width
     const newStart = fromPixeltoTimeSpace(rect.x());
     const newEnd = fromPixeltoTimeSpace(rect.x() + rect.width() * rect.scaleX());
-    // const newStart = props.startTime + rect.x() / props.zoomX / stageWidth.value * (props.endTime - props.startTime);
-    // const newEnd = props.startTime + (rect.x() + rect.width()) / props.zoomX / stageWidth.value * (props.endTime - props.startTime);
 
-    const newTranscription = [...transcriptions.value];
-    newTranscription[segmentIndex] = {
-        ...newTranscription[segmentIndex],
+    const segmentId = segments.value[segmentIndex].id;
+    executeCommand(new UpdateSegementCommand(segmentId, {
         start: Math.max(0, newStart),
-        end: Math.max(newStart + 0.1, newEnd), // Ensure minimum duration
-    };
-
-    console.log("transforem end", rect.width(), newStart, newEnd);
-
-    transcriptionStore.updateCurrentTrascription({
-        segments: newTranscription,
-    });
+        end: Math.max(newStart + 0.5, newEnd), // Ensure minimum duration
+    }));
 
     // Reset scale since we've applied the transform
     rect.scaleX(1);
@@ -230,7 +215,7 @@ function onTransformEnd(e: KonvaEventObject<Rect, Event>): void {
 // Handle drag move to implement snapping
 function onDragMove(e: KonvaEventObject<MouseEvent, Rect>): void {
     const rect = e.target;
-    const snapPoints = findSnapPoints(transcriptions.value, selectedSegment.value, fromTimetoPixelSpace);
+    const snapPoints = findSnapPoints(rectConfigs.value, selectedSegment.value);
 
     // Check for snap on left edge (start time)
     const leftEdge = rect.x();
@@ -251,14 +236,14 @@ function onDragMove(e: KonvaEventObject<MouseEvent, Rect>): void {
 // Handle transform move for snapping during resize
 function onTransform(e: KonvaEventObject<Event, Rect>): void {
     const rect = e.target;
-    const snapPoints = findSnapPoints(transcriptions.value, selectedSegment.value, fromTimetoPixelSpace);
+    const snapPoints = findSnapPoints(rectConfigs.value, selectedSegment.value);
 
     // Check for snap on left edge (if middle-left anchor is being dragged)
     const leftEdge = rect.x();
     const snappedLeft = checkSnap(leftEdge, [...snapPoints.starts, ...snapPoints.ends]);
 
     // Check for snap on right edge (if middle-right anchor is being dragged)
-    const rightEdge = leftEdge + rect.width() * rect.scaleX();
+    const rightEdge = leftEdge + rect.width();
     const snappedRight = checkSnap(rightEdge, [...snapPoints.starts, ...snapPoints.ends]);
 
     // Apply snapping if needed
@@ -267,7 +252,9 @@ function onTransform(e: KonvaEventObject<Event, Rect>): void {
         rect.x(snappedLeft);
         rect.width(newWidth);
         rect.scaleX(1); // Reset scale
-    } else if (snappedRight !== null) {
+    }
+
+    if (snappedRight !== null) {
         const newWidth = snappedRight - rect.x();
         rect.width(newWidth);
         rect.scaleX(1); // Reset scale
@@ -277,7 +264,7 @@ function onTransform(e: KonvaEventObject<Event, Rect>): void {
 function onSegmentClicked(e: KonvaEventObject<MouseEvent, Rect>, segmentId: string): void {
     // Deselect previous selection
     selectedSegment.value = segmentId;
-    transformerNode.value = e.target as Rect;
+    showTransformer(e.target as Rect);
 }
 
 // Clear selection when clicking on empty space
@@ -287,7 +274,7 @@ function clearSelection(e: KonvaEventObject<MouseEvent, Stage>): void {
         selectedSegment.value = undefined;
 
         // Clear transformer
-        transformerNode.value = undefined;
+        hideTransformer();
 
         // Hide time info
         timeInfoVisible.value = false;
@@ -334,10 +321,9 @@ function onPointerMove(e: any): void {
 
 <template>
     <div ref="container" class="w-full">
-        <v-stage :config="configKonva" v-if="transcriptions.length > 0" @mousemove="onPointerMove"
-            @click="clearSelection">
+        <v-stage :config="configKonva" v-if="segments.length > 0" @mousemove="onPointerMove" @click="clearSelection">
 
-            <!-- Time Axis layer - replaced with component -->
+            <!-- Time Axis layer - replaced with component -->F
             <TimeAxisLayer :start-time="props.startTime" :end-time="props.endTime" :zoom-x="props.zoomX"
                 :stage-width="stageWidth" />
 

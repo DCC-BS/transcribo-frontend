@@ -11,7 +11,7 @@ const transcriptionStore = useTranscriptionsStore();
 
 const mediaFile = ref<Blob | null>(null);
 const mediaSrc = ref<string>('');
-const segments = ref(transcriptionStore.currentTranscription?.segments ?? []);
+const segments = shallowRef(transcriptionStore.currentTranscription?.segments ?? []);
 const videoElement = ref<HTMLVideoElement | null>(null);
 const isPlaying = ref<boolean>(false);
 const isVideoFile = ref<boolean>(false);

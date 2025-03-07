@@ -31,8 +31,7 @@ const loadAudio = async (event: Event): Promise<void> => {
 
 <template>
     <div>
-        <UInput
-type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up"
+        <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up"
             @change="loadAudio" />
     </div>
 </template>

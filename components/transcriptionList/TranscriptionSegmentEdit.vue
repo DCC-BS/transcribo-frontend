@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { UCard, UTextarea } from '#components';
-import { SeekToSecondsCommand } from '~/types/commands';
+import { SeekToSecondsCommand, DeleteSegementCommand, InsertSegementCommand, UpdateSegementCommand } from '~/types/commands';
 import type { SegementWithId } from '~/types/transcriptionResponse';
 
 interface TranscriptionListProps {
@@ -9,11 +9,6 @@ interface TranscriptionListProps {
 }
 
 const props = defineProps<TranscriptionListProps>();
-const emit = defineEmits<{
-    'remove-segment': [segment: SegementWithId];
-    'add-segment-after': [segment: SegementWithId];
-    'update-segment': [segment: SegementWithId];
-}>();
 
 const { executeCommand } = useCommandBus();
 const internalSegment = ref<SegementWithId>({ ...props.segment });
@@ -29,19 +24,21 @@ watch(internalSegment, () => {
         return;
     }
 
-    console.log(internalSegment.value !== props.segment);
-
     if (JSON.stringify(internalSegment.value) !== JSON.stringify(props.segment)) {
         isDirty.value = true;
     }
 }, { deep: true });
 
 function removeSegment(segment: SegementWithId): void {
-    emit('remove-segment', segment);
+    executeCommand(new DeleteSegementCommand(segment.id))
 }
 
 function addSegmentAfter(segment: SegementWithId): void {
-    emit('add-segment-after', segment);
+    executeCommand(new InsertSegementCommand(segment.id, {}, 'after'));
+}
+
+function addSegmentBefore(segment: SegementWithId): void {
+    executeCommand(new InsertSegementCommand(segment.id, {}, 'before'));
 }
 
 function seekTo(time: number): void {
@@ -50,7 +47,8 @@ function seekTo(time: number): void {
 
 function applyChanges(): void {
     isDirty.value = false;
-    emit('update-segment', internalSegment.value);
+
+    executeCommand(new UpdateSegementCommand(internalSegment.value.id, internalSegment.value));
 }
 
 function unDoChanges(): void {
@@ -70,12 +68,18 @@ function handleKeydown(event: KeyboardEvent): void {
         }
     }
 }
+
+function handleCreateSpeaker(speaker: string): void {
+    // Add the new speaker to the list of speakers
+    props.speakers.push(speaker);
+    // Set the new speaker as the current speaker
+    internalSegment.value.speaker = speaker;
+}
 </script>
 
 <template>
     <UCard>
-        <UAlert
-v-if="isDirty" title="" description="Do you want to apply your changes?" color="info" variant="outline"
+        <UAlert v-if="isDirty" title="" description="Do you want to apply your changes?" color="info" variant="outline"
             :actions="[
                 {
                     label: 'Undo',
@@ -91,7 +95,8 @@ v-if="isDirty" title="" description="Do you want to apply your changes?" color="
         <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" />
 
         <div class="flex gap-2" @keydown="handleKeydown">
-            <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" />
+            <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
+                @create="handleCreateSpeaker" />
             <div>
                 <!-- <UInputNumber v-model="internalSegment.start" type="number" :step="0.1" @keydown="handleKeydown" /> -->
                 <a @click="() => seekTo(internalSegment.start)">
@@ -101,7 +106,10 @@ v-if="isDirty" title="" description="Do you want to apply your changes?" color="
                 <a @click="() => seekTo(internalSegment.end)">{{ formatTime(internalSegment.end) }}</a>
                 <!-- <UInputNumber v-model="internalSegment.end" type="number" :step="0.1" @keydown="handleKeydown" /> -->
             </div>
-            <UButton color="primary" icon="i-heroicons-plus" @click="addSegmentAfter(internalSegment)" />
+            <UButton color="primary" icon="i-heroicons-arrow-up-on-square-stack"
+                @click="addSegmentBefore(internalSegment)" />
+            <UButton color="primary" icon="i-heroicons-arrow-down-on-square-stack"
+                @click="addSegmentAfter(internalSegment)" />
             <UButton color="error" icon="i-heroicons-trash" @click="removeSegment(internalSegment)" />
         </div>
     </UCard>

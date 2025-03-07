@@ -13,6 +13,8 @@ export function useMediaTimeline(inputs: {
     const { mediaDuration, stageWidth, stageHeight, startTime, currentTime, zoomX } = inputs;
 
     const scaleFactor = computed(() => {
+        if (stageWidth.value === 0 || mediaDuration.value === 0) return 1;
+
         return (stageWidth.value / mediaDuration.value)
     });
 

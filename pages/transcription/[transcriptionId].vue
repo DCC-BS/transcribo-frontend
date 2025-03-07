@@ -1,26 +1,27 @@
 <script lang="ts" setup>
 import { UInput } from '#components';
-import { TogglePlayCommand } from '~/types/commands';
+import { TogglePlayCommand, TranscriptonNameChangeCommand } from '~/types/commands';
 
 const route = useRoute();
 const transcriptionStore = useTranscriptionsStore();
 const { executeCommand } = useCommandBus();
 
 const transcriptionId = route.params.transcriptionId as string;
-
-if (transcriptionId) {
-    transcriptionStore.setCurrentTranscription(transcriptionId);
-}
+const { registerService, unRegisterServer } = useTranscriptionService(transcriptionId);
 
 onMounted(() => {
+    registerService();
     window.addEventListener('keydown', handleDownUp);
 });
 
 onUnmounted(() => {
+    unRegisterServer();
     window.removeEventListener('keydown', handleDownUp);
 });
 
 function handleDownUp(event: KeyboardEvent): void {
+    return;
+
     // Check for space key using both event.code and event.key for better browser compatibility
     if (event.code === 'Space' || event.key === ' ') {
         // Prevent default scrolling behavior when space is pressed
@@ -30,11 +31,9 @@ function handleDownUp(event: KeyboardEvent): void {
     }
 }
 
-function handleNameChange(name: string | number): void {
+async function handleNameChange(name: string | number) {
     if (typeof name === 'string') {
-        transcriptionStore.updateCurrentTrascription({
-            name: name,
-        });
+        await executeCommand(new TranscriptonNameChangeCommand(name));
     }
 }
 </script>
@@ -60,6 +59,3 @@ function handleNameChange(name: string | number): void {
         <p>Loading...</p>
     </div>
 </template>
-
-
-<style></style>

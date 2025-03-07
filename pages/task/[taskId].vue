@@ -27,8 +27,6 @@ onMounted(() => {
                 audioFile.value = t.mediaFile;
                 audioName.value = t.mediaFileName;
                 isLoaded.value = true;
-
-                console.log(isLoaded.value);
             }
             else {
                 console.error('No media file found for task', taskId);
@@ -57,7 +55,6 @@ async function handleTranscriptionFinished(command: TranscriptionFinishedCommand
             name: audioName.value ?? 'Untitled',
         });
 
-        transcriptionsStore.setCurrentTranscription(transcription.id);
         taskStore.deleteTask(taskId);
         navigateTo(`/transcription/${transcription.id}`);
     }

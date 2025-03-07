@@ -1,12 +1,12 @@
+import type { RectConfig } from 'konva/lib/shapes/Rect';
 import type { Vector2d } from 'konva/lib/types';
-import type { SegementWithId } from '~/types/transcriptionResponse';
 
 /**
  * Composable for managing timeline segment operations
  */
-export function useTimelineSegment() {
+export function useTimelineSegment(zoomX: Ref<number>) {
     // Snap distance in pixels
-    const SNAP_DISTANCE = 5;
+    const snapDistance = computed(() => 5 / zoomX.value);
 
     /**
      * Find segments to snap to when dragging or resizing
@@ -15,20 +15,18 @@ export function useTimelineSegment() {
      * @param fromTimetoPixelSpace Function to convert time to pixel coordinates
      */
     function findSnapPoints(
-        segments: SegementWithId[],
-        selectedId: string | undefined,
-        fromTimetoPixelSpace: (time: number) => number
+        rectConfigs: RectConfig[],
+        selectedId: string | undefined
     ): { starts: number[], ends: number[] } {
         // Collect all segment start and end points except the selected one
         const starts: number[] = [];
         const ends: number[] = [];
 
-        segments.forEach(segment => {
-            if (segment.id !== selectedId) {
-                // Convert time points to pixel positions
-                starts.push(fromTimetoPixelSpace(segment.start));
-                ends.push(fromTimetoPixelSpace(segment.end));
-            }
+        rectConfigs.forEach(rectConfig => {
+            if (rectConfig.id === selectedId) return;
+
+            starts.push(rectConfig.x!);
+            ends.push(rectConfig.x! + rectConfig.width!);
         });
 
         return { starts, ends };
@@ -41,7 +39,7 @@ export function useTimelineSegment() {
      */
     function checkSnap(position: number, snapPoints: number[]): number | null {
         for (const snapPoint of snapPoints) {
-            if (Math.abs(position - snapPoint) <= SNAP_DISTANCE) {
+            if (Math.abs(position - snapPoint) <= snapDistance.value) {
                 return snapPoint;
             }
         }

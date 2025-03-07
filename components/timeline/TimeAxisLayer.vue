@@ -21,7 +21,7 @@ const timeTicks = computed(() => {
     if (visibleDuration <= 10) { // 0-10 seconds visible
         tickIntervalSeconds = 1; // 1 second intervals
     } else if (visibleDuration <= 60) { // 10-60 seconds visible
-        tickIntervalSeconds = 5; // 5 second intervals
+        tickIntervalSeconds = 5; // 5 second intsetNodeervals
     } else if (visibleDuration <= 300) { // 1-5 minutes visible
         tickIntervalSeconds = 30; // 30 second intervals
     } else if (visibleDuration <= 1800) { // 5-30 minutes visible
