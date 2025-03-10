@@ -48,7 +48,18 @@ function seekTo(time: number): void {
 function applyChanges(): void {
     isDirty.value = false;
 
-    executeCommand(new UpdateSegementCommand(internalSegment.value.id, internalSegment.value));
+    const newSegment = internalSegment.value as Record<string, any>;
+    const oldSegment = props.segment as Record<string, any>;
+
+    // difference between the original segment and the new segment
+    const updates = Object.keys(newSegment).reduce((acc: Record<string, any>, key) => {
+        if (newSegment[key] !== oldSegment[key]) {
+            acc[key] = newSegment[key];
+        }
+        return acc;
+    }, {} as Partial<SegementWithId>);
+
+    executeCommand(new UpdateSegementCommand(internalSegment.value.id, updates));
 }
 
 function unDoChanges(): void {

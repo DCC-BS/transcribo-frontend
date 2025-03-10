@@ -1,25 +1,47 @@
 <script lang="ts" setup>
-import { UNavigationMenu } from '#components';
+import type { IReversibleCommand } from '#build/types/commands';
+import type { NavigationMenuItem } from '#ui/components/NavigationMenu.vue';
+
+
+const route = useRoute();
+
+// Using a computed to reactively access the current path
+const currentPath = computed<string>(() => route.path);
+const { canRedo, canUndo, redo, undo, undoStack } = useCommandHistory();
+
+/**
+ * Check if current path is a transcription path
+ * Uses the reactive route path for better reactivity
+ */
+const isTranscriptionPath = computed<boolean>(() => {
+    return currentPath.value.includes('transcription/');
+});
 
 // Navigation menu items
-const items = ref([
-    [
+const items = computed<NavigationMenuItem[][]>(() => [
+    isTranscriptionPath.value ? [
         {
             label: '',
             icon: 'i-heroicons-arrow-uturn-left',
-            onclick: handleUndo,
+            onSelect: () => handleUndo(),
+            disabled: !canUndo.value,
         },
         {
             label: '',
             icon: 'i-heroicons-arrow-uturn-right',
-            onclick: handleRedo,
+            onSelect: handleRedo,
+            disabled: !canRedo.value,
         },
         {
             label: '',
             icon: 'i-heroicons-list-bullet',
-            onclick: handleUndoStack,
+            disabled: !canUndo.value,
+            children: undoStack.value.map((action: IReversibleCommand, index: number) => ({
+                label: `Undo ${action.toString()}`,
+                onSelect: () => handleUndo(undoStack.value.length - index),
+            } as NavigationMenuItem)),
         },
-    ],
+    ] : [],
     [
         {
             label: 'New',
@@ -38,31 +60,22 @@ const items = ref([
 /**
  * Handler for undo button click
  */
-function handleUndo(): void {
-    // Implement undo functionality here
-    console.log('Undo clicked');
+function handleUndo(amount: number = 1): void {
+    console.log('Undo', amount);
+
+    for (let i = 0; i < amount; i++) {
+        undo();
+    }
 }
 
-/**
- * Handler for redo button click
- */
 function handleRedo(): void {
-    // Implement redo functionality here
-    console.log('Redo clicked');
+    redo();
 }
 
-/**
- * Handler for undo stack button click
- * Shows the history of actions that can be undone
- */
-function handleUndoStack(): void {
-    // Implement undo stack functionality here
-    console.log('Undo stack clicked');
-}
 </script>
 
 <template>
     <div>
-        <UNavigationMenu :items="items" class="w-full justify-between" />
+        <UNavigationMenu :items="items" class="w-full justify-between z-50" />
     </div>
 </template>

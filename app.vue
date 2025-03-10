@@ -3,9 +3,25 @@ import DialogView from './components/DialogView.vue';
 import { useInitDialog } from './composables/dialog';
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
+const { undo, redo, canUndo, canRedo, undoStack } = useCommandHistory();
 
-const app = useNuxtApp();
+onMounted(() => {
+    window.addEventListener('keydown', handleKeyDown);
+});
 
+onUnmounted(() => {
+    window.removeEventListener('keydown', handleKeyDown);
+});
+
+function handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'z' && event.ctrlKey && canUndo.value) {
+        undo();
+    }
+
+    if (event.key === 'y' && event.ctrlKey && canRedo.value) {
+        redo();
+    }
+}
 
 </script>
 

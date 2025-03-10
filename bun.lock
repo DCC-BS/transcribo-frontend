@@ -5,7 +5,7 @@
       "name": "transcribo-frontend",
       "dependencies": {
         "@dcc-bs/common-ui.bs.js": "^0.1.5",
-        "@dcc-bs/event-system.bs.js": "^1.0.3",
+        "@dcc-bs/event-system.bs.js": "^1.1.1",
         "@nuxt/eslint": "1.1.0",
         "@nuxt/ui": "^3.0.0-beta.2",
         "@nuxtjs/i18n": "^9.2.1",
@@ -118,7 +118,7 @@
 
     "@dcc-bs/common-ui.bs.js": ["@dcc-bs/common-ui.bs.js@0.1.5", "https://npm.pkg.github.com/download/@dcc-bs/common-ui.bs.js/0.1.5/dab258ffc33d6a2d98600501a0480e3dbfbbd1e1", { "dependencies": { "@nuxt/kit": "^3.15.4", "tailwind-merge": "^3.0.1" } }, "sha512-yzWsu9opFMFipCf7KnMgKAJulo3FtL6mOaYip6a9JgHFMsgTSipMAODxg/B6QXXnLQgBW9mqom0hS1Wygl/9NA=="],
 
-    "@dcc-bs/event-system.bs.js": ["@dcc-bs/event-system.bs.js@1.0.3", "https://npm.pkg.github.com/download/@dcc-bs/event-system.bs.js/1.0.3/7f25043fd5b3d120c1bf4e4698df9d4378c91241", { "dependencies": { "@nuxt/kit": "^3.15.4" } }, "sha512-UStRUUZnbb933yFtbTaWnGGq53bRLiFolnqJxoMZC8hc2l+CxRaw1T2VfJ4Qtzm3Vpv/f6fuR+X1Xr/7Z6nSfA=="],
+    "@dcc-bs/event-system.bs.js": ["@dcc-bs/event-system.bs.js@1.1.1", "https://npm.pkg.github.com/download/@dcc-bs/event-system.bs.js/1.1.1/59d836425f00f3106b8c3b05dc640edd8bf483f6", { "dependencies": { "@nuxt/kit": "^3.15.4" } }, "sha512-mDo1sDBduJ4+uYmuEocEJOcS0eCw5zP3La69mLR5jvLacIa3PJVqX2VFVdZvL7OSbTQX8UG5jfO9LHXMt+gv+g=="],
 
     "@es-joy/jsdoccomment": ["@es-joy/jsdoccomment@0.49.0", "", { "dependencies": { "comment-parser": "1.4.1", "esquery": "^1.6.0", "jsdoc-type-pratt-parser": "~4.1.0" } }, "sha512-xjZTSFgECpb9Ohuk5yMX5RhUEbfeQcuOp8IF60e+wyzWEF0M5xeSgqsfLtvPEX8BIyOX9saZqzuGPmZ8oWc+5Q=="],
 

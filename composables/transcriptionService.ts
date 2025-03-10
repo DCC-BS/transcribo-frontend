@@ -1,6 +1,7 @@
 import { Cmds, DeleteSegementCommand, InsertSegementCommand, RenameSpeakerCommand, TranscriptonNameChangeCommand, UpdateSegementCommand } from "~/types/commands";
 import { v4 as uuid } from 'uuid';
 import type { SegementWithId } from "~/types/transcriptionResponse";
+import { compileAsync } from "sass";
 
 export const useTranscriptionService = (currentTranscriptionId: string) => {
     const store = useTranscriptionsStore();
@@ -49,6 +50,8 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
             ...command.newSegement
         } as SegementWithId;
 
+        command.setUndoCommand(new DeleteSegementCommand(newSegement.id));
+
         currentTranscription.segments.splice(targetIndex, 0, newSegement);
 
         const newTranscriptions = currentTranscription.segments
@@ -73,6 +76,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         }
 
         const updatedSegment = { ...segment, ...command.updates };
+        command.setUndoCommand(new UpdateSegementCommand(command.segmentId, segment));
 
         const newSegments = currentTranscription.segments
             .map(s => s.id === command.segmentId ? updatedSegment : s)
@@ -88,6 +92,9 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
             console.warn('Current transcription not found');
             return;
         }
+
+        const oldName = currentTranscription.name;
+        command.setUndoCommand(new TranscriptonNameChangeCommand(oldName));
 
         store.updateCurrentTrascription({ name: command.newName });
     }
