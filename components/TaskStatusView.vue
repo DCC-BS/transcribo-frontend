@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const status = ref<TaskStatus>();
 const { executeCommand } = useCommandBus();
+const { t } = useI18n();
 
 const progress = computed(() =>
     match(status.value?.status)
@@ -58,14 +59,14 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
         <!-- Show loading or success animation based on status -->
         <div v-if="!isSuccessful" class="loading-container">
             <UIcon name="i-heroicons-arrow-path" class="loading-spinner" />
-            <p class="loading-text">Processing your request...</p>
+            <p class="loading-text">{{ t('taskStatus.processing') }}</p>
         </div>
         <!-- Success animation shown when status is SUCCESS -->
         <div v-else class="success-container">
             <div class="success-circle">
                 <UIcon name="i-heroicons-check" class="success-icon" />
             </div>
-            <p class="success-text">Transcription completed successfully!</p>
+            <p class="success-text">{{ t('taskStatus.completed') }}</p>
         </div>
 
         <div v-if="status">

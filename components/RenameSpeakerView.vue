@@ -5,6 +5,7 @@ import { RenameSpeakerCommand } from '~/types/commands';
 // Get speakers from the current transcription
 const { speakers } = useCurrentTranscription();
 const { executeCommand } = useCommandBus();
+const { getSpeakerColor } = useSpeakerColor(speakers);
 
 // Create a mapping of original speaker names to their new names
 // This allows us to track both the original name and the edited name
@@ -37,24 +38,13 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
 </script>
 
 <template>
-    <div>
-        <h2>Speakers</h2>
-        <ul class="speaker-list">
-            <li v-for="(speakerMap, index) in speakerMappings" :key="index" class="speaker-item">
+    <UCard>
+        <h2 class="text-lg font-bold">Speakers</h2>
+        <div class="flex gap-2 flex-wrap mt-2">
+            <div v-for="(speakerMap, index) in speakerMappings" :key="index" class="speaker-item">
                 <UInput v-model="speakerMap.new" @change="handleSpeakerNameChange(speakerMap.original, speakerMap.new)"
-                    placeholder="Speaker name" />
-            </li>
-        </ul>
-    </div>
+                    :style="{ color: getSpeakerColor(speakerMap.original) }" placeholder="Speaker name" />
+            </div>
+        </div>
+    </UCard>
 </template>
-
-<style>
-.speaker-list {
-    list-style: none;
-    padding: 0;
-}
-
-.speaker-item {
-    margin-bottom: 10px;
-}
-</style>

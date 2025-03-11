@@ -6,6 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 const { registerHandler, unregisterHandler } = useCommandBus();
 const taskStore = useTasksStore();
 const transcriptionsStore = useTranscriptionsStore();
+const { t } = useI18n();
 
 const route = useRoute();
 const taskId = route.params.taskId as string;
@@ -29,11 +30,11 @@ onMounted(() => {
                 isLoaded.value = true;
             }
             else {
-                errorMessage.value = 'No media file found for task';
+                errorMessage.value = t('task.errors.noMediaFile');
                 console.error('No media file found for task', taskId);
             }
         }).catch(e => {
-            errorMessage.value = 'Failed to get task';
+            errorMessage.value = t('task.errors.failedToLoad');
             console.error('Failed to get task', taskId, e);
         });
 });
@@ -51,12 +52,12 @@ async function handleTranscriptionFinished(command: TranscriptionFinishedCommand
             segments: command.result.segments.map((x) => ({
                 ...x,
                 text: x.text?.trim() ?? '',
-                speaker: x.speaker?.trim().toUpperCase() ?? 'UNKNOWN',
+                speaker: x.speaker?.trim().toUpperCase() ?? t('transcription.noSpeaker'),
                 id: uuidv4(),
             })),
             mediaFile: audioFile.value,
             mediaFileName: audioName.value,
-            name: audioName.value ?? 'Untitled',
+            name: audioName.value ?? t('transcription.untitled'),
         });
 
         taskStore.deleteTask(taskId);

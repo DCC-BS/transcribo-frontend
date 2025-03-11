@@ -5,6 +5,7 @@ import { TogglePlayCommand, TranscriptonNameChangeCommand } from '~/types/comman
 const route = useRoute();
 const transcriptionStore = useTranscriptionsStore();
 const { executeCommand } = useCommandBus();
+const { t } = useI18n();
 
 const transcriptionId = route.params.transcriptionId as string;
 const { registerService, unRegisterServer } = useTranscriptionService(transcriptionId);
@@ -42,6 +43,6 @@ async function handleNameChange(name: string | number) {
         </SplitView>
     </div>
     <div v-else>
-        <p>Loading...</p>
+        <p>{{ t('transcription.loading') }}</p>
     </div>
 </template>

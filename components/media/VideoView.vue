@@ -1,6 +1,9 @@
 <script lang="ts" setup>
+import type { RGBColor } from '~/types/color';
 import { Cmds, TogglePlayCommand, type SeekToSecondsCommand } from '~/types/commands';
 
+// Import useI18n composable
+const { t } = useI18n();
 
 interface VideoViewProps {
     duration: number;
@@ -116,6 +119,7 @@ async function handleSeekToSeconds(
 ): Promise<void> {
     seekTo(command.seconds);
 }
+
 </script>
 
 <template>
@@ -134,29 +138,33 @@ async function handleSeekToSeconds(
 
         <!-- Subtitles section - now positioned at the bottom of the media -->
         <div class="subtitles-container">
-            <div v-for="segment in currentSegments" :key="segment.id" class="subtitle-segment"
-                :style="{ color: getSpeakerColor(segment.speaker ?? 'unknown').toString() || '#FFFFFF' }">
-                <span class="speaker-label">{{ segment.speaker }}:</span>
-                <span class="subtitle-text">{{ segment.text }}</span>
+            <div v-for="segment in currentSegments" :key="segment.id" class="subtitle-segment" :style="{
+                '--text-color': getSpeakerColor(segment.speaker ?? 'unknown').toString()
+            }">
+                <span class="font-bold">{{ segment.speaker }}: </span>
+                <span>{{ segment.text }}</span>
             </div>
         </div>
     </div>
     <!-- Playback controls -->
-    <div class="controls">
+    <div class="controls flex gap-2 items-center my-3">
         <UButton @click="togglePlay">
-            {{ isPlaying ? 'Pause' : 'Play' }}
+            {{ isPlaying ? t('media.pause') : t('media.play') }}
         </UButton>
 
         <USlider v-model="currentTime" :min="0" :max="props.duration" :step="0.1"
             @update:model-value="v => seekTo(v as number)">
         </USlider>
-        <span>
-            {{ formatTime(currentTime) }} / {{ formatTime(props.duration) }}
-        </span>
+        <div class="w-[100px]">
+            {{ formatTime(currentTime, { milliseconds: false }) }} / {{ formatTime(props.duration, {
+                milliseconds:
+                    false
+            }) }}
+        </div>
     </div>
 </template>
 
-<style>
+<style lang="scss">
 .media-container {
     display: flex;
     flex-direction: column;
@@ -183,7 +191,7 @@ async function handleSeekToSeconds(
     /* Position at the bottom with small margin */
     left: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(177, 177, 177, 0.9);
     border-radius: 4px;
     padding: 12px;
     min-height: 40px;
@@ -197,17 +205,8 @@ async function handleSeekToSeconds(
 }
 
 .subtitle-segment {
-    margin-bottom: 8px;
-    font-size: 16px;
-    line-height: 1.5;
-}
-
-.speaker-label {
-    font-weight: bold;
-    margin-right: 6px;
-}
-
-.subtitle-text {
-    font-weight: normal;
+    font-size: 20px;
+    color: var(--text-color);
+    -webkit-text-stroke: 0.5px #313131;
 }
 </style>

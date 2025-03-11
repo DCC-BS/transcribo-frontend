@@ -20,6 +20,7 @@ interface TimelineViewProps {
 }
 
 const props = defineProps<TimelineViewProps>();
+const { t } = useI18n();
 
 const marginTop = 20;
 const heightPerSpeaker = 50;
@@ -379,7 +380,7 @@ function clearSelection(e: KonvaEventObject<MouseEvent, Stage>): void {
  */
 function onSegmentMouseEnter(e: any, text: string): void {
     // Display the tooltip with segment text
-    tooltipText.value = text || 'No transcription available';
+    tooltipText.value = text || t('timeline.noTranscription');
     tooltipVisible.value = true;
 
     // Position tooltip near the mouse position

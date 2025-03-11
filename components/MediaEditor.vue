@@ -185,7 +185,7 @@ watch(currentTime, (newTime) => {
 </script>
 
 <template>
-    <div>
+    <div class="p-1">
         <div v-if="audioFile && duration > 0">
             <div @keydown="handleKeyDown" @keyup="handleKeyUp" tabindex="0">
                 <VideoView v-model="currentTime" :duration="duration" />
@@ -202,12 +202,12 @@ watch(currentTime, (newTime) => {
                     </div>
                 </ClientOnly>
 
-                <USlider v-model="timeRange" :min="0" :max="duration" />
+                <USlider v-model="timeRange" :min="0" :max="duration" class="my-2" />
             </div>
 
 
-            <CurrentSegementEditor :currentTime="currentTime" />
-            <RenameSpeakerView />
+            <CurrentSegementEditor :currentTime="currentTime" class="m-2" />
+            <RenameSpeakerView class="m-2" />
         </div>
     </div>
 </template>

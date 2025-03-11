@@ -9,7 +9,7 @@ export function useSpeakerColor(speakers: Ref<(string | undefined)[]>) {
         )
     );
 
-    const colorMap = getColorMap('rainbow');
+    const colorMap = getColorMap('textFriendly');
 
     // Compute a dictionary mapping each speaker to their color
     const colorDict = computed(() => speakerSet.value.reduce((acc, speaker, index) => {

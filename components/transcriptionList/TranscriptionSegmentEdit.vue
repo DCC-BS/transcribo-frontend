@@ -13,6 +13,7 @@ const props = defineProps<TranscriptionListProps>();
 const { executeCommand } = useCommandBus();
 const internalSegment = ref<SegementWithId>({ ...props.segment });
 const isDirty = ref(false);
+const { t } = useI18n();
 
 watch(() => props.segment, (segment) => {
     internalSegment.value = { ...segment };
@@ -106,14 +107,14 @@ const endTimeFormatted = computed({
 
 <template>
     <UCard>
-        <UAlert v-if="isDirty" title="" description="Do you want to apply your changes?" color="info" variant="outline"
-            :actions="[
+        <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
+            variant="outline" :actions="[
                 {
-                    label: 'Undo',
+                    label: t('transcription.undoChanges'),
                     onClick: unDoChanges,
                 },
                 {
-                    label: 'Apply',
+                    label: t('transcription.applyChanges'),
                     color: 'neutral',
                     variant: 'subtle',
                     onClick: applyChanges,
@@ -123,9 +124,9 @@ const endTimeFormatted = computed({
 
         <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
             <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
-                @create="handleCreateSpeaker" />
+                @create="handleCreateSpeaker" :placeholder="t('transcription.placeholderSpeakerName')" />
 
-            <div class="flex gap-2">
+            <div class="flex gap-2 items-center">
                 <UInput type="number" class="w-[100px]" v-model="startTimeFormatted" :step="0.1"
                     @keydown="handleKeydown">
                     <template #trailing>

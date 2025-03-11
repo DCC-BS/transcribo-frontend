@@ -6,9 +6,12 @@ const emit = defineEmits<{
     'uploaded': [task: TaskStatus, file: File];
 }>();
 
+const { t } = useI18n();
+
 // Track the conversion progress
 const conversionProgress = ref(0);
-const isConverting = ref(false);
+const progressMessage = ref('');
+const showProgress = ref(false);
 const errorMessage = ref('');
 
 /**
@@ -30,34 +33,37 @@ const loadAudio = async (event: Event): Promise<void> => {
     try {
         // If it's already a WAV file, use it directly
         if (mediaFile.type === 'audio/wav') {
-            await uploadFile(mediaFile);
+            await uploadFile(mediaFile, mediaFile);
             return;
         }
 
         // Otherwise convert to WAV
-        isConverting.value = true;
+        showProgress.value = true;
         conversionProgress.value = 0;
+        progressMessage.value = t('upload.convertingMedia');
 
         // Convert the file to WAV format
         const result = await convertToWav(mediaFile, {
             onProgress: (progress) => {
+                console.log('progress', progress);
                 conversionProgress.value = progress;
             }
         });
 
-        await uploadFile(result.wavFile);
+        progressMessage.value = t('upload.uploadingMedia');
+        await uploadFile(result.wavFile, mediaFile);
     } catch (error) {
         console.error('Error processing media file:', error);
-        errorMessage.value = 'Failed to process the media file. Please try again.';
+        errorMessage.value = t('upload.processingError');
     } finally {
-        isConverting.value = false;
+        showProgress.value = false;
     }
 };
 
 /**
  * Uploads the file to the server
  */
-async function uploadFile(file: File): Promise<void> {
+async function uploadFile(file: File, originalFile: File): Promise<void> {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -66,18 +72,18 @@ async function uploadFile(file: File): Promise<void> {
         method: 'POST',
     });
 
-    emit('uploaded', response, file);
+    emit('uploaded', response, originalFile);
 }
 </script>
 
 <template>
     <div>
         <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up" @change="loadAudio"
-            :disabled="isConverting" />
+            :disabled="showProgress" />
 
-        <div v-if="isConverting" class="mt-4">
-            <p>Converting media to WAV format...</p>
-            <UProgress :value="conversionProgress * 100" class="mt-2" />
+        <div v-if="showProgress" class="mt-4">
+            <p>{{ progressMessage }}</p>
+            <UProgress v-model="conversionProgress" :max="1" class="mt-2" />
         </div>
 
         <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>

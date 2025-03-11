@@ -1,13 +1,30 @@
+type formatOptions = {
+    /**
+     * If true, the time will be formatted with milliseconds
+     */
+    milliseconds?: boolean;
+}
+
+const defaultOptions: formatOptions = {
+    milliseconds: true
+};
+
 /**
  * Formats time in seconds to MM:SS display
  * @param {number} time - Time in seconds
  * @returns {string} Formatted time string
  */
-export const formatTime = (time: number): string => {
+export const formatTime = (time: number, options?: formatOptions): string => {
+    const { milliseconds: useMiliseconds } = { ...defaultOptions, ...options };
+
     const minutes: number = Math.floor(time / 60);
     const seconds: number = Math.floor(time % 60);
     const milliseconds: number = Math.floor((time % 1) * 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
+
+    const secondsString = seconds.toString().padStart(2, '0');
+    const millisecondsString = useMiliseconds ? milliseconds.toString().padStart(3, '0') : '';
+
+    return `${minutes}:${secondsString}${millisecondsString ? '.' + millisecondsString : ''}`;
 };
 
 /**

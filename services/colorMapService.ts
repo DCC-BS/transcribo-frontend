@@ -8,7 +8,8 @@ export type ColorMapType =
     | 'grayscale'
     | 'viridis'
     | 'inferno'
-    | 'magma';
+    | 'magma'
+    | 'textFriendly';
 
 /**
  * Maps a normalized value (0-1) to RGB color using the rainbow color scale
@@ -181,6 +182,42 @@ export function magma(normalizedValue: number): RGBColor {
 }
 
 /**
+ * Maps a normalized value (0-1) to RGB color using a text-friendly color scale
+ * Optimized for text readability with high contrast and accessible colors
+ * @param normalizedValue - Value between 0 and 1
+ * @returns RGB color object
+ */
+export function textFriendly(normalizedValue: number): RGBColor {
+    // Ensure value is in valid range
+    const value = Math.max(0, Math.min(1, normalizedValue));
+
+    // Using a set of distinct, high-contrast colors that work well for text
+    // These colors maintain good readability and accessibility standards
+    if (value < 0.14) {
+        // Dark blue
+        return new RGBColor(0, 51, 153);
+    } else if (value < 0.28) {
+        // Green
+        return new RGBColor(0, 128, 0);
+    } else if (value < 0.42) {
+        // Dark red
+        return new RGBColor(153, 0, 0);
+    } else if (value < 0.56) {
+        // Purple
+        return new RGBColor(102, 0, 153);
+    } else if (value < 0.7) {
+        // Teal
+        return new RGBColor(0, 128, 128);
+    } else if (value < 0.84) {
+        // Dark orange
+        return new RGBColor(204, 85, 0);
+    } else {
+        // Dark magenta
+        return new RGBColor(139, 0, 139);
+    }
+}
+
+/**
  * Gets the appropriate color mapping function based on the requested type
  * @param type - The color map type to use
  * @returns Function that converts a normalized value to RGB
@@ -195,6 +232,8 @@ export function getColorMap(type: ColorMapType): (value: number) => RGBColor {
             return inferno;
         case 'magma':
             return magma;
+        case 'textFriendly':
+            return textFriendly;
         case 'rainbow':
         default:
             return rainbow;

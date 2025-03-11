@@ -1,7 +1,6 @@
 import { Cmds, DeleteSegementCommand, InsertSegementCommand, RenameSpeakerCommand, TranscriptonNameChangeCommand, UpdateSegementCommand } from "~/types/commands";
 import { v4 as uuid } from 'uuid';
 import type { SegementWithId } from "~/types/transcriptionResponse";
-import { compileAsync } from "sass";
 
 export const useTranscriptionService = (currentTranscriptionId: string) => {
     const store = useTranscriptionsStore();

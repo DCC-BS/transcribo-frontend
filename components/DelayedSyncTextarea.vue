@@ -8,6 +8,8 @@ const emit = defineEmits<{
     'update:modelValue': [value: string];
 }>();
 
+const { t } = useI18n();
+
 // Local state to track the current input value
 const localValue = ref(props.modelValue);
 
@@ -51,10 +53,10 @@ function handleFocus() {
     <div class="relative w-full">
         <!-- Tooltip that shows when textarea is dirty and focused -->
         <UTooltip
-:text="'Textfeld verlassen oder Enter drücken, um Änderungen zu übernehmen'"
+            :text="t('ui.saveChangesHint')"
             :popper="{ placement: 'top' }" :open="isFocused && isDirty" class="w-full">
             <UTextarea
-:model-value="localValue" @update:model-value="localValue = $event as string" @blur="handleBlur"
+                :model-value="localValue" @update:model-value="localValue = $event as string" @blur="handleBlur"
                 @focus="handleFocus" @keydown="handleKeydown" />
         </UTooltip>
     </div>
