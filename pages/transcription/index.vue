@@ -69,7 +69,8 @@ function handleDeletedTranscription(transcriptionId: string): void {
     <UContainer>
         <UTable :columns="columns" :data="transcriptionStore.transcriptions" sticky :empty-state="{
             icon: 'i-heroicons-document-text',
-            label: t('transcription.noTranscriptionsFound')
+            label: t('transcription.noTranscriptionsFound'),
+            description: t('ui.emptyState.description')
         }" :sorting-options="{ enableSorting: true, }">
             <!-- Custom cell renderer for the name column -->
             <template #name-cell="{ row }">

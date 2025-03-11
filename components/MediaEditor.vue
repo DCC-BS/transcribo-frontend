@@ -8,7 +8,6 @@ import RenameSpeakerView from './RenameSpeakerView.vue';
 import { match } from 'ts-pattern';
 
 const audioFile = ref<Blob>(); // Reference to the uploaded audio file
-const audioSrc = ref<string>(''); // URL to the audio file
 const currentTime = ref<number>(0); // Current playback position in seconds
 const duration = ref<number>(0); // Total audio duration in seconds
 const zoomX = computed(() => duration.value / (timeRange.value[1] - timeRange.value[0]))
@@ -19,6 +18,7 @@ const transcriptionStore = useTranscriptionsStore();
 const { executeCommand } = useCommandBus();
 
 onMounted(() => {
+    duration.value = 0;
     const currentTranscription = transcriptionStore.currentTranscription;
 
     if (!currentTranscription?.mediaFile) {
@@ -26,15 +26,18 @@ onMounted(() => {
     }
 
     audioFile.value = currentTranscription.mediaFile;
-    audioSrc.value = URL.createObjectURL(audioFile.value);
+    const audioSrc = URL.createObjectURL(audioFile.value);
 
     // calculate duration
     const audio = new Audio();
-    audio.src = audioSrc.value;
+    audio.src = audioSrc;
 
     audio.onloadedmetadata = () => {
         duration.value = audio.duration;
         timeRange.value = [0, audio.duration];
+
+        URL.revokeObjectURL(audioSrc);
+        audio.onloadedmetadata = null;
     };
 
     currentTime.value = 0;
@@ -208,6 +211,8 @@ watch(currentTime, (newTime) => {
 
             <CurrentSegementEditor :currentTime="currentTime" class="m-2" />
             <RenameSpeakerView class="m-2" />
+
+            <DataBsBanner class="mt-4" />
         </div>
     </div>
 </template>

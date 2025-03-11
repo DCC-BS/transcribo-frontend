@@ -45,7 +45,6 @@ const loadAudio = async (event: Event): Promise<void> => {
         // Convert the file to WAV format
         const result = await convertToWav(mediaFile, {
             onProgress: (progress) => {
-                console.log('progress', progress);
                 conversionProgress.value = progress;
             }
         });

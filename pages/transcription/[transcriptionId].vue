@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { UInput } from '#components';
-import { TogglePlayCommand, TranscriptonNameChangeCommand } from '~/types/commands';
+import { TranscriptonNameChangeCommand } from '~/types/commands';
 
 const route = useRoute();
 const transcriptionStore = useTranscriptionsStore();
@@ -8,7 +8,7 @@ const { executeCommand } = useCommandBus();
 const { t } = useI18n();
 
 const transcriptionId = route.params.transcriptionId as string;
-const { registerService, unRegisterServer } = useTranscriptionService(transcriptionId);
+const { registerService, unRegisterServer, error, isInited } = useTranscriptionService(transcriptionId);
 
 onMounted(() => {
     registerService();
@@ -18,6 +18,7 @@ onUnmounted(() => {
     unRegisterServer();
 });
 
+
 async function handleNameChange(name: string | number) {
     if (typeof name === 'string') {
         await executeCommand(new TranscriptonNameChangeCommand(name));
@@ -26,7 +27,12 @@ async function handleNameChange(name: string | number) {
 </script>
 
 <template>
-    <div class="p-2" v-if="transcriptionStore.currentTranscription">
+    <!-- Top container with DisclaimerLlm positioned at the right -->
+    <div class="flex justify-end p-2">
+        <DisclaimerLlm />
+    </div>
+
+    <div class="p-2" v-if="transcriptionStore.currentTranscription && isInited">
         <div class="flex justify-items-stretch p-2 gap-2">
             <UInput class="grow" :model-value="transcriptionStore.currentTranscription.name"
                 @update:model-value="handleNameChange" />
@@ -42,7 +48,11 @@ async function handleNameChange(name: string | number) {
             </template>
         </SplitView>
     </div>
-    <div v-else>
+    <div v-else-if="error" class="p-4 text-center">
+        <UAlert color="error" title="Error" :description="t('transcription.notFound')"
+            icon="i-heroicons-exclamation-triangle" />
+    </div>
+    <div v-else class="p-4 text-center">
         <p>{{ t('transcription.loading') }}</p>
     </div>
 </template>

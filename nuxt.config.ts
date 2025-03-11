@@ -1,3 +1,5 @@
+import pwaIcons from './public/icons.json';
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-11-01',
@@ -35,6 +37,7 @@ export default defineNuxtConfig({
         'nuxt3-winston-log',
         '@nuxt/eslint',
         '@pinia/nuxt',
+        '@vite-pwa/nuxt',
     ],
     typescript: {
         strict: true,
@@ -81,5 +84,27 @@ export default defineNuxtConfig({
 
         // Set to `true` to skip auto render:html logging (level: info).
         skipRequestMiddlewareHandler: false,
+    },
+    pwa: {
+        devOptions: {
+            enabled: false,
+        },
+        registerType: 'autoUpdate',
+        workbox: {
+            globPatterns: ['**/*.{js,css,html,png,jpg,jpeg,svg}'],
+            globIgnores: ['dev-sw-dist/**/*'],
+            navigateFallback: '/',
+        },
+        client: {
+            periodicSyncForUpdates: 60 * 10, // 10 minutes
+        },
+        manifest: {
+            name: 'Transcribo BS',
+            short_name: 'Transcribo BS',
+            description: 'Speech-to-text transcription tool',
+            theme_color: '#000000',
+            background_color: '#000000',
+            icons: pwaIcons.icons as any,
+        },
     },
 });

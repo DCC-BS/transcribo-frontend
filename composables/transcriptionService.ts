@@ -4,10 +4,16 @@ import type { SegementWithId } from "~/types/transcriptionResponse";
 
 export const useTranscriptionService = (currentTranscriptionId: string) => {
     const store = useTranscriptionsStore();
+    const error = ref<string>();
+    const isInited = ref(false);
     const { registerHandler, unregisterHandler } = useCommandBus();
 
     store.initDB();
-    store.setCurrentTranscription(currentTranscriptionId);
+    store.setCurrentTranscription(currentTranscriptionId)
+        .then(() => {
+            isInited.value = true;
+        })
+        .catch(err => error.value = err);
 
     async function handleDeleteSegment(command: DeleteSegementCommand) {
         const currentTranscription = store.currentTranscription;
@@ -128,5 +134,5 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         unregisterHandler(Cmds.RenameSpeakerCommand, handleRenameSpeaker);
     }
 
-    return { registerService, unRegisterServer };
+    return { registerService, unRegisterServer, error, isInited };
 }

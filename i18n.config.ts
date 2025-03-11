@@ -40,6 +40,7 @@ export default defineI18nConfig(() => ({
                 applyChanges: 'Apply',
                 placeholderSpeakerName: 'Speaker name',
                 loading: 'Loading...',
+                notFound: 'Transcription not found or failed to load',
                 noTranscriptionsFound: 'No transcriptions found',
                 untitled: 'Untitled',
                 delete: {
@@ -57,7 +58,11 @@ export default defineI18nConfig(() => ({
                 }
             },
             ui: {
-                saveChangesHint: 'Leave text field or press Enter to save changes'
+                saveChangesHint: 'Leave text field or press Enter to save changes',
+                emptyState: {
+                    title: 'No data found',
+                    description: 'There is no data available to display.'
+                }
             },
             export: {
                 withSpeakers: 'With speakers',
@@ -123,6 +128,7 @@ export default defineI18nConfig(() => ({
                 applyChanges: 'Übernehmen',
                 placeholderSpeakerName: 'Sprechername',
                 loading: 'Lädt...',
+                notFound: 'Transkription nicht gefunden oder konnte nicht geladen werden',
                 noTranscriptionsFound: 'Keine Transkriptionen gefunden',
                 untitled: 'Ohne Titel',
                 delete: {
@@ -140,7 +146,11 @@ export default defineI18nConfig(() => ({
                 }
             },
             ui: {
-                saveChangesHint: 'Textfeld verlassen oder Enter drücken, um Änderungen zu übernehmen'
+                saveChangesHint: 'Textfeld verlassen oder Enter drücken, um Änderungen zu übernehmen',
+                emptyState: {
+                    title: 'Keine Daten gefunden',
+                    description: 'Es sind keine Daten zum Anzeigen verfügbar.'
+                }
             },
             export: {
                 withSpeakers: 'Mit Sprechern',

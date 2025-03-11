@@ -13,12 +13,13 @@
         "prettier": "prettier --write \"**/*.{js,ts,vue,json,css,scss,md}\""
     },
     "dependencies": {
-        "@dcc-bs/common-ui.bs.js": "^0.1.5",
+        "@dcc-bs/common-ui.bs.js": "^0.1.6",
         "@dcc-bs/event-system.bs.js": "^1.1.1",
         "@nuxt/eslint": "1.1.0",
         "@nuxt/ui": "^3.0.0-beta.2",
         "@nuxtjs/i18n": "^9.2.1",
         "@pinia/nuxt": "0.10.1",
+        "@vite-pwa/nuxt": "0.10.6",
         "konva": "^9.3.18",
         "nuxt": "^3.15.4",
         "nuxt3-winston-log": "^0.5.0",
