@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import type { TaskStatus } from '~/types/task';
-import { convertToWav } from '~/utils/mediaConverter';
 
 const emit = defineEmits<{
     'uploaded': [task: TaskStatus, file: File];
@@ -9,7 +8,6 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 // Track the conversion progress
-const conversionProgress = ref(0);
 const progressMessage = ref('');
 const showProgress = ref(false);
 const errorMessage = ref('');
@@ -31,26 +29,7 @@ const loadAudio = async (event: Event): Promise<void> => {
     errorMessage.value = '';
 
     try {
-        // If it's already a WAV file, use it directly
-        if (mediaFile.type === 'audio/wav') {
-            await uploadFile(mediaFile, mediaFile);
-            return;
-        }
-
-        // Otherwise convert to WAV
-        showProgress.value = true;
-        conversionProgress.value = 0;
-        progressMessage.value = t('upload.convertingMedia');
-
-        // Convert the file to WAV format
-        const result = await convertToWav(mediaFile, {
-            onProgress: (progress) => {
-                conversionProgress.value = progress;
-            }
-        });
-
-        progressMessage.value = t('upload.uploadingMedia');
-        await uploadFile(result.wavFile, mediaFile);
+        await uploadFile(mediaFile, mediaFile);
     } catch (error) {
         console.error('Error processing media file:', error);
         errorMessage.value = t('upload.processingError');
@@ -63,6 +42,9 @@ const loadAudio = async (event: Event): Promise<void> => {
  * Uploads the file to the server
  */
 async function uploadFile(file: File, originalFile: File): Promise<void> {
+    showProgress.value = true;
+    progressMessage.value = t('upload.uploadingMedia');
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -82,7 +64,7 @@ async function uploadFile(file: File, originalFile: File): Promise<void> {
 
         <div v-if="showProgress" class="mt-4">
             <p>{{ progressMessage }}</p>
-            <UProgress v-model="conversionProgress" :max="1" class="mt-2" />
+            <UProgress class="mt-2" />
         </div>
 
         <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>

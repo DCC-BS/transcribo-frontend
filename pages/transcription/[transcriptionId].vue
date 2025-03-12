@@ -29,6 +29,14 @@ async function handleNameChange(name: string | number) {
 <template>
     <!-- Top container with DisclaimerLlm positioned at the right -->
     <div class="flex justify-end p-2">
+        <UModal fullscreen>
+            <UButton label="Help" color="neutral" variant="subtle" />
+            <template #content>
+                <div class="w-full h-full overflow-scroll">
+                    <HelpView />
+                </div>
+            </template>
+        </UModal>
         <DisclaimerLlm />
     </div>
 
