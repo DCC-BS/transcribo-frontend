@@ -85,7 +85,8 @@ function handleDeletedTranscription(transcriptionId: string): void {
                             {{ t('transcription.actions.edit') }}
                         </UButton>
                     </ULink>
-                    <UButton icon="i-heroicons-trash" color="error" @click="handleDeletedTranscription(row.id)">
+                    <UButton icon="i-heroicons-trash" color="error"
+                        @click="handleDeletedTranscription(row.original.id)">
                         {{ t('transcription.actions.delete') }}
                     </UButton>
                 </div>

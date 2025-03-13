@@ -9,6 +9,7 @@ const { t } = useI18n();
 
 const transcriptionId = route.params.transcriptionId as string;
 const { registerService, unRegisterServer, error, isInited } = useTranscriptionService(transcriptionId);
+const isHelpViewOpen = ref(false);
 
 onMounted(() => {
     registerService();
@@ -29,10 +30,14 @@ async function handleNameChange(name: string | number) {
 <template>
     <!-- Top container with DisclaimerLlm positioned at the right -->
     <div class="flex justify-end p-2">
-        <UModal fullscreen>
-            <UButton label="Help" color="neutral" variant="subtle" />
+        <UModal fullscreen close v-model:open="isHelpViewOpen">
+            <UButton icon="i-heroicons-question-mark-circle" variant="ghost" label="Help" color="info" />
             <template #content>
-                <div class="w-full h-full overflow-scroll">
+                <div class="flex justify-end p-2">
+                    <UButton icon="i-heroicons-x-circle" variant="ghost" label="Close" color="error"
+                        @click="isHelpViewOpen = false" />
+                </div>
+                <div class="overflow-y-scroll w-full h-full">
                     <HelpView />
                 </div>
             </template>

@@ -92,24 +92,29 @@ export default defineI18nConfig(() => ({
             help: {
                 title: 'Help Guide - Transcribo',
                 mediaControls: {
+                    spectrogram: 'Spectrogram',
+                    timeline: 'Timeline',
                     title: 'Basic Media Controls',
-                    spacebar: 'Press {key} to play/pause the video or audio',
-                    spectrogramClick: 'Click or drag on the spectrogram to seek to a specific position',
+                    spacebar: 'Press {space} to play/pause the video or audio',
+                    spectrogramClick: 'Click or drag on the {spectrogram} to seek to a specific position',
                     arrowKeys: 'Use {leftKey} or {rightKey} to seek 5 seconds back or forward',
                     shiftArrows: 'Hold {shiftKey} + {leftKey}/{rightKey} to seek 30 seconds',
                     ctrlArrows: 'Hold {ctrlKey} + {leftKey}/{rightKey} to seek 1 second',
-                    mouseWheel: 'Use mouse wheel to zoom into the timeline, or use the range slider below',
-                    ctrlClick: 'Use {ctrlKey} + left click to move around the timeline'
+                    mouseWheel: 'Use mouse wheel to zoom into the {timeline}, or use the range slider below',
+                    ctrlClick: 'Use {ctrlKey} + left click to move around the {timeline}'
                 },
                 segments: {
                     title: 'Transcription Segments',
-                    intro: 'At the bottom, the current transcription segment is shown for editing:',
-                    speaker: 'In the dropdown, assign a speaker (type in the search box to create a new speaker)',
-                    timeChange: 'Change the time in seconds in the timespan text fields',
+                    transcriptionSegment: 'Transcription Segment',
+                    dropdown: 'dropdown',
+                    timespanTextFields: 'timespan text fields',
+                    intro: 'At the bottom, the current {transcriptionSegment} is shown for editing:',
+                    speaker: 'In the {dropdown}, assign a speaker (type in the search box to create a new speaker)',
+                    timeChange: 'Change the time in seconds in the {timespanTextFields}',
                     seekTime: 'Click on the timestamps to seek to that time',
-                    insertBefore: 'Press the button with the arrow up to insert a segment before',
-                    insertAfter: 'Press the button with the arrow down to insert a segment below',
-                    deleteSegment: 'Press the delete button to remove the segment'
+                    insertBefore: 'Press the button with the arrow up {insertAbove} to insert a segment before',
+                    insertAfter: 'Press the button with the arrow down {insertBelow} to insert a segment below',
+                    deleteSegment: 'Press the delete button {delete} to remove the segment'
                 },
                 timeline: {
                     title: 'Working with Segments on Timeline',
@@ -217,24 +222,29 @@ export default defineI18nConfig(() => ({
             help: {
                 title: 'Hilfe - Transcribo',
                 mediaControls: {
+                    spectrogram: 'Spektrogramm',
+                    timeline: 'Zeitleiste',
                     title: 'Grundlegende Mediensteuerung',
-                    spacebar: 'Drücken Sie {key} zum Abspielen/Pausieren von Video oder Audio',
-                    spectrogramClick: 'Klicken oder ziehen Sie auf das Spektrogramm, um zu einer bestimmten Position zu springen',
+                    spacebar: 'Drücken Sie {space} zum Abspielen/Pausieren von Video oder Audio',
+                    spectrogramClick: 'Klicken oder ziehen Sie auf das {spectrogram}, um zu einer bestimmten Position zu springen',
                     arrowKeys: 'Verwenden Sie {leftKey} oder {rightKey} um 5 Sekunden zurück oder vorwärts zu springen',
-                    shiftArrows: 'Halten Sie {shiftKey} + {leftKey}/{rightKey} um 30 Sekunden zu springen',
-                    ctrlArrows: 'Halten Sie {ctrlKey} + {leftKey}/{rightKey} um 1 Sekunde zu springen',
-                    mouseWheel: 'Verwenden Sie das Mausrad zum Zoomen in die Zeitleiste oder nutzen Sie den Bereichsregler unten',
-                    ctrlClick: 'Verwenden Sie {ctrlKey} + Linksklick, um sich auf der Zeitleiste zu bewegen'
+                    shiftArrows: 'Halten Sie {shiftKey} + {leftKey} / {rightKey} um 30 Sekunden zu springen',
+                    ctrlArrows: 'Halten Sie {ctrlKey} + {leftKey} / {rightKey} um 1 Sekunde zu springen',
+                    mouseWheel: 'Verwenden Sie das Mausrad zum Zoomen in die {timeline} oder nutzen Sie den Bereichsregler unten',
+                    ctrlClick: 'Verwenden Sie {ctrlKey} + Linksklick, um sich auf der {timeline} zu bewegen'
                 },
                 segments: {
                     title: 'Transkriptionssegmente',
-                    intro: 'Am unteren Rand wird das aktuelle Transkriptionssegment zur Bearbeitung angezeigt:',
-                    speaker: 'Im Dropdown-Menü können Sie einen Sprecher zuweisen (tippen Sie in das Suchfeld, um einen neuen Sprecher zu erstellen)',
-                    timeChange: 'Ändern Sie die Zeit in Sekunden in den Zeitspannen-Textfeldern',
+                    transcriptionSegment: 'Transkriptionssegment',
+                    dropdown: 'Dropdown-Menü',
+                    timespanTextFields: 'Zeitspannen-Textfelder',
+                    intro: 'Am unteren Rand wird das aktuelle {transcriptionSegment} zur Bearbeitung angezeigt:',
+                    speaker: 'Im {dropdown} können Sie einen Sprecher zuweisen (tippen Sie in das Suchfeld, um einen neuen Sprecher zu erstellen)',
+                    timeChange: 'Ändern Sie die Zeit in Sekunden in den {timespanTextFields}',
                     seekTime: 'Klicken Sie auf die Zeitstempel, um zu dieser Zeit zu springen',
-                    insertBefore: 'Drücken Sie den Knopf mit dem Pfeil nach oben, um ein Segment davor einzufügen',
-                    insertAfter: 'Drücken Sie den Knopf mit dem Pfeil nach unten, um ein Segment danach einzufügen',
-                    deleteSegment: 'Drücken Sie den Löschen-Knopf, um das Segment zu entfernen'
+                    insertBefore: 'Drücken Sie den Knopf mit dem Pfeil {insertAbove} nach oben, um ein Segment davor einzufügen',
+                    insertAfter: 'Drücken Sie den Knopf mit dem Pfeil {insertBelow} nach unten, um ein Segment danach einzufügen',
+                    deleteSegment: 'Drücken Sie den Löschen-Knopf {delete}, um das Segment zu entfernen'
                 },
                 timeline: {
                     title: 'Arbeiten mit Segmenten auf der Zeitleiste',

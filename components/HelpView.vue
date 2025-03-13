@@ -41,33 +41,65 @@ function getKeyName(key: string): string {
             <section>
                 <h2>{{ t('help.mediaControls.title') }}</h2>
                 <ul>
-                    <li>
-                        {{ t('help.mediaControls.spacebar', { key: '' }) }}
-                        <UKbd :value="getKeyName('Space')" />
-                    </li>
-                    <li>{{ t('help.mediaControls.spectrogramClick') }}</li>
-                    <li>
-                        {{ t('help.mediaControls.arrowKeys', { leftKey: '', rightKey: '' }) }}
-                        <UKbd value="←" /> {{ t('or') }}
-                        <UKbd value="→" />
-                    </li>
-                    <li>
-                        {{ t('help.mediaControls.shiftArrows', { shiftKey: '', leftKey: '', rightKey: '' }) }}
-                        <UKbd :value="getKeyName('Shift')" /> +
-                        <UKbd value="←" />/
-                        <UKbd value="→" />
-                    </li>
-                    <li>
-                        {{ t('help.mediaControls.ctrlArrows', { ctrlKey: '', leftKey: '', rightKey: '' }) }}
-                        <UKbd :value="getKeyName('Ctrl')" /> +
-                        <UKbd value="←" />/
-                        <UKbd value="→" />
-                    </li>
-                    <li>{{ t('help.mediaControls.mouseWheel') }}</li>
-                    <li>
-                        {{ t('help.mediaControls.ctrlClick', { ctrlKey: '' }) }}
-                        <UKbd :value="getKeyName('Ctrl')" />
-                    </li>
+                    <i18n-t keypath="help.mediaControls.spacebar" tag="li">
+                        <template v-slot:space>
+                            <UKbd :value="getKeyName('Space')" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.mediaControls.spectrogramClick" tag="li">
+                        <template v-slot:spectrogram>
+                            <span class="text-highlight highlight-orange">{{
+                                t('help.mediaControls.spectrogram')
+                            }}</span>
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.mediaControls.arrowKeys" tag="li">
+                        <template v-slot:leftKey>
+                            <UKbd value="←" />
+                        </template>
+                        <template v-slot:rightKey>
+                            <UKbd value="→" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.mediaControls.shiftArrows" tag="li">
+                        <template v-slot:shiftKey>
+                            <UKbd value="shift" />
+                        </template>
+                        <template v-slot:leftKey>
+                            <UKbd value="←" />
+                        </template>
+                        <template v-slot:rightKey>
+                            <UKbd value="→" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.mediaControls.ctrlArrows" tag="li">
+                        <template v-slot:ctrlKey>
+                            <UKbd value="ctrl" />
+                        </template>
+                        <template v-slot:leftKey>
+                            <UKbd value="←" />
+                        </template>
+                        <template v-slot:rightKey>
+                            <UKbd value="→" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.mediaControls.mouseWheel" tag="li">
+                        <template #timeline>
+                            <span class="text-highlight highlight-green">{{
+                                t('help.mediaControls.timeline')
+                            }}</span>
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.mediaControls.ctrlClick" tag="li">
+                        <template v-slot:ctrlKey>
+                            <UKbd value="ctrl" />
+                        </template>
+                        <template #timeline>
+                            <span class="text-highlight highlight-green">{{
+                                t('help.mediaControls.timeline')
+                            }}</span>
+                        </template>
+                    </i18n-t>
                 </ul>
                 <img src="../assets/img/mediaControls.png"
                     :alt="locale === 'en' ? 'Media controls illustration' : 'Illustration der Mediensteuerung'" />
@@ -75,14 +107,40 @@ function getKeyName(key: string): string {
 
             <section>
                 <h2>{{ t('help.segments.title') }}</h2>
-                <p>{{ t('help.segments.intro') }}</p>
+                <i18n-t keypath="help.segments.intro" tag="p">
+                    <template #transcriptionSegment>
+                        <span class="text-highlight highlight-violet">{{ t('help.segments.transcriptionSegment')
+                            }}</span>
+                    </template>
+                </i18n-t>
                 <ul>
-                    <li>{{ t('help.segments.speaker') }}</li>
-                    <li>{{ t('help.segments.timeChange') }}</li>
-                    <li>{{ t('help.segments.seekTime') }}</li>
-                    <li>{{ t('help.segments.insertBefore') }}</li>
-                    <li>{{ t('help.segments.insertAfter') }}</li>
-                    <li>{{ t('help.segments.deleteSegment') }}</li>
+                    <i18n-t keypath="help.segments.speaker" tag="li">
+                        <template #dropdown>
+                            <span class="text-highlight highlight-teal">{{ t('help.segments.dropdown') }}</span>
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.segments.timeChange" tag="li">
+                        <template #timespanTextFields>
+                            <span class="text-highlight highlight-mangenta">{{ t('help.segments.timespanTextFields')
+                            }}</span>
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.segments.seekTime" tag="li" />
+                    <i18n-t keypath="help.segments.insertBefore" tag="li">
+                        <template #insertAbove>
+                            <UButton color="primary" icon="i-heroicons-arrow-up-on-square-stack" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.segments.insertAfter" tag="li">
+                        <template #insertBelow>
+                            <UButton color="primary" icon="i-heroicons-arrow-down-on-square-stack" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.segments.deleteSegment" tag="li">
+                        <template #delete>
+                            <UButton color="error" icon="i-heroicons-trash" />
+                        </template>
+                    </i18n-t>
                 </ul>
                 <img src="../assets/img/segmentEditing.png"
                     :alt="locale === 'en' ? 'Segment editing illustration' : 'Illustration der Segmentbearbeitung'" />
@@ -108,17 +166,23 @@ function getKeyName(key: string): string {
             <section>
                 <h2>{{ t('help.editing.title') }}</h2>
                 <ul>
-                    <li>
-                        {{ t('help.editing.undo', { ctrlKey: '', zKey: '' }) }}
-                        <UKbd :value="getKeyName('Ctrl') " /> +
-                        <UKbd :value="getKeyName('Z')" />
-                    </li>
-                    <li>
-                        {{ t('help.editing.redo', { ctrlKey: '', yKey: '' }) }}
-                        <UKbd :value="getKeyName('Ctrl') " /> +
-                        <UKbd :value="getKeyName('Y')" />
-                    </li>
-                    <li>{{ t('help.editing.buttons') }}</li>
+                    <i18n-t keypath="help.editing.undo" tag="li">
+                        <template v-slot:ctrlKey>
+                            <UKbd value="ctrl" />
+                        </template>
+                        <template v-slot:zKey>
+                            <UKbd value="z" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.editing.redo" tag="li">
+                        <template v-slot:ctrlKey>
+                            <UKbd value="ctrl" />
+                        </template>
+                        <template v-slot:yKey>
+                            <UKbd value="y" />
+                        </template>
+                    </i18n-t>
+                    <i18n-t keypath="help.editing.buttons" tag="li" />
                 </ul>
             </section>
         </div>
@@ -126,6 +190,31 @@ function getKeyName(key: string): string {
 </template>
 
 <style scoped>
+.text-highlight {
+    @apply border-solid border-2;
+    padding: 1px;
+}
+
+.highlight-orange {
+    border-color: #ffaa00;
+}
+
+.highlight-green {
+    border-color: #008055;
+}
+
+.highlight-violet {
+    border-color: #600080;
+}
+
+.highlight-teal {
+    border-color: #00aacc;
+}
+
+.highlight-mangenta {
+    border-color: #b51c69;
+}
+
 .help-view {
     padding: 20px;
     max-width: 1200px;
@@ -181,15 +270,8 @@ section {
 ul {
     padding-left: 20px;
     margin-bottom: 1.5rem;
-}
-
-li {
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 4px;
+    list-style-type: disc;
+    line-height: 2rem;
 }
 
 img {
