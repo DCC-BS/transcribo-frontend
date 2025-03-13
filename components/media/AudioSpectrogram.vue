@@ -116,8 +116,6 @@ const loadAudio = async (file: Blob): Promise<void> => {
     img.onload = () => {
         spectrogramImage.value = img;
         audioLoaded.value = true;
-
-        console.log("spec img size", img.width, img.height);
     };
 };
 

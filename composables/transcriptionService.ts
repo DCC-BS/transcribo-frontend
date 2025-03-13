@@ -6,6 +6,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
     const store = useTranscriptionsStore();
     const error = ref<string>();
     const isInited = ref(false);
+    const logger = useLogger();
     const { registerHandler, unregisterHandler } = useCommandBus();
 
     store.initDB();
@@ -19,7 +20,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         const currentTranscription = store.currentTranscription;
 
         if (!currentTranscription) {
-            console.warn('Current transcription not found');
+            logger.warn('Current transcription not found');
             return;
         }
 
@@ -33,13 +34,13 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         const currentTranscription = store.currentTranscription;
 
         if (!currentTranscription) {
-            console.warn('Current transcription not found');
+            logger.warn('Current transcription not found');
             return;
         }
 
         const targetIndex = currentTranscription.segments.findIndex(s => s.id === command.targetSegmentId);
         if (targetIndex === -1) {
-            console.warn('Target segment not found');
+            logger.warn('Target segment not found');
             return;
         }
 
@@ -69,14 +70,14 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         const currentTranscription = store.currentTranscription;
 
         if (!currentTranscription) {
-            console.warn('Current transcription not found');
+            logger.warn('Current transcription not found');
             return;
         }
 
         const segment = currentTranscription.segments.find(s => s.id === command.segmentId);
 
         if (!segment) {
-            console.warn('Target segment not found');
+            logger.warn('Target segment not found');
             return;
         }
 
@@ -94,7 +95,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         const currentTranscription = store.currentTranscription;
 
         if (!currentTranscription) {
-            console.warn('Current transcription not found');
+            logger.warn('Current transcription not found');
             return;
         }
 
@@ -108,7 +109,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         const currentTranscription = store.currentTranscription;
 
         if (!currentTranscription) {
-            console.warn('Current transcription not found');
+            logger.warn('Current transcription not found');
             return;
         }
 

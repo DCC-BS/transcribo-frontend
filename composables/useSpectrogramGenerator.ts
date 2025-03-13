@@ -30,6 +30,7 @@ export function useSpectrogramGenerator() {
     const isLoading = ref<boolean>(false);
     const error = ref<string | null>(null);
     const audioContext = ref<AudioContext | null>(null);
+    const logger = useLogger();
 
     // Initialize the AudioContext if it doesn't exist
     const ensureAudioContext = (): AudioContext => {
@@ -68,7 +69,7 @@ export function useSpectrogramGenerator() {
                 err instanceof Error
                     ? err.message
                     : 'Unknown error generating spectrogram';
-            console.error('Spectrogram generation error:', err);
+            logger.error('Spectrogram generation error:', err);
             error.value = errorMessage;
 
             // Return an empty result with the error
@@ -115,7 +116,7 @@ export function useSpectrogramGenerator() {
                 err instanceof Error
                     ? err.message
                     : 'Unknown error generating spectrogram';
-            console.error('Spectrogram generation error:', err);
+            logger.error('Spectrogram generation error:', err);
             error.value = errorMessage;
 
             // Return an empty result with the error
@@ -153,7 +154,7 @@ export function useSpectrogramGenerator() {
         // Calculate hop size (samples between consecutive frames)
         const hopSize: number = Math.floor(sampleRate / framesPerSecond);
 
-        console.log(
+        logger.log(
             `Manual frame generation: Using hop size ${hopSize} for ${framesPerSecond} fps`,
         );
 
@@ -166,7 +167,7 @@ export function useSpectrogramGenerator() {
         const numFrames: number = Math.floor(audioData.length / hopSize);
         const framesToProcess: number = Math.min(numFrames, maxFrames);
 
-        console.log(`Generating ${framesToProcess} frames in manual mode`);
+        logger.log(`Generating ${framesToProcess} frames in manual mode`);
 
         const spectrogramData: Uint8Array[] = [];
 
@@ -180,7 +181,7 @@ export function useSpectrogramGenerator() {
             );
 
             if (frame % 500 === 0) {
-                console.log(`Processing frame ${frame}/${framesToProcess}...`);
+                logger.log(`Processing frame ${frame}/${framesToProcess}...`);
             }
 
             // Create a temporary buffer for this chunk
@@ -228,7 +229,7 @@ export function useSpectrogramGenerator() {
             spectrogramData.push(new Uint8Array(frequencyData));
         }
 
-        console.log(
+        logger.log(
             `Manual spectrogram generated with ${spectrogramData.length} frames`,
         );
 

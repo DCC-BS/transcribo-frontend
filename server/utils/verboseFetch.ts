@@ -1,12 +1,16 @@
 import type { NitroFetchOptions, NitroFetchRequest } from 'nitropack';
-import { createError } from 'h3'; // Import createError from h3
+import { createError, H3Event } from 'h3'; // Import createError from h3
+import { getEventLogger } from './eventLogger';
 export type Methods = 'get' | 'post' | 'put' | 'delete' | 'patch';
 
 // Update the generic type parameters to handle the response type correctly
 export async function verboseFetch<T>(
     url: string,
+    event: H3Event,
     init?: NitroFetchOptions<NitroFetchRequest, Methods>,
 ): Promise<T> {
+    const logger = getEventLogger(event);
+
     try {
         // Use type assertion to specify that the return value will be of type T
         // This tells TypeScript that we're handling the conversion from TypedInternalResponse to T
@@ -23,20 +27,18 @@ export async function verboseFetch<T>(
             data?: unknown;
         };
 
-        // Handle errors and attempt to log the error details
-        console.error('API request failed:', fetchError.message);
+        // Create a context object with all available error information
+        const errorContext = {
+            url,
+            method: init?.method ?? 'GET',
+            errorMessage: fetchError.message,
+            status: fetchError.response?.status,
+            headers: fetchError.response?.headers ? Object.fromEntries(fetchError.response.headers.entries()) : undefined,
+            errorData: fetchError.data,
+        };
 
-        // If there's a response object available, log additional details
-        if (fetchError.response) {
-            // Log response status and headers
-            console.error('Status:', fetchError.response.status);
-            console.error('Headers:', fetchError.response.headers);
-
-            // Get error data if available (this won't try to read the body again)
-            if (fetchError.data) {
-                console.error('Error data:', fetchError.data);
-            }
-        }
+        // Log all error details in a single structured entry
+        logger.error('API request failed', errorContext);
 
         // Re-throw the error to be handled by Nuxt's error system
         throw createError({

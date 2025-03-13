@@ -3,10 +3,11 @@ import { type StoredTranscription } from '~/stores/transcriptionsStore';
 
 export const useExport = () => {
     const { currentTranscription } = useCurrentTranscription();
+    const logger = useLogger();
 
     function exportAsText(withSpeakers: boolean) {
         if (!currentTranscription.value) {
-            console.error('No current transcription available for export.');
+            logger.error('No current transcription available for export.');
             return;
         }
 
@@ -38,7 +39,7 @@ export const useExport = () => {
 
     function exportAsSrt(withSpeakers: boolean) {
         if (!currentTranscription.value) {
-            console.error('No current transcription available for export.');
+            logger.error('No current transcription available for export.');
             return;
         }
 
@@ -63,7 +64,7 @@ export const useExport = () => {
      */
     function exportAsBinary(): void {
         if (!currentTranscription.value) {
-            console.error('No current transcription available for export.');
+            logger.error('No current transcription available for export.');
             return;
         }
 

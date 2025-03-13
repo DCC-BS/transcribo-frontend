@@ -79,8 +79,6 @@ const items = computed<NavigationMenuItem[][]>(() => [
  * Handler for undo button click
  */
 function handleUndo(amount: number = 1): void {
-    console.log('Undo', amount);
-
     for (let i = 0; i < amount; i++) {
         undo();
     }

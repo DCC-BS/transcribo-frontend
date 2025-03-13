@@ -6,6 +6,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const logger = useLogger();
 
 // Track the conversion progress
 const progressMessage = ref('');
@@ -31,7 +32,7 @@ const loadAudio = async (event: Event): Promise<void> => {
     try {
         await uploadFile(mediaFile, mediaFile);
     } catch (error) {
-        console.error('Error processing media file:', error);
+        logger.error('Error processing media file:', error);
         errorMessage.value = t('upload.processingError');
     } finally {
         showProgress.value = false;

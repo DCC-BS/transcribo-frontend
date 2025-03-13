@@ -20,6 +20,7 @@ export default defineEventHandler(async (event) => {
     // Attempt to make the API request
     const response = await verboseFetch<TaskStatus>(
         `${config.public.apiUrl}/transcribe`,
+        event,
         {
             method: 'POST',
             body: formData,

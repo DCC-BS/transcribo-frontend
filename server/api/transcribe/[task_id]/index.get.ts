@@ -7,5 +7,6 @@ export default defineEventHandler(async (event) => {
 
     return verboseFetch<TranscriptionResponse>(
         `${config.public.apiUrl}/task/${taskId}/result`,
+        event
     );
 });

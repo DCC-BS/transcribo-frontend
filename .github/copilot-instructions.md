@@ -112,8 +112,8 @@
    ```typescript
    // Correct
    async func fetchUserData(userId: number): Promise {
-     const response = await fetch(`/api/users/${userId}`)
-     return await response.json()
+     const response = await fetch(`/api/users/${userId}`);
+     return await response.json();
    }
 
    // Incorrect
@@ -123,4 +123,22 @@
    }
    ```
 
+9. **Always use semicolons**
+   Always terminate statements with semicolons for clarity and consistency.
+
+   ```typescript
+   // Correct
+   const name = ref('');
+   func increment(): void {
+     count.value++;
+   }
+
+   // Incorrect
+   const name = ref('')
+   func increment(): void {
+     count.value++
+   }
+   ```
+
 Remember to adhere to these guidelines while coding to maintain consistency and leverage the full power of TypeScript in your Nuxt project.
+Always add comments to your code.

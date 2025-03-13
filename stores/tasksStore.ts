@@ -18,6 +18,7 @@ const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
 
 export const useTasksStore = defineStore("tasksStore", {
     state: () => ({
+        logger: useLogger(),
         tasks: [] as StoredTask[],
         isLoading: false,
         error: null as string | null,
@@ -37,9 +38,9 @@ export const useTasksStore = defineStore("tasksStore", {
             }
             catch (e: unknown) {
                 if (e instanceof Error) {
-                    console.error(e.message);
+                    this.logger.error(e.message);
                 } else {
-                    console.error('Unknown error initializing database', e);
+                    this.logger.error('Unknown error initializing database', e);
                 }
 
                 this.isLoading = false;
@@ -282,11 +283,11 @@ export const useTasksStore = defineStore("tasksStore", {
                     await this.deleteTask(taskId);
                     deletedCount++;
                 } catch (error) {
-                    console.error(`Failed to delete old task ${taskId}:`, error);
+                    this.logger.error(`Failed to delete old task ${taskId}:`, error);
                 }
             }
 
-            console.log(`Cleaned up ${deletedCount} tasks older than 1 day`);
+            this.logger.info(`Cleaned up ${deletedCount} tasks older than 1 day`);
             return deletedCount;
         },
     },

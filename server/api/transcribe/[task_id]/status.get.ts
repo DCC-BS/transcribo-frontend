@@ -7,6 +7,7 @@ export default defineEventHandler(async (event) => {
 
     return verboseFetch<TaskStatus>(
         `${config.public.apiUrl}/task/${taskId}/status`,
+        event,
         {
             method: 'GET',
         },

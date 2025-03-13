@@ -22,12 +22,12 @@
         "@vite-pwa/nuxt": "0.10.6",
         "konva": "^9.3.18",
         "nuxt": "^3.15.4",
-        "nuxt3-winston-log": "^0.5.0",
         "ts-pattern": "^5.6.2",
         "uuid": "^11.1.0",
         "vue": "latest",
         "vue-konva": "^3.2.0",
-        "vue-router": "latest"
+        "vue-router": "latest",
+        "winston": "^3.17.0"
     },
     "devDependencies": {
         "@nuxtjs/eslint-module": "4.1.0",

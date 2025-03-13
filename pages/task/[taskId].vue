@@ -7,6 +7,7 @@ const { registerHandler, unregisterHandler } = useCommandBus();
 const taskStore = useTasksStore();
 const transcriptionsStore = useTranscriptionsStore();
 const { t } = useI18n();
+const logger = useLogger();
 
 const route = useRoute();
 const taskId = route.params.taskId as string;
@@ -31,11 +32,11 @@ onMounted(() => {
             }
             else {
                 errorMessage.value = t('task.errors.noMediaFile');
-                console.error('No media file found for task', taskId);
+                logger.error('No media file found for task', taskId);
             }
         }).catch(e => {
             errorMessage.value = t('task.errors.failedToLoad');
-            console.error('Failed to get task', taskId, e);
+            logger.error('Failed to get task', taskId, e);
         });
 });
 

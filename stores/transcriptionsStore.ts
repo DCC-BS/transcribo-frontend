@@ -29,6 +29,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
             isLoading: false,
             error: null as string | null,
             db: null as IDBDatabase | null,
+            logger: useLogger(),
         }
     },
 
@@ -44,9 +45,9 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
             }
             catch (e: unknown) {
                 if (e instanceof Error) {
-                    console.error(e.message);
+                    this.logger.error(e.message);
                 } else {
-                    console.error('Unknown error initializing database', e);
+                    this.logger.error('Unknown error initializing database', e);
                 }
 
                 this.isLoading = false;
@@ -315,7 +316,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', {
                 if (updatedTranscription.segments) {
                     // Check if segments is actually an array
                     if (!Array.isArray(updatedTranscription.segments)) {
-                        console.error('Segments is not an array:', updatedTranscription.segments);
+                        this.logger.error('Segments is not an array:', updatedTranscription.segments);
                         reject(new Error('Segments must be an array'));
                         return;
                     }
