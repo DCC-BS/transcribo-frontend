@@ -1,6 +1,5 @@
 import type { NitroFetchOptions, NitroFetchRequest } from 'nitropack';
 import { createError, H3Event } from 'h3'; // Import createError from h3
-import { getEventLogger } from './eventLogger';
 export type Methods = 'get' | 'post' | 'put' | 'delete' | 'patch';
 
 // Update the generic type parameters to handle the response type correctly

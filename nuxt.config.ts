@@ -4,14 +4,14 @@ import { fileURLToPath } from 'url';
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-11-01',
-    alias: {
-        '@logger': fileURLToPath(new URL('./services/logger', import.meta.url)),
-    },
-    build: {
-        transpile: [
-            './services/logger/winstonLogger.server',
-        ]
-    },
+    // alias: {
+    //     '@logger': fileURLToPath(new URL('./services/logger', import.meta.url)),
+    // },
+    // build: {
+    //     transpile: [
+    //         './services/logger/winstonLogger.server',
+    //     ]
+    // },
     runtimeConfig: {
         public: {
             apiUrl: process.env.API_URL,
@@ -43,6 +43,7 @@ export default defineNuxtConfig({
         '@nuxtjs/i18n',
         '@dcc-bs/common-ui.bs.js',
         '@dcc-bs/event-system.bs.js',
+        '@dcc-bs/logger.bs.js',
         '@nuxt/eslint',
         '@pinia/nuxt',
         '@vite-pwa/nuxt',

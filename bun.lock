@@ -6,6 +6,7 @@
       "dependencies": {
         "@dcc-bs/common-ui.bs.js": "^0.1.6",
         "@dcc-bs/event-system.bs.js": "^1.1.1",
+        "@dcc-bs/logger.bs.js": "0.0.5",
         "@nuxt/eslint": "1.1.0",
         "@nuxt/ui": "^3.0.0-beta.2",
         "@nuxtjs/i18n": "^9.2.1",
@@ -252,6 +253,8 @@
     "@dcc-bs/common-ui.bs.js": ["@dcc-bs/common-ui.bs.js@0.1.6", "https://npm.pkg.github.com/download/@dcc-bs/common-ui.bs.js/0.1.6/e0db96388e946cd69384730800606666a626f0c9", { "dependencies": { "@nuxt/kit": "^3.15.4", "tailwind-merge": "^3.0.1" } }, "sha512-1/xYwUY2fyPQqGgS/Vo3khuqDEbIAuleHu7ApWGa4oY8MTV5LKdZnMzucsoNsQKduXYn9kM/M9LEM4/Fv32/yA=="],
 
     "@dcc-bs/event-system.bs.js": ["@dcc-bs/event-system.bs.js@1.1.1", "https://npm.pkg.github.com/download/@dcc-bs/event-system.bs.js/1.1.1/59d836425f00f3106b8c3b05dc640edd8bf483f6", { "dependencies": { "@nuxt/kit": "^3.15.4" } }, "sha512-mDo1sDBduJ4+uYmuEocEJOcS0eCw5zP3La69mLR5jvLacIa3PJVqX2VFVdZvL7OSbTQX8UG5jfO9LHXMt+gv+g=="],
+
+    "@dcc-bs/logger.bs.js": ["@dcc-bs/logger.bs.js@0.0.5", "https://npm.pkg.github.com/download/@dcc-bs/logger.bs.js/0.0.5/a5866f3dcaf23e2c66b3ea1423a26881f674f4aa", { "dependencies": { "@nuxt/kit": "^3.15.4", "winston": "^3.17.0" } }, "sha512-MML4yC7ugweFq1to9J8Ifwl5RMPbiGbtjUxjxH1OGUWe+dCFlRnK34tgcSCsh5/tWesDro8laTBDtX5phZjBwg=="],
 
     "@es-joy/jsdoccomment": ["@es-joy/jsdoccomment@0.49.0", "", { "dependencies": { "comment-parser": "1.4.1", "esquery": "^1.6.0", "jsdoc-type-pratt-parser": "~4.1.0" } }, "sha512-xjZTSFgECpb9Ohuk5yMX5RhUEbfeQcuOp8IF60e+wyzWEF0M5xeSgqsfLtvPEX8BIyOX9saZqzuGPmZ8oWc+5Q=="],
 
