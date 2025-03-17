@@ -1,17 +1,8 @@
 import pwaIcons from './public/icons.json';
-import { fileURLToPath } from 'url';
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2024-11-01',
-    // alias: {
-    //     '@logger': fileURLToPath(new URL('./services/logger', import.meta.url)),
-    // },
-    // build: {
-    //     transpile: [
-    //         './services/logger/winstonLogger.server',
-    //     ]
-    // },
     runtimeConfig: {
         public: {
             apiUrl: process.env.API_URL,

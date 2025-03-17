@@ -42,7 +42,7 @@ const loadAudio = async (event: Event): Promise<void> => {
 /**
  * Uploads the file to the server
  */
-async function uploadFile(file: File, originalFile: File): Promise<void> {
+async function uploadFile(file: File | Blob, originalFile: File): Promise<void> {
     showProgress.value = true;
     progressMessage.value = t('upload.uploadingMedia');
 
@@ -56,6 +56,8 @@ async function uploadFile(file: File, originalFile: File): Promise<void> {
 
     emit('uploaded', response, originalFile);
 }
+
+defineExpose({ uploadFile });
 </script>
 
 <template>

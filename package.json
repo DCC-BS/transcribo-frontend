@@ -27,8 +27,7 @@
         "uuid": "^11.1.0",
         "vue": "latest",
         "vue-konva": "^3.2.0",
-        "vue-router": "latest",
-        "winston": "^3.17.0"
+        "vue-router": "latest"
     },
     "devDependencies": {
         "@nuxtjs/eslint-module": "4.1.0",
