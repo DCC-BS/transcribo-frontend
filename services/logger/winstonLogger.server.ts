@@ -1,40 +1,32 @@
-import path from 'path';
 import { createLogger, format, transports } from 'winston';
 import * as Transport from 'winston-transport';
+import { type ILogger } from './ILogger';
 const { combine, timestamp, logstash, simple } = format;
 const { Console, File } = transports;
+import path from 'path';
 
-export function getNewLogger() {
-    const isServer = import.meta.server;
-
+export function getWinstonLogger(): ILogger {
     return process.env.NODE_ENV === 'production'
-        ? getProductionLogger(isServer)
-        : getDevelopmentLogger(isServer);
+        ? getProductionLogger()
+        : getDevelopmentLogger();
 }
 
-export function getProductionLogger(isServer = false) {
-
-    const transports: Transport[] = [];
-
-    if (isServer) {
-
-        transports.push(new Console());
-
-        transports.push(new File({
+export function getProductionLogger(): ILogger {
+    // This function is only called on the server side
+    const transports: Transport[] = [
+        new Console(),
+        new File({
             filename: '/var/log/combined.log',
             maxsize: 1000000, // in bytes (1MB)
             maxFiles: 5,
-        }));
-
-        transports.push(new File({
+        }),
+        new File({
             filename: '/var/log/error.log',
             level: 'error',
             maxsize: 1000000, // in bytes (1MB)
             maxFiles: 5,
-        }));
-    } else {
-        transports.push(new BrowserConsole());
-    }
+        }),
+    ];
 
     return createLogger({
         level: 'info',
@@ -43,32 +35,31 @@ export function getProductionLogger(isServer = false) {
             logstash()
         ),
         transports: transports,
-    });
+    }) as unknown as ILogger;
 }
 
-export function getDevelopmentLogger(isServer = false) {
+export function getDevelopmentLogger(): ILogger {
+    // This should only run on the server side
+    if (!path || !import.meta.server) {
+        throw new Error('Path module is not available on client side');
+    }
+
     const logDir = path.resolve(process.cwd(), './logs');
 
-    const transports: Transport[] = [];
-
-    if (isServer) {
-        transports.push(new Console());
-
-        transports.push(new File({
+    const transports: Transport[] = [
+        new Console(),
+        new File({
             filename: path.join(logDir, 'combined.log'),
             maxsize: 1000000, // in bytes (1MB)
             maxFiles: 1,
-        }));
-
-        transports.push(new File({
+        }),
+        new File({
             filename: path.join(logDir, 'error.log'),
             level: 'error',
             maxsize: 1000000, // in bytes (1MB)
             maxFiles: 1,
-        }));
-    } else {
-        transports.push(new BrowserConsole());
-    }
+        }),
+    ];
 
     return createLogger({
         level: 'info',
@@ -76,5 +67,5 @@ export function getDevelopmentLogger(isServer = false) {
             simple(),
         ),
         transports: transports,
-    });
+    }) as unknown as ILogger;
 }

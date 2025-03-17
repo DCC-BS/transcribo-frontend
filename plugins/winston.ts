@@ -1,8 +1,4 @@
-export default defineNuxtPlugin((nuxtApp) => {
-    // if client side, do nothing
-    if (import.meta.client) {
-        return;
-    }
-
-    nuxtApp.provide('logger', getNewLogger());
+export default defineNuxtPlugin(async (nuxtApp) => {
+    const logger = await getNewLogger();
+    nuxtApp.provide('logger', logger);
 });

@@ -9,7 +9,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
     const logger = useLogger();
     const { registerHandler, unregisterHandler } = useCommandBus();
 
-    store.initDB();
+    store.initializeDB();
     store.setCurrentTranscription(currentTranscriptionId)
         .then(() => {
             isInited.value = true;
@@ -27,7 +27,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         currentTranscription.segments = currentTranscription.segments
             .filter(s => s.id !== command.segmentId);
 
-        store.updateCurrentTrascription({ segments: currentTranscription.segments });
+        store.updateCurrentTranscription({ segments: currentTranscription.segments });
     }
 
     async function handleInsertSegment(command: InsertSegementCommand) {
@@ -62,8 +62,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
 
         const newTranscriptions = currentTranscription.segments
             .toSorted((a, b) => a.start - b.start);
-        store.updateCurrentTrascription({ segments: newTranscriptions });
-
+        store.updateCurrentTranscription({ segments: newTranscriptions });
     }
 
     async function handleUpdateSegment(command: UpdateSegementCommand) {
@@ -88,7 +87,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
             .map(s => s.id === command.segmentId ? updatedSegment : s)
             .sort((a, b) => a.start - b.start);
 
-        store.updateCurrentTrascription({ segments: newSegments });
+        store.updateCurrentTranscription({ segments: newSegments });
     }
 
     async function handleNameChanged(command: TranscriptonNameChangeCommand) {
@@ -102,7 +101,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         const oldName = currentTranscription.name;
         command.setUndoCommand(new TranscriptonNameChangeCommand(oldName));
 
-        store.updateCurrentTrascription({ name: command.newName });
+        store.updateCurrentTranscription({ name: command.newName });
     }
 
     async function handleRenameSpeaker(command: RenameSpeakerCommand) {
@@ -116,7 +115,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         const newSegments = currentTranscription.segments
             .map(s => s.speaker === command.oldName ? { ...s, speaker: command.newName } : s);
 
-        store.updateCurrentTrascription({ segments: newSegments });
+        store.updateCurrentTranscription({ segments: newSegments });
     }
 
     function registerService() {

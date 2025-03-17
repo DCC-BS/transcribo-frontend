@@ -1,8 +1,8 @@
-import { getNewLogger } from "~/utils/winstonLogger";
+import { getWinstonLogger } from "~/services/logger/winstonLogger.server";
 
 export default defineNitroPlugin((nitroApp) => {
     // Import the logger function from the utils folder
-    const logger = getNewLogger();
+    const logger = getWinstonLogger();
 
     // Provide the logger to the application
     nitroApp.hooks.hook('error', (error) => {

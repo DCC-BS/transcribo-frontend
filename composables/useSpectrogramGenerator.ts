@@ -154,7 +154,7 @@ export function useSpectrogramGenerator() {
         // Calculate hop size (samples between consecutive frames)
         const hopSize: number = Math.floor(sampleRate / framesPerSecond);
 
-        logger.log(
+        logger.info(
             `Manual frame generation: Using hop size ${hopSize} for ${framesPerSecond} fps`,
         );
 
@@ -167,7 +167,7 @@ export function useSpectrogramGenerator() {
         const numFrames: number = Math.floor(audioData.length / hopSize);
         const framesToProcess: number = Math.min(numFrames, maxFrames);
 
-        logger.log(`Generating ${framesToProcess} frames in manual mode`);
+        logger.info(`Generating ${framesToProcess} frames in manual mode`);
 
         const spectrogramData: Uint8Array[] = [];
 
@@ -181,7 +181,7 @@ export function useSpectrogramGenerator() {
             );
 
             if (frame % 500 === 0) {
-                logger.log(`Processing frame ${frame}/${framesToProcess}...`);
+                logger.info(`Processing frame ${frame}/${framesToProcess}...`);
             }
 
             // Create a temporary buffer for this chunk
@@ -229,7 +229,7 @@ export function useSpectrogramGenerator() {
             spectrogramData.push(new Uint8Array(frequencyData));
         }
 
-        logger.log(
+        logger.info(
             `Manual spectrogram generated with ${spectrogramData.length} frames`,
         );
 

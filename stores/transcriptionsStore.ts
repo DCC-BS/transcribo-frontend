@@ -21,405 +21,432 @@ const STORE_NAME = 'transcriptions';
 /**
  * Store to manage transcriptions with IndexedDB persistence
  */
-export const useTranscriptionsStore = defineStore('transcriptions', {
-    state: () => {
-        return {
-            transcriptions: [] as StoredTranscription[],
-            currentTranscription: undefined as StoredTranscription | undefined,
-            isLoading: false,
-            error: null as string | null,
-            db: null as IDBDatabase | null,
-            logger: useLogger(),
+export const useTranscriptionsStore = defineStore('transcriptions', () => {
+    // State
+    const transcriptions = ref<StoredTranscription[]>([]);
+    const currentTranscription = ref<StoredTranscription | undefined>(undefined);
+    const isLoading = ref(false);
+    const error = ref<string | null>(null);
+    const db = ref<IDBDatabase | null>(null);
+
+    const logger = useLogger();
+
+    /**
+     * Initialize the IndexedDB database
+     */
+    async function initializeDB(): Promise<void> {
+        try {
+            db.value = await initDB();
+            isLoading.value = false;
+            await loadAllTranscriptions();
         }
-    },
-
-    actions: {
-        /**
-         * Initialize the IndexedDB database
-         */
-        async initDB() {
-            try {
-                this.db = await initDB();
-                this.isLoading = false;
-                this.loadAllTranscriptions();
+        catch (e: unknown) {
+            if (e instanceof Error) {
+                logger.error(e.message);
+            } else {
+                logger.error('Unknown error initializing database', e);
             }
-            catch (e: unknown) {
-                if (e instanceof Error) {
-                    this.logger.error(e.message);
-                } else {
-                    this.logger.error('Unknown error initializing database', e);
-                }
 
-                this.isLoading = false;
-            }
-        },
+            isLoading.value = false;
+        }
+    }
 
-        /**
-         * Load all transcriptions from IndexedDB
-         * Note: This doesn't load audio blobs by default to save memory
-         */
-        async loadAllTranscriptions() {
-            if (!this.db) await this.initDB();
+    /**
+     * Load all transcriptions from IndexedDB
+     * Note: This doesn't load audio blobs by default to save memory
+     */
+    async function loadAllTranscriptions(): Promise<StoredTranscription[]> {
+        if (!db.value) await initializeDB();
 
-            return new Promise<StoredTranscription[]>((resolve, reject) => {
-                // Updated return type
-                this.isLoading = true;
+        return new Promise<StoredTranscription[]>((resolve, reject) => {
+            isLoading.value = true;
 
-                const transaction = this.db!.transaction(
-                    STORE_NAME,
-                    'readonly',
+            const transaction = db.value!.transaction(
+                STORE_NAME,
+                'readonly',
+            );
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                // Store transcriptions but remove the audio blobs to save memory
+                transcriptions.value = request.result.map(
+                    (transcription) => {
+                        // Create a copy without the audioFile blob
+                        const { audioFile, ...restOfTranscription } =
+                            transcription;
+                        return restOfTranscription;
+                    },
                 );
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.getAll();
-
-                request.onsuccess = () => {
-                    // Store transcriptions but remove the audio blobs to save memory
-                    this.transcriptions = request.result.map(
-                        (transcription) => {
-                            // Create a copy without the audioFile blob
-                            const { audioFile, ...restOfTranscription } =
-                                transcription;
-                            return restOfTranscription;
-                        },
-                    );
-                    this.isLoading = false;
-                    resolve(this.transcriptions);
-                };
-
-                request.onerror = (event) => {
-                    this.error = `Failed to load transcriptions: ${(event.target as IDBRequest).error?.message}`;
-                    this.isLoading = false;
-                    reject(new Error(this.error));
-                };
-            });
-        },
-
-        /**
-         * Get a single transcription by ID
-         * @param id The transcription ID
-         * @param includeAudio Whether to include the audio blob (default: false)
-         */
-        async getTranscription(
-            id: string,
-            includeAudio: boolean = false,
-        ): Promise<StoredTranscription | null> {
-            // Updated return type
-            if (!this.db) await this.initDB();
-
-            return new Promise((resolve, reject) => {
-                const transaction = this.db!.transaction(
-                    STORE_NAME,
-                    'readonly',
-                );
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.get(id);
-
-                request.onsuccess = () => {
-                    if (!request.result) {
-                        resolve(null);
-                        return;
-                    }
-
-                    // If includeAudio is false, remove the audio blob to save memory
-                    if (!includeAudio && request.result.audioFile) {
-                        const { audioFile, ...transcriptionWithoutAudio } =
-                            request.result;
-                        resolve(transcriptionWithoutAudio);
-                    } else {
-                        resolve(request.result);
-                    }
-                };
-
-                request.onerror = (event) => {
-                    this.error = `Failed to get transcription: ${(event.target as IDBRequest).error?.message}`;
-                    reject(new Error(this.error));
-                };
-            });
-        },
-
-        /**
-         * Get only the audio file blob for a transcription
-         */
-        async getAudioFile(id: string): Promise<Blob | null> {
-            if (!this.db) await this.initDB();
-
-            return new Promise((resolve, reject) => {
-                const transaction = this.db!.transaction(
-                    STORE_NAME,
-                    'readonly',
-                );
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.get(id);
-
-                request.onsuccess = () => {
-                    if (!request.result?.audioFile) {
-                        resolve(null);
-                        return;
-                    }
-                    resolve(request.result.audioFile);
-                };
-
-                request.onerror = (event) => {
-                    this.error = `Failed to get audio file: ${(event.target as IDBRequest).error?.message}`;
-                    reject(new Error(this.error));
-                };
-            });
-        },
-
-        /**
-         * Add a new transcription to the store with optional audio file
-         */
-        async addTranscriptions(
-            transcription: Omit<
-                StoredTranscription,
-                'id' | 'createdAt' | 'updatedAt'
-            >, // Updated type
-            audioFile?: File | Blob,
-            audioFileName?: string,
-        ): Promise<StoredTranscription> {
-            // Updated return type
-            if (!this.db) await this.initDB();
-
-            // Create a new transcription with ID and timestamps
-            const now = new Date();
-            const newTranscription: StoredTranscription = {
-                ...transcription,
-                id: uuidv4(), // Generate unique ID
-                // Use provided name if available, otherwise use mediaFileName or default
-                name: transcription.name || audioFileName || `Transcription ${now.toLocaleString()}`,
-                createdAt: now,
-                updatedAt: now,
+                isLoading.value = false;
+                resolve(transcriptions.value);
             };
 
-            // Add audio file if provided
-            if (audioFile) {
-                newTranscription.mediaFile = audioFile;
-                newTranscription.mediaFileName = audioFileName ?? 'audio-file';
+            request.onerror = (event) => {
+                error.value = `Failed to load transcriptions: ${(event.target as IDBRequest).error?.message}`;
+                isLoading.value = false;
+                reject(new Error(error.value));
+            };
+        });
+    }
 
-                // If name wasn't explicitly set and we have a mediaFileName, use that
-                if (!transcription.name && audioFileName) {
-                    newTranscription.name = audioFileName;
-                }
+    /**
+     * Get a single transcription by ID
+     * @param id The transcription ID
+     * @param includeAudio Whether to include the audio blob (default: false)
+     */
+    async function getTranscription(
+        id: string,
+        includeAudio: boolean = false,
+    ): Promise<StoredTranscription | null> {
+        if (!db.value) await initializeDB();
 
-                // Generate a unique audioFileId
-                newTranscription.audioFileId = uuidv4();
-            }
-
-            return new Promise((resolve, reject) => {
-                const transaction = this.db!.transaction(
-                    STORE_NAME,
-                    'readwrite',
-                );
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.add(newTranscription);
-
-                request.onsuccess = () => {
-                    // Add to local state, but without the audio blob
-                    const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
-                        newTranscription;
-                    this.transcriptions.push(transcriptionWithoutAudio);
-                    resolve(newTranscription);
-                };
-
-                request.onerror = (event) => {
-                    this.error = `Failed to add transcription: ${(event.target as IDBRequest).error?.message}`;
-                    reject(new Error(this.error));
-                };
-            });
-        },
-
-        async setCurrentTranscription(id: string): Promise<void> {
-            const transcription = await this.getTranscription(id, true);
-            if (!transcription) {
-                throw new Error(`Transcription with ID ${id} not found`);
-            }
-
-            this.currentTranscription = transcription;
-        },
-
-        async updateCurrentTrascription(
-            updates: Partial<
-                Omit<StoredTranscription, 'id' | 'createdAt' | 'updatedAt'>
-            >,
-        ): Promise<void> {
-            if (!this.currentTranscription) {
-                throw new Error('No current transcription set');
-            }
-
-            const newTranscription = await this.updateTranscriptions(
-                this.currentTranscription.id,
-                updates,
+        return new Promise((resolve, reject) => {
+            const transaction = db.value!.transaction(
+                STORE_NAME,
+                'readonly',
             );
-            this.currentTranscription = newTranscription;
-        },
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(id);
 
-        /**
-         * Update an existing transcription
-         */
-        async updateTranscriptions(
-            id: string,
-            updates: Partial<
-                Omit<StoredTranscription, 'id' | 'createdAt' | 'updatedAt'>
-            >, // Updated type
-            audioFile?: File | Blob,
-            audioFileName?: string,
-        ): Promise<StoredTranscription> {
-            // Updated return type
-            if (!this.db) await this.initDB();
+            request.onsuccess = () => {
+                if (!request.result) {
+                    resolve(null);
+                    return;
+                }
 
-            // First get the existing transcription with audio
-            const existingTranscription = await this.getTranscription(id, true);
+                // If includeAudio is false, remove the audio blob to save memory
+                if (!includeAudio && request.result.audioFile) {
+                    const { audioFile, ...transcriptionWithoutAudio } =
+                        request.result;
+                    resolve(transcriptionWithoutAudio);
+                } else {
+                    resolve(request.result);
+                }
+            };
 
-            if (!existingTranscription) {
-                this.error = `Transcription with ID ${id} not found`;
-                throw new Error(this.error);
+            request.onerror = (event) => {
+                error.value = `Failed to get transcription: ${(event.target as IDBRequest).error?.message}`;
+                reject(new Error(error.value));
+            };
+        });
+    }
+
+    /**
+     * Get only the audio file blob for a transcription
+     */
+    async function getAudioFile(id: string): Promise<Blob | null> {
+        if (!db.value) await initializeDB();
+
+        return new Promise((resolve, reject) => {
+            const transaction = db.value!.transaction(
+                STORE_NAME,
+                'readonly',
+            );
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get(id);
+
+            request.onsuccess = () => {
+                if (!request.result?.audioFile) {
+                    resolve(null);
+                    return;
+                }
+                resolve(request.result.audioFile);
+            };
+
+            request.onerror = (event) => {
+                error.value = `Failed to get audio file: ${(event.target as IDBRequest).error?.message}`;
+                reject(new Error(error.value));
+            };
+        });
+    }
+
+    /**
+     * Add a new transcription to the store with optional audio file
+     */
+    async function addTranscription(
+        transcription: Omit<
+            StoredTranscription,
+            'id' | 'createdAt' | 'updatedAt'
+        >,
+        audioFile?: File | Blob,
+        audioFileName?: string,
+    ): Promise<StoredTranscription> {
+        if (!db.value) await initializeDB();
+
+        // Create a new transcription with ID and timestamps
+        const now = new Date();
+        const newTranscription: StoredTranscription = {
+            ...transcription,
+            id: uuidv4(), // Generate unique ID
+            // Use provided name if available, otherwise use mediaFileName or default
+            name: transcription.name || audioFileName || `Transcription ${now.toLocaleString()}`,
+            createdAt: now,
+            updatedAt: now,
+        };
+
+        // Add audio file if provided
+        if (audioFile) {
+            newTranscription.mediaFile = audioFile;
+            newTranscription.mediaFileName = audioFileName ?? 'audio-file';
+
+            // If name wasn't explicitly set and we have a mediaFileName, use that
+            if (!transcription.name && audioFileName) {
+                newTranscription.name = audioFileName;
             }
 
-            // Create a new Promise with non-async executor function
-            return new Promise((resolve, reject) => {
+            // Generate a unique audioFileId
+            newTranscription.audioFileId = uuidv4();
+        }
 
-                const clonedTranscription = JSON.parse(JSON.stringify(existingTranscription)) as StoredTranscription;
+        return new Promise((resolve, reject) => {
+            const transaction = db.value!.transaction(
+                STORE_NAME,
+                'readwrite',
+            );
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.add(newTranscription);
 
-                // Update the transcription with new data and update timestamp
-                const updatedTranscription: StoredTranscription = {
-                    ...clonedTranscription,
-                    // Only apply updates for properties that exist in the updates object
-                    ...(updates.segments ? { segments: JSON.parse(JSON.stringify(updates.segments)) } : {}),
-                    ...(updates.mediaFileName ? { mediaFileName: updates.mediaFileName } : {}),
-                    ...(updates.audioFileId ? { audioFileId: updates.audioFileId } : {}),
-                    ...(updates.name ? { name: updates.name } : {}), // Apply name updates if present
-                    updatedAt: new Date(),
-                };
+            request.onsuccess = () => {
+                // Add to local state, but without the audio blob
+                const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
+                    newTranscription;
+                transcriptions.value.push(transcriptionWithoutAudio);
+                resolve(newTranscription);
+            };
 
-                // Update audio file if provided
-                if (audioFile) {
-                    updatedTranscription.mediaFile = audioFile;
-                    updatedTranscription.mediaFileName =
-                        audioFileName ?? 'audio-file';
+            request.onerror = (event) => {
+                error.value = `Failed to add transcription: ${(event.target as IDBRequest).error?.message}`;
+                reject(new Error(error.value));
+            };
+        });
+    }
 
-                    // If updating audio and name wasn't provided in updates, update name to match new audio filename
-                    if (!updates.name && audioFileName && !clonedTranscription.name) {
-                        updatedTranscription.name = audioFileName;
-                    }
+    /**
+     * Set the current transcription by ID
+     */
+    async function setCurrentTranscription(id: string): Promise<void> {
+        const transcription = await getTranscription(id, true);
+        if (!transcription) {
+            throw new Error(`Transcription with ID ${id} not found`);
+        }
 
-                    // Generate a new audioFileId if one doesn't already exist
-                    if (!updatedTranscription.audioFileId) {
-                        updatedTranscription.audioFileId = uuidv4();
-                    }
-                } else if (existingTranscription.mediaFile) {
-                    // Keep the existing media file if present
-                    updatedTranscription.mediaFile = existingTranscription.mediaFile;
+        currentTranscription.value = transcription;
+    }
+
+    /**
+     * Update the current transcription
+     */
+    async function updateCurrentTranscription(
+        updates: Partial<
+            Omit<StoredTranscription, 'id' | 'createdAt' | 'updatedAt'>
+        >,
+    ): Promise<void> {
+        if (!currentTranscription.value) {
+            throw new Error('No current transcription set');
+        }
+
+        const newTranscription = await updateTranscription(
+            currentTranscription.value.id,
+            updates,
+        );
+        currentTranscription.value = newTranscription;
+    }
+
+    /**
+     * Update an existing transcription
+     */
+    async function updateTranscription(
+        id: string,
+        updates: Partial<
+            Omit<StoredTranscription, 'id' | 'createdAt' | 'updatedAt'>
+        >,
+        audioFile?: File | Blob,
+        audioFileName?: string,
+    ): Promise<StoredTranscription> {
+        if (!db.value) await initializeDB();
+
+        // First get the existing transcription with audio
+        const existingTranscription = await getTranscription(id, true);
+
+        if (!existingTranscription) {
+            error.value = `Transcription with ID ${id} not found`;
+            throw new Error(error.value);
+        }
+
+        // Create a new Promise with non-async executor function
+        return new Promise((resolve, reject) => {
+            const clonedTranscription = JSON.parse(JSON.stringify(existingTranscription)) as StoredTranscription;
+
+            // Update the transcription with new data and update timestamp
+            const updatedTranscription: StoredTranscription = {
+                ...clonedTranscription,
+                // Only apply updates for properties that exist in the updates object
+                ...(updates.segments ? { segments: JSON.parse(JSON.stringify(updates.segments)) } : {}),
+                ...(updates.mediaFileName ? { mediaFileName: updates.mediaFileName } : {}),
+                ...(updates.audioFileId ? { audioFileId: updates.audioFileId } : {}),
+                ...(updates.name ? { name: updates.name } : {}), // Apply name updates if present
+                updatedAt: new Date(),
+            };
+
+            // Update audio file if provided
+            if (audioFile) {
+                updatedTranscription.mediaFile = audioFile;
+                updatedTranscription.mediaFileName =
+                    audioFileName ?? 'audio-file';
+
+                // If updating audio and name wasn't provided in updates, update name to match new audio filename
+                if (!updates.name && audioFileName && !clonedTranscription.name) {
+                    updatedTranscription.name = audioFileName;
                 }
 
-                // Validate data before writing to IndexedDB
-                // Ensure segments array is serializable
-                if (updatedTranscription.segments) {
-                    // Check if segments is actually an array
-                    if (!Array.isArray(updatedTranscription.segments)) {
-                        this.logger.error('Segments is not an array:', updatedTranscription.segments);
-                        reject(new Error('Segments must be an array'));
-                        return;
-                    }
+                // Generate a new audioFileId if one doesn't already exist
+                if (!updatedTranscription.audioFileId) {
+                    updatedTranscription.audioFileId = uuidv4();
+                }
+            } else if (existingTranscription.mediaFile) {
+                // Keep the existing media file if present
+                updatedTranscription.mediaFile = existingTranscription.mediaFile;
+            }
+
+            // Validate data before writing to IndexedDB
+            // Ensure segments array is serializable
+            if (updatedTranscription.segments) {
+                // Check if segments is actually an array
+                if (!Array.isArray(updatedTranscription.segments)) {
+                    logger.error('Segments is not an array:', updatedTranscription.segments);
+                    reject(new Error('Segments must be an array'));
+                    return;
+                }
+            }
+
+            const transaction = db.value!.transaction(
+                STORE_NAME,
+                'readwrite',
+            );
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.put(updatedTranscription);
+
+            request.onsuccess = () => {
+                // Update local state, but without the audio blob
+                const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
+                    updatedTranscription;
+
+                const index = transcriptions.value.findIndex(
+                    (t) => t.id === id,
+                );
+                if (index !== -1) {
+                    transcriptions.value[index] = transcriptionWithoutAudio;
                 }
 
-                const transaction = this.db!.transaction(
-                    STORE_NAME,
-                    'readwrite',
+                resolve(updatedTranscription);
+            };
+
+            request.onerror = (event) => {
+                error.value = `Failed to update transcription: ${(event.target as IDBRequest).error?.message}`;
+                reject(new Error(error.value));
+            };
+        });
+    }
+
+    /**
+     * Delete a transcription
+     */
+    async function deleteTranscription(id: string): Promise<void> {
+        if (!db.value) await initializeDB();
+
+        return new Promise((resolve, reject) => {
+            const transaction = db.value!.transaction(
+                STORE_NAME,
+                'readwrite',
+            );
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.delete(id);
+
+            request.onsuccess = () => {
+                // Update local state
+                transcriptions.value = transcriptions.value.filter(
+                    (t) => t.id !== id,
                 );
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.put(updatedTranscription);
+                resolve();
+            };
 
-                request.onsuccess = () => {
-                    // Update local state, but without the audio blob
-                    const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
-                        updatedTranscription;
+            request.onerror = (event) => {
+                error.value = `Failed to delete transcription: ${(event.target as IDBRequest).error?.message}`;
+                reject(new Error(error.value));
+            };
+        });
+    }
 
-                    const index = this.transcriptions.findIndex(
-                        (t) => t.id === id,
-                    );
-                    if (index !== -1) {
-                        this.transcriptions[index] = transcriptionWithoutAudio;
-                    }
+    /**
+     * Get the complete text from all segments
+     */
+    function getTranscriptionText(transcription: StoredTranscription): string {
+        // Helper method to extract text from segments
+        return transcription.segments
+            .map((segment) => segment.text)
+            .join(' ');
+    }
 
-                    resolve(updatedTranscription);
-                };
+    // Computed properties (getters)
 
-                request.onerror = (event) => {
-                    this.error = `Failed to update transcription: ${(event.target as IDBRequest).error?.message}`;
-                    reject(new Error(this.error));
-                };
-            });
-        },
+    /**
+     * Get transcription count
+     */
+    const transcriptionCount = computed(() => {
+        return transcriptions.value.length;
+    });
 
-        /**
-         * Delete a transcription
-         */
-        async deleteTranscription(id: string): Promise<void> {
-            if (!this.db) await this.initDB();
+    /**
+     * Get transcriptions with audio files
+     */
+    const transcriptionsWithAudio = computed(() => {
+        return transcriptions.value.filter((t) => t.audioFileId);
+    });
 
-            return new Promise((resolve, reject) => {
-                const transaction = this.db!.transaction(
-                    STORE_NAME,
-                    'readwrite',
-                );
-                const store = transaction.objectStore(STORE_NAME);
-                const request = store.delete(id);
-
-                request.onsuccess = () => {
-                    // Update local state
-                    this.transcriptions = this.transcriptions.filter(
-                        (t) => t.id !== id,
-                    );
-                    resolve();
-                };
-
-                request.onerror = (event) => {
-                    this.error = `Failed to delete transcription: ${(event.target as IDBRequest).error?.message}`;
-                    reject(new Error(this.error));
-                };
-            });
-        },
-
-        /**
-         * Get the complete text from all segments
-         */
-        getTranscriptionText(transcription: StoredTranscription): string {
-            // Helper method to extract text from segments
-            return transcription.segments
+    /**
+     * Filter transcriptions by search query
+     */
+    function searchTranscriptions(query: string): StoredTranscription[] {
+        const lowerQuery = query.toLowerCase();
+        return transcriptions.value.filter((transcription) => {
+            // Search through all segment texts
+            const fullText = transcription.segments
                 .map((segment) => segment.text)
-                .join(' ');
-        },
-    },
+                .join(' ')
+                .toLowerCase();
 
-    getters: {
-        /**
-         * Get transcription count
-         */
-        transcriptionCount: (state) => {
-            return state.transcriptions.length;
-        },
+            return fullText.includes(lowerQuery);
+        });
+    }
 
-        /**
-         * Filter transcriptions by search query
-         */
-        searchTranscriptions: (state) => (query: string) => {
-            const lowerQuery = query.toLowerCase();
-            return state.transcriptions.filter((transcription) => {
-                // Search through all segment texts
-                const fullText = transcription.segments
-                    .map((segment) => segment.text)
-                    .join(' ')
-                    .toLowerCase();
+    // Initialize the store when it's first accessed
+    onMounted(() => {
+        initializeDB();
+    });
 
-                return fullText.includes(lowerQuery);
-            });
-        },
+    return {
+        // State
+        transcriptions,
+        currentTranscription,
+        isLoading,
+        error,
 
-        /**
-         * Get transcriptions with audio files
-         */
-        transcriptionsWithAudio: (state) => {
-            return state.transcriptions.filter((t) => t.audioFileId);
-        },
-    },
+        // Actions
+        initializeDB,
+        loadAllTranscriptions,
+        getTranscription,
+        getAudioFile,
+        addTranscription,
+        setCurrentTranscription,
+        updateCurrentTranscription,
+        updateTranscription,
+        deleteTranscription,
+        getTranscriptionText,
+
+        // Getters
+        transcriptionCount,
+        transcriptionsWithAudio,
+        searchTranscriptions,
+    };
 });

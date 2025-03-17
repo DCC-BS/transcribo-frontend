@@ -14,7 +14,8 @@ export async function verboseFetch<T>(
     try {
         // Use type assertion to specify that the return value will be of type T
         // This tells TypeScript that we're handling the conversion from TypedInternalResponse to T
-        return (await $fetch(url, init)) as T;
+        const response = await $fetch(url, init);
+        return response as unknown as T; // NOSONAR
     } catch (error: unknown) {
         // Use unknown as it's safer for caught errors
         // Cast to a more specific type that we expect from $fetch errors

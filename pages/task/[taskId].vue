@@ -49,7 +49,7 @@ onUnmounted(() => {
 
 async function handleTranscriptionFinished(command: TranscriptionFinishedCommand): Promise<void> {
     if (command.result) {
-        const transcription = await transcriptionsStore.addTranscriptions({
+        const transcription = await transcriptionsStore.addTranscription({
             segments: command.result.segments.map((x) => ({
                 ...x,
                 text: x.text?.trim() ?? '',

@@ -7,12 +7,12 @@ import { Logger } from 'winston'
  */
 export function useLogger(): Logger {
     // Access the logger from the plugin
-    const nuxtApp = useNuxtApp();
+    const { $logger } = useNuxtApp();
 
     // Check if logger exists, which should be provided by the winston.server.ts plugin
-    if (!nuxtApp.$logger) {
+    if (!$logger) {
         throw new Error('Logger not available. Make sure the winston plugin is properly initialized.')
     }
 
-    return nuxtApp.$logger as Logger;
+    return $logger as Logger;
 }
