@@ -13,7 +13,7 @@ async function handleUpload(status: TaskStatus, file: File): Promise<void> {
 }
 
 async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
-    const file = new File([audioBlob], 'recording.wav', { type: 'audio/wav' });
+    const file = new File([audioBlob], 'recording.webm', { type: 'audio/webm' });
     await uploadMediaView.value?.uploadFile(audioBlob, file);
 }
 </script>

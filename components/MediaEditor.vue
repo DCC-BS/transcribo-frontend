@@ -33,6 +33,7 @@ onMounted(() => {
     audio.src = audioSrc;
 
     audio.onloadedmetadata = () => {
+        console.log(audio.duration);
         duration.value = audio.duration;
         timeRange.value = [0, audio.duration];
 

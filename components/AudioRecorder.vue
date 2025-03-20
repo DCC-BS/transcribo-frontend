@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import fixWebmDuration from 'fix-webm-duration';
 
 // Define emits for the component
 const emit = defineEmits<{
@@ -143,6 +144,7 @@ function stopRecording(): void {
     if (mediaRecorder.value && isRecording.value) {
         isRecording.value = false;
         mediaRecorder.value.stop();
+        console.log(recordingTime.value);
     }
 }
 
@@ -164,7 +166,11 @@ function resetRecording(): void {
  */
 function emitAudio(): void {
     if (audioBlob.value) {
-        emit('recording-complete', audioBlob.value);
+        console.log(recordingTime.value);
+
+        fixWebmDuration(audioBlob.value, recordingTime.value * 1000).then((fixedBlob: Blob) => {
+            emit('recording-complete', fixedBlob);
+        });
     }
 }
 
