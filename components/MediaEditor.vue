@@ -78,7 +78,7 @@ function handleMouseDown(event: MouseEvent) {
     }
 }
 
-function handleMouseUp(event: MouseEvent) {
+function handleMouseUp(_: MouseEvent) {
     mouseDownStart.value = undefined;
 }
 
@@ -210,7 +210,7 @@ watch(currentTime, (newTime) => {
             </div>
 
 
-            <CurrentSegementEditor :currentTime="currentTime" class="m-2" />
+            <CurrentSegementEditor :currentTime="currentTime" :duration="duration" class="m-2" />
             <RenameSpeakerView class="m-2" />
 
             <DataBsBanner class="mt-4" />

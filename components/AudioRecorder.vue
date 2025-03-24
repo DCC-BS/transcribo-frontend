@@ -185,16 +185,17 @@ onMounted(async () => {
 <template>
     <div class="audio-recorder">
         <div class="recorder-controls">
-            <button v-if="!isRecording && !audioBlob" @click="startRecording" :disabled="isLoading"
-                class="record-button">
+            <UButton
+                v-if="!isRecording && !audioBlob" color="primary" icon="i-heroicons-microphone"
+                :disabled="isLoading" @click="startRecording">
                 Start Recording
-            </button>
-            <button v-if="isRecording" @click="stopRecording" class="stop-button">
+            </UButton>
+            <UButton v-if="isRecording" color="secondary" icon="i-heroicons-stop" @click="stopRecording">
                 Stop Recording
-            </button>
-            <button v-if="audioBlob" @click="resetRecording" class="reset-button">
+            </UButton>
+            <UButton v-if="audioBlob" color="neutral" @click="resetRecording">
                 Reset
-            </button>
+            </UButton>
         </div>
 
         <div v-if="isRecording" class="recording-indicator">
@@ -203,8 +204,8 @@ onMounted(async () => {
         </div>
 
         <div v-if="audioBlob" class="audio-preview">
-            <audio :src="audioUrl" controls></audio>
-            <button @click="emitAudio" class="submit-button">Use this recording</button>
+            <audio :src="audioUrl" controls/>
+            <button class="submit-button" @click="emitAudio">Use this recording</button>
         </div>
 
         <div v-if="errorMessage" class="error-message">

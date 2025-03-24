@@ -16,6 +16,7 @@
         "@dcc-bs/common-ui.bs.js": "^0.1.6",
         "@dcc-bs/event-system.bs.js": "^1.1.1",
         "@dcc-bs/logger.bs.js": "1.0.0",
+        "@iconify-json/heroicons": "^1.2.2",
         "@nuxt/eslint": "1.2.0",
         "@nuxt/ui": "^3.0.0-beta.2",
         "@nuxtjs/i18n": "^9.2.1",

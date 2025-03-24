@@ -1,4 +1,5 @@
-import { Cmds, DeleteSegementCommand, InsertSegementCommand, RenameSpeakerCommand, TranscriptonNameChangeCommand, UpdateSegementCommand } from "~/types/commands";
+import type { InsertSegementCommand, RenameSpeakerCommand} from "~/types/commands";
+import { Cmds, DeleteSegementCommand, TranscriptonNameChangeCommand, UpdateSegementCommand, AddSegmentCommand } from "~/types/commands";
 import { v4 as uuid } from 'uuid';
 import type { SegementWithId } from "~/types/transcriptionResponse";
 
@@ -65,6 +66,28 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         store.updateCurrentTranscription({ segments: newTranscriptions });
     }
 
+    async function handleAddSegment(command: AddSegmentCommand): Promise<void> {
+        const currentTranscription = store.currentTranscription;
+        
+        if (!currentTranscription) {
+            logger.warn('Current transcription not found');
+            return;
+        }
+
+        const newSegement = {
+            id: uuid(),
+            ...command.newSegement
+        } as SegementWithId;
+
+        command.setUndoCommand(new DeleteSegementCommand(newSegement.id));
+
+        currentTranscription.segments.push(newSegement);
+
+        const newTranscriptions = currentTranscription.segments
+            .toSorted((a, b) => a.start - b.start);
+        store.updateCurrentTranscription({ segments: newTranscriptions });
+    }
+
     async function handleUpdateSegment(command: UpdateSegementCommand) {
         const currentTranscription = store.currentTranscription;
 
@@ -124,6 +147,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         registerHandler(Cmds.UpdateSegementCommand, handleUpdateSegment);
         registerHandler(Cmds.TranscriptonNameChangeCommand, handleNameChanged);
         registerHandler(Cmds.RenameSpeakerCommand, handleRenameSpeaker);
+        registerHandler(Cmds.AddSegmentCommand, handleAddSegment);
     }
 
     function unRegisterServer() {
@@ -136,3 +160,4 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
 
     return { registerService, unRegisterServer, error, isInited };
 }
+

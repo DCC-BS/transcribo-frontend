@@ -11,7 +11,8 @@ export default defineI18nConfig(() => ({
             },
             pages: {
                 index: {
-                    uploadMedia: 'Upload Media'
+                    uploadMedia: 'Upload Media',
+                    recordAudio: 'Record audio'
                 }
             },
             navigation: {
@@ -141,7 +142,8 @@ export default defineI18nConfig(() => ({
             },
             pages: {
                 index: {
-                    uploadMedia: 'Medien hochladen'
+                    uploadMedia: 'Medien hochladen',
+                    recordAudio: 'Audio aufnehmen'
                 }
             },
             navigation: {
@@ -153,7 +155,7 @@ export default defineI18nConfig(() => ({
                 actions: 'Aktionen'
             },
             timeline: {
-                noTranscription: 'Keine Transkription verfügbar'
+                noTranskription: 'Keine Transkription verfügbar'
             },
             media: {
                 play: 'Abspielen',

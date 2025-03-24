@@ -13,6 +13,7 @@ export const Cmds = {
     TranscriptonNameChangeCommand: 'TranscriptonNameChangeCommand',
     RenameSpeakerCommand: 'RenameSpeakerCommand',
     EmptyCommand: 'EmptyCommand',
+    AddSegmentCommand: 'AddSegmentCommand',
 };
 
 export type ITransriboReversibleCommand = IReversibleCommand & {
@@ -130,6 +131,18 @@ export class TogglePlayCommand implements ICommand {
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
         return t('commands.togglePlay');
+    }
+}
+
+export class AddSegmentCommand implements ITransriboReversibleCommand {
+    readonly $type = 'AddSegmentCommand';
+    $undoCommand: ICommand = new EmptyCommand();
+
+    constructor(public readonly newSegement: Segment) {
+    }
+
+    public setUndoCommand(undoCommand: ICommand) {
+        this.$undoCommand = undoCommand;
     }
 }
 
