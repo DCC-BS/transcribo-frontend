@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { IReversibleCommand } from '#build/types/commands';
 import type { NavigationMenuItem } from '#ui/components/NavigationMenu.vue';
 import type { ITransriboReversibleCommand } from '~/types/commands';
 
