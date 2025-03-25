@@ -25,7 +25,7 @@ const defaultOptions: Required<RenderOptions> = {
     height: 200,
     gamma: 0.3,
     logBase: 10,
-    colorMap: "rainbow",
+    colorMap: "magma",
     showFrequencyLabels: true,
 };
 

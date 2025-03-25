@@ -49,6 +49,9 @@ export default defineNuxtConfig({
     css: ["~/assets/css/main.css"],
     // localization
     i18n: {
+        bundle: {
+            optimizeTranslationDirective: false,
+        },
         locales: [
             {
                 code: "en",
