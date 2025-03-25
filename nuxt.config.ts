@@ -40,6 +40,7 @@ export default defineNuxtConfig({
         "@dcc-bs/logger.bs.js",
         "@pinia/nuxt",
         "@vite-pwa/nuxt",
+        "@codecov/nuxt-plugin",
     ],
     typescript: {
         strict: true,
@@ -84,5 +85,10 @@ export default defineNuxtConfig({
             background_color: "#000000",
             icons: pwaIcons.icons,
         },
+    },
+    codecovNuxtPlugin: {
+        enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+        bundleName: "transcribo-frontend",
+        uploadToken: process.env.CODECOV_TOKEN,
     },
 });

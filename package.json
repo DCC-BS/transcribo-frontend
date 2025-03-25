@@ -29,6 +29,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "1.9.4",
+        "@codecov/nuxt-plugin": "^1.9.0",
         "@types/bun": "^1.2.6",
         "jiti": "^2.4.2",
         "sass": "1.86.0",
