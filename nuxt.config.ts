@@ -10,7 +10,7 @@ export default defineNuxtConfig({
     },
     app: {
         head: {
-            titleTemplate: '%s | Transcribo',
+            titleTemplate: 'Transcribo',
             htmlAttrs: {
                 lang: 'de',
             },
@@ -22,9 +22,9 @@ export default defineNuxtConfig({
                 },
                 {
                     name: 'apple-mobile-web-app-title',
-                    content: 'My Test App',
+                    content: 'Transcribo',
                 },
-                { name: 'application-name', content: 'My Test App' },
+                { name: 'application-name', content: 'Transcribo' },
                 { name: 'msapplication-config', content: '/browserconfig.xml' },
             ],
         },
@@ -83,7 +83,7 @@ export default defineNuxtConfig({
             description: 'Speech-to-text transcription tool',
             theme_color: '#000000',
             background_color: '#000000',
-            icons: pwaIcons.icons as any,
+            icons: pwaIcons.icons,
         },
     },
 });

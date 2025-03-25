@@ -26,7 +26,7 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                 <UploadMediaView ref="uploadMediaView" @uploaded="handleUpload" />
             </UCard>
 
-            <UCard>
+            <UCard class="mt-5">
                 <div class="text-lg font-bold">{{ t('pages.index.recordAudio') }}</div>
                 <AudioRecorder @recording-complete="handleRecordingComplete" />
             </UCard>

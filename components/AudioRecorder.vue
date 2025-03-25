@@ -107,20 +107,25 @@ async function startRecording(): Promise<void> {
         };
 
         // Event handler for when recording stops
-        mediaRecorder.value.onstop = () => {
+        mediaRecorder.value.onstop = async () => {
             // Create a blob from all chunks
             const blob = new Blob(audioChunks.value, { type: 'audio/webm' });
-            audioBlob.value = blob;
-            audioUrl.value = URL.createObjectURL(blob);
 
-            // Stop all tracks in the stream to release the microphone
-            stream.getTracks().forEach(track => track.stop());
+            console.log('Recording stopped:', blob);
 
-            // Clear the recording timer
-            if (recordingInterval.value) {
-                clearInterval(recordingInterval.value);
-                recordingInterval.value = undefined;
-            }
+            fixWebmDuration(blob, recordingTime.value * 1000).then((fixedBlob: Blob) => {
+                audioBlob.value = fixedBlob;
+                audioUrl.value = URL.createObjectURL(blob);
+
+                // Stop all tracks in the stream to release the microphone
+                stream.getTracks().forEach(track => track.stop());
+
+                // Clear the recording timer
+                if (recordingInterval.value) {
+                    clearInterval(recordingInterval.value);
+                    recordingInterval.value = undefined;
+                }
+            });
         };
 
         // Start recording
@@ -166,11 +171,7 @@ function resetRecording(): void {
  */
 function emitAudio(): void {
     if (audioBlob.value) {
-        console.log(recordingTime.value);
-
-        fixWebmDuration(audioBlob.value, recordingTime.value * 1000).then((fixedBlob: Blob) => {
-            emit('recording-complete', fixedBlob);
-        });
+        emit('recording-complete', fixedBlob);
     }
 }
 
@@ -183,10 +184,9 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="audio-recorder">
-        <div class="recorder-controls">
-            <UButton
-                v-if="!isRecording && !audioBlob" color="primary" icon="i-heroicons-microphone"
+    <div class="p-2 min-w-[400px] max-w-[500px] mx-auto">
+        <div class="flex justify-center gap-2 mb-2">
+            <UButton v-if="!isRecording && !audioBlob" color="primary" icon="i-heroicons-microphone"
                 :disabled="isLoading" @click="startRecording">
                 Start Recording
             </UButton>
@@ -204,8 +204,8 @@ onMounted(async () => {
         </div>
 
         <div v-if="audioBlob" class="audio-preview">
-            <audio :src="audioUrl" controls/>
-            <button class="submit-button" @click="emitAudio">Use this recording</button>
+            <audio :src="audioUrl" controls />
+            <UButton @click="emitAudio">Use this recording</UButton>
         </div>
 
         <div v-if="errorMessage" class="error-message">
@@ -221,54 +221,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.audio-recorder {
-    padding: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.recorder-controls {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-button {
-    padding: 8px 16px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.record-button {
-    background-color: #f44336;
-    color: white;
-}
-
-.stop-button {
-    background-color: #2196F3;
-    color: white;
-}
-
-.reset-button {
-    background-color: #9e9e9e;
-    color: white;
-}
-
-.submit-button {
-    background-color: #4CAF50;
-    color: white;
-    margin-top: 10px;
-}
-
-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-}
-
 .recording-indicator {
     color: #f44336;
     text-align: center;
