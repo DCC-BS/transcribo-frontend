@@ -7,7 +7,7 @@ export function useSpeakerColor(speakers: Ref<(string | undefined)[]>) {
             new Set<string>(
                 speakers.value
                     .filter((speaker) => speaker)
-                    .map((speaker) => speaker!),
+                    .map((speaker) => speaker as string),
             ),
         ),
     );

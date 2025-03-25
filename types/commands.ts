@@ -191,7 +191,7 @@ export class DeleteSegementCommand implements ITransriboReversibleCommand {
      * Returns a string representation of the command
      */
     toString(): string {
-        return `Delete Segment`;
+        return "Delete Segment";
     }
 
     /**

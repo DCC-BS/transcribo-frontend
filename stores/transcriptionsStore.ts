@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { v4 as uuidv4 } from "uuid";
-import type { SegementWithId } from "../types/transcriptionResponse";
 import { initDB } from "~/services/indexDbService";
+import type { SegementWithId } from "../types/transcriptionResponse";
 
 // Define the structure of a stored transcription
 export interface StoredTranscription {
@@ -60,9 +60,15 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         if (!db.value) await initializeDB();
 
         return new Promise<StoredTranscription[]>((resolve, reject) => {
+            if (!db.value) {
+                error.value = "Database not initialized";
+                reject(new Error(error.value));
+                return;
+            }
+
             isLoading.value = true;
 
-            const transaction = db.value!.transaction(STORE_NAME, "readonly");
+            const transaction = db.value.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.getAll();
 
@@ -92,12 +98,18 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
      */
     async function getTranscription(
         id: string,
-        includeAudio: boolean = false,
+        includeAudio = false,
     ): Promise<StoredTranscription | null> {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(STORE_NAME, "readonly");
+            if (!db.value) {
+                error.value = "Database not initialized";
+                reject(new Error(error.value));
+                return;
+            }
+
+            const transaction = db.value.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.get(id);
 
@@ -131,7 +143,13 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(STORE_NAME, "readonly");
+            if (!db.value) {
+                error.value = "Database not initialized";
+                reject(new Error(error.value));
+                return;
+            }
+
+            const transaction = db.value.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.get(id);
 
@@ -192,7 +210,13 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         }
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
+            if (!db.value) {
+                error.value = "Database not initialized";
+                reject(new Error(error.value));
+                return;
+            }
+
+            const transaction = db.value.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.add(newTranscription);
 
@@ -265,6 +289,12 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
         // Create a new Promise with non-async executor function
         return new Promise((resolve, reject) => {
+            if (!db.value) {
+                error.value = "Database not initialized";
+                reject(new Error(error.value));
+                return;
+            }
+
             const clonedTranscription = JSON.parse(
                 JSON.stringify(existingTranscription),
             ) as StoredTranscription;
@@ -325,7 +355,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                 }
             }
 
-            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
+            const transaction = db.value.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.put(updatedTranscription);
 
@@ -358,7 +388,13 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
+            if (!db.value) {
+                error.value = "Database not initialized";
+                reject(new Error(error.value));
+                return;
+            }
+
+            const transaction = db.value.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.delete(id);
 

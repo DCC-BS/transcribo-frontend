@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { UInput } from "#components";
 import { TranscriptonNameChangeCommand } from "~/types/commands";
+import { UInput } from "#components";
 
 const route = useRoute();
 const transcriptionStore = useTranscriptionsStore();

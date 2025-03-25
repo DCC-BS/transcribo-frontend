@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { UButton } from "#components";
-import TranscriptionListItem from "../transcriptionList/TranscriptionSegmentEdit.vue";
 import { AddSegmentCommand } from "../../types/commands";
+import TranscriptionListItem from "../transcriptionList/TranscriptionSegmentEdit.vue";
 
 interface CurrentSegmentEditorProps {
     currentTime: number;

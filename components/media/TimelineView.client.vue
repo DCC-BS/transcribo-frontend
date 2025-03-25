@@ -2,7 +2,7 @@
 import type { LayerConfig } from "konva/lib/Layer";
 import type { KonvaEventObject } from "konva/lib/Node";
 import type { Stage, StageConfig } from "konva/lib/Stage";
-import type { RectConfig, Rect } from "konva/lib/shapes/Rect";
+import type { Rect, RectConfig } from "konva/lib/shapes/Rect";
 import type { Box, TransformerConfig } from "konva/lib/shapes/Transformer";
 import TimeAxisLayer from "~/components/timeline/TimeAxisLayer.vue";
 import { UpdateSegementCommand } from "~/types/commands";
@@ -419,13 +419,25 @@ function clearSelection(e: KonvaEventObject<MouseEvent, Stage>): void {
 /**
  * Shows tooltip when hovering over a segment
  */
-function onSegmentMouseEnter(e: any, text: string): void {
+function onSegmentMouseEnter(
+    e: KonvaEventObject<MouseEvent, Stage>,
+    text: string,
+): void {
     // Display the tooltip with segment text
     tooltipText.value = text || t("timeline.noTranscription");
     tooltipVisible.value = true;
 
+    if (!e.target) {
+        return;
+    }
+
     // Position tooltip near the mouse position
     const stage = e.target.getStage();
+
+    if (!stage) {
+        return;
+    }
+
     const pointerPosition = stage.getPointerPosition();
     if (pointerPosition) {
         tooltipPosition.value = {
@@ -445,9 +457,13 @@ function onSegmentMouseLeave(): void {
 /**
  * Updates tooltip position as mouse moves
  */
-function onPointerMove(e: any): void {
+function onPointerMove(e: KonvaEventObject<MouseEvent, Stage>): void {
     if (tooltipVisible.value) {
         const stage = e.target.getStage();
+        if (!stage) {
+            return;
+        }
+
         const pointerPosition = stage.getPointerPosition();
         if (pointerPosition) {
             tooltipPosition.value = {

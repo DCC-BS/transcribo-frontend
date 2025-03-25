@@ -26,7 +26,7 @@ export const formatTime = (time: number, options?: formatOptions): string => {
         ? milliseconds.toString().padStart(3, "0")
         : "";
 
-    return `${minutes}:${secondsString}${millisecondsString ? "." + millisecondsString : ""}`;
+    return `${minutes}:${secondsString}${millisecondsString ? `.${millisecondsString}` : ""}`;
 };
 
 /**
@@ -38,10 +38,10 @@ export const formatTime = (time: number, options?: formatOptions): string => {
  */
 export const parseTime = (time: string): number => {
     const parts = time.split(":");
-    const minutes = parseInt(parts[0], 10);
-    const seconds = parseInt(parts[1], 10);
+    const minutes = Number.parseInt(parts[0], 10);
+    const seconds = Number.parseInt(parts[1], 10);
 
-    if (isNaN(minutes) || isNaN(seconds)) {
+    if (Number.isNaN(minutes) || Number.isNaN(seconds)) {
         throw new Error("Invalid time format");
     }
 

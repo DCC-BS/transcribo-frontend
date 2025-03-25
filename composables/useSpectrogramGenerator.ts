@@ -172,7 +172,7 @@ export function useSpectrogramGenerator() {
         const spectrogramData: Uint8Array[] = [];
 
         // Process each frame
-        for (let frame: number = 0; frame < framesToProcess; frame++) {
+        for (let frame = 0; frame < framesToProcess; frame++) {
             // Calculate positions for this frame
             const startSample: number = frame * hopSize;
             const endSample: number = Math.min(
@@ -193,7 +193,7 @@ export function useSpectrogramGenerator() {
             const tempChannel: Float32Array = tempBuffer.getChannelData(0);
 
             // Fill the buffer with audio data (with zero-padding if needed)
-            for (let i: number = 0; i < fftSize; i++) {
+            for (let i = 0; i < fftSize; i++) {
                 tempChannel[i] =
                     startSample + i < endSample
                         ? audioData[startSample + i]

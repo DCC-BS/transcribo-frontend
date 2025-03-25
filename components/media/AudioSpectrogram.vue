@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from "vue";
+import type { KonvaPointerEvent } from "konva/lib/PointerEvents";
 import type { Stage, StageConfig } from "konva/lib/Stage";
 import type { ImageConfig } from "konva/lib/shapes/Image";
 import type { RectConfig } from "konva/lib/shapes/Rect";
 import type { TextConfig } from "konva/lib/shapes/Text";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 import { SeekToSecondsCommand } from "~/types/commands";
-import type { KonvaPointerEvent } from "konva/lib/PointerEvents";
 
 interface AudioSpectrogramProps {
     audioFile: File | Blob;
@@ -157,7 +157,7 @@ const frequencyLabels = computed(() => {
         100, 200, 500, 1000, 2000, 5000, 10000, 20000,
     ].filter((f) => f < nyquist);
 
-    freqPoints.forEach((freq: number) => {
+    for (const freq of freqPoints) {
         // Logarithmic mapping
         const logFreqRatio: number = 1 - Math.log(freq) / Math.log(nyquist);
         const yPos: number = Math.floor(logFreqRatio * stageHeight.value);
@@ -174,7 +174,7 @@ const frequencyLabels = computed(() => {
             fontFamily: "Arial",
             fill: "black",
         } as TextConfig);
-    });
+    }
 
     return labels;
 });

@@ -23,12 +23,18 @@ export function useTimelineSegment(zoomX: Ref<number>) {
         const starts: number[] = [];
         const ends: number[] = [];
 
-        rectConfigs.forEach((rectConfig) => {
-            if (rectConfig.id === selectedId) return;
+        for (const rectConfig of rectConfigs) {
+            if (
+                rectConfig.id === selectedId ||
+                !rectConfig.x ||
+                !rectConfig.width
+            ) {
+                continue;
+            }
 
-            starts.push(rectConfig.x!);
-            ends.push(rectConfig.x! + rectConfig.width!);
-        });
+            starts.push(rectConfig.x);
+            ends.push(rectConfig.x + rectConfig.width);
+        }
 
         return { starts, ends };
     }

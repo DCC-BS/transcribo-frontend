@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import type { TaskStatus } from "~/types/task";
 import { initDB } from "~/services/indexDbService";
+import type { TaskStatus } from "~/types/task";
 
 // Define the structure of a stored task
 export interface StoredTask {
@@ -53,9 +53,13 @@ export const useTasksStore = defineStore("tasksStore", () => {
         if (!db.value) await initializeDB();
 
         return new Promise<StoredTask[]>((resolve, reject) => {
+            if (!db.value) {
+                throw new Error("Database initialization failed");
+            }
+
             isLoading.value = true;
 
-            const transaction = db.value!.transaction(STORE_NAME, "readonly");
+            const transaction = db.value.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.getAll();
 
@@ -86,7 +90,11 @@ export const useTasksStore = defineStore("tasksStore", () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(STORE_NAME, "readonly");
+            if (!db.value) {
+                throw new Error("Database initialization failed");
+            }
+
+            const transaction = db.value.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.get(id);
 
@@ -130,7 +138,11 @@ export const useTasksStore = defineStore("tasksStore", () => {
         }
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
+            if (!db.value) {
+                throw new Error("Database initialization failed");
+            }
+
+            const transaction = db.value.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.add(newTask);
 
@@ -168,6 +180,10 @@ export const useTasksStore = defineStore("tasksStore", () => {
         }
 
         return new Promise((resolve, reject) => {
+            if (!db.value) {
+                throw new Error("Database initialization failed");
+            }
+
             // Create a deep clone of the existing task
             const clonedTask = JSON.parse(
                 JSON.stringify(existingTask),
@@ -184,8 +200,8 @@ export const useTasksStore = defineStore("tasksStore", () => {
                     : {}),
             };
 
-            // Update media file if provided
             if (mediaFile) {
+                // Update media file if provided
                 updatedTask.mediaFile = mediaFile;
                 updatedTask.mediaFileName = mediaFileName ?? "media-file";
             } else if (existingTask.mediaFile) {
@@ -193,7 +209,7 @@ export const useTasksStore = defineStore("tasksStore", () => {
                 updatedTask.mediaFile = existingTask.mediaFile;
             }
 
-            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
+            const transaction = db.value.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.put(updatedTask);
 
@@ -223,7 +239,11 @@ export const useTasksStore = defineStore("tasksStore", () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
+            if (!db.value) {
+                throw new Error("Database initialization failed");
+            }
+
+            const transaction = db.value.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.delete(id);
 

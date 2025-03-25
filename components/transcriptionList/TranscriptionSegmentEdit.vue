@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import { UCard, UTextarea } from "#components";
 import {
-    SeekToSecondsCommand,
     DeleteSegementCommand,
     InsertSegementCommand,
+    SeekToSecondsCommand,
     UpdateSegementCommand,
 } from "~/types/commands";
 import type { SegementWithId } from "~/types/transcriptionResponse";
+import { UCard, UTextarea } from "#components";
 
 interface TranscriptionListProps {
     segment: SegementWithId;

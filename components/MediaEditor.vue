@@ -1,11 +1,11 @@
 <script lang="ts" setup>
+import { match } from "ts-pattern";
 import { SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
+import RenameSpeakerView from "./RenameSpeakerView.vue";
 import AudioSpectrogram from "./media/AudioSpectrogram.vue";
 import CurrentSegementEditor from "./media/CurrentSegementEditor.vue";
 import TimelineView from "./media/TimelineView.client.vue";
 import VideoView from "./media/VideoView.vue";
-import RenameSpeakerView from "./RenameSpeakerView.vue";
-import { match } from "ts-pattern";
 
 const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const currentTime = ref<number>(0); // Current playback position in seconds

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import { v4 as uuidv4 } from "uuid";
 import type { TranscriptionFinishedCommand } from "~/types/commands";
 import { Cmds } from "~/types/commands";
-import { v4 as uuidv4 } from "uuid";
 
 const { registerHandler, unregisterHandler } = useCommandBus();
 const taskStore = useTasksStore();

@@ -19,9 +19,9 @@ export type ColorMapType =
 export function rainbow(normalizedValue: number): RGBColor {
     // Ensure value is in valid range
     const value = Math.max(0, Math.min(1, normalizedValue));
-    let r = 0,
-        g = 0,
-        b = 0;
+    let r = 0;
+    let g = 0;
+    let b = 0;
 
     if (value < 0.2) {
         // Blue to Cyan (0-0.2)
@@ -70,9 +70,9 @@ export function grayscale(normalizedValue: number): RGBColor {
 export function viridis(normalizedValue: number): RGBColor {
     // Ensure value is in valid range
     const value = Math.max(0, Math.min(1, normalizedValue));
-    let r = 0,
-        g = 0,
-        b = 0;
+    let r = 0;
+    let g = 0;
+    let b = 0;
 
     if (value < 0.33) {
         // Dark blue to teal
@@ -106,9 +106,9 @@ export function viridis(normalizedValue: number): RGBColor {
 export function inferno(normalizedValue: number): RGBColor {
     // Ensure value is in valid range
     const value = Math.max(0, Math.min(1, normalizedValue));
-    let r = 0,
-        g = 0,
-        b = 0;
+    let r = 0;
+    let g = 0;
+    let b = 0;
 
     if (value < 0.25) {
         // Black to purple
@@ -148,9 +148,9 @@ export function inferno(normalizedValue: number): RGBColor {
 export function magma(normalizedValue: number): RGBColor {
     // Ensure value is in valid range
     const value = Math.max(0, Math.min(1, normalizedValue));
-    let r = 0,
-        g = 0,
-        b = 0;
+    let r = 0;
+    let g = 0;
+    let b = 0;
 
     if (value < 0.25) {
         // Dark purple to purple
@@ -196,25 +196,30 @@ export function textFriendly(normalizedValue: number): RGBColor {
     if (value < 0.14) {
         // Dark blue
         return new RGBColor(0, 51, 153);
-    } else if (value < 0.28) {
+    }
+    if (value < 0.28) {
         // Green
         return new RGBColor(0, 128, 0);
-    } else if (value < 0.42) {
+    }
+    if (value < 0.42) {
         // Dark red
         return new RGBColor(153, 0, 0);
-    } else if (value < 0.56) {
+    }
+    if (value < 0.56) {
         // Purple
         return new RGBColor(102, 0, 153);
-    } else if (value < 0.7) {
+    }
+    if (value < 0.7) {
         // Teal
         return new RGBColor(0, 128, 128);
-    } else if (value < 0.84) {
+    }
+    if (value < 0.84) {
         // Dark orange
         return new RGBColor(204, 85, 0);
-    } else {
-        // Dark magenta
-        return new RGBColor(139, 0, 139);
     }
+
+    // Dark magenta
+    return new RGBColor(139, 0, 139);
 }
 
 /**
@@ -235,6 +240,7 @@ export function getColorMap(type: ColorMapType): (value: number) => RGBColor {
         case "textFriendly":
             return textFriendly;
         case "rainbow":
+            return rainbow;
         default:
             return rainbow;
     }

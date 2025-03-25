@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
 import fixWebmDuration from "fix-webm-duration";
+import { computed, onMounted, ref, watch } from "vue";
 
 // Define emits for the component
 const emit = defineEmits<{
@@ -187,7 +187,9 @@ async function startRecording(): Promise<void> {
                     audioUrl.value = URL.createObjectURL(blob);
 
                     // Stop all tracks in the stream to release the microphone
-                    stream.getTracks().forEach((track) => track.stop());
+                    for (const track of stream.getTracks()) {
+                        track.stop();
+                    }
 
                     // Clear the recording timer
                     if (recordingInterval.value) {

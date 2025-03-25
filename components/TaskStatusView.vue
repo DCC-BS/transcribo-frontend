@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { TaskStatusEnum, type TaskStatus } from "~/types/task";
+import { P, match } from "ts-pattern";
 import { TranscriptionFinishedCommand } from "~/types/commands";
+import { type TaskStatus, TaskStatusEnum } from "~/types/task";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
-import { match, P } from "ts-pattern";
 
 const props = defineProps<{
     taskId: string;
@@ -43,13 +43,13 @@ const fetchTaskStatus = async (): Promise<void> => {
         return;
     }
 
-    while (status.value?.status == TaskStatusEnum.IN_PROGRESS) {
+    while (status.value?.status === TaskStatusEnum.IN_PROGRESS) {
         await loadTaskStatus(props.taskId);
         await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     let result: TranscriptionResponse | undefined = undefined;
-    if (status.value?.status == TaskStatusEnum.SUCCESS) {
+    if (status.value?.status === TaskStatusEnum.SUCCESS) {
         result = await $fetch<TranscriptionResponse>(
             `/api/transcribe/${props.taskId}`,
         );

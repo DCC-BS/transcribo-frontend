@@ -7,7 +7,8 @@
         "build": "nuxt build",
         "start": "nuxt start",
         "generate": "nuxt generate",
-        "lint": "biome format --write"
+        "lint": "biome format --write",
+        "check": "biome check --fix"
     },
     "dependencies": {
         "@dcc-bs/common-ui.bs.js": "^0.1.6",

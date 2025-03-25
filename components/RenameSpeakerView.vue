@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { UInput } from "#components";
 import { RenameSpeakerCommand } from "~/types/commands";
+import { UInput } from "#components";
 
 // Get speakers from the current transcription
 const { speakers } = useCurrentTranscription();

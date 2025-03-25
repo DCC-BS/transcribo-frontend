@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { UButton, ULink } from "#components";
 import type { TableColumn } from "@nuxt/ui/runtime/components/Table.vue";
+import { UButton, ULink } from "#components";
 
 const transcriptionStore = useTranscriptionsStore();
 const { openDialog } = useDialog();

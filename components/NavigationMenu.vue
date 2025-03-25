@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { NavigationMenuItem } from "#ui/components/NavigationMenu.vue";
 import type { ITransriboReversibleCommand } from "~/types/commands";
+import type { NavigationMenuItem } from "#ui/components/NavigationMenu.vue";
 
 // Add translation hook
 const { t } = useI18n();
@@ -97,7 +97,7 @@ const items = computed<NavigationMenuItem[][]>(() => [
 /**
  * Handler for undo button click
  */
-function handleUndo(amount: number = 1): void {
+function handleUndo(amount = 1): void {
     for (let i = 0; i < amount; i++) {
         undo();
     }

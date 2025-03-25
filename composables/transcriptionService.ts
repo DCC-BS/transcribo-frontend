@@ -1,7 +1,8 @@
+import { v4 as uuid } from "uuid";
 import type {
+    AddSegmentCommand,
     InsertSegementCommand,
     RenameSpeakerCommand,
-    AddSegmentCommand,
 } from "~/types/commands";
 import {
     Cmds,
@@ -9,7 +10,6 @@ import {
     TranscriptonNameChangeCommand,
     UpdateSegementCommand,
 } from "~/types/commands";
-import { v4 as uuid } from "uuid";
 import type { SegementWithId } from "~/types/transcriptionResponse";
 
 export const useTranscriptionService = (currentTranscriptionId: string) => {
@@ -25,7 +25,9 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         .then(() => {
             isInited.value = true;
         })
-        .catch((err) => (error.value = err));
+        .catch((err) => {
+            error.value = err;
+        });
 
     async function handleDeleteSegment(command: DeleteSegementCommand) {
         const currentTranscription = store.currentTranscription;

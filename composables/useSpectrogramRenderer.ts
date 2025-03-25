@@ -1,4 +1,4 @@
-import { getColorMap, type ColorMapType } from "../services/colorMapService";
+import { type ColorMapType, getColorMap } from "../services/colorMapService";
 
 /**
  * Interface for spectrogram rendering options
@@ -10,7 +10,6 @@ interface RenderOptions {
     logBase?: number; // Base for logarithmic scaling
     colorMap?: ColorMapType; // Color mapping style
     showFrequencyLabels?: boolean; // Whether to display frequency labels
-    frequencyRange?: [number, number]; // Optional min/max frequency range to display
 }
 
 /**
@@ -21,12 +20,13 @@ interface RenderResult {
     imageData: ImageData; // The raw image data
 }
 
-const defaultOptions: RenderOptions = {
+const defaultOptions: Required<RenderOptions> = {
     width: 800,
     height: 200,
     gamma: 0.3,
     logBase: 10,
     colorMap: "rainbow",
+    showFrequencyLabels: true,
 };
 
 /**
@@ -96,24 +96,22 @@ export function useSpectrogramRenderer() {
     /**
      * Renders spectrogram data to a canvas with various visualization options
      * @param {Uint8Array[]} spectrogramData - The frequency data from spectrogram analysis
-     * @param {number} sampleRate - The audio sample rate in Hz
      * @param {RenderOptions} options - Rendering options
      * @returns {RenderResult} - The rendering result with canvas and helper methods
      */
     const renderSpectrogram = (
         spectrogramData: Uint8Array[],
-        sampleRate: number,
         options: RenderOptions = {},
     ): RenderResult => {
         isRendering.value = true;
         error.value = null;
 
         try {
-            options = { ...defaultOptions, ...options };
+            const full_options = { ...defaultOptions, ...options };
 
-            const logBase = options.logBase!;
-            const gamma = options.gamma!;
-            const colorMap = options.colorMap!;
+            const logBase = full_options.logBase;
+            const gamma = full_options.gamma;
+            const colorMap = full_options.colorMap;
 
             // Validate inputs
             if (!spectrogramData?.length) {
@@ -185,8 +183,8 @@ export function useSpectrogramRenderer() {
             );
 
             // Map frequency data to pixel colors with logarithmic y-axis scaling
-            for (let x: number = 0; x < dataWidth; x++) {
-                for (let y: number = 0; y < dataHeight; y++) {
+            for (let x = 0; x < dataWidth; x++) {
+                for (let y = 0; y < dataHeight; y++) {
                     // Apply logarithmic scaling to y-coordinate (frequency axis)
                     const originalY: number = dataHeight - y - 1;
 
@@ -210,10 +208,8 @@ export function useSpectrogramRenderer() {
                     const index: number = (y * dataWidth + x) * 4;
 
                     // Apply gamma correction for better contrast
-                    const normalizedValue: number = Math.pow(
-                        (value - minFrequency) / range,
-                        gamma,
-                    );
+                    const normalizedValue: number =
+                        ((value - minFrequency) / range) ** gamma;
 
                     // Get color from color map service
                     const color = getColor(normalizedValue);

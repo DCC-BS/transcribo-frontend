@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TogglePlayCommand, SeekToSecondsCommand } from "~/types/commands";
+import type { SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
 import { Cmds } from "~/types/commands";
 
 // Import useI18n composable

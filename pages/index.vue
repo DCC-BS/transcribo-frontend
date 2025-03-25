@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { UploadMediaView } from "#components";
 import type { TaskStatus } from "~/types/task";
+import type { UploadMediaView } from "#components";
 
 const tasksStore = useTasksStore();
 const { t } = useI18n();
