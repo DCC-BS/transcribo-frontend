@@ -67,7 +67,8 @@ function handleDeletedTranscription(transcriptionId: string): void {
 
 <template>
     <UContainer>
-        <UTable :columns="columns" :data="transcriptionStore.transcriptions" sticky :empty-state="{
+        <UTable
+:columns="columns" :data="transcriptionStore.transcriptions" sticky :empty-state="{
             icon: 'i-heroicons-document-text',
             label: t('transcription.noTranscriptionsFound'),
             description: t('ui.emptyState.description')
@@ -85,7 +86,8 @@ function handleDeletedTranscription(transcriptionId: string): void {
                             {{ t('transcription.actions.edit') }}
                         </UButton>
                     </ULink>
-                    <UButton icon="i-heroicons-trash" color="error"
+                    <UButton
+icon="i-heroicons-trash" color="error"
                         @click="handleDeletedTranscription(row.original.id)">
                         {{ t('transcription.actions.delete') }}
                     </UButton>

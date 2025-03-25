@@ -62,8 +62,9 @@ defineExpose({ uploadFile });
 
 <template>
     <div>
-        <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up" @change="loadAudio"
-            :disabled="showProgress" />
+        <UInput
+type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up" :disabled="showProgress"
+            @change="loadAudio" />
 
         <div v-if="showProgress" class="mt-4">
             <p>{{ progressMessage }}</p>

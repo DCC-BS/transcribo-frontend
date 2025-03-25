@@ -42,8 +42,9 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
         <h2 class="text-lg font-bold">Speakers</h2>
         <div class="flex gap-2 flex-wrap mt-2">
             <div v-for="(speakerMap, index) in speakerMappings" :key="index" class="speaker-item">
-                <UInput v-model="speakerMap.new" @change="handleSpeakerNameChange(speakerMap.original, speakerMap.new)"
-                    :style="{ color: getSpeakerColor(speakerMap.original) }" placeholder="Speaker name" />
+                <UInput
+v-model="speakerMap.new" :style="{ color: getSpeakerColor(speakerMap.original) }"
+                    placeholder="Speaker name" @change="handleSpeakerNameChange(speakerMap.original, speakerMap.new)" />
             </div>
         </div>
     </UCard>

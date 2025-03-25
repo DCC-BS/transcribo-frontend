@@ -54,7 +54,8 @@ async function handleNameChange(name: string | number) {
                 <UButton icon="i-heroicons-question-mark-circle" variant="ghost" label="Help" color="info" />
                 <template #content>
                     <div class="flex justify-end p-2">
-                        <UButton icon="i-heroicons-x-circle" variant="ghost" label="Close" color="error"
+                        <UButton
+icon="i-heroicons-x-circle" variant="ghost" label="Close" color="error"
                             @click="isHelpViewOpen = false" />
                     </div>
                     <div class="overflow-y-scroll w-full h-full">
@@ -67,7 +68,8 @@ async function handleNameChange(name: string | number) {
 
         <div v-if="transcriptionStore.currentTranscription && isInited" class="p-2">
             <div class="flex justify-items-stretch p-2 gap-2">
-                <UInput class="grow" :model-value="transcriptionStore.currentTranscription.name"
+                <UInput
+class="grow" :model-value="transcriptionStore.currentTranscription.name"
                     @update:model-value="handleNameChange" />
                 <ExportToolbar />
             </div>
@@ -82,7 +84,8 @@ async function handleNameChange(name: string | number) {
             </SplitView>
         </div>
         <div v-else-if="error" class="p-4 text-center">
-            <UAlert color="error" title="Error" :description="t('transcription.notFound')"
+            <UAlert
+color="error" title="Error" :description="t('transcription.notFound')"
                 icon="i-heroicons-exclamation-triangle" />
         </div>
         <div v-else class="p-4 text-center">

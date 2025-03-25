@@ -1,5 +1,5 @@
 // Import the StoredTranscription interface
-import { type StoredTranscription } from '~/stores/transcriptionsStore';
+import type { StoredTranscription } from '~/stores/transcriptionsStore';
 
 export const useExport = () => {
     const { currentTranscription } = useCurrentTranscription();

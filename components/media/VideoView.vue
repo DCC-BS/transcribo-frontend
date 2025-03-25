@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { RGBColor } from '~/types/color';
-import { Cmds, TogglePlayCommand, type SeekToSecondsCommand } from '~/types/commands';
+import type { TogglePlayCommand, Cmds, type SeekToSecondsCommand } from '~/types/commands';
 
 // Import useI18n composable
 const { t } = useI18n();
@@ -125,7 +125,8 @@ async function handleSeekToSeconds(
 <template>
     <div class="media-container">
         <!-- Show video if it's a video file -->
-        <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player" @timeupdate="onTimeUpdate"
+        <video
+v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player" @timeupdate="onTimeUpdate"
             @click="togglePlay">
             <source :src="mediaSrc" type="video/mp4">
         </video>
@@ -138,7 +139,8 @@ async function handleSeekToSeconds(
 
         <!-- Subtitles section - now positioned at the bottom of the media -->
         <div class="subtitles-container">
-            <div v-for="segment in currentSegments" :key="segment.id" class="subtitle-segment" :style="{
+            <div
+v-for="segment in currentSegments" :key="segment.id" class="subtitle-segment" :style="{
                 '--text-color': getSpeakerColor(segment.speaker ?? 'unknown').toString()
             }">
                 <span class="font-bold">{{ segment.speaker }}: </span>
@@ -152,9 +154,9 @@ async function handleSeekToSeconds(
             {{ isPlaying ? t('media.pause') : t('media.play') }}
         </UButton>
 
-        <USlider v-model="currentTime" :min="0" :max="props.duration" :step="0.1"
-            @update:model-value="v => seekTo(v as number)">
-        </USlider>
+        <USlider
+v-model="currentTime" :min="0" :max="props.duration" :step="0.1"
+            @update:model-value="v => seekTo(v as number)"/>
         <div class="w-[100px]">
             {{ formatTime(currentTime, { milliseconds: false }) }} / {{ formatTime(props.duration, {
                 milliseconds:

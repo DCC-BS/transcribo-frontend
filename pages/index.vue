@@ -28,7 +28,8 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
 
             <div class="mt-5">
                 <div class="text-lg font-bold my-4">{{ t('pages.index.recordAudio') }}</div>
-                <UAlert class="text-left" icon="i-heroicons-information-circle"
+                <UAlert
+class="text-left" icon="i-heroicons-information-circle"
                     :title="t('pages.index.experimentalTitle')" color="info"
                     :description="t('pages.index.experimental')" />
                 <AudioRecorder @recording-complete="handleRecordingComplete" />

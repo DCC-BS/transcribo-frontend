@@ -191,18 +191,21 @@ watch(currentTime, (newTime) => {
 <template>
     <div class="p-1">
         <div v-if="audioFile && duration > 0">
-            <div @keydown="handleKeyDown" @keyup="handleKeyUp" tabindex="0">
+            <div tabindex="0" @keydown="handleKeyDown" @keyup="handleKeyUp">
                 <VideoView v-model="currentTime" :duration="duration" />
 
                 <ClientOnly>
-                    <div @wheel="handleWheel" @mousedown="handleMouseDown" @mouseup="handleMouseUp"
+                    <div
+@wheel="handleWheel" @mousedown="handleMouseDown" @mouseup="handleMouseUp"
                         @mousemove="handleMouseMove">
 
-                        <AudioSpectrogram :audio-file="audioFile" :current-time="currentTime" :duration="duration"
-                            :zoomX="zoomX" :startTime="timeRange[0]" />
+                        <AudioSpectrogram
+:audio-file="audioFile" :current-time="currentTime" :duration="duration"
+                            :zoom-x="zoomX" :start-time="timeRange[0]" />
 
-                        <TimelineView :current-time="currentTime" :duration="duration" :zoomX="zoomX"
-                            :startTime="timeRange[0]" :endTime="timeRange[1]" />
+                        <TimelineView
+:current-time="currentTime" :duration="duration" :zoom-x="zoomX"
+                            :start-time="timeRange[0]" :end-time="timeRange[1]" />
                     </div>
                 </ClientOnly>
 
@@ -210,7 +213,7 @@ watch(currentTime, (newTime) => {
             </div>
 
 
-            <CurrentSegementEditor :currentTime="currentTime" :duration="duration" class="m-2" />
+            <CurrentSegementEditor :current-time="currentTime" :duration="duration" class="m-2" />
             <RenameSpeakerView class="m-2" />
 
             <DataBsBanner class="mt-4" />

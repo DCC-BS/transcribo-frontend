@@ -1,5 +1,5 @@
 export const useResizeObserver = (container: Ref<HTMLDivElement | undefined>) => {
-    let observer = (entry: ResizeObserverEntry) => { };
+    let observer = (_: ResizeObserverEntry) => { };
 
     const resizeObserver = ref<ResizeObserver>();
 

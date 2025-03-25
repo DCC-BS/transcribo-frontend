@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "github.copilot",
+    "github.copilot-chat",
+    "nuxtr.nuxt-vscode-extentions",
+    "rvest.vs-code-prettier-eslint",
+    "yoavbls.pretty-ts-errors",
+    "bradlc.vscode-tailwindcss"
+  ]
+}

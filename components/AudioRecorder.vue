@@ -234,7 +234,8 @@ onMounted(async () => {
 <template>
     <div class="p-2 min-w-[400px] max-w-[500px] mx-auto">
         <div class="flex justify-center gap-2 mb-2">
-            <UButton v-if="!isRecording && !audioBlob" color="primary" icon="i-heroicons-microphone"
+            <UButton
+v-if="!isRecording && !audioBlob" color="primary" icon="i-heroicons-microphone"
                 :disabled="isLoading" @click="startRecording">
                 Start Recording
             </UButton>
@@ -250,7 +251,8 @@ onMounted(async () => {
             Recording in progress...
             <div class="recording-time">{{ formattedRecordingTime }}</div>
             <div class="audio-visualization">
-                <div v-for="(value, index) in audioVisualization" :key="index" class="bar"
+                <div
+v-for="(value, index) in audioVisualization" :key="index" class="bar"
                     :style="{ height: value + '%' }" />
             </div>
         </div>

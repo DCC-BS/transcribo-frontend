@@ -420,15 +420,17 @@ function onPointerMove(e: any): void {
 
 <template>
     <div ref="container" class="w-full">
-        <v-stage :config="configKonva" v-if="segments.length > 0" @mousemove="onPointerMove" @click="clearSelection">
+        <v-stage v-if="segments.length > 0" :config="configKonva" @mousemove="onPointerMove" @click="clearSelection">
 
             <!-- Time Axis layer -->
-            <TimeAxisLayer :start-time="props.startTime" :end-time="props.endTime" :zoom-x="props.zoomX"
+            <TimeAxisLayer
+:start-time="props.startTime" :end-time="props.endTime" :zoom-x="props.zoomX"
                 :stage-width="stageWidth" />
 
             <!-- Timeline segments layer -->
             <v-layer :config="timelineLayerConfig">
-                <v-rect v-for="(rectConfig, index) in rectConfigs" :key="index" :config="rectConfig"
+                <v-rect
+v-for="(rectConfig, index) in rectConfigs" :key="index" :config="rectConfig"
                     @click="(e: KonvaEventObject<MouseEvent, Rect>) => onSegmentClicked(e, rectConfig.id!)"
                     @mouseenter="onSegmentMouseEnter($event, rectConfig.text!)" @mouseleave="onSegmentMouseLeave()"
                     @dragmove="onDragMove" @dragend="onDragEnd" @transform="onTransform"
@@ -445,12 +447,14 @@ function onPointerMove(e: any): void {
 
             <!-- Tooltip layer -->
             <v-layer>
-                <v-label v-if="tooltipVisible" :config="{
+                <v-label
+v-if="tooltipVisible" :config="{
                     x: tooltipPosition.x,
                     y: tooltipPosition.y,
                     opacity: 0.75,
                 }">
-                    <v-tag :config="{
+                    <v-tag
+:config="{
                         fill: 'black',
                         pointerDirection: 'down',
                         pointerWidth: 10,
@@ -461,7 +465,8 @@ function onPointerMove(e: any): void {
                         shadowOffset: { x: 5, y: 5 },
                         shadowOpacity: 0.5
                     }" />
-                    <v-text :config="{
+                    <v-text
+:config="{
                         text: tooltipText,
                         fontSize: 14,
                         padding: 5,

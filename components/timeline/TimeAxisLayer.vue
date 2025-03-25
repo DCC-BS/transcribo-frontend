@@ -62,14 +62,16 @@ function fromTimetoPixelSpace(time: number): number {
         <!-- Time tick marks -->
         <template v-for="(tick, index) in timeTicks" :key="index">
             <!-- Vertical tick line -->
-            <v-line :config="{
+            <v-line
+:config="{
                 points: [tick.x, 0, tick.x, 10],
                 stroke: '#555',
                 strokeWidth: 1
             }" />
 
             <!-- Tick label -->
-            <v-text :config="{
+            <v-text
+:config="{
                 x: tick.x,
                 y: 10,
                 text: tick.label,

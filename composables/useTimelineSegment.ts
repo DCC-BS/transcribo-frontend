@@ -1,5 +1,6 @@
 import type { RectConfig } from 'konva/lib/shapes/Rect';
 import type { Vector2d } from 'konva/lib/types';
+import type { Segment } from '~/types/transcriptionResponse';
 
 /**
  * Composable for managing timeline segment operations
@@ -56,7 +57,7 @@ export function useTimelineSegment(zoomX: Ref<number>) {
      * @param marginTop Top margin value
      */
     function createDragBoundFunc(
-        segment: any,
+        segment: Segment,
         stageWidth: number,
         speakerIndex: number,
         heightPerSpeaker: number,

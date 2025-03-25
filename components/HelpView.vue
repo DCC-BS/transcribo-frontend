@@ -42,44 +42,44 @@ function getKeyName(key: string): string {
                 <h2>{{ t('help.mediaControls.title') }}</h2>
                 <ul>
                     <i18n-t keypath="help.mediaControls.spacebar" tag="li">
-                        <template v-slot:space>
+                        <template #space>
                             <UKbd :value="getKeyName('Space')" />
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.mediaControls.spectrogramClick" tag="li">
-                        <template v-slot:spectrogram>
+                        <template #spectrogram>
                             <span class="text-highlight highlight-orange">{{
                                 t('help.mediaControls.spectrogram')
                             }}</span>
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.mediaControls.arrowKeys" tag="li">
-                        <template v-slot:leftKey>
+                        <template #leftKey>
                             <UKbd value="←" />
                         </template>
-                        <template v-slot:rightKey>
+                        <template #rightKey>
                             <UKbd value="→" />
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.mediaControls.shiftArrows" tag="li">
-                        <template v-slot:shiftKey>
+                        <template #shiftKey>
                             <UKbd value="shift" />
                         </template>
-                        <template v-slot:leftKey>
+                        <template #leftKey>
                             <UKbd value="←" />
                         </template>
-                        <template v-slot:rightKey>
+                        <template #rightKey>
                             <UKbd value="→" />
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.mediaControls.ctrlArrows" tag="li">
-                        <template v-slot:ctrlKey>
+                        <template #ctrlKey>
                             <UKbd value="ctrl" />
                         </template>
-                        <template v-slot:leftKey>
+                        <template #leftKey>
                             <UKbd value="←" />
                         </template>
-                        <template v-slot:rightKey>
+                        <template #rightKey>
                             <UKbd value="→" />
                         </template>
                     </i18n-t>
@@ -91,7 +91,7 @@ function getKeyName(key: string): string {
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.mediaControls.ctrlClick" tag="li">
-                        <template v-slot:ctrlKey>
+                        <template #ctrlKey>
                             <UKbd value="ctrl" />
                         </template>
                         <template #timeline>
@@ -101,8 +101,9 @@ function getKeyName(key: string): string {
                         </template>
                     </i18n-t>
                 </ul>
-                <img src="../assets/img/mediaControls.png"
-                    :alt="locale === 'en' ? 'Media controls illustration' : 'Illustration der Mediensteuerung'" />
+                <img
+src="../assets/img/mediaControls.png"
+                    :alt="locale === 'en' ? 'Media controls illustration' : 'Illustration der Mediensteuerung'" >
             </section>
 
             <section>
@@ -142,8 +143,9 @@ function getKeyName(key: string): string {
                         </template>
                     </i18n-t>
                 </ul>
-                <img src="../assets/img/segmentEditing.png"
-                    :alt="locale === 'en' ? 'Segment editing illustration' : 'Illustration der Segmentbearbeitung'" />
+                <img
+src="../assets/img/segmentEditing.png"
+                    :alt="locale === 'en' ? 'Segment editing illustration' : 'Illustration der Segmentbearbeitung'" >
             </section>
 
             <section>
@@ -159,26 +161,27 @@ function getKeyName(key: string): string {
                         <UKbd :value="getKeyName('Alt')" />
                     </li>
                 </ul>
-                <img src="../assets/img/timelineSegments.png"
-                    :alt="locale === 'en' ? 'Timeline segments illustration' : 'Illustration der Zeitleistensegmente'" />
+                <img
+src="../assets/img/timelineSegments.png"
+                    :alt="locale === 'en' ? 'Timeline segments illustration' : 'Illustration der Zeitleistensegmente'" >
             </section>
 
             <section>
                 <h2>{{ t('help.editing.title') }}</h2>
                 <ul>
                     <i18n-t keypath="help.editing.undo" tag="li">
-                        <template v-slot:ctrlKey>
+                        <template #ctrlKey>
                             <UKbd value="ctrl" />
                         </template>
-                        <template v-slot:zKey>
+                        <template #zKey>
                             <UKbd value="z" />
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.editing.redo" tag="li">
-                        <template v-slot:ctrlKey>
+                        <template #ctrlKey>
                             <UKbd value="ctrl" />
                         </template>
-                        <template v-slot:yKey>
+                        <template #yKey>
                             <UKbd value="y" />
                         </template>
                     </i18n-t>

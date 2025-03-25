@@ -1,5 +1,5 @@
-import type { InsertSegementCommand, RenameSpeakerCommand} from "~/types/commands";
-import { Cmds, DeleteSegementCommand, TranscriptonNameChangeCommand, UpdateSegementCommand, AddSegmentCommand } from "~/types/commands";
+import type { InsertSegementCommand, RenameSpeakerCommand, AddSegmentCommand } from "~/types/commands";
+import { Cmds, DeleteSegementCommand, TranscriptonNameChangeCommand, UpdateSegementCommand } from "~/types/commands";
 import { v4 as uuid } from 'uuid';
 import type { SegementWithId } from "~/types/transcriptionResponse";
 

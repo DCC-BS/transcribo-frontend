@@ -6,7 +6,7 @@ const { exportAsText, exportAsSrt } = useExport();
 
 <template>
     <div class="flex gap-2 align-middle items-center">
-        <USwitch :label="t('export.withSpeakers')" v-model="withSpeakers" />
+        <USwitch v-model="withSpeakers" :label="t('export.withSpeakers')" />
         <UButton @click="() => exportAsText(withSpeakers)">{{ t('export.exportAsText') }}</UButton>
         <UButton @click="() => exportAsSrt(withSpeakers)">{{ t('export.exportAsSrt') }}</UButton>
     </div>

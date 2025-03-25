@@ -70,7 +70,8 @@ async function handleTranscriptionFinished(command: TranscriptionFinishedCommand
 <template>
     <UContainer>
         <TaskStatusView v-if="taskId && isLoaded" :task-id="taskId" />
-        <UAlert v-if="errorMessage" color="error" :title="errorMessage" icon="i-heroicons-exclamation-circle"
-            type="error"></UAlert>
+        <UAlert
+v-if="errorMessage" color="error" :title="errorMessage" icon="i-heroicons-exclamation-circle"
+            type="error"/>
     </UContainer>
 </template>
