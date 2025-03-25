@@ -1,5 +1,5 @@
 // Import the StoredTranscription interface
-import type { StoredTranscription } from '~/stores/transcriptionsStore';
+import type { StoredTranscription } from "~/stores/transcriptionsStore";
 
 export const useExport = () => {
     const { currentTranscription } = useCurrentTranscription();
@@ -7,16 +7,26 @@ export const useExport = () => {
 
     function exportAsText(withSpeakers: boolean) {
         if (!currentTranscription.value) {
-            logger.error('No current transcription available for export.');
+            logger.error("No current transcription available for export.");
             return;
         }
 
         const text = withSpeakers
-            ? currentTranscription.value.segments.map(s => `${formatTime(s.start)}  - ${formatTime(s.end)} ${s.speaker}: ${s.text}`).join('\n')
-            : currentTranscription.value.segments.map(s => `${formatTime(s.start)}  - ${formatTime(s.end)}: s.text`).join('\n');
-        const blob = new Blob([text], { type: 'text/plain' });
+            ? currentTranscription.value.segments
+                  .map(
+                      (s) =>
+                          `${formatTime(s.start)}  - ${formatTime(s.end)} ${s.speaker}: ${s.text}`,
+                  )
+                  .join("\n")
+            : currentTranscription.value.segments
+                  .map(
+                      (s) =>
+                          `${formatTime(s.start)}  - ${formatTime(s.end)}: s.text`,
+                  )
+                  .join("\n");
+        const blob = new Blob([text], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `${currentTranscription.value?.name}.txt`;
         a.click();
@@ -34,24 +44,26 @@ export const useExport = () => {
         const secs = Math.floor(seconds % 60);
         const milliseconds = Math.floor((seconds - Math.floor(seconds)) * 1000);
 
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')},${milliseconds.toString().padStart(3, '0')}`;
+        return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")},${milliseconds.toString().padStart(3, "0")}`;
     }
 
     function exportAsSrt(withSpeakers: boolean) {
         if (!currentTranscription.value) {
-            logger.error('No current transcription available for export.');
+            logger.error("No current transcription available for export.");
             return;
         }
 
-        const srt = currentTranscription.value.segments.map((s, i) => {
-            const start = srtFormatTime(s.start);
-            const end = srtFormatTime(s.end);
-            const speaker = withSpeakers ? `${s.speaker}:` : '';
-            return `${i + 1}\n${start} --> ${end}\n${speaker}${s.text}\n`;
-        }).join('\n');
-        const blob = new Blob([srt], { type: 'text/plain' });
+        const srt = currentTranscription.value.segments
+            .map((s, i) => {
+                const start = srtFormatTime(s.start);
+                const end = srtFormatTime(s.end);
+                const speaker = withSpeakers ? `${s.speaker}:` : "";
+                return `${i + 1}\n${start} --> ${end}\n${speaker}${s.text}\n`;
+            })
+            .join("\n");
+        const blob = new Blob([srt], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `${currentTranscription.value.name}.srt`;
         a.click();
@@ -64,7 +76,7 @@ export const useExport = () => {
      */
     function exportAsBinary(): void {
         if (!currentTranscription.value) {
-            logger.error('No current transcription available for export.');
+            logger.error("No current transcription available for export.");
             return;
         }
 
@@ -75,18 +87,20 @@ export const useExport = () => {
             audioFileId: currentTranscription.value.audioFileId,
             createdAt: currentTranscription.value.createdAt,
             mediaFileName: currentTranscription.value.mediaFileName,
-            version: '1.0.0' // Adding version for future compatibility
+            version: "1.0.0", // Adding version for future compatibility
         };
 
         // Convert to JSON string
         const jsonString = JSON.stringify(exportData);
 
         // Create binary blob
-        const blob = new Blob([jsonString], { type: 'application/octet-stream' });
+        const blob = new Blob([jsonString], {
+            type: "application/octet-stream",
+        });
 
         // Download file
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
         a.download = `${currentTranscription.value.name}.transcribo`;
         a.click();
@@ -101,8 +115,10 @@ export const useExport = () => {
     async function importFromBinary(file: File): Promise<StoredTranscription> {
         return new Promise((resolve, reject) => {
             // Validate file type
-            if (!file.name.endsWith('.transcribo')) {
-                reject(new Error('Invalid file format. Expected .transcribo file'));
+            if (!file.name.endsWith(".transcribo")) {
+                reject(
+                    new Error("Invalid file format. Expected .transcribo file"),
+                );
                 return;
             }
 
@@ -110,16 +126,21 @@ export const useExport = () => {
 
             reader.onload = (event): void => {
                 try {
-                    if (typeof event.target?.result !== 'string') {
-                        throw new Error('Failed to read file');
+                    if (typeof event.target?.result !== "string") {
+                        throw new Error("Failed to read file");
                     }
 
                     // Parse the JSON data
                     const importedData = JSON.parse(event.target.result);
 
                     // Validate the imported data structure
-                    if (!importedData.name || !Array.isArray(importedData.segments)) {
-                        throw new Error('Invalid file format or corrupted file');
+                    if (
+                        !importedData.name ||
+                        !Array.isArray(importedData.segments)
+                    ) {
+                        throw new Error(
+                            "Invalid file format or corrupted file",
+                        );
                     }
 
                     // Create a StoredTranscription object
@@ -128,20 +149,26 @@ export const useExport = () => {
                         id: importedData.id || crypto.randomUUID(), // Use existing ID or generate new one
                         name: importedData.name,
                         segments: importedData.segments,
-                        createdAt: importedData.createdAt ? new Date(importedData.createdAt) : now,
+                        createdAt: importedData.createdAt
+                            ? new Date(importedData.createdAt)
+                            : now,
                         updatedAt: now, // Always use current time for updatedAt on import
                         audioFileId: importedData.audioFileId,
-                        mediaFileName: importedData.mediaFileName
+                        mediaFileName: importedData.mediaFileName,
                     };
 
                     resolve(storedTranscription);
                 } catch (error) {
-                    reject(error instanceof Error ? error : new Error('Unknown error during import'));
+                    reject(
+                        error instanceof Error
+                            ? error
+                            : new Error("Unknown error during import"),
+                    );
                 }
             };
 
             reader.onerror = (): void => {
-                reject(new Error('Failed to read file'));
+                reject(new Error("Failed to read file"));
             };
 
             // Read the file as text
@@ -153,6 +180,6 @@ export const useExport = () => {
         exportAsText,
         exportAsSrt,
         exportAsBinary,
-        importFromBinary
+        importFromBinary,
     };
-}
+};

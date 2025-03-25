@@ -5,7 +5,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    'update:modelValue': [value: string];
+    "update:modelValue": [value: string];
 }>();
 
 const { t } = useI18n();
@@ -26,21 +26,21 @@ watch(
     () => props.modelValue,
     (newValue) => {
         localValue.value = newValue;
-    }
+    },
 );
 
 // Handle keydown events and sync on Enter key press
 function handleKeydown(event: KeyboardEvent) {
-    if (event.key === 'Enter' && !event.shiftKey) {
+    if (event.key === "Enter" && !event.shiftKey) {
         // Only sync when Enter is pressed without Shift
-        emit('update:modelValue', localValue.value);
+        emit("update:modelValue", localValue.value);
     }
 }
 
 // Handle blur events to sync the value
 function handleBlur() {
     isFocused.value = false;
-    emit('update:modelValue', localValue.value);
+    emit("update:modelValue", localValue.value);
 }
 
 // Handle focus events
@@ -54,10 +54,17 @@ function handleFocus() {
         <!-- Tooltip that shows when textarea is dirty and focused -->
         <UTooltip
             :text="t('ui.saveChangesHint')"
-            :popper="{ placement: 'top' }" :open="isFocused && isDirty" class="w-full">
+            :popper="{ placement: 'top' }"
+            :open="isFocused && isDirty"
+            class="w-full"
+        >
             <UTextarea
-                :model-value="localValue" @update:model-value="localValue = $event as string" @blur="handleBlur"
-                @focus="handleFocus" @keydown="handleKeydown" />
+                :model-value="localValue"
+                @update:model-value="localValue = $event as string"
+                @blur="handleBlur"
+                @focus="handleFocus"
+                @keydown="handleKeydown"
+            />
         </UTooltip>
     </div>
 </template>

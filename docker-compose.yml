@@ -1,44 +1,44 @@
 services:
-  faster_whisper:
-    build:
-      context: https://github.com/DCC-BS/bentoml-faster-whisper.git
-      dockerfile: ./Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
-    ports:
-      - '50001:50001'
-    environment:
-      - HF_AUTH_TOKEN=${HF_AUTH_TOKEN}
-    volumes:
-      - hugging_face_cache:/root/.cache/huggingface
-    deploy:
-      resources:
-        reservations:
-          memory: 16g
-          devices:
-            - driver: nvidia
-              device_ids: [ '1' ]
-              capabilities: [ gpu ]
-  transcribo-backend:
-    build:
-      context: https://github.com/DCC-BS/transcribo-backend.git
-      dockerfile: ./Dockerfile
-    depends_on:
-      - faster_whisper
-    ports:
-      - "8000:8000"
-    environment:
-      - WHISPER_API=http://faster_whisper:50001/v1
-  transcribo-frontend:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    depends_on:
-      - transcribo-backend
-    ports:
-      - "3000:3000"
-    profiles:
-      - frontend
+    faster_whisper:
+        build:
+            context: https://github.com/DCC-BS/bentoml-faster-whisper.git
+            dockerfile: ./Dockerfile
+            platforms:
+                - linux/amd64
+                - linux/arm64
+        ports:
+            - '50001:50001'
+        environment:
+            - HF_AUTH_TOKEN=${HF_AUTH_TOKEN}
+        volumes:
+            - hugging_face_cache:/root/.cache/huggingface
+        deploy:
+            resources:
+                reservations:
+                    memory: 16g
+                    devices:
+                        - driver: nvidia
+                          device_ids: ['1']
+                          capabilities: [gpu]
+    transcribo-backend:
+        build:
+            context: https://github.com/DCC-BS/transcribo-backend.git
+            dockerfile: ./Dockerfile
+        depends_on:
+            - faster_whisper
+        ports:
+            - '8000:8000'
+        environment:
+            - WHISPER_API=http://faster_whisper:50001/v1
+    transcribo-frontend:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        depends_on:
+            - transcribo-backend
+        ports:
+            - '3000:3000'
+        profiles:
+            - frontend
 volumes:
-  hugging_face_cache:
+    hugging_face_cache:

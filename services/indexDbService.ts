@@ -1,9 +1,8 @@
 // Database configuration
-const DB_NAME = 'transcribo-db';
-const TRANSCIPTION_STORE_NAME = 'transcriptions';
-const TASK_STORE_NAME = 'tasks';
+const DB_NAME = "transcribo-db";
+const TRANSCIPTION_STORE_NAME = "transcriptions";
+const TASK_STORE_NAME = "tasks";
 const DB_VERSION = 1;
-
 
 export async function initDB() {
     return new Promise<IDBDatabase>((resolve, reject) => {
@@ -20,7 +19,7 @@ export async function initDB() {
 
         // Handle successful connection
         request.onsuccess = (event) => {
-            resolve((event.target as IDBOpenDBRequest).result)
+            resolve((event.target as IDBOpenDBRequest).result);
         };
 
         // Handle errors
@@ -35,12 +34,12 @@ function createTranscriptionStore(db: IDBDatabase) {
     // Create object store for tasks if it doesn't exist
     if (!db.objectStoreNames.contains(TRANSCIPTION_STORE_NAME)) {
         const store = db.createObjectStore(TRANSCIPTION_STORE_NAME, {
-            keyPath: 'id',
+            keyPath: "id",
         });
-        store.createIndex('status', 'status', {
+        store.createIndex("status", "status", {
             unique: false,
         });
-        store.createIndex('mediaFileId', 'mediaFileId', {
+        store.createIndex("mediaFileId", "mediaFileId", {
             unique: false,
         });
     }
@@ -50,12 +49,12 @@ function createTaskStore(db: IDBDatabase) {
     // Create object store for tasks if it doesn't exist
     if (!db.objectStoreNames.contains(TASK_STORE_NAME)) {
         const store = db.createObjectStore(TASK_STORE_NAME, {
-            keyPath: 'id',
+            keyPath: "id",
         });
-        store.createIndex('status', 'status', {
+        store.createIndex("status", "status", {
             unique: false,
         });
-        store.createIndex('mediaFileId', 'mediaFileId', {
+        store.createIndex("mediaFileId", "mediaFileId", {
             unique: false,
         });
     }

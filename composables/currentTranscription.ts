@@ -8,10 +8,13 @@ export const useCurrentTranscription = () => {
         Array.from(getUniqueSpeakers(segments.value)),
     );
 
-    watch(() => store.currentTranscription, () => {
-        currentTranscription.value = store.currentTranscription;
-        segments.value = store.currentTranscription?.segments ?? [];
-    });
+    watch(
+        () => store.currentTranscription,
+        () => {
+            currentTranscription.value = store.currentTranscription;
+            segments.value = store.currentTranscription?.segments ?? [];
+        },
+    );
 
     return { currentTranscription, segments, speakers };
-}
+};

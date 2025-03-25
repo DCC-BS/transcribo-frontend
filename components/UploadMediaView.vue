@@ -1,17 +1,17 @@
 <script lang="ts" setup>
-import type { TaskStatus } from '~/types/task';
+import type { TaskStatus } from "~/types/task";
 
 const emit = defineEmits<{
-    'uploaded': [task: TaskStatus, file: File];
+    uploaded: [task: TaskStatus, file: File];
 }>();
 
 const { t } = useI18n();
 const logger = useLogger();
 
 // Track the conversion progress
-const progressMessage = ref('');
+const progressMessage = ref("");
 const showProgress = ref(false);
-const errorMessage = ref('');
+const errorMessage = ref("");
 
 /**
  * Handles the file upload and conversion process
@@ -27,13 +27,13 @@ const loadAudio = async (event: Event): Promise<void> => {
     }
 
     const mediaFile = target.files[0];
-    errorMessage.value = '';
+    errorMessage.value = "";
 
     try {
         await uploadFile(mediaFile, mediaFile);
     } catch (error) {
-        logger.error('Error processing media file:', error);
-        errorMessage.value = t('upload.processingError');
+        logger.error("Error processing media file:", error);
+        errorMessage.value = t("upload.processingError");
     } finally {
         showProgress.value = false;
     }
@@ -42,19 +42,22 @@ const loadAudio = async (event: Event): Promise<void> => {
 /**
  * Uploads the file to the server
  */
-async function uploadFile(file: File | Blob, originalFile: File): Promise<void> {
+async function uploadFile(
+    file: File | Blob,
+    originalFile: File,
+): Promise<void> {
     showProgress.value = true;
-    progressMessage.value = t('upload.uploadingMedia');
+    progressMessage.value = t("upload.uploadingMedia");
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
-    const response = await $fetch<TaskStatus>('/api/transcribe/submit', {
+    const response = await $fetch<TaskStatus>("/api/transcribe/submit", {
         body: formData,
-        method: 'POST',
+        method: "POST",
     });
 
-    emit('uploaded', response, originalFile);
+    emit("uploaded", response, originalFile);
 }
 
 defineExpose({ uploadFile });
@@ -63,8 +66,13 @@ defineExpose({ uploadFile });
 <template>
     <div>
         <UInput
-type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up" :disabled="showProgress"
-            @change="loadAudio" />
+            type="file"
+            accept="audio/*,video/*"
+            size="xl"
+            icon="i-heroicons-document-arrow-up"
+            :disabled="showProgress"
+            @change="loadAudio"
+        />
 
         <div v-if="showProgress" class="mt-4">
             <p>{{ progressMessage }}</p>

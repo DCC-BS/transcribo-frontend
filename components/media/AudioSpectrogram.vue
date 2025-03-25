@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import type { Stage, StageConfig } from 'konva/lib/Stage';
-import type { ImageConfig } from 'konva/lib/shapes/Image';
-import type { RectConfig } from 'konva/lib/shapes/Rect';
-import type { TextConfig } from 'konva/lib/shapes/Text';
-import { SeekToSecondsCommand } from '~/types/commands';
-import type { KonvaPointerEvent } from 'konva/lib/PointerEvents';
+import { ref, onMounted, onUnmounted, computed } from "vue";
+import type { Stage, StageConfig } from "konva/lib/Stage";
+import type { ImageConfig } from "konva/lib/shapes/Image";
+import type { RectConfig } from "konva/lib/shapes/Rect";
+import type { TextConfig } from "konva/lib/shapes/Text";
+import { SeekToSecondsCommand } from "~/types/commands";
+import type { KonvaPointerEvent } from "konva/lib/PointerEvents";
 
 interface AudioSpectrogramProps {
     audioFile: File | Blob;
@@ -25,7 +25,7 @@ const { executeCommand } = useCommandBus();
 const container = ref<HTMLDivElement>(); // Container div reference
 const audioContext = ref<AudioContext>(); // Web Audio API context
 const audioBuffer = ref<AudioBuffer>(); // Decoded audio data
-const audioSrc = ref<string>(''); // URL to the audio file
+const audioSrc = ref<string>(""); // URL to the audio file
 const audioLoaded = ref<boolean>(false); // Flag to indicate if audio is loaded
 const audioDuration = ref<number>(0); // Total audio duration in seconds
 const spectrogramData = ref<Uint8Array[]>([]);
@@ -62,20 +62,22 @@ watch(
 const stageWidth = ref(800);
 const stageHeight = computed(() => 200);
 
-const { playheadLineConfig, transformedLayerConfig, offsetX } = useMediaTimeline({
-    mediaDuration: computed(() => props.duration),
-    stageWidth,
-    stageHeight,
-    zoomX: computed(() => props.zoomX),
-    startTime: computed(() => props.startTime),
-    currentTime: computed(() => props.currentTime),
-});
+const { playheadLineConfig, transformedLayerConfig, offsetX } =
+    useMediaTimeline({
+        mediaDuration: computed(() => props.duration),
+        stageWidth,
+        stageHeight,
+        zoomX: computed(() => props.zoomX),
+        startTime: computed(() => props.startTime),
+        currentTime: computed(() => props.currentTime),
+    });
 
 const configKonva = computed(
-    () => ({
-        width: stageWidth.value,
-        height: stageHeight.value,
-    }) as StageConfig,
+    () =>
+        ({
+            width: stageWidth.value,
+            height: stageHeight.value,
+        }) as StageConfig,
 );
 
 function updateStageSize(): void {
@@ -107,7 +109,7 @@ const loadAudio = async (file: Blob): Promise<void> => {
     const result = renderSpectrogram(
         spectrogramData.value,
         specResult.sampleRate,
-        { colorMap: 'magma' },
+        { colorMap: "magma" },
     );
 
     // Create an image from the canvas
@@ -120,21 +122,27 @@ const loadAudio = async (file: Blob): Promise<void> => {
 };
 
 // Spectrogram image configuration
-const spectrogramImageConfig = computed(() => ({
-    image: spectrogramImage.value,
-    width: stageWidth.value,
-    height: stageHeight.value,
-    listening: false,
-}) as ImageConfig);
+const spectrogramImageConfig = computed(
+    () =>
+        ({
+            image: spectrogramImage.value,
+            width: stageWidth.value,
+            height: stageHeight.value,
+            listening: false,
+        }) as ImageConfig,
+);
 
 // Background rectangle for capturing events
-const backgroundRectConfig = computed(() => ({
-    x: 0,
-    y: 0,
-    width: stageWidth.value,
-    height: stageHeight.value,
-    fill: 'transparent',
-}) as RectConfig);
+const backgroundRectConfig = computed(
+    () =>
+        ({
+            x: 0,
+            y: 0,
+            width: stageWidth.value,
+            height: stageHeight.value,
+            fill: "transparent",
+        }) as RectConfig,
+);
 
 // Frequency labels
 const frequencyLabels = computed(() => {
@@ -155,15 +163,16 @@ const frequencyLabels = computed(() => {
         const yPos: number = Math.floor(logFreqRatio * stageHeight.value);
 
         // Format frequency label (e.g., 1000Hz as "1kHz")
-        const freqLabel: string = freq < 1000 ? `${freq}Hz` : `${freq / 1000}kHz`;
+        const freqLabel: string =
+            freq < 1000 ? `${freq}Hz` : `${freq / 1000}kHz`;
 
         labels.push({
             x: 8,
             y: yPos,
             text: freqLabel,
             fontSize: 10,
-            fontFamily: 'Arial',
-            fill: 'black',
+            fontFamily: "Arial",
+            fill: "black",
         } as TextConfig);
     });
 
@@ -171,14 +180,17 @@ const frequencyLabels = computed(() => {
 });
 
 // Frequency axis background
-const freqAxisBackground = computed(() => ({
-    x: 0,
-    y: 0,
-    width: 40,
-    height: stageHeight.value,
-    fill: 'rgba(255, 255, 255, 0.7)',
-    opacity: 0.7,
-}) as RectConfig);
+const freqAxisBackground = computed(
+    () =>
+        ({
+            x: 0,
+            y: 0,
+            width: 40,
+            height: stageHeight.value,
+            fill: "rgba(255, 255, 255, 0.7)",
+            opacity: 0.7,
+        }) as RectConfig,
+);
 
 /**
  * Handles clicks on the spectrogram to seek to a specific position
@@ -208,7 +220,9 @@ const seekToPosition = (stageRef: Stage, x: number): void => {
     const boundedProportion = Math.max(0, Math.min(1, clickProportion));
 
     // Calculate the corresponding time in the audio
-    const seekTime = (boundedProportion / props.zoomX) * audioDuration.value + props.startTime;
+    const seekTime =
+        (boundedProportion / props.zoomX) * audioDuration.value +
+        props.startTime;
 
     // Update current time and seek to that position
     executeCommand(new SeekToSecondsCommand(seekTime));
@@ -256,9 +270,14 @@ const handleMouseUp = (): void => {
     <div ref="container" class="audio-spectrogram">
         <!-- Audio spectrogram display using Konva, shown when audio is loaded -->
         <div v-if="audioLoaded">
-            <v-stage :config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
-                @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
-
+            <v-stage
+                :config="configKonva"
+                @click="handleStageClick"
+                @mousedown="handleMouseDown"
+                @mousemove="handleMouseMove"
+                @mouseup="handleMouseUp"
+                @mouseleave="handleMouseUp"
+            >
                 <v-layer :config="transformedLayerConfig">
                     <!-- Spectrogram image -->
                     <v-image :config="spectrogramImageConfig" />
@@ -268,7 +287,11 @@ const handleMouseUp = (): void => {
                     <v-rect :config="freqAxisBackground" />
 
                     <!-- Frequency labels -->
-                    <v-text v-for="(labelConfig, index) in frequencyLabels" :key="index" :config="labelConfig" />
+                    <v-text
+                        v-for="(labelConfig, index) in frequencyLabels"
+                        :key="index"
+                        :config="labelConfig"
+                    />
 
                     <!-- Transparent rectangle to capture events -->
                     <v-rect :config="backgroundRectConfig" />
@@ -280,7 +303,12 @@ const handleMouseUp = (): void => {
             </v-stage>
         </div>
         <div v-else>
-            <USkeleton :style="{ width: `${stageWidth}px`, height: `${stageHeight}px` }" />
+            <USkeleton
+                :style="{
+                    width: `${stageWidth}px`,
+                    height: `${stageHeight}px`,
+                }"
+            />
         </div>
     </div>
 </template>

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-
 interface DialogViewProps {
     isOpen: boolean;
     title: string;
@@ -17,7 +16,6 @@ function handleCancel() {
 function handleConfirm() {
     props.onConfirm();
 }
-
 </script>
 
 <template>

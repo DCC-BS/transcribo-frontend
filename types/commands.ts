@@ -1,33 +1,33 @@
-import type { ICommand, IReversibleCommand } from '#build/types/commands';
-import type { TaskStatus } from './task';
-import type { Segment, TranscriptionResponse } from './transcriptionResponse';
+import type { ICommand, IReversibleCommand } from "#build/types/commands";
+import type { TaskStatus } from "./task";
+import type { Segment, TranscriptionResponse } from "./transcriptionResponse";
 
 export const Cmds = {
-    StartTranscriptionCommand: 'StartTranscriptionCommand',
-    TranscriptionFinishedCommand: 'TranscriptionFinishedCommand',
-    SeekToSecondsCommand: 'SeekToSecondsCommand',
-    TogglePlayCommand: 'TogglePlayCommand',
-    InsertSegementCommand: 'InsertSegementCommand',
-    DeleteSegementCommand: 'DeleteSegementCommand',
-    UpdateSegementCommand: 'UpdateSegementCommand',
-    TranscriptonNameChangeCommand: 'TranscriptonNameChangeCommand',
-    RenameSpeakerCommand: 'RenameSpeakerCommand',
-    EmptyCommand: 'EmptyCommand',
-    AddSegmentCommand: 'AddSegmentCommand',
+    StartTranscriptionCommand: "StartTranscriptionCommand",
+    TranscriptionFinishedCommand: "TranscriptionFinishedCommand",
+    SeekToSecondsCommand: "SeekToSecondsCommand",
+    TogglePlayCommand: "TogglePlayCommand",
+    InsertSegementCommand: "InsertSegementCommand",
+    DeleteSegementCommand: "DeleteSegementCommand",
+    UpdateSegementCommand: "UpdateSegementCommand",
+    TranscriptonNameChangeCommand: "TranscriptonNameChangeCommand",
+    RenameSpeakerCommand: "RenameSpeakerCommand",
+    EmptyCommand: "EmptyCommand",
+    AddSegmentCommand: "AddSegmentCommand",
 };
 
 export type ITransriboReversibleCommand = IReversibleCommand & {
-    toLocaleString: (t: (key: string, params?: object) => string) => string
+    toLocaleString: (t: (key: string, params?: object) => string) => string;
 };
 
 export class EmptyCommand implements ICommand {
-    readonly $type = 'EmptyCommand';
+    readonly $type = "EmptyCommand";
 
     /**
      * Returns a string representation of the command
      */
     toString(): string {
-        return 'Empty Command';
+        return "Empty Command";
     }
 
     /**
@@ -35,17 +35,17 @@ export class EmptyCommand implements ICommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.empty');
+        return t("commands.empty");
     }
 }
 
 export class StartTranscriptionCommand implements ICommand {
-    readonly $type = 'StartTranscriptionCommand';
+    readonly $type = "StartTranscriptionCommand";
 
     constructor(
         public taskId: string,
         public audio: File,
-    ) { }
+    ) {}
 
     /**
      * Returns a string representation of the command
@@ -59,26 +59,26 @@ export class StartTranscriptionCommand implements ICommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.startTranscription', {
+        return t("commands.startTranscription", {
             taskId: this.taskId,
-            fileName: this.audio.name
+            fileName: this.audio.name,
         });
     }
 }
 
 export class TranscriptionFinishedCommand implements ICommand {
-    readonly $type = 'TranscriptionFinishedCommand';
+    readonly $type = "TranscriptionFinishedCommand";
 
     constructor(
         public status: TaskStatus,
         public result?: TranscriptionResponse,
-    ) { }
+    ) {}
 
     /**
      * Returns a string representation of the command
      */
     toString(): string {
-        return `Transcription Finished: Status ${this.status.status}${this.result ? ', Results available' : ''}`;
+        return `Transcription Finished: Status ${this.status.status}${this.result ? ", Results available" : ""}`;
     }
 
     /**
@@ -86,18 +86,20 @@ export class TranscriptionFinishedCommand implements ICommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        const hasResults = this.result ? t('commands.transcriptionFinishedResults') : '';
-        return t('commands.transcriptionFinished', {
+        const hasResults = this.result
+            ? t("commands.transcriptionFinishedResults")
+            : "";
+        return t("commands.transcriptionFinished", {
             status: this.status.status,
-            hasResults
+            hasResults,
         });
     }
 }
 
 export class SeekToSecondsCommand implements ICommand {
-    readonly $type = 'SeekToSecondsCommand';
+    readonly $type = "SeekToSecondsCommand";
 
-    constructor(public seconds: number) { }
+    constructor(public seconds: number) {}
 
     /**
      * Returns a string representation of the command
@@ -111,18 +113,20 @@ export class SeekToSecondsCommand implements ICommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.seekToSeconds', { seconds: this.seconds.toFixed(2) });
+        return t("commands.seekToSeconds", {
+            seconds: this.seconds.toFixed(2),
+        });
     }
 }
 
 export class TogglePlayCommand implements ICommand {
-    readonly $type = 'TogglePlayCommand';
+    readonly $type = "TogglePlayCommand";
 
     /**
      * Returns a string representation of the command
      */
     toString(): string {
-        return 'Toggle Play/Pause';
+        return "Toggle Play/Pause";
     }
 
     /**
@@ -130,16 +134,15 @@ export class TogglePlayCommand implements ICommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.togglePlay');
+        return t("commands.togglePlay");
     }
 }
 
 export class AddSegmentCommand implements ITransriboReversibleCommand {
-    readonly $type = 'AddSegmentCommand';
+    readonly $type = "AddSegmentCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
-    constructor(public readonly newSegement: Segment) {
-    }
+    constructor(public readonly newSegement: Segment) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;
@@ -147,14 +150,14 @@ export class AddSegmentCommand implements ITransriboReversibleCommand {
 }
 
 export class InsertSegementCommand implements ITransriboReversibleCommand {
-    readonly $type = 'InsertSegementCommand';
+    readonly $type = "InsertSegementCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
     constructor(
         public readonly targetSegmentId: string,
         public readonly newSegement: Partial<Segment>,
-        public readonly direction: 'before' | 'after') {
-    }
+        public readonly direction: "before" | "after",
+    ) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;
@@ -172,16 +175,16 @@ export class InsertSegementCommand implements ITransriboReversibleCommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.insertSegment', { direction: this.direction });
+        return t("commands.insertSegment", { direction: this.direction });
     }
 }
 
 export class DeleteSegementCommand implements ITransriboReversibleCommand {
-    readonly $type = 'DeleteSegementCommand';
+    readonly $type = "DeleteSegementCommand";
     $undoCommand: ICommand;
 
     constructor(public readonly segmentId: string) {
-        this.$undoCommand = new InsertSegementCommand(segmentId, {}, 'after');
+        this.$undoCommand = new InsertSegementCommand(segmentId, {}, "after");
     }
 
     /**
@@ -196,18 +199,18 @@ export class DeleteSegementCommand implements ITransriboReversibleCommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.deleteSegment');
+        return t("commands.deleteSegment");
     }
 }
 
 export class UpdateSegementCommand implements ITransriboReversibleCommand {
-    readonly $type = 'UpdateSegementCommand';
+    readonly $type = "UpdateSegementCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
     constructor(
         public readonly segmentId: string,
-        public readonly updates: Partial<Segment>) {
-    }
+        public readonly updates: Partial<Segment>,
+    ) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;
@@ -219,8 +222,8 @@ export class UpdateSegementCommand implements ITransriboReversibleCommand {
     toString(): string {
         const updateDetails = Object.entries(this.updates)
             .map(([field, value]) => `${field}: ${JSON.stringify(value)}`)
-            .join(', ');
-        return `Update Segment: Updates: ${updateDetails || 'none'}`;
+            .join(", ");
+        return `Update Segment: Updates: ${updateDetails || "none"}`;
     }
 
     /**
@@ -230,22 +233,23 @@ export class UpdateSegementCommand implements ITransriboReversibleCommand {
     toLocaleString(t: (key: string, params?: object) => string): string {
         const updateDetails = Object.entries(this.updates)
             .map(([field, value]) => `${field}: ${JSON.stringify(value)}`)
-            .join(', ');
+            .join(", ");
 
         if (!updateDetails) {
-            return t('commands.updateSegmentNoUpdates');
+            return t("commands.updateSegmentNoUpdates");
         }
 
-        return t('commands.updateSegment', { updates: updateDetails });
+        return t("commands.updateSegment", { updates: updateDetails });
     }
 }
 
-export class TranscriptonNameChangeCommand implements ITransriboReversibleCommand {
-    readonly $type = 'TranscriptonNameChangeCommand';
+export class TranscriptonNameChangeCommand
+    implements ITransriboReversibleCommand
+{
+    readonly $type = "TranscriptonNameChangeCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
-    constructor(public readonly newName: string) {
-    }
+    constructor(public readonly newName: string) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;
@@ -263,20 +267,22 @@ export class TranscriptonNameChangeCommand implements ITransriboReversibleComman
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.changeTranscriptionName', { name: this.newName });
+        return t("commands.changeTranscriptionName", { name: this.newName });
     }
 }
 
 export class RenameSpeakerCommand implements ITransriboReversibleCommand {
-    readonly $type = 'RenameSpeakerCommand';
+    readonly $type = "RenameSpeakerCommand";
     readonly $undoCommand: ICommand;
 
     constructor(
         public readonly oldName: string,
         public readonly newName: string,
-        undoCommand?: ICommand) {
+        undoCommand?: ICommand,
+    ) {
         // to avoid circular dependency, we set the undo command in the constructor
-        this.$undoCommand = undoCommand || new RenameSpeakerCommand(newName, oldName, this);
+        this.$undoCommand =
+            undoCommand || new RenameSpeakerCommand(newName, oldName, this);
     }
 
     /**
@@ -291,9 +297,9 @@ export class RenameSpeakerCommand implements ITransriboReversibleCommand {
      * @param t - Translation function from useI18n
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
-        return t('commands.renameSpeaker', {
+        return t("commands.renameSpeaker", {
             oldName: this.oldName,
-            newName: this.newName
+            newName: this.newName,
         });
     }
 }

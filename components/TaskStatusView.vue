@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import { TaskStatusEnum, type TaskStatus } from '~/types/task';
-import { TranscriptionFinishedCommand } from '~/types/commands';
-import type { TranscriptionResponse } from '~/types/transcriptionResponse';
-import { match, P } from 'ts-pattern';
+import { TaskStatusEnum, type TaskStatus } from "~/types/task";
+import { TranscriptionFinishedCommand } from "~/types/commands";
+import type { TranscriptionResponse } from "~/types/transcriptionResponse";
+import { match, P } from "ts-pattern";
 
 const props = defineProps<{
     taskId: string;
@@ -19,13 +19,22 @@ const progress = computed(() =>
         .with(TaskStatusEnum.SUCCESS, () => 1)
         .with(TaskStatusEnum.FAILURE, () => 1)
         .with(TaskStatusEnum.CANCELLED, () => 0)
-        .otherwise(() => 0));
+        .otherwise(() => 0),
+);
 
 // Computed property to determine if task is completed successfully
-const isSuccessful = computed(() => status.value?.status === TaskStatusEnum.SUCCESS);
+const isSuccessful = computed(
+    () => status.value?.status === TaskStatusEnum.SUCCESS,
+);
 
 onMounted(() => {
-    status.value = { status: TaskStatusEnum.IN_PROGRESS, task_id: props.taskId, created_at: "", executed_at: "", progress: 0 };
+    status.value = {
+        status: TaskStatusEnum.IN_PROGRESS,
+        task_id: props.taskId,
+        created_at: "",
+        executed_at: "",
+        progress: 0,
+    };
     fetchTaskStatus();
 });
 
@@ -112,7 +121,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: var(--color-green-500, #10B981);
+    background-color: var(--color-green-500, #10b981);
     animation: scale-in 0.5s ease-out;
     margin-bottom: 1rem;
 }

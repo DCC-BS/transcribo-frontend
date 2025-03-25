@@ -4,12 +4,12 @@ import { RGBColor } from "~/types/color";
  * Available color map types for spectrograms and visualizations
  */
 export type ColorMapType =
-    | 'rainbow'
-    | 'grayscale'
-    | 'viridis'
-    | 'inferno'
-    | 'magma'
-    | 'textFriendly';
+    | "rainbow"
+    | "grayscale"
+    | "viridis"
+    | "inferno"
+    | "magma"
+    | "textFriendly";
 
 /**
  * Maps a normalized value (0-1) to RGB color using the rainbow color scale
@@ -224,17 +224,17 @@ export function textFriendly(normalizedValue: number): RGBColor {
  */
 export function getColorMap(type: ColorMapType): (value: number) => RGBColor {
     switch (type) {
-        case 'grayscale':
+        case "grayscale":
             return grayscale;
-        case 'viridis':
+        case "viridis":
             return viridis;
-        case 'inferno':
+        case "inferno":
             return inferno;
-        case 'magma':
+        case "magma":
             return magma;
-        case 'textFriendly':
+        case "textFriendly":
             return textFriendly;
-        case 'rainbow':
+        case "rainbow":
         default:
             return rainbow;
     }

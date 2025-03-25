@@ -1,6 +1,6 @@
-import { defineStore } from 'pinia';
-import type { TaskStatus } from '~/types/task';
-import { initDB } from '~/services/indexDbService';
+import { defineStore } from "pinia";
+import type { TaskStatus } from "~/types/task";
+import { initDB } from "~/services/indexDbService";
 
 // Define the structure of a stored task
 export interface StoredTask {
@@ -12,11 +12,11 @@ export interface StoredTask {
 }
 
 // Database configuration
-const STORE_NAME = 'tasks';
+const STORE_NAME = "tasks";
 // Define retention period (1 day in milliseconds)
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
 
-export const useTasksStore = defineStore('tasksStore', () => {
+export const useTasksStore = defineStore("tasksStore", () => {
     const logger = useLogger();
 
     // State as refs
@@ -34,12 +34,11 @@ export const useTasksStore = defineStore('tasksStore', () => {
             isLoading.value = false;
             await loadAllTasks();
             await cleanupOldTasks();
-        }
-        catch (e: unknown) {
+        } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
             } else {
-                logger.error('Unknown error initializing database', e);
+                logger.error("Unknown error initializing database", e);
             }
 
             isLoading.value = false;
@@ -56,22 +55,17 @@ export const useTasksStore = defineStore('tasksStore', () => {
         return new Promise<StoredTask[]>((resolve, reject) => {
             isLoading.value = true;
 
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readonly',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.getAll();
 
             request.onsuccess = () => {
                 // Store tasks but remove the media blobs to save memory
-                tasks.value = request.result.map(
-                    (task) => {
-                        // Create a copy without the mediaFile blob
-                        const { mediaFile, ...restOfTask } = task;
-                        return restOfTask;
-                    },
-                );
+                tasks.value = request.result.map((task) => {
+                    // Create a copy without the mediaFile blob
+                    const { mediaFile, ...restOfTask } = task;
+                    return restOfTask;
+                });
                 isLoading.value = false;
                 resolve(tasks.value);
             };
@@ -88,16 +82,11 @@ export const useTasksStore = defineStore('tasksStore', () => {
      * Get a single task by ID
      * @param id The task ID
      */
-    async function getTask(
-        id: string,
-    ): Promise<StoredTask | null> {
+    async function getTask(id: string): Promise<StoredTask | null> {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readonly',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.get(id);
 
@@ -137,14 +126,11 @@ export const useTasksStore = defineStore('tasksStore', () => {
         // Add media file if provided
         if (mediaFile) {
             newTask.mediaFile = mediaFile;
-            newTask.mediaFileName = mediaFileName ?? 'media-file';
+            newTask.mediaFileName = mediaFileName ?? "media-file";
         }
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readwrite',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.add(newTask);
 
@@ -167,7 +153,7 @@ export const useTasksStore = defineStore('tasksStore', () => {
      */
     async function updateTask(
         id: string,
-        updates: Partial<Omit<StoredTask, 'id' | 'createdAt' | 'updatedAt'>>,
+        updates: Partial<Omit<StoredTask, "id" | "createdAt" | "updatedAt">>,
         mediaFile?: File | Blob,
         mediaFileName?: string,
     ): Promise<StoredTask> {
@@ -183,28 +169,31 @@ export const useTasksStore = defineStore('tasksStore', () => {
 
         return new Promise((resolve, reject) => {
             // Create a deep clone of the existing task
-            const clonedTask = JSON.parse(JSON.stringify(existingTask)) as StoredTask;
+            const clonedTask = JSON.parse(
+                JSON.stringify(existingTask),
+            ) as StoredTask;
 
             // Update the task with new data and update timestamp
             const updatedTask: StoredTask = {
                 ...clonedTask,
-                ...(updates.status !== undefined ? { status: updates.status } : {}),
-                ...(updates.mediaFileName ? { mediaFileName: updates.mediaFileName } : {}),
+                ...(updates.status !== undefined
+                    ? { status: updates.status }
+                    : {}),
+                ...(updates.mediaFileName
+                    ? { mediaFileName: updates.mediaFileName }
+                    : {}),
             };
 
             // Update media file if provided
             if (mediaFile) {
                 updatedTask.mediaFile = mediaFile;
-                updatedTask.mediaFileName = mediaFileName ?? 'media-file';
+                updatedTask.mediaFileName = mediaFileName ?? "media-file";
             } else if (existingTask.mediaFile) {
                 // Keep the existing media file if present
                 updatedTask.mediaFile = existingTask.mediaFile;
             }
 
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readwrite',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.put(updatedTask);
 
@@ -212,9 +201,7 @@ export const useTasksStore = defineStore('tasksStore', () => {
                 // Update local state, but without the media blob
                 const { mediaFile, ...taskWithoutMedia } = updatedTask;
 
-                const index = tasks.value.findIndex(
-                    (t) => t.id === id,
-                );
+                const index = tasks.value.findIndex((t) => t.id === id);
                 if (index !== -1) {
                     tasks.value[index] = taskWithoutMedia;
                 }
@@ -236,18 +223,13 @@ export const useTasksStore = defineStore('tasksStore', () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readwrite',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.delete(id);
 
             request.onsuccess = () => {
                 // Update local state
-                tasks.value = tasks.value.filter(
-                    (t) => t.id !== id,
-                );
+                tasks.value = tasks.value.filter((t) => t.id !== id);
                 resolve();
             };
 
@@ -272,8 +254,12 @@ export const useTasksStore = defineStore('tasksStore', () => {
 
         // Find tasks older than the retention period
         const oldTaskIds = allTasks
-            .filter(task => task.createdAt && (now - task.createdAt > RETENTION_PERIOD_MS))
-            .map(task => task.id);
+            .filter(
+                (task) =>
+                    task.createdAt &&
+                    now - task.createdAt > RETENTION_PERIOD_MS,
+            )
+            .map((task) => task.id);
 
         // Delete each old task
         for (const taskId of oldTaskIds) {
@@ -303,6 +289,6 @@ export const useTasksStore = defineStore('tasksStore', () => {
         addTask,
         updateTask,
         deleteTask,
-        cleanupOldTasks
+        cleanupOldTasks,
     };
 });

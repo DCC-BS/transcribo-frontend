@@ -1,7 +1,7 @@
-import { defineStore } from 'pinia';
-import { v4 as uuidv4 } from 'uuid';
-import type { SegementWithId } from '../types/transcriptionResponse';
-import { initDB } from '~/services/indexDbService';
+import { defineStore } from "pinia";
+import { v4 as uuidv4 } from "uuid";
+import type { SegementWithId } from "../types/transcriptionResponse";
+import { initDB } from "~/services/indexDbService";
 
 // Define the structure of a stored transcription
 export interface StoredTranscription {
@@ -16,15 +16,17 @@ export interface StoredTranscription {
 }
 
 // Database configuration
-const STORE_NAME = 'transcriptions';
+const STORE_NAME = "transcriptions";
 
 /**
  * Store to manage transcriptions with IndexedDB persistence
  */
-export const useTranscriptionsStore = defineStore('transcriptions', () => {
+export const useTranscriptionsStore = defineStore("transcriptions", () => {
     // State
     const transcriptions = ref<StoredTranscription[]>([]);
-    const currentTranscription = ref<StoredTranscription | undefined>(undefined);
+    const currentTranscription = ref<StoredTranscription | undefined>(
+        undefined,
+    );
     const isLoading = ref(false);
     const error = ref<string | null>(null);
     const db = ref<IDBDatabase | null>(null);
@@ -39,12 +41,11 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
             db.value = await initDB();
             isLoading.value = false;
             await loadAllTranscriptions();
-        }
-        catch (e: unknown) {
+        } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
             } else {
-                logger.error('Unknown error initializing database', e);
+                logger.error("Unknown error initializing database", e);
             }
 
             isLoading.value = false;
@@ -61,23 +62,17 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
         return new Promise<StoredTranscription[]>((resolve, reject) => {
             isLoading.value = true;
 
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readonly',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.getAll();
 
             request.onsuccess = () => {
                 // Store transcriptions but remove the audio blobs to save memory
-                transcriptions.value = request.result.map(
-                    (transcription) => {
-                        // Create a copy without the audioFile blob
-                        const { audioFile, ...restOfTranscription } =
-                            transcription;
-                        return restOfTranscription;
-                    },
-                );
+                transcriptions.value = request.result.map((transcription) => {
+                    // Create a copy without the audioFile blob
+                    const { audioFile, ...restOfTranscription } = transcription;
+                    return restOfTranscription;
+                });
                 isLoading.value = false;
                 resolve(transcriptions.value);
             };
@@ -102,10 +97,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readonly',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.get(id);
 
@@ -139,10 +131,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readonly',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readonly");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.get(id);
 
@@ -167,7 +156,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
     async function addTranscription(
         transcription: Omit<
             StoredTranscription,
-            'id' | 'createdAt' | 'updatedAt'
+            "id" | "createdAt" | "updatedAt"
         >,
         audioFile?: File | Blob,
         audioFileName?: string,
@@ -180,7 +169,10 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
             ...transcription,
             id: uuidv4(), // Generate unique ID
             // Use provided name if available, otherwise use mediaFileName or default
-            name: transcription.name || audioFileName || `Transcription ${now.toLocaleString()}`,
+            name:
+                transcription.name ||
+                audioFileName ||
+                `Transcription ${now.toLocaleString()}`,
             createdAt: now,
             updatedAt: now,
         };
@@ -188,7 +180,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
         // Add audio file if provided
         if (audioFile) {
             newTranscription.mediaFile = audioFile;
-            newTranscription.mediaFileName = audioFileName ?? 'audio-file';
+            newTranscription.mediaFileName = audioFileName ?? "audio-file";
 
             // If name wasn't explicitly set and we have a mediaFileName, use that
             if (!transcription.name && audioFileName) {
@@ -200,10 +192,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
         }
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readwrite',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.add(newTranscription);
 
@@ -239,11 +228,11 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
      */
     async function updateCurrentTranscription(
         updates: Partial<
-            Omit<StoredTranscription, 'id' | 'createdAt' | 'updatedAt'>
+            Omit<StoredTranscription, "id" | "createdAt" | "updatedAt">
         >,
     ): Promise<void> {
         if (!currentTranscription.value) {
-            throw new Error('No current transcription set');
+            throw new Error("No current transcription set");
         }
 
         const newTranscription = await updateTranscription(
@@ -259,7 +248,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
     async function updateTranscription(
         id: string,
         updates: Partial<
-            Omit<StoredTranscription, 'id' | 'createdAt' | 'updatedAt'>
+            Omit<StoredTranscription, "id" | "createdAt" | "updatedAt">
         >,
         audioFile?: File | Blob,
         audioFileName?: string,
@@ -276,15 +265,23 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
 
         // Create a new Promise with non-async executor function
         return new Promise((resolve, reject) => {
-            const clonedTranscription = JSON.parse(JSON.stringify(existingTranscription)) as StoredTranscription;
+            const clonedTranscription = JSON.parse(
+                JSON.stringify(existingTranscription),
+            ) as StoredTranscription;
 
             // Update the transcription with new data and update timestamp
             const updatedTranscription: StoredTranscription = {
                 ...clonedTranscription,
                 // Only apply updates for properties that exist in the updates object
-                ...(updates.segments ? { segments: JSON.parse(JSON.stringify(updates.segments)) } : {}),
-                ...(updates.mediaFileName ? { mediaFileName: updates.mediaFileName } : {}),
-                ...(updates.audioFileId ? { audioFileId: updates.audioFileId } : {}),
+                ...(updates.segments
+                    ? { segments: JSON.parse(JSON.stringify(updates.segments)) }
+                    : {}),
+                ...(updates.mediaFileName
+                    ? { mediaFileName: updates.mediaFileName }
+                    : {}),
+                ...(updates.audioFileId
+                    ? { audioFileId: updates.audioFileId }
+                    : {}),
                 ...(updates.name ? { name: updates.name } : {}), // Apply name updates if present
                 updatedAt: new Date(),
             };
@@ -293,10 +290,14 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
             if (audioFile) {
                 updatedTranscription.mediaFile = audioFile;
                 updatedTranscription.mediaFileName =
-                    audioFileName ?? 'audio-file';
+                    audioFileName ?? "audio-file";
 
                 // If updating audio and name wasn't provided in updates, update name to match new audio filename
-                if (!updates.name && audioFileName && !clonedTranscription.name) {
+                if (
+                    !updates.name &&
+                    audioFileName &&
+                    !clonedTranscription.name
+                ) {
                     updatedTranscription.name = audioFileName;
                 }
 
@@ -306,7 +307,8 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
                 }
             } else if (existingTranscription.mediaFile) {
                 // Keep the existing media file if present
-                updatedTranscription.mediaFile = existingTranscription.mediaFile;
+                updatedTranscription.mediaFile =
+                    existingTranscription.mediaFile;
             }
 
             // Validate data before writing to IndexedDB
@@ -314,16 +316,16 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
             if (updatedTranscription.segments) {
                 // Check if segments is actually an array
                 if (!Array.isArray(updatedTranscription.segments)) {
-                    logger.error('Segments is not an array:', updatedTranscription.segments);
-                    reject(new Error('Segments must be an array'));
+                    logger.error(
+                        "Segments is not an array:",
+                        updatedTranscription.segments,
+                    );
+                    reject(new Error("Segments must be an array"));
                     return;
                 }
             }
 
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readwrite',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.put(updatedTranscription);
 
@@ -356,10 +358,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
         if (!db.value) await initializeDB();
 
         return new Promise((resolve, reject) => {
-            const transaction = db.value!.transaction(
-                STORE_NAME,
-                'readwrite',
-            );
+            const transaction = db.value!.transaction(STORE_NAME, "readwrite");
             const store = transaction.objectStore(STORE_NAME);
             const request = store.delete(id);
 
@@ -383,9 +382,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
      */
     function getTranscriptionText(transcription: StoredTranscription): string {
         // Helper method to extract text from segments
-        return transcription.segments
-            .map((segment) => segment.text)
-            .join(' ');
+        return transcription.segments.map((segment) => segment.text).join(" ");
     }
 
     // Computed properties (getters)
@@ -413,7 +410,7 @@ export const useTranscriptionsStore = defineStore('transcriptions', () => {
             // Search through all segment texts
             const fullText = transcription.segments
                 .map((segment) => segment.text)
-                .join(' ')
+                .join(" ")
                 .toLowerCase();
 
             return fullText.includes(lowerQuery);

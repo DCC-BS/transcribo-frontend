@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-
 /**
  * Access i18n functionality
  */
@@ -10,22 +9,22 @@ const { t, locale } = useI18n();
  */
 function getKeyName(key: string): string {
     const keyMappings: Record<string, Record<string, string>> = {
-        'en': {
-            'Space': 'Space',
-            'Shift': 'Shift',
-            'Ctrl': 'Ctrl',
-            'Alt': 'Alt',
-            'Z': 'Z',
-            'Y': 'Y',
+        en: {
+            Space: "Space",
+            Shift: "Shift",
+            Ctrl: "Ctrl",
+            Alt: "Alt",
+            Z: "Z",
+            Y: "Y",
         },
-        'de': {
-            'Space': 'Leertaste',
-            'Shift': 'Umschalt',
-            'Ctrl': 'Strg',
-            'Alt': 'Alt',
-            'Z': 'Z',
-            'Y': 'Y',
-        }
+        de: {
+            Space: "Leertaste",
+            Shift: "Umschalt",
+            Ctrl: "Strg",
+            Alt: "Alt",
+            Z: "Z",
+            Y: "Y",
+        },
     };
 
     const currentLocale = locale.value as string;
@@ -46,7 +45,10 @@ function getKeyName(key: string): string {
                             <UKbd :value="getKeyName('Space')" />
                         </template>
                     </i18n-t>
-                    <i18n-t keypath="help.mediaControls.spectrogramClick" tag="li">
+                    <i18n-t
+                        keypath="help.mediaControls.spectrogramClick"
+                        tag="li"
+                    >
                         <template #spectrogram>
                             <span class="text-highlight highlight-orange">{{
                                 t('help.mediaControls.spectrogram')
@@ -102,39 +104,54 @@ function getKeyName(key: string): string {
                     </i18n-t>
                 </ul>
                 <img
-src="../assets/img/mediaControls.png"
-                    :alt="locale === 'en' ? 'Media controls illustration' : 'Illustration der Mediensteuerung'" >
+                    src="../assets/img/mediaControls.png"
+                    :alt="
+                        locale === 'en'
+                            ? 'Media controls illustration'
+                            : 'Illustration der Mediensteuerung'
+                    "
+                >
             </section>
 
             <section>
                 <h2>{{ t('help.segments.title') }}</h2>
                 <i18n-t keypath="help.segments.intro" tag="p">
                     <template #transcriptionSegment>
-                        <span class="text-highlight highlight-violet">{{ t('help.segments.transcriptionSegment')
-                            }}</span>
+                        <span class="text-highlight highlight-violet">{{
+                            t('help.segments.transcriptionSegment')
+                        }}</span>
                     </template>
                 </i18n-t>
                 <ul>
                     <i18n-t keypath="help.segments.speaker" tag="li">
                         <template #dropdown>
-                            <span class="text-highlight highlight-teal">{{ t('help.segments.dropdown') }}</span>
+                            <span class="text-highlight highlight-teal">{{
+                                t('help.segments.dropdown')
+                            }}</span>
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.segments.timeChange" tag="li">
                         <template #timespanTextFields>
-                            <span class="text-highlight highlight-mangenta">{{ t('help.segments.timespanTextFields')
+                            <span class="text-highlight highlight-mangenta">{{
+                                t('help.segments.timespanTextFields')
                             }}</span>
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.segments.seekTime" tag="li" />
                     <i18n-t keypath="help.segments.insertBefore" tag="li">
                         <template #insertAbove>
-                            <UButton color="primary" icon="i-heroicons-arrow-up-on-square-stack" />
+                            <UButton
+                                color="primary"
+                                icon="i-heroicons-arrow-up-on-square-stack"
+                            />
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.segments.insertAfter" tag="li">
                         <template #insertBelow>
-                            <UButton color="primary" icon="i-heroicons-arrow-down-on-square-stack" />
+                            <UButton
+                                color="primary"
+                                icon="i-heroicons-arrow-down-on-square-stack"
+                            />
                         </template>
                     </i18n-t>
                     <i18n-t keypath="help.segments.deleteSegment" tag="li">
@@ -144,8 +161,13 @@ src="../assets/img/mediaControls.png"
                     </i18n-t>
                 </ul>
                 <img
-src="../assets/img/segmentEditing.png"
-                    :alt="locale === 'en' ? 'Segment editing illustration' : 'Illustration der Segmentbearbeitung'" >
+                    src="../assets/img/segmentEditing.png"
+                    :alt="
+                        locale === 'en'
+                            ? 'Segment editing illustration'
+                            : 'Illustration der Segmentbearbeitung'
+                    "
+                >
             </section>
 
             <section>
@@ -162,8 +184,13 @@ src="../assets/img/segmentEditing.png"
                     </li>
                 </ul>
                 <img
-src="../assets/img/timelineSegments.png"
-                    :alt="locale === 'en' ? 'Timeline segments illustration' : 'Illustration der Zeitleistensegmente'" >
+                    src="../assets/img/timelineSegments.png"
+                    :alt="
+                        locale === 'en'
+                            ? 'Timeline segments illustration'
+                            : 'Illustration der Zeitleistensegmente'
+                    "
+                >
             </section>
 
             <section>

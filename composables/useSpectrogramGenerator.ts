@@ -1,4 +1,4 @@
-import { ref } from 'vue';
+import { ref } from "vue";
 
 /**
  * Interface for the spectrogram generation options
@@ -68,8 +68,8 @@ export function useSpectrogramGenerator() {
             const errorMessage =
                 err instanceof Error
                     ? err.message
-                    : 'Unknown error generating spectrogram';
-            logger.error('Spectrogram generation error:', err);
+                    : "Unknown error generating spectrogram";
+            logger.error("Spectrogram generation error:", err);
             error.value = errorMessage;
 
             // Return an empty result with the error
@@ -115,8 +115,8 @@ export function useSpectrogramGenerator() {
             const errorMessage =
                 err instanceof Error
                     ? err.message
-                    : 'Unknown error generating spectrogram';
-            logger.error('Spectrogram generation error:', err);
+                    : "Unknown error generating spectrogram";
+            logger.error("Spectrogram generation error:", err);
             error.value = errorMessage;
 
             // Return an empty result with the error

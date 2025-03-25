@@ -1,7 +1,4 @@
-import {
-    getColorMap,
-    type ColorMapType,
-} from '../services/colorMapService';
+import { getColorMap, type ColorMapType } from "../services/colorMapService";
 
 /**
  * Interface for spectrogram rendering options
@@ -29,7 +26,7 @@ const defaultOptions: RenderOptions = {
     height: 200,
     gamma: 0.3,
     logBase: 10,
-    colorMap: 'rainbow',
+    colorMap: "rainbow",
 };
 
 /**
@@ -47,7 +44,10 @@ export function useSpectrogramRenderer() {
      * @param {number} targetHeight - The desired height after downsampling
      * @returns {Uint8Array[]} - Downsampled spectrogram data
      */
-    function downsampleSpectrogramData(data: Uint8Array[], targetHeight: number): Uint8Array[] {
+    function downsampleSpectrogramData(
+        data: Uint8Array[],
+        targetHeight: number,
+    ): Uint8Array[] {
         const originalWidth = data.length;
         const originalHeight = data[0].length;
 
@@ -56,7 +56,9 @@ export function useSpectrogramRenderer() {
             return data;
         }
 
-        console.log(`Downsampling spectrogram from height ${originalHeight} to ${targetHeight}`);
+        console.log(
+            `Downsampling spectrogram from height ${originalHeight} to ${targetHeight}`,
+        );
 
         // Calculate the sampling step (how many original rows to combine into one)
         const samplingFactor = originalHeight / targetHeight;
@@ -115,7 +117,7 @@ export function useSpectrogramRenderer() {
 
             // Validate inputs
             if (!spectrogramData?.length) {
-                throw new Error('No spectrogram data provided');
+                throw new Error("No spectrogram data provided");
             }
 
             // Get original dimensions based on data
@@ -123,24 +125,25 @@ export function useSpectrogramRenderer() {
             const originalHeight: number = spectrogramData[0].length;
 
             // Downsample the data if it's taller than 400 pixels
-            const processedData = originalHeight > 400
-                ? downsampleSpectrogramData(spectrogramData, 400)
-                : spectrogramData;
+            const processedData =
+                originalHeight > 400
+                    ? downsampleSpectrogramData(spectrogramData, 400)
+                    : spectrogramData;
 
             // Get new dimensions after potential downsampling
             const dataWidth: number = processedData.length;
             const dataHeight: number = processedData[0].length;
 
             // Create a temporary canvas for the raw spectrogram data
-            const canvas = document.createElement('canvas');
+            const canvas = document.createElement("canvas");
             canvas.width = dataWidth;
             canvas.height = dataHeight;
             const tempCtx: CanvasRenderingContext2D | null =
-                canvas.getContext('2d');
+                canvas.getContext("2d");
 
             if (!tempCtx) {
                 throw new Error(
-                    'Failed to get 2D context from temporary canvas',
+                    "Failed to get 2D context from temporary canvas",
                 );
             }
 
@@ -156,10 +159,12 @@ export function useSpectrogramRenderer() {
                 255,
             );
 
-            console.log('Frequency range:', minFrequency, 'to', maxFrequency);
+            console.log("Frequency range:", minFrequency, "to", maxFrequency);
 
             if (originalHeight > 400) {
-                console.log(`Using downsampled data: ${originalWidth}x${originalHeight} → ${dataWidth}x${dataHeight}`);
+                console.log(
+                    `Using downsampled data: ${originalWidth}x${originalHeight} → ${dataWidth}x${dataHeight}`,
+                );
             }
 
             // Ensure valid range
@@ -230,21 +235,21 @@ export function useSpectrogramRenderer() {
             };
         } catch (err) {
             const errorMessage =
-                err instanceof Error ? err.message : 'Unknown rendering error';
-            console.error('Spectrogram rendering error:', err);
+                err instanceof Error ? err.message : "Unknown rendering error";
+            console.error("Spectrogram rendering error:", err);
             error.value = errorMessage;
 
             // Create a fallback canvas with error message
-            const errorCanvas = document.createElement('canvas');
+            const errorCanvas = document.createElement("canvas");
             errorCanvas.width = options.width ?? 800;
             errorCanvas.height = options.height ?? 200;
 
-            const ctx = errorCanvas.getContext('2d');
+            const ctx = errorCanvas.getContext("2d");
             if (ctx) {
-                ctx.fillStyle = '#f8f8f8';
+                ctx.fillStyle = "#f8f8f8";
                 ctx.fillRect(0, 0, errorCanvas.width, errorCanvas.height);
-                ctx.fillStyle = 'red';
-                ctx.font = '14px Arial';
+                ctx.fillStyle = "red";
+                ctx.font = "14px Arial";
                 ctx.fillText(
                     `Error rendering spectrogram: ${errorMessage}`,
                     10,

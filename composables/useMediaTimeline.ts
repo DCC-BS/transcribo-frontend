@@ -2,20 +2,26 @@ import type { LayerConfig } from "konva/lib/Layer";
 import type { LineConfig } from "konva/lib/shapes/Line";
 
 export function useMediaTimeline(inputs: {
-    mediaDuration: Ref<number>,
-    stageWidth: Ref<number>,
-    stageHeight: Ref<number>,
-    zoomX: Ref<number>,
-    startTime: Ref<number>,
-    currentTime: Ref<number>
+    mediaDuration: Ref<number>;
+    stageWidth: Ref<number>;
+    stageHeight: Ref<number>;
+    zoomX: Ref<number>;
+    startTime: Ref<number>;
+    currentTime: Ref<number>;
 }) {
-
-    const { mediaDuration, stageWidth, stageHeight, startTime, currentTime, zoomX } = inputs;
+    const {
+        mediaDuration,
+        stageWidth,
+        stageHeight,
+        startTime,
+        currentTime,
+        zoomX,
+    } = inputs;
 
     const scaleFactor = computed(() => {
         if (stageWidth.value === 0 || mediaDuration.value === 0) return 1;
 
-        return (stageWidth.value / mediaDuration.value)
+        return stageWidth.value / mediaDuration.value;
     });
 
     function fromTimetoPixelSpace(value: number): number {
@@ -26,23 +32,38 @@ export function useMediaTimeline(inputs: {
         return value / scaleFactor.value;
     }
 
-    const playheadLineConfig = computed(() => ({
-        points: [
-            fromTimetoPixelSpace(currentTime.value), 0,
-            fromTimetoPixelSpace(currentTime.value), stageHeight.value,
-        ],
-        stroke: 'red',
-        strokeWidth: 1,
-        strokeScaleEnabled: false,
-    } as LineConfig));
+    const playheadLineConfig = computed(
+        () =>
+            ({
+                points: [
+                    fromTimetoPixelSpace(currentTime.value),
+                    0,
+                    fromTimetoPixelSpace(currentTime.value),
+                    stageHeight.value,
+                ],
+                stroke: "red",
+                strokeWidth: 1,
+                strokeScaleEnabled: false,
+            }) as LineConfig,
+    );
 
-    const transformedLayerConfig = computed(() => ({
-        offsetX: offsetX.value,
-        scaleX: zoomX.value,
-        y: 0,
-    } as LayerConfig));
+    const transformedLayerConfig = computed(
+        () =>
+            ({
+                offsetX: offsetX.value,
+                scaleX: zoomX.value,
+                y: 0,
+            }) as LayerConfig,
+    );
 
     const offsetX = computed(() => startTime.value * scaleFactor.value);
 
-    return { scaleFactor, offsetX, playheadLineConfig, transformedLayerConfig, fromTimetoPixelSpace, fromPixeltoTimeSpace }
+    return {
+        scaleFactor,
+        offsetX,
+        playheadLineConfig,
+        transformedLayerConfig,
+        fromTimetoPixelSpace,
+        fromPixeltoTimeSpace,
+    };
 }

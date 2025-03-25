@@ -32,7 +32,7 @@ export function mapRange(
     inMin: number,
     inMax: number,
     outMin: number,
-    outMax: number
+    outMax: number,
 ): number {
     // First map the value to 0-1 range
     const normalizedValue = (value - inMin) / (inMax - inMin);

@@ -3,10 +3,10 @@
  * Corresponds to the Python TaskStatusEnum
  */
 export enum TaskStatusEnum {
-    IN_PROGRESS = 'in_progress',
-    SUCCESS = 'success',
-    FAILURE = 'failure',
-    CANCELLED = 'cancelled',
+    IN_PROGRESS = "in_progress",
+    SUCCESS = "success",
+    FAILURE = "failure",
+    CANCELLED = "cancelled",
 }
 
 /**

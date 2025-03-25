@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import type { TranscriptionFinishedCommand } from '~/types/commands';
-import { Cmds } from '~/types/commands';
-import { v4 as uuidv4 } from 'uuid';
+import type { TranscriptionFinishedCommand } from "~/types/commands";
+import { Cmds } from "~/types/commands";
+import { v4 as uuidv4 } from "uuid";
 
 const { registerHandler, unregisterHandler } = useCommandBus();
 const taskStore = useTasksStore();
@@ -23,20 +23,21 @@ onMounted(() => {
         handleTranscriptionFinished,
     );
 
-    taskStore.getTask(taskId)
-        .then(t => {
+    taskStore
+        .getTask(taskId)
+        .then((t) => {
             if (t?.mediaFile) {
                 audioFile.value = t.mediaFile;
                 audioName.value = t.mediaFileName;
                 isLoaded.value = true;
+            } else {
+                errorMessage.value = t("task.errors.noMediaFile");
+                logger.error("No media file found for task", taskId);
             }
-            else {
-                errorMessage.value = t('task.errors.noMediaFile');
-                logger.error('No media file found for task', taskId);
-            }
-        }).catch(e => {
-            errorMessage.value = t('task.errors.failedToLoad');
-            logger.error('Failed to get task', taskId, e);
+        })
+        .catch((e) => {
+            errorMessage.value = t("task.errors.failedToLoad");
+            logger.error("Failed to get task", taskId, e);
         });
 });
 
@@ -47,18 +48,22 @@ onUnmounted(() => {
     );
 });
 
-async function handleTranscriptionFinished(command: TranscriptionFinishedCommand): Promise<void> {
+async function handleTranscriptionFinished(
+    command: TranscriptionFinishedCommand,
+): Promise<void> {
     if (command.result) {
         const transcription = await transcriptionsStore.addTranscription({
             segments: command.result.segments.map((x) => ({
                 ...x,
-                text: x.text?.trim() ?? '',
-                speaker: x.speaker?.trim().toUpperCase() ?? t('transcription.noSpeaker'),
+                text: x.text?.trim() ?? "",
+                speaker:
+                    x.speaker?.trim().toUpperCase() ??
+                    t("transcription.noSpeaker"),
                 id: uuidv4(),
             })),
             mediaFile: audioFile.value,
             mediaFileName: audioName.value,
-            name: audioName.value ?? t('transcription.untitled'),
+            name: audioName.value ?? t("transcription.untitled"),
         });
 
         taskStore.deleteTask(taskId);
@@ -71,7 +76,11 @@ async function handleTranscriptionFinished(command: TranscriptionFinishedCommand
     <UContainer>
         <TaskStatusView v-if="taskId && isLoaded" :task-id="taskId" />
         <UAlert
-v-if="errorMessage" color="error" :title="errorMessage" icon="i-heroicons-exclamation-circle"
-            type="error"/>
+            v-if="errorMessage"
+            color="error"
+            :title="errorMessage"
+            icon="i-heroicons-exclamation-circle"
+            type="error"
+        />
     </UContainer>
 </template>

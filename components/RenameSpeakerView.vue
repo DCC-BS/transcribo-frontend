@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { UInput } from '#components';
-import { RenameSpeakerCommand } from '~/types/commands';
+import { UInput } from "#components";
+import { RenameSpeakerCommand } from "~/types/commands";
 
 // Get speakers from the current transcription
 const { speakers } = useCurrentTranscription();
@@ -14,12 +14,16 @@ const speakerMappings = ref<{ original: string; new: string }[]>([]);
 /**
  * Initialize speaker mappings when speakers change
  */
-watch(speakers, () => {
-    speakerMappings.value = speakers.value.map(speaker => ({
-        original: speaker,
-        new: speaker
-    }));
-}, { immediate: true });
+watch(
+    speakers,
+    () => {
+        speakerMappings.value = speakers.value.map((speaker) => ({
+            original: speaker,
+            new: speaker,
+        }));
+    },
+    { immediate: true },
+);
 
 /**
  * Handle speaker name change
@@ -41,10 +45,22 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
     <UCard>
         <h2 class="text-lg font-bold">Speakers</h2>
         <div class="flex gap-2 flex-wrap mt-2">
-            <div v-for="(speakerMap, index) in speakerMappings" :key="index" class="speaker-item">
+            <div
+                v-for="(speakerMap, index) in speakerMappings"
+                :key="index"
+                class="speaker-item"
+            >
                 <UInput
-v-model="speakerMap.new" :style="{ color: getSpeakerColor(speakerMap.original) }"
-                    placeholder="Speaker name" @change="handleSpeakerNameChange(speakerMap.original, speakerMap.new)" />
+                    v-model="speakerMap.new"
+                    :style="{ color: getSpeakerColor(speakerMap.original) }"
+                    placeholder="Speaker name"
+                    @change="
+                        handleSpeakerNameChange(
+                            speakerMap.original,
+                            speakerMap.new,
+                        )
+                    "
+                />
             </div>
         </div>
     </UCard>

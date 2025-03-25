@@ -1,6 +1,6 @@
-import type { RectConfig } from 'konva/lib/shapes/Rect';
-import type { Vector2d } from 'konva/lib/types';
-import type { Segment } from '~/types/transcriptionResponse';
+import type { RectConfig } from "konva/lib/shapes/Rect";
+import type { Vector2d } from "konva/lib/types";
+import type { Segment } from "~/types/transcriptionResponse";
 
 /**
  * Composable for managing timeline segment operations
@@ -17,13 +17,13 @@ export function useTimelineSegment(zoomX: Ref<number>) {
      */
     function findSnapPoints(
         rectConfigs: RectConfig[],
-        selectedId: string | undefined
-    ): { starts: number[], ends: number[] } {
+        selectedId: string | undefined,
+    ): { starts: number[]; ends: number[] } {
         // Collect all segment start and end points except the selected one
         const starts: number[] = [];
         const ends: number[] = [];
 
-        rectConfigs.forEach(rectConfig => {
+        rectConfigs.forEach((rectConfig) => {
             if (rectConfig.id === selectedId) return;
 
             starts.push(rectConfig.x!);
@@ -62,7 +62,7 @@ export function useTimelineSegment(zoomX: Ref<number>) {
         speakerIndex: number,
         heightPerSpeaker: number,
         fromTimetoPixelSpace: (time: number) => number,
-        marginTop: number
+        marginTop: number,
     ) {
         return (pos: Vector2d) => {
             const width = fromTimetoPixelSpace(segment.end - segment.start);
@@ -77,6 +77,6 @@ export function useTimelineSegment(zoomX: Ref<number>) {
     return {
         findSnapPoints,
         checkSnap,
-        createDragBoundFunc
+        createDragBoundFunc,
     };
 }

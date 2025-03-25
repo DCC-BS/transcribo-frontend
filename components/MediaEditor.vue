@@ -1,16 +1,18 @@
 <script lang="ts" setup>
-import { SeekToSecondsCommand, TogglePlayCommand } from '~/types/commands';
-import AudioSpectrogram from './media/AudioSpectrogram.vue';
-import CurrentSegementEditor from './media/CurrentSegementEditor.vue';
-import TimelineView from './media/TimelineView.client.vue';
-import VideoView from './media/VideoView.vue';
-import RenameSpeakerView from './RenameSpeakerView.vue';
-import { match } from 'ts-pattern';
+import { SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
+import AudioSpectrogram from "./media/AudioSpectrogram.vue";
+import CurrentSegementEditor from "./media/CurrentSegementEditor.vue";
+import TimelineView from "./media/TimelineView.client.vue";
+import VideoView from "./media/VideoView.vue";
+import RenameSpeakerView from "./RenameSpeakerView.vue";
+import { match } from "ts-pattern";
 
 const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const currentTime = ref<number>(0); // Current playback position in seconds
 const duration = ref<number>(0); // Total audio duration in seconds
-const zoomX = computed(() => duration.value / (timeRange.value[1] - timeRange.value[0]))
+const zoomX = computed(
+    () => duration.value / (timeRange.value[1] - timeRange.value[0]),
+);
 
 const timeRange = ref([0, duration.value]);
 
@@ -54,8 +56,8 @@ function handleWheel(event: WheelEvent): void {
     const startFactor = x / w;
     const endFactor = 1 - startFactor;
 
-    const start = timeRange.value[0] + (delta * startFactor);
-    const end = timeRange.value[1] - (delta * endFactor);
+    const start = timeRange.value[0] + delta * startFactor;
+    const end = timeRange.value[1] - delta * endFactor;
 
     event.preventDefault();
 
@@ -65,7 +67,6 @@ function handleWheel(event: WheelEvent): void {
 
     timeRange.value[0] = Math.max(0, start);
     timeRange.value[1] = Math.min(duration.value, end);
-
 }
 
 const mouseDownStart = ref<number>();
@@ -101,7 +102,10 @@ function handleMouseMove(event: MouseEvent) {
             timeRange.value = [0, timeRange.value[1] - timeRange.value[0]];
         } else if (end > duration.value) {
             // Don't go past the end
-            timeRange.value = [duration.value - (timeRange.value[1] - timeRange.value[0]), duration.value];
+            timeRange.value = [
+                duration.value - (timeRange.value[1] - timeRange.value[0]),
+                duration.value,
+            ];
         } else {
             // Normal case - move the window
             timeRange.value = [start, end];
@@ -113,11 +117,11 @@ function handleMouseMove(event: MouseEvent) {
 }
 
 function handleKeyDown(event: KeyboardEvent) {
-    if (event.key === 'ArrowLeft') {
+    if (event.key === "ArrowLeft") {
         handleLeftPress(event);
-    } else if (event.key === 'ArrowRight') {
+    } else if (event.key === "ArrowRight") {
         handleRightPress(event);
-    } else if (event.key === ' ') {
+    } else if (event.key === " ") {
         // Space handling moved here
         handleSpaceDown(event);
     }
@@ -125,7 +129,7 @@ function handleKeyDown(event: KeyboardEvent) {
 
 function handleKeyUp(event: KeyboardEvent) {
     // Handle key up events
-    if (event.key === ' ') {
+    if (event.key === " ") {
         handleSpaceUp(event);
     }
 }
@@ -196,24 +200,42 @@ watch(currentTime, (newTime) => {
 
                 <ClientOnly>
                     <div
-@wheel="handleWheel" @mousedown="handleMouseDown" @mouseup="handleMouseUp"
-                        @mousemove="handleMouseMove">
-
+                        @wheel="handleWheel"
+                        @mousedown="handleMouseDown"
+                        @mouseup="handleMouseUp"
+                        @mousemove="handleMouseMove"
+                    >
                         <AudioSpectrogram
-:audio-file="audioFile" :current-time="currentTime" :duration="duration"
-                            :zoom-x="zoomX" :start-time="timeRange[0]" />
+                            :audio-file="audioFile"
+                            :current-time="currentTime"
+                            :duration="duration"
+                            :zoom-x="zoomX"
+                            :start-time="timeRange[0]"
+                        />
 
                         <TimelineView
-:current-time="currentTime" :duration="duration" :zoom-x="zoomX"
-                            :start-time="timeRange[0]" :end-time="timeRange[1]" />
+                            :current-time="currentTime"
+                            :duration="duration"
+                            :zoom-x="zoomX"
+                            :start-time="timeRange[0]"
+                            :end-time="timeRange[1]"
+                        />
                     </div>
                 </ClientOnly>
 
-                <USlider v-model="timeRange" :min="0" :max="duration" class="my-2" />
+                <USlider
+                    v-model="timeRange"
+                    :min="0"
+                    :max="duration"
+                    class="my-2"
+                />
             </div>
 
-
-            <CurrentSegementEditor :current-time="currentTime" :duration="duration" class="m-2" />
+            <CurrentSegementEditor
+                :current-time="currentTime"
+                :duration="duration"
+                class="m-2"
+            />
             <RenameSpeakerView class="m-2" />
 
             <DataBsBanner class="mt-4" />
