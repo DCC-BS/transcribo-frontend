@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import fixWebmDuration from 'fix-webm-duration';
 
 // Define emits for the component
@@ -20,6 +20,10 @@ const recordingStartTime = ref(0);
 const recordingTime = ref(0);
 const recordingInterval = ref<NodeJS.Timeout | undefined>(undefined);
 const microphoneAvailable = ref<boolean | undefined>(undefined);
+const audioVisualization = ref<number[]>([]);
+const audioContext = ref<AudioContext | undefined>(undefined);
+const analyser = ref<AnalyserNode | undefined>(undefined);
+const frequencyData = ref<Uint8Array | undefined>(undefined);
 
 // Computed properties
 const formattedRecordingTime = computed(() => {
@@ -74,6 +78,47 @@ function handleMicrophoneError(error: Error): void {
 }
 
 /**
+ * Initialize audio visualization
+ */
+function initializeAudioVisualization(stream: MediaStream): void {
+    audioContext.value = new AudioContext();
+    const source = audioContext.value.createMediaStreamSource(stream);
+    analyser.value = audioContext.value.createAnalyser();
+    analyser.value.fftSize = 256; // Set FFT size for frequency analysis
+    frequencyData.value = new Uint8Array(analyser.value.frequencyBinCount);
+    source.connect(analyser.value);
+}
+
+/**
+ * Update audio visualization with frequency data
+ */
+function updateAudioVisualization(): void {
+    if (analyser.value && frequencyData.value) {
+        analyser.value.getByteFrequencyData(frequencyData.value);
+        audioVisualization.value = Array.from(frequencyData.value)
+            .slice(0, 20)
+            .map(value => (value / 255) * 100);
+    } else {
+        audioVisualization.value = [];
+    }
+}
+
+// Update visualization every 100ms during recording
+watch(isRecording, (newVal) => {
+    if (newVal) {
+        const interval = setInterval(() => updateAudioVisualization(), 100);
+        recordingInterval.value = interval as unknown as NodeJS.Timeout;
+    } else if (recordingInterval.value) {
+        clearInterval(recordingInterval.value);
+        recordingInterval.value = undefined;
+        if (audioContext.value) {
+            audioContext.value.close();
+            audioContext.value = undefined;
+        }
+    }
+});
+
+/**
  * Start the audio recording process
  */
 async function startRecording(): Promise<void> {
@@ -91,6 +136,9 @@ async function startRecording(): Promise<void> {
     // Request access to the microphone
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        // Initialize visualization
+        initializeAudioVisualization(stream);
 
         isLoading.value = false;
         isRecording.value = true;
@@ -171,7 +219,7 @@ function resetRecording(): void {
  */
 function emitAudio(): void {
     if (audioBlob.value) {
-        emit('recording-complete', fixedBlob);
+        emit('recording-complete', audioBlob.value);
     }
 }
 
@@ -201,6 +249,10 @@ onMounted(async () => {
         <div v-if="isRecording" class="recording-indicator">
             Recording in progress...
             <div class="recording-time">{{ formattedRecordingTime }}</div>
+            <div class="audio-visualization">
+                <div v-for="(value, index) in audioVisualization" :key="index" class="bar"
+                    :style="{ height: value + '%' }" />
+            </div>
         </div>
 
         <div v-if="audioBlob" class="audio-preview">
@@ -263,6 +315,20 @@ onMounted(async () => {
 
 .error-message li {
     margin-bottom: 4px;
+}
+
+.audio-visualization {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    height: 50px;
+    margin-top: 10px;
+}
+
+.audio-visualization .bar {
+    width: 4%;
+    background-color: #4caf50;
+    transition: height 0.1s ease-in-out;
 }
 
 @keyframes pulse {
