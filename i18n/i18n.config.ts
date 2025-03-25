@@ -12,7 +12,9 @@ export default defineI18nConfig(() => ({
             pages: {
                 index: {
                     uploadMedia: 'Upload Media',
-                    recordAudio: 'Record audio'
+                    recordAudio: 'Record audio',
+                    experimentalTitle: 'Experimental',
+                    experimental: 'The recording feature is experimental and only tested with short recordings. It may not work for long recordings.'
                 }
             },
             navigation: {
@@ -143,7 +145,9 @@ export default defineI18nConfig(() => ({
             pages: {
                 index: {
                     uploadMedia: 'Medien hochladen',
-                    recordAudio: 'Audio aufnehmen'
+                    recordAudio: 'Audio aufnehmen',
+                    experimentalTitle: 'Experimentelle',
+                    experimental: 'Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Es kann sein, dass sie bei langen Aufnahmen nicht funktioniert.'
                 }
             },
             navigation: {

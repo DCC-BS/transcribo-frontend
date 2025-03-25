@@ -21,15 +21,23 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
 <template>
     <UContainer>
         <div class="flex flex-col items-center text-center pt-5">
-            <UCard>
-                <div class="text-lg font-bold">{{ t('pages.index.uploadMedia') }}</div>
+            <div>
+                <div class="text-lg font-bold my-4">{{ t('pages.index.uploadMedia') }}</div>
                 <UploadMediaView ref="uploadMediaView" @uploaded="handleUpload" />
-            </UCard>
+            </div>
 
-            <UCard class="mt-5">
-                <div class="text-lg font-bold">{{ t('pages.index.recordAudio') }}</div>
+            <div class="mt-5">
+                <div class="text-lg font-bold my-4">{{ t('pages.index.recordAudio') }}</div>
+                <UAlert class="text-left" icon="i-heroicons-information-circle"
+                    :title="t('pages.index.experimentalTitle')" color="info"
+                    :description="t('pages.index.experimental')" />
                 <AudioRecorder @recording-complete="handleRecordingComplete" />
-            </UCard>
+            </div>
+
+            <div class="pt-5 flex flex-col items-center gap-2">
+                <DisclaimerLlm class="align-middle self-center" />
+                <DataBsBanner />
+            </div>
         </div>
     </UContainer>
 </template>
