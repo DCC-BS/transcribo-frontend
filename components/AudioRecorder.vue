@@ -8,6 +8,9 @@ const emit = defineEmits<{
     "recording-error": [error: Error];
 }>();
 
+// composables
+const logger = useLogger();
+
 // State variables
 const isRecording = ref(false);
 const isLoading = ref(false);
@@ -49,7 +52,7 @@ async function checkMicrophoneAvailability(): Promise<boolean> {
 
         return true;
     } catch (error) {
-        console.error("Error checking microphone availability:", error);
+        logger.error("Error checking microphone availability:", error);
         errorMessage.value = "Unable to check for microphone devices.";
         return false;
     }
@@ -60,7 +63,7 @@ async function checkMicrophoneAvailability(): Promise<boolean> {
  */
 function handleMicrophoneError(error: Error): void {
     isLoading.value = false;
-    console.error("Microphone access error:", error);
+    logger.error("Microphone access error:", error);
 
     if (
         error.name === "NotFoundError" ||
@@ -242,7 +245,6 @@ function stopRecording(): void {
     if (mediaRecorder.value && isRecording.value) {
         isRecording.value = false;
         mediaRecorder.value.stop();
-        console.log(recordingTime.value);
     }
 }
 
