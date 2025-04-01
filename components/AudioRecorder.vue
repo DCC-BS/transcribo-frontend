@@ -168,37 +168,11 @@ async function startRecording(): Promise<void> {
         mediaRecorder.value = new MediaRecorder(stream);
 
         // Event handler for data available from the recorder
-        mediaRecorder.value.ondataavailable = (event) => {
-            if (event.data.size > 0) {
-                audioChunks.value.push(event.data);
-            }
-        };
+        mediaRecorder.value.ondataavailable = handleRecordingDataAvailable;
 
         // Event handler for when recording stops
-        mediaRecorder.value.onstop = async () => {
-            // Create a blob from all chunks
-            const blob = new Blob(audioChunks.value, { type: "audio/webm" });
-
-            console.log("Recording stopped:", blob);
-
-            fixWebmDuration(blob, recordingTime.value * 1000).then(
-                (fixedBlob: Blob) => {
-                    audioBlob.value = fixedBlob;
-                    audioUrl.value = URL.createObjectURL(blob);
-
-                    // Stop all tracks in the stream to release the microphone
-                    for (const track of stream.getTracks()) {
-                        track.stop();
-                    }
-
-                    // Clear the recording timer
-                    if (recordingInterval.value) {
-                        clearInterval(recordingInterval.value);
-                        recordingInterval.value = undefined;
-                    }
-                },
-            );
-        };
+        mediaRecorder.value.onstop = async () =>
+            await handleStopRecording(stream);
 
         // Start recording
         mediaRecorder.value.start();
@@ -214,6 +188,51 @@ async function startRecording(): Promise<void> {
     } catch (error) {
         handleMicrophoneError(error as Error);
     }
+}
+
+function handleRecordingDataAvailable(event: BlobEvent): void {
+    if (event.data.size > 0) {
+        audioChunks.value.push(event.data);
+    }
+}
+
+async function handleStopRecording(stream: MediaStream): Promise<void> {
+    // Create a blob from all chunks
+    const blob = new Blob(audioChunks.value, { type: "audio/webm" });
+    const fixedBlob = await fixAudioDuration(blob, recordingTime.value * 1000);
+
+    audioBlob.value = fixedBlob;
+    audioUrl.value = URL.createObjectURL(blob);
+
+    // Stop all tracks in the stream to release the microphone
+    for (const track of stream.getTracks()) {
+        track.stop();
+    }
+
+    if (recordingInterval.value) {
+        // Clear the recording timer
+        clearInterval(recordingInterval.value);
+        recordingInterval.value = undefined;
+    }
+}
+
+/**
+ * Fix the duration of the WebM audio blob.
+ * This will add the duration to the metadata of the audio blob.
+ * @param blob - The audio blob to fix
+ * @param duration - The desired duration in seconds
+ * @returns A promise that resolves with the fixed blob
+ */
+function fixAudioDuration(blob: Blob, duration: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+        fixWebmDuration(blob, duration * 1000).then((fixedBlob: Blob) => {
+            if (fixedBlob) {
+                resolve(fixedBlob);
+            } else {
+                reject(new Error("Failed to fix WebM duration."));
+            }
+        });
+    });
 }
 
 /**
