@@ -8,6 +8,24 @@ export default defineNuxtConfig({
             apiUrl: process.env.API_URL,
         },
     },
+    $development: {
+        vite: {
+            server: {
+                allowedHosts: ["robust-nationally-lacewing.ngrok-free.app"],
+            },
+        },
+    },
+    vite: {
+        optimizeDeps: {
+            exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"],
+        },
+        server: {
+            headers: {
+                "Cross-Origin-Opener-Policy": "same-origin",
+                "Cross-Origin-Embedder-Policy": "require-corp",
+            },
+        },
+    },
     app: {
         head: {
             titleTemplate: "Transcribo",
@@ -45,7 +63,7 @@ export default defineNuxtConfig({
     typescript: {
         strict: true,
     },
-    devtools: { enabled: true },
+    devtools: { enabled: false },
     css: ["~/assets/css/main.css"],
     // localization
     i18n: {
@@ -69,13 +87,15 @@ export default defineNuxtConfig({
     },
     pwa: {
         devOptions: {
-            enabled: false,
+            enabled: true,
         },
         registerType: "autoUpdate",
         workbox: {
             globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg}"],
             globIgnores: ["dev-sw-dist/**/*"],
             navigateFallback: "/",
+            clientsClaim: true,
+            skipWaiting: true,
         },
         client: {
             periodicSyncForUpdates: 60 * 10, // 10 minutes

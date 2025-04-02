@@ -168,7 +168,7 @@ export default defineI18nConfig(() => ({
                 index: {
                     uploadMedia: "Medien hochladen",
                     recordAudio: "Audio aufnehmen",
-                    experimentalTitle: "Experimentelle",
+                    experimentalTitle: "Experimentell",
                     experimental:
                         "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Es kann sein, dass sie bei langen Aufnahmen nicht funktioniert.",
                 },

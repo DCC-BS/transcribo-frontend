@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import fixWebmDuration from "fix-webm-duration";
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 // Define emits for the component
 const emit = defineEmits<{
@@ -8,33 +7,149 @@ const emit = defineEmits<{
     "recording-error": [error: Error];
 }>();
 
-// composables
+// ------------- Composables -------------
 const logger = useLogger();
+const { convertWebmToMp3 } = useAudioConvertion();
+const app = useNuxtApp();
 
-// State variables
+// ------------- State variables -------------
+// UI state
 const isRecording = ref(false);
 const isLoading = ref(false);
+const errorMessage = ref("");
+const microphoneAvailable = ref<boolean | undefined>(undefined);
+
+// Audio recording state
 const audioBlob = ref<Blob | undefined>(undefined);
 const audioUrl = ref("");
-const errorMessage = ref("");
 const mediaRecorder = ref<MediaRecorder | undefined>(undefined);
 const audioChunks = ref<Blob[]>([]);
+
+// Timing and intervals
 const recordingStartTime = ref(0);
 const recordingTime = ref(0);
+const elapsedTime = ref(0);
 const recordingInterval = ref<NodeJS.Timeout | undefined>(undefined);
-const microphoneAvailable = ref<boolean | undefined>(undefined);
+const visualizationInterval = ref<NodeJS.Timeout | undefined>(undefined);
+
+// Audio visualization
 const audioVisualization = ref<number[]>([]);
 const audioContext = ref<AudioContext | undefined>(undefined);
 const analyser = ref<AnalyserNode | undefined>(undefined);
 const frequencyData = ref<Uint8Array | undefined>(undefined);
 
-// Computed properties
+// ------------- Computed properties -------------
+/**
+ * Format recording time as MM:SS
+ */
 const formattedRecordingTime = computed(() => {
     const minutes = Math.floor(recordingTime.value / 60);
     const seconds = recordingTime.value % 60;
     return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 });
 
+// ------------- Lifecycle hooks -------------
+onMounted(async () => {
+    // Check if microphone is available on mount
+    microphoneAvailable.value = await checkMicrophoneAvailability();
+
+    // Add event listener for handling background/foreground state
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+});
+
+onUnmounted(() => {
+    // Clean up event listeners
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+
+    // Release audio URL if exists
+    if (audioUrl.value) {
+        URL.revokeObjectURL(audioUrl.value);
+    }
+});
+
+// ------------- Watchers -------------
+/**
+ * Watch recording state to manage visualization
+ */
+watch(isRecording, (newVal) => {
+    if (newVal) {
+        // Start visualization when recording begins
+        visualizationInterval.value = setInterval(
+            () => updateAudioVisualization(),
+            100,
+        );
+    } else if (visualizationInterval.value) {
+        // Clean up visualization when recording stops
+        clearInterval(visualizationInterval.value);
+        visualizationInterval.value = undefined;
+
+        // Close audio context if open
+        if (audioContext.value) {
+            audioContext.value.close();
+            audioContext.value = undefined;
+        }
+    }
+});
+
+// ------------- Event Handlers -------------
+/**
+ * Handle document visibility change (background/foreground)
+ */
+function handleVisibilityChange(): void {
+    // Only handle when recording and PWA is installed
+    if (
+        mediaRecorder.value?.state !== "recording" ||
+        !app.$pwa?.isPWAInstalled
+    ) {
+        return;
+    }
+
+    if (document.hidden) {
+        // Save elapsed time when app goes to background
+        elapsedTime.value += recordingTime.value;
+    } else {
+        // Reinitialize visualization when app comes to foreground
+        initializeAudioVisualization(mediaRecorder.value.stream);
+        recordingStartTime.value = Date.now();
+    }
+}
+
+/**
+ * Handle data received from MediaRecorder
+ */
+function handleRecordingDataAvailable(event: BlobEvent): void {
+    if (event.data.size > 0) {
+        audioChunks.value.push(event.data);
+    }
+}
+
+/**
+ * Handle recording stop, process audio data
+ */
+async function handleStopRecording(stream: MediaStream): Promise<void> {
+    // Create a blob from all chunks
+    const blob = new Blob(audioChunks.value, { type: "audio/webm" });
+
+    // Convert webm to mp3 format
+    const mp3Blob = await convertWebmToMp3(blob, "recording");
+
+    // Update state with processed audio
+    audioBlob.value = mp3Blob;
+    audioUrl.value = URL.createObjectURL(mp3Blob);
+
+    // Release microphone
+    for (const track of stream.getTracks()) {
+        track.stop();
+    }
+
+    // Clear recording timer
+    if (recordingInterval.value) {
+        clearInterval(recordingInterval.value);
+        recordingInterval.value = undefined;
+    }
+}
+
+// ------------- Microphone Management -------------
 /**
  * Check if microphone is available
  */
@@ -65,6 +180,7 @@ function handleMicrophoneError(error: Error): void {
     isLoading.value = false;
     logger.error("Microphone access error:", error);
 
+    // Set appropriate error message based on error type
     if (
         error.name === "NotFoundError" ||
         error.name === "DevicesNotFoundError"
@@ -98,10 +214,17 @@ function handleMicrophoneError(error: Error): void {
     emit("recording-error", error);
 }
 
+// ------------- Audio Visualization -------------
 /**
- * Initialize audio visualization
+ * Initialize audio visualization with media stream
  */
 function initializeAudioVisualization(stream: MediaStream): void {
+    // Close existing context if it exists
+    if (audioContext.value) {
+        audioContext.value.close();
+    }
+
+    // Create new audio context and analyzer
     audioContext.value = new AudioContext();
     const source = audioContext.value.createMediaStreamSource(stream);
     analyser.value = audioContext.value.createAnalyser();
@@ -116,6 +239,7 @@ function initializeAudioVisualization(stream: MediaStream): void {
 function updateAudioVisualization(): void {
     if (analyser.value && frequencyData.value) {
         analyser.value.getByteFrequencyData(frequencyData.value);
+        // Transform frequency data to visualization values (0-100%)
         audioVisualization.value = Array.from(frequencyData.value)
             .slice(0, 20)
             .map((value) => (value / 255) * 100);
@@ -124,21 +248,7 @@ function updateAudioVisualization(): void {
     }
 }
 
-// Update visualization every 100ms during recording
-watch(isRecording, (newVal) => {
-    if (newVal) {
-        const interval = setInterval(() => updateAudioVisualization(), 100);
-        recordingInterval.value = interval as unknown as NodeJS.Timeout;
-    } else if (recordingInterval.value) {
-        clearInterval(recordingInterval.value);
-        recordingInterval.value = undefined;
-        if (audioContext.value) {
-            audioContext.value.close();
-            audioContext.value = undefined;
-        }
-    }
-});
-
+// ------------- Recording Controls -------------
 /**
  * Start the audio recording process
  */
@@ -146,6 +256,7 @@ async function startRecording(): Promise<void> {
     isLoading.value = true;
     errorMessage.value = "";
     audioChunks.value = [];
+    elapsedTime.value = 0;
 
     // Check if microphone is available before attempting to record
     const isAvailable = await checkMicrophoneAvailability();
@@ -163,6 +274,7 @@ async function startRecording(): Promise<void> {
         // Initialize visualization
         initializeAudioVisualization(stream);
 
+        // Update UI state
         isLoading.value = false;
         isRecording.value = true;
         microphoneAvailable.value = true;
@@ -170,10 +282,17 @@ async function startRecording(): Promise<void> {
         // Create a new MediaRecorder instance
         mediaRecorder.value = new MediaRecorder(stream);
 
-        // Event handler for data available from the recorder
-        mediaRecorder.value.ondataavailable = handleRecordingDataAvailable;
+        // Setup for iOS background audio
+        if ("mediaSession" in navigator) {
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: "Active Recording",
+                artist: "Transcribo",
+                album: "Transcribo",
+            });
+        }
 
-        // Event handler for when recording stops
+        // Add event handlers
+        mediaRecorder.value.ondataavailable = handleRecordingDataAvailable;
         mediaRecorder.value.onstop = async () =>
             await handleStopRecording(stream);
 
@@ -185,57 +304,13 @@ async function startRecording(): Promise<void> {
         // Start the timer to display recording duration
         recordingInterval.value = setInterval(() => {
             recordingTime.value = Math.floor(
-                (Date.now() - recordingStartTime.value) / 1000,
+                (Date.now() - recordingStartTime.value) / 1000 +
+                    elapsedTime.value,
             );
         }, 1000);
     } catch (error) {
         handleMicrophoneError(error as Error);
     }
-}
-
-function handleRecordingDataAvailable(event: BlobEvent): void {
-    if (event.data.size > 0) {
-        audioChunks.value.push(event.data);
-    }
-}
-
-async function handleStopRecording(stream: MediaStream): Promise<void> {
-    // Create a blob from all chunks
-    const blob = new Blob(audioChunks.value, { type: "audio/webm" });
-    const fixedBlob = await fixAudioDuration(blob, recordingTime.value * 1000);
-
-    audioBlob.value = fixedBlob;
-    audioUrl.value = URL.createObjectURL(blob);
-
-    // Stop all tracks in the stream to release the microphone
-    for (const track of stream.getTracks()) {
-        track.stop();
-    }
-
-    if (recordingInterval.value) {
-        // Clear the recording timer
-        clearInterval(recordingInterval.value);
-        recordingInterval.value = undefined;
-    }
-}
-
-/**
- * Fix the duration of the WebM audio blob.
- * This will add the duration to the metadata of the audio blob.
- * @param blob - The audio blob to fix
- * @param duration - The desired duration in seconds
- * @returns A promise that resolves with the fixed blob
- */
-function fixAudioDuration(blob: Blob, duration: number): Promise<Blob> {
-    return new Promise((resolve, reject) => {
-        fixWebmDuration(blob, duration * 1000).then((fixedBlob: Blob) => {
-            if (fixedBlob) {
-                resolve(fixedBlob);
-            } else {
-                reject(new Error("Failed to fix WebM duration."));
-            }
-        });
-    });
 }
 
 /**
@@ -269,13 +344,6 @@ function emitAudio(): void {
         emit("recording-complete", audioBlob.value);
     }
 }
-
-/**
- * Check for microphone when component is mounted
- */
-onMounted(async () => {
-    microphoneAvailable.value = await checkMicrophoneAvailability();
-});
 </script>
 
 <template>
