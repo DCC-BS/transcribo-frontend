@@ -20,7 +20,7 @@
         "@nuxt/ui": "^3.0.1",
         "@nuxtjs/i18n": "^9.4.0",
         "@pinia/nuxt": "0.10.1",
-        "@vite-pwa/nuxt": "0.10.6",
+        "@vite-pwa/nuxt": "0.10.8",
         "konva": "^9.3.20",
         "nuxt": "^3.16.1",
         "ts-pattern": "^5.6.2",
