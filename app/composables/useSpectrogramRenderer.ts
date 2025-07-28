@@ -1,4 +1,4 @@
-import { type ColorMapType, getColorMap } from "../services/colorMapService";
+import { type ColorMapType, getColorMap } from "../../services/colorMapService";
 
 /**
  * Interface for spectrogram rendering options

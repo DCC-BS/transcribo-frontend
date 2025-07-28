@@ -1,4 +1,4 @@
-import { verboseFetch } from "~/server/utils/verboseFetch";
+import { verboseFetch } from "../../../utils/verboseFetch";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
 
 export default defineEventHandler(async (event) => {

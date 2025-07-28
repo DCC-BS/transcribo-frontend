@@ -28,6 +28,7 @@ function handleKeyDown(event: KeyboardEvent) {
     <NuxtPwaManifest />
     <UApp>
         <NavigationMenu />
+        <FeedbackControl />
         <DialogView
             :is-open="isOpen"
             :title="title"
