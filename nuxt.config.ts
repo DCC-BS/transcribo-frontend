@@ -56,6 +56,7 @@ export default defineNuxtConfig({
         "@dcc-bs/common-ui.bs.js",
         "@dcc-bs/event-system.bs.js",
         "@dcc-bs/logger.bs.js",
+        "@dcc-bs/feedback-control.bs.js",
         "@pinia/nuxt",
         "@vite-pwa/nuxt",
     ],
@@ -64,10 +65,16 @@ export default defineNuxtConfig({
     },
     devtools: { enabled: false },
     css: ["~/assets/css/main.css"],
+    "feedback-control.bs.js": {
+        repo: "Feedback",
+        owner: "DCC-BS",
+        project: "Transcribo",
+        githubToken: process.env.GITHUB_TOKEN,
+    },
     // localization
     i18n: {
         bundle: {
-            optimizeTranslationDirective: false,
+            fullInstall: true,
         },
         locales: [
             {
@@ -81,7 +88,6 @@ export default defineNuxtConfig({
         ],
         defaultLocale: "de",
         vueI18n: "./i18n.config.ts",
-        lazy: true,
         strategy: "prefix_except_default",
     },
     pwa: {

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
+
 const { segments, speakers } = useCurrentTranscription();
 </script>
 

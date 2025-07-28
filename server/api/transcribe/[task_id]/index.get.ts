@@ -1,5 +1,5 @@
-import { verboseFetch } from "../../../utils/verboseFetch";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
+import { verboseFetch } from "../../../utils/verboseFetch";
 
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { P, match } from "ts-pattern";
+import { match, P } from "ts-pattern";
 import { TranscriptionFinishedCommand } from "~/types/commands";
 import { type TaskStatus, TaskStatusEnum } from "~/types/task";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
@@ -16,15 +16,15 @@ const progress = computed(() =>
     match(status.value?.status)
         .returnType<number>()
         .with(TaskStatusEnum.IN_PROGRESS, () => status.value?.progress ?? 0)
-        .with(TaskStatusEnum.SUCCESS, () => 1)
-        .with(TaskStatusEnum.FAILURE, () => 1)
+        .with(TaskStatusEnum.COMPLETED, () => 1)
+        .with(TaskStatusEnum.FAILED, () => 1)
         .with(TaskStatusEnum.CANCELLED, () => 0)
         .otherwise(() => 0),
 );
 
 // Computed property to determine if task is completed successfully
 const isSuccessful = computed(
-    () => status.value?.status === TaskStatusEnum.SUCCESS,
+    () => status.value?.status === TaskStatusEnum.COMPLETED,
 );
 
 onMounted(() => {
@@ -48,8 +48,8 @@ const fetchTaskStatus = async (): Promise<void> => {
         await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
-    let result: TranscriptionResponse | undefined = undefined;
-    if (status.value?.status === TaskStatusEnum.SUCCESS) {
+    let result: TranscriptionResponse | undefined;
+    if (status.value?.status === TaskStatusEnum.COMPLETED) {
         result = await $fetch<TranscriptionResponse>(
             `/api/transcribe/${props.taskId}`,
         );
@@ -70,7 +70,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
             <UIcon name="i-heroicons-arrow-path" class="loading-spinner" />
             <p class="loading-text">{{ t('taskStatus.processing') }}</p>
         </div>
-        <!-- Success animation shown when status is SUCCESS -->
+        <!-- Success animation shown when status is COMPLETED -->
         <div v-else class="success-container">
             <div class="success-circle">
                 <UIcon name="i-heroicons-check" class="success-icon" />

@@ -4,8 +4,8 @@
  */
 export enum TaskStatusEnum {
     IN_PROGRESS = "in_progress",
-    SUCCESS = "success",
-    FAILURE = "failure",
+    COMPLETED = "completed",
+    FAILED = "failed",
     CANCELLED = "cancelled",
 }
 

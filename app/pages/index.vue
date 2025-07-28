@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { TaskStatus } from "~/types/task";
 import type { UploadMediaView } from "#components";
+import type { TaskStatus } from "~/types/task";
 
 const tasksStore = useTasksStore();
 const { t } = useI18n();
@@ -37,18 +37,11 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                 <div class="text-lg font-bold my-4">
                     {{ t('pages.index.recordAudio') }}
                 </div>
-                <UAlert
-                    class="text-left"
-                    icon="i-heroicons-information-circle"
-                    :title="t('pages.index.experimentalTitle')"
-                    color="info"
-                    :description="t('pages.index.experimental')"
-                />
                 <AudioRecorder @recording-complete="handleRecordingComplete" />
             </div>
 
             <div class="pt-5 flex flex-col items-center gap-2">
-                <DisclaimerLlm />
+                <DisclaimerButton app-name="Transcribo" />
                 <DataBsBanner />
             </div>
         </div>

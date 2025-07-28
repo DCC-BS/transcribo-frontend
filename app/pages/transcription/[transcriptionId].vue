@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { TranscriptonNameChangeCommand } from "~/types/commands";
 import { UInput } from "#components";
+import { TranscriptonNameChangeCommand } from "~/types/commands";
 
 const route = useRoute();
 const transcriptionStore = useTranscriptionsStore();
@@ -83,7 +83,7 @@ async function handleNameChange(name: string | number) {
                     </div>
                 </template>
             </UModal>
-            <DisclaimerLlm />
+            <DisclaimerButton app-name="Transcribo" />
         </div>
 
         <div

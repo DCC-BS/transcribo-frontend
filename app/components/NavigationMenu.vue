@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { ITransriboReversibleCommand } from "~/types/commands";
 import type { NavigationMenuItem } from "#ui/components/NavigationMenu.vue";
+import type { ITransriboReversibleCommand } from "~/types/commands";
 
 // Add translation hook
 const { t } = useI18n();
