@@ -30,6 +30,10 @@ const items = computed<NavigationMenuItem[][]>(() => [
     isTranscriptionPath.value
         ? [
               {
+                  slot: "disclaimer",
+                  as: "link",
+              },
+              {
                   label: t("navigation.undo"),
                   icon: "i-heroicons-arrow-uturn-left",
                   onSelect: () => handleUndo(),
@@ -69,7 +73,12 @@ const items = computed<NavigationMenuItem[][]>(() => [
                       ),
               },
           ]
-        : [],
+        : [
+              {
+                  slot: "disclaimer",
+                  as: "link",
+              },
+          ],
     [
         {
             label: t("navigation.new"),
@@ -110,10 +119,11 @@ function handleRedo(): void {
 
 <template>
     <div>
-        <UNavigationMenu
-            content-orientation="vertical"
-            :items="items"
-            class="w-full justify-between z-50"
-        />
+         <UNavigationMenu content-orientation="vertical" variant="link" :items="items"
+            class="w-full justify-between align-top z-50">
+            <template #disclaimer>
+                <DisclaimerButton variant="ghost" />
+            </template>
+        </UNavigationMenu>
     </div>
 </template>

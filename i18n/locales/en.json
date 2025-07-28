@@ -1,0 +1,133 @@
+{
+    "upload": {
+        "convertingMedia": "Converting media to WAV format...",
+        "uploadingMedia": "Uploading the media file...",
+        "processingError": "Failed to process the media file. Please try again."
+    },
+    "pages": {
+        "index": {
+            "uploadMedia": "Upload Media",
+            "recordAudio": "Record audio",
+            "experimentalTitle": "Experimental",
+            "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for long recordings."
+        }
+    },
+    "navigation": {
+        "new": "New",
+        "transcriptions": "Transcriptions",
+        "languages": "Languages",
+        "undo": "Undo",
+        "redo": "Redo",
+        "actions": "Actions"
+    },
+    "timeline": {
+        "noTranscription": "No transcription available"
+    },
+    "media": {
+        "play": "Play",
+        "pause": "Pause"
+    },
+    "taskStatus": {
+        "processing": "Processing your request...",
+        "completed": "Transcription completed successfully!"
+    },
+    "transcription": {
+        "noSpeaker": "unknown",
+        "applySpeakerChanges": "Do you want to apply your changes?",
+        "undoChanges": "Undo",
+        "applyChanges": "Apply",
+        "placeholderSpeakerName": "Speaker name",
+        "loading": "Loading...",
+        "notFound": "Transcription not found or failed to load",
+        "noTranscriptionsFound": "No transcriptions found",
+        "untitled": "Untitled",
+        "delete": {
+            "title": "Delete Transcription",
+            "confirmation": "Are you sure you want to delete this transcription?"
+        },
+        "actions": {
+            "edit": "Edit",
+            "delete": "Delete"
+        },
+        "table": {
+            "name": "Name",
+            "createdAt": "Created at",
+            "updatedAt": "Updated at"
+        }
+    },
+    "ui": {
+        "saveChangesHint": "Leave text field or press Enter to save changes",
+        "emptyState": {
+            "title": "No data found",
+            "description": "There is no data available to display."
+        }
+    },
+    "export": {
+        "withSpeakers": "With speakers",
+        "exportAsText": "Export as text",
+        "exportAsSrt": "Export as SRT"
+    },
+    "task": {
+        "errors": {
+            "noMediaFile": "No media file found for task",
+            "failedToLoad": "Failed to get task"
+        }
+    },
+    "commands": {
+        "empty": "Empty Command",
+        "startTranscription": "Start Transcription: Task ID {taskId}, File: {fileName}",
+        "transcriptionFinished": "Transcription Finished: Status {status}{hasResults}",
+        "transcriptionFinishedResults": ", Results available",
+        "seekToSeconds": "Seek To: {seconds} seconds",
+        "togglePlay": "Toggle Play/Pause",
+        "insertSegment": "Insert Segment {direction}",
+        "deleteSegment": "Delete Segment",
+        "updateSegment": "Update Segment: Updates: {updates}",
+        "updateSegmentNoUpdates": "Update Segment: Updates: none",
+        "changeTranscriptionName": "Change Transcription Name To: {name}",
+        "renameSpeaker": "Rename Speaker: \"{oldName}\" → \"{newName}\""
+    },
+    "help": {
+        "title": "Help Guide - Transcribo",
+        "mediaControls": {
+            "spectrogram": "Spectrogram",
+            "timeline": "Timeline",
+            "title": "Basic Media Controls",
+            "spacebar": "Press {space} to play/pause the video or audio",
+            "spectrogramClick": "Click or drag on the {spectrogram} to seek to a specific position",
+            "arrowKeys": "Use {leftKey} or {rightKey} to seek 5 seconds back or forward",
+            "shiftArrows": "Hold {shiftKey} + {leftKey}/{rightKey} to seek 30 seconds",
+            "ctrlArrows": "Hold {ctrlKey} + {leftKey}/{rightKey} to seek 1 second",
+            "mouseWheel": "Use mouse wheel to zoom into the {timeline}, or use the range slider below",
+            "ctrlClick": "Use {ctrlKey} + left click to move around the {timeline}"
+        },
+        "segments": {
+            "title": "Transcription Segments",
+            "transcriptionSegment": "Transcription Segment",
+            "dropdown": "dropdown",
+            "timespanTextFields": "timespan text fields",
+            "intro": "At the bottom, the current {transcriptionSegment} is shown for editing:",
+            "speaker": "In the {dropdown}, assign a speaker (type in the search box to create a new speaker)",
+            "timeChange": "Change the time in seconds in the {timespanTextFields}",
+            "seekTime": "Click on the timestamps to seek to that time",
+            "insertBefore": "Press the button with the arrow up {insertAbove} to insert a segment before",
+            "insertAfter": "Press the button with the arrow down {insertBelow} to insert a segment below",
+            "deleteSegment": "Press the delete button {delete} to remove the segment"
+        },
+        "timeline": {
+            "title": "Working with Segments on Timeline",
+            "hoverText": "Hover over a rectangle to see the text",
+            "clickSelect": "Click on a rectangle to select it and see the handles",
+            "moveWithKeys": "When selected, you can move the rectangle 0.5 seconds to the left or right with the arrow keys",
+            "dragMove": "Drag the rectangle to move it",
+            "resizeHandles": "Drag the handles on the left or right side to resize the rectangle",
+            "altSnap": "Hold the {altKey} key while moving to prevent snapping to other rectangles"
+        },
+        "editing": {
+            "title": "Editing Operations",
+            "undo": "Use {ctrlKey} + {zKey} for undo",
+            "redo": "Use {ctrlKey} + {yKey} for redo",
+            "buttons": "Or press the undo/redo buttons at the top left"
+        }
+    }
+}

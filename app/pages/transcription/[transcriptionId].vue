@@ -83,7 +83,6 @@ async function handleNameChange(name: string | number) {
                     </div>
                 </template>
             </UModal>
-            <DisclaimerButton app-name="Transcribo" />
         </div>
 
         <div

@@ -73,21 +73,19 @@ export default defineNuxtConfig({
     },
     // localization
     i18n: {
-        bundle: {
-            fullInstall: true,
-        },
         locales: [
             {
                 code: "en",
                 name: "English",
+                file: "en.json",
             },
             {
                 code: "de",
                 name: "Deutsch",
+                file: "de.json",
             },
         ],
         defaultLocale: "de",
-        vueI18n: "./i18n.config.ts",
         strategy: "prefix_except_default",
     },
     pwa: {

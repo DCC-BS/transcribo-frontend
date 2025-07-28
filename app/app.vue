@@ -41,18 +41,3 @@ function handleKeyDown(event: KeyboardEvent) {
         <NuxtPage />
     </UApp>
 </template>
-
-<style>
-.disclaimer-container p {
-    margin-bottom: 1rem;
-}
-.disclaimer-container ul {
-    margin-bottom: 1rem;
-    margin-left: 1.5rem;
-    list-style-type: disc;
-}
-.disclaimer-container li {
-    margin-bottom: 0.5rem;
-    display: list-item;
-}
-</style>

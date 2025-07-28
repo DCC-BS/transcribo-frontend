@@ -1,0 +1,132 @@
+{
+    "upload": {
+        "uploadingMedia": "Lade die Mediendatei hoch...",
+        "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut."
+    },
+    "pages": {
+        "index": {
+            "uploadMedia": "Medien hochladen",
+            "recordAudio": "Audio aufnehmen",
+            "experimentalTitle": "Experimentell",
+            "experimental": "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Es kann sein, dass sie bei langen Aufnahmen nicht funktioniert."
+        }
+    },
+    "navigation": {
+        "new": "Neu",
+        "transcriptions": "Transkriptionen",
+        "languages": "Sprachen",
+        "undo": "Rückgängig",
+        "redo": "Wiederholen",
+        "actions": "Aktionen"
+    },
+    "timeline": {
+        "noTranskription": "Keine Transkription verfügbar"
+    },
+    "media": {
+        "play": "Abspielen",
+        "pause": "Pause"
+    },
+    "taskStatus": {
+        "processing": "Verarbeite deine Anfrage...",
+        "completed": "Transkription erfolgreich abgeschlossen!"
+    },
+    "transcription": {
+        "noSpeaker": "unbekannt",
+        "applySpeakerChanges": "Möchtest du deine Änderungen übernehmen?",
+        "undoChanges": "Rückgängig",
+        "applyChanges": "Übernehmen",
+        "placeholderSpeakerName": "Sprechername",
+        "loading": "Lädt...",
+        "notFound": "Transkription nicht gefunden oder konnte nicht geladen werden",
+        "noTranscriptionsFound": "Keine Transkriptionen gefunden",
+        "untitled": "Ohne Titel",
+        "delete": {
+            "title": "Transkription löschen",
+            "confirmation": "Sind Sie sicher, dass Sie diese Transkription löschen möchten?"
+        },
+        "actions": {
+            "edit": "Bearbeiten",
+            "delete": "Löschen"
+        },
+        "table": {
+            "name": "Name",
+            "createdAt": "Erstellt am",
+            "updatedAt": "Aktualisiert am"
+        }
+    },
+    "ui": {
+        "saveChangesHint": "Textfeld verlassen oder Enter drücken, um Änderungen zu übernehmen",
+        "emptyState": {
+            "title": "Keine Daten gefunden",
+            "description": "Es sind keine Daten zum Anzeigen verfügbar."
+        }
+    },
+    "export": {
+        "withSpeakers": "Mit Sprechern",
+        "exportAsText": "Als Text exportieren",
+        "exportAsSrt": "Als SRT exportieren"
+    },
+    "task": {
+        "errors": {
+            "noMediaFile": "Keine Mediendatei für diese Aufgabe gefunden",
+            "failedToLoad": "Fehler beim Laden der Aufgabe"
+        }
+    },
+    "commands": {
+        "empty": "Leerer Befehl",
+        "startTranscription": "Starte Transkription: Aufgaben-ID {taskId}, Datei: {fileName}",
+        "transcriptionFinished": "Transkription abgeschlossen: Status {status}{hasResults}",
+        "transcriptionFinishedResults": ", Ergebnisse verfügbar",
+        "seekToSeconds": "Springe zu: {seconds} Sekunden",
+        "togglePlay": "Wiedergabe/Pause umschalten",
+        "insertSegment": "Segment {direction} einfügen",
+        "deleteSegment": "Segment löschen",
+        "updateSegment": "Segment aktualisieren: Änderungen: {updates}",
+        "updateSegmentNoUpdates": "Segment aktualisieren: Keine Änderungen",
+        "changeTranscriptionName": "Transkriptionsname ändern zu: {name}",
+        "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\""
+    },
+    "help": {
+        "title": "Hilfe - Transcribo",
+        "mediaControls": {
+            "spectrogram": "Spektrogramm",
+            "timeline": "Zeitleiste",
+            "title": "Grundlegende Mediensteuerung",
+            "spacebar": "Drücken Sie {space} zum Abspielen/Pausieren von Video oder Audio",
+            "spectrogramClick": "Klicken oder ziehen Sie auf das {spectrogram}, um zu einer bestimmten Position zu springen",
+            "arrowKeys": "Verwenden Sie {leftKey} oder {rightKey} um 5 Sekunden zurück oder vorwärts zu springen",
+            "shiftArrows": "Halten Sie {shiftKey} + {leftKey} / {rightKey} um 30 Sekunden zu springen",
+            "ctrlArrows": "Halten Sie {ctrlKey} + {leftKey} / {rightKey} um 1 Sekunde zu springen",
+            "mouseWheel": "Verwenden Sie das Mausrad zum Zoomen in die {timeline} oder nutzen Sie den Bereichsregler unten",
+            "ctrlClick": "Verwenden Sie {ctrlKey} + Linksklick, um sich auf der {timeline} zu bewegen"
+        },
+        "segments": {
+            "title": "Transkriptionssegmente",
+            "transcriptionSegment": "Transkriptionssegment",
+            "dropdown": "Dropdown-Menü",
+            "timespanTextFields": "Zeitspannen-Textfelder",
+            "intro": "Am unteren Rand wird das aktuelle {transcriptionSegment} zur Bearbeitung angezeigt:",
+            "speaker": "Im {dropdown} können Sie einen Sprecher zuweisen (tippen Sie in das Suchfeld, um einen neuen Sprecher zu erstellen)",
+            "timeChange": "Ändern Sie die Zeit in Sekunden in den {timespanTextFields}",
+            "seekTime": "Klicken Sie auf die Zeitstempel, um zu dieser Zeit zu springen",
+            "insertBefore": "Drücken Sie den Knopf mit dem Pfeil {insertAbove} nach oben, um ein Segment davor einzufügen",
+            "insertAfter": "Drücken Sie den Knopf mit dem Pfeil {insertBelow} nach unten, um ein Segment danach einzufügen",
+            "deleteSegment": "Drücken Sie den Löschen-Knopf {delete}, um das Segment zu entfernen"
+        },
+        "timeline": {
+            "title": "Arbeiten mit Segmenten auf der Zeitleiste",
+            "hoverText": "Fahren Sie mit dem Mauszeiger über ein Rechteck, um den Text zu sehen",
+            "clickSelect": "Klicken Sie auf ein Rechteck, um es auszuwählen und die Griffe zu sehen",
+            "moveWithKeys": "Wenn ausgewählt, können Sie das Rechteck mit den Pfeiltasten um 0,5 Sekunden nach links oder rechts verschieben",
+            "dragMove": "Ziehen Sie das Rechteck, um es zu verschieben",
+            "resizeHandles": "Ziehen Sie die Griffe auf der linken oder rechten Seite, um das Rechteck in der Größe zu ändern",
+            "altSnap": "Halten Sie die {altKey}-Taste gedrückt, während Sie es verschieben, um das Einrasten an anderen Rechtecken zu verhindern"
+        },
+        "editing": {
+            "title": "Bearbeitungsvorgänge",
+            "undo": "Verwenden Sie {ctrlKey} + {zKey} zum Rückgängigmachen",
+            "redo": "Verwenden Sie {ctrlKey} + {yKey} zum Wiederholen",
+            "buttons": "Oder drücken Sie die Schaltflächen für Rückgängig/Wiederholen oben links"
+        }
+    }
+}
