@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import disclaimerText from "./assets/disclaimer.html?raw";
 import DialogView from "./components/DialogView.vue";
 import { useInitDialog } from "./composables/dialog";
-import disclaimerText from "./assets/disclaimer.html?raw";
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
 const { undo, redo, canUndo, canRedo, undoStack } = useCommandHistory();

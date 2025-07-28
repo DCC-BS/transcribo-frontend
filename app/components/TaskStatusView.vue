@@ -121,7 +121,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    background-color: var(--color-green-500, #10b981);
+    border: 2px solid var(--color-green-500);
     animation: scale-in 0.5s ease-out;
     margin-bottom: 1rem;
 }
