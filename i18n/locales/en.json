@@ -7,7 +7,7 @@
     "pages": {
         "index": {
             "uploadMedia": "Upload Media",
-            "recordAudio": "Record audio",
+            "recordAudio": "Record Audio",
             "experimentalTitle": "Experimental",
             "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for long recordings."
         }
@@ -63,7 +63,9 @@
         "emptyState": {
             "title": "No data found",
             "description": "There is no data available to display."
-        }
+        },
+        "cancel": "Cancel",
+        "confirm": "Confirm"
     },
     "export": {
         "withSpeakers": "With speakers",

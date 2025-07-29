@@ -63,7 +63,9 @@
         "emptyState": {
             "title": "Keine Daten gefunden",
             "description": "Es sind keine Daten zum Anzeigen verfügbar."
-        }
+        },
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen"
     },
     "export": {
         "withSpeakers": "Mit Sprechern",

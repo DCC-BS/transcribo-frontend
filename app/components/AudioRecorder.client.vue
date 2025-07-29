@@ -7,6 +7,8 @@ const emit = defineEmits<{
     "recording-error": [error: Error];
 }>();
 
+const { t } = useI18n();
+
 // ------------- Composables -------------
 const logger = useLogger();
 const { convertWebmToMp3 } = useAudioConvertion();
@@ -356,7 +358,7 @@ function emitAudio(): void {
                 :disabled="isLoading"
                 @click="startRecording"
             >
-                Start Recording
+                {{ t("pages.index.recordAudio") }}
             </UButton>
             <UButton
                 v-if="isRecording"
