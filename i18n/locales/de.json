@@ -2,7 +2,11 @@
     "upload": {
         "convertingMedia": "Konvertiere Medien in WAV-Format...",
         "uploadingMedia": "Lade die Mediendatei hoch...",
-        "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut."
+        "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut.",
+        "extractingAudio": "Extrahiere Audio aus Video...",
+        "numSpeakers": "Anzahl der Sprecher",
+        "numSpeakersHelp": "Wählen Sie die Anzahl der Sprecher in der Audiodatei oder wählen Sie automatische Erkennung",
+        "autoDetection": "Automatische Erkennung"
     },
     "pages": {
         "index": {
@@ -32,7 +36,10 @@
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
-        "completed": "Transkription erfolgreich abgeschlossen!"
+        "completed": "Transkription erfolgreich abgeschlossen!",
+        "failed": "Transkription fehlgeschlagen",
+        "failedDescription": "Während der Transkription ist ein Fehler aufgetreten. Bitte versuchen Sie es mit einer anderen Datei erneut.",
+        "goBack": "Zurück"
     },
     "transcription": {
         "noSpeaker": "unbekannt",
@@ -75,7 +82,10 @@
     "task": {
         "errors": {
             "noMediaFile": "Keine Mediendatei für diese Aufgabe gefunden",
-            "failedToLoad": "Fehler beim Laden der Aufgabe"
+            "failedToLoad": "Fehler beim Laden der Aufgabe",
+            "transcriptionFailed": "Transkription fehlgeschlagen. Bitte versuchen Sie es erneut.",
+            "failedToCreateTranscription": "Fehler beim Erstellen der Transkription aus den Ergebnissen",
+            "noResult": "Kein Transkriptionsergebnis verfügbar"
         }
     },
     "commands": {

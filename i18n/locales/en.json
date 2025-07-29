@@ -2,7 +2,11 @@
     "upload": {
         "convertingMedia": "Converting media to WAV format...",
         "uploadingMedia": "Uploading the media file...",
-        "processingError": "Failed to process the media file. Please try again."
+        "processingError": "Failed to process the media file. Please try again.",
+        "extractingAudio": "Extracting audio from video...",
+        "numSpeakers": "Number of speakers",
+        "numSpeakersHelp": "Select the number of speakers in the audio file, or choose auto-detection",
+        "autoDetection": "Auto detection"
     },
     "pages": {
         "index": {
@@ -32,7 +36,10 @@
     },
     "taskStatus": {
         "processing": "Processing your request...",
-        "completed": "Transcription completed successfully!"
+        "completed": "Transcription completed successfully!",
+        "failed": "Transcription failed",
+        "failedDescription": "Something went wrong during the transcription process. Please try again with a different file.",
+        "goBack": "Go Back"
     },
     "transcription": {
         "noSpeaker": "unknown",
@@ -75,7 +82,10 @@
     "task": {
         "errors": {
             "noMediaFile": "No media file found for task",
-            "failedToLoad": "Failed to get task"
+            "failedToLoad": "Failed to get task",
+            "transcriptionFailed": "Transcription failed. Please try again.",
+            "failedToCreateTranscription": "Failed to create transcription from results",
+            "noResult": "No transcription result available"
         }
     },
     "commands": {
