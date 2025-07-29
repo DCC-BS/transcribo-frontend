@@ -97,6 +97,7 @@ export default defineNuxtConfig({
             globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg}"],
             globIgnores: ["dev-sw-dist/**/*"],
             navigateFallback: "/",
+            navigateFallbackDenylist: [/^\/transcription\/.*/, /^\/task\/.*/],
             clientsClaim: true,
             skipWaiting: true,
         },
