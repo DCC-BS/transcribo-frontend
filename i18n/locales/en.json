@@ -90,6 +90,7 @@
         "renameSpeaker": "Rename Speaker: \"{oldName}\" → \"{newName}\""
     },
     "help": {
+        "help": "Help",
         "title": "Help Guide - Transcribo",
         "mediaControls": {
             "spectrogram": "Spectrogram",

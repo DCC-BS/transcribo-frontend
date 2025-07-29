@@ -65,7 +65,7 @@ async function handleNameChange(name: string | number) {
                 <UButton
                     icon="i-heroicons-question-mark-circle"
                     variant="ghost"
-                    label="Help"
+                    :label="t('help.help')"
                     color="info"
                 />
                 <template #content>

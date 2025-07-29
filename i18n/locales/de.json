@@ -89,6 +89,7 @@
         "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\""
     },
     "help": {
+        "help": "Hilfe",
         "title": "Hilfe - Transcribo",
         "mediaControls": {
             "spectrogram": "Spektrogramm",
