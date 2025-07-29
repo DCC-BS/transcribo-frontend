@@ -115,11 +115,16 @@ function handleRedo(): void {
 
 <template>
     <div>
-         <UNavigationMenu content-orientation="vertical" variant="link" :items="items"
-            class="w-full justify-between align-top z-50">
-            <template #disclaimer>
-                <DisclaimerButton variant="ghost" />
+        <ClientOnly>
+            <UNavigationMenu content-orientation="vertical" variant="link" :items="items"
+                class="w-full justify-between align-top z-50">
+                <template #disclaimer>
+                    <DisclaimerButton variant="ghost" />
+                </template>
+            </UNavigationMenu>
+            <template #fallback>
+                <div class="w-full h-12 bg-gray-100 animate-pulse rounded"></div>
             </template>
-        </UNavigationMenu>
+        </ClientOnly>
     </div>
 </template>
