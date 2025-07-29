@@ -27,7 +27,8 @@
     },
     "media": {
         "play": "Play",
-        "pause": "Pause"
+        "pause": "Pause",
+        "addSegment": "Add Segment"
     },
     "taskStatus": {
         "processing": "Processing your request...",

@@ -1,5 +1,6 @@
 {
     "upload": {
+        "convertingMedia": "Konvertiere Medien in WAV-Format...",
         "uploadingMedia": "Lade die Mediendatei hoch...",
         "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut."
     },
@@ -22,11 +23,12 @@
         "actions": "Aktionen"
     },
     "timeline": {
-        "noTranskription": "Keine Transkription verfügbar"
+        "noTranscription": "Keine Transkription verfügbar"
     },
     "media": {
         "play": "Abspielen",
-        "pause": "Pause"
+        "pause": "Pause",
+        "addSegment": "Segment hinzufügen"
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
