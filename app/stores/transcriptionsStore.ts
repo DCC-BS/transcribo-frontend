@@ -13,6 +13,7 @@ export interface StoredTranscription {
     audioFileId?: string;
     mediaFile?: Blob;
     mediaFileName?: string;
+    summary?: string; // AI-generated meeting summary
 }
 
 // Database configuration
@@ -313,6 +314,9 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                     ? { audioFileId: updates.audioFileId }
                     : {}),
                 ...(updates.name ? { name: updates.name } : {}), // Apply name updates if present
+                ...(updates.summary !== undefined
+                    ? { summary: updates.summary }
+                    : {}), // Apply summary updates if present
                 updatedAt: new Date(),
             };
 
@@ -453,6 +457,63 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         });
     }
 
+    /**
+     * Generate and store a summary for the current transcription
+     */
+    async function generateSummary(): Promise<string | null> {
+        if (!currentTranscription.value) {
+            logger.error(
+                "No current transcription available for summary generation.",
+            );
+            return null;
+        }
+
+        if (currentTranscription.value.summary) {
+            logger.info("Summary already exists for this transcription.");
+            return currentTranscription.value.summary;
+        }
+
+        try {
+            const transcriptText = getTranscriptionText(
+                currentTranscription.value,
+            );
+
+            const formData = new FormData();
+            formData.append("transcript", transcriptText);
+
+            const summaryResponse = await $fetch<{ summary: string }>(
+                "/api/summarize/submit",
+                {
+                    method: "POST",
+                    body: formData,
+                },
+            );
+
+            // Store the summary in the current transcription with proper reactivity
+            currentTranscription.value = {
+                ...currentTranscription.value,
+                summary: summaryResponse.summary,
+            };
+
+            logger.info("Summary stored in current transcription:", {
+                transcriptionId: currentTranscription.value.id,
+                hasSummary: !!currentTranscription.value.summary,
+                summaryLength: summaryResponse.summary.length,
+            });
+
+            // Update the transcription in IndexedDB
+            await updateCurrentTranscription({
+                summary: summaryResponse.summary,
+            });
+
+            logger.info("Summary generated and stored successfully.");
+            return summaryResponse.summary;
+        } catch (error) {
+            logger.error("Failed to generate summary:", error);
+            throw error;
+        }
+    }
+
     // Initialize the store when it's first accessed
     onMounted(() => {
         initializeDB();
@@ -476,6 +537,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         updateTranscription,
         deleteTranscription,
         getTranscriptionText,
+        generateSummary,
 
         // Getters
         transcriptionCount,

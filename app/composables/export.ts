@@ -1,11 +1,11 @@
 // Import the StoredTranscription interface
-import type { StoredTranscription } from "~/stores/transcriptionsStore";
 import type { SegementWithId } from "~/types/transcriptionResponse";
 
 export interface ExportOptions {
     withSpeakers: boolean;
     withTimestamps: boolean;
     mergeSegments: boolean; // Only applies to text exports
+    withSummary: boolean; // Only applies to text exports
 }
 
 export const useExport = () => {
@@ -59,7 +59,7 @@ export const useExport = () => {
             segments = mergeConsecutiveSegments(segments);
         }
 
-        const text = segments
+        const transcriptText = segments
             .map((s) => {
                 let line = "";
 
@@ -87,7 +87,15 @@ export const useExport = () => {
             })
             .join("\n");
 
-        const blob = new Blob([text], { type: "text/plain" });
+        let finalText = transcriptText;
+
+        // Add summary if requested
+        if (options.withSummary && currentTranscription.value?.summary) {
+            // Use the stored summary
+            finalText = `MEETING SUMMARY:\n${currentTranscription.value.summary}\n\n---\n\nFULL TRANSCRIPT:\n${transcriptText}`;
+        }
+
+        const blob = new Blob([finalText], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;

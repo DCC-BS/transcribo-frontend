@@ -97,6 +97,7 @@
         "withSpeakers": "With speakers",
         "withTimestamps": "Include timestamps",
         "mergeSegments": "Merge segments from same speaker",
+        "withSummary": "Include meeting summary",
         "textOnly": "Text format only",
         "export": "Export",
         "options": "Options",
@@ -109,6 +110,14 @@
         },
         "exportAsText": "Export as text",
         "exportAsSrt": "Export as SRT"
+    },
+    "summary": {
+        "generate": "Generate Summary",
+        "generating": "Generating...",
+        "show": "Show Summary",
+        "hide": "Hide Summary",
+        "title": "Meeting Summary",
+        "error": "Summary Generation Error"
     },
     "task": {
         "errors": {
@@ -136,6 +145,7 @@
     "help": {
         "help": "Help",
         "title": "Help Guide - Transcribo",
+        "description": "Application help and keyboard shortcuts guide",
         "mediaControls": {
             "spectrogram": "Spectrogram",
             "timeline": "Timeline",

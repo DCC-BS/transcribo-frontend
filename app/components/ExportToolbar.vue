@@ -3,12 +3,14 @@ import type { ExportOptions } from "~/composables/export";
 
 const { t } = useI18n();
 const { exportAsText, exportAsSrt, exportAsJson } = useExport();
+const transcriptionStore = useTranscriptionsStore();
 
 // Export options state
 const exportOptions = ref<ExportOptions>({
     withSpeakers: true,
     withTimestamps: true,
     mergeSegments: false,
+    withSummary: false,
 });
 
 // Functions to handle exports
@@ -56,12 +58,24 @@ function handleJsonExport(): void {
                     </div>
                     
                     <!-- Merge segments toggle (text only) -->
-                    <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center justify-between mb-2">
                         <div class="flex flex-col">
                             <span class="text-sm">{{ t('export.mergeSegments') }}</span>
                             <span class="text-xs text-gray-500">{{ t('export.textOnly') }}</span>
                         </div>
                         <USwitch v-model="exportOptions.mergeSegments" />
+                    </div>
+                    
+                    <!-- Meeting summary toggle (text only) -->
+                    <div 
+                        v-if="transcriptionStore.currentTranscription?.summary"
+                        class="flex items-center justify-between mb-3"
+                    >
+                        <div class="flex flex-col">
+                            <span class="text-sm">{{ t('export.withSummary') }}</span>
+                            <span class="text-xs text-gray-500">{{ t('export.textOnly') }}</span>
+                        </div>
+                        <USwitch v-model="exportOptions.withSummary" />
                     </div>
                 </div>
                 
@@ -88,7 +102,7 @@ function handleJsonExport(): void {
                         block
                         variant="ghost"
                         color="primary"
-                        icon="i-heroicons-video-camera"
+                        icon="i-heroicons-chat-bubble-bottom-center-text"
                         :label="t('export.formats.subtitle')"
                         @click="handleSubtitleExport"
                         class="justify-start"

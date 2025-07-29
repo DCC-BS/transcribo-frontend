@@ -95,8 +95,9 @@
     },
     "export": {
         "withSpeakers": "Mit Sprechern",
-        "withTimestamps": "Zeitstempel einbeziehen",
+        "withTimestamps": "Zeitstempel hinzufügen",
         "mergeSegments": "Segmente vom selben Sprecher zusammenführen",
+        "withSummary": "Meeting-Zusammenfassung hinzufügen",
         "textOnly": "Nur Textformat",
         "export": "Exportieren",
         "options": "Optionen",
@@ -109,6 +110,14 @@
         },
         "exportAsText": "Als Text exportieren",
         "exportAsSrt": "Als SRT exportieren"
+    },
+    "summary": {
+        "generate": "Zusammenfassung erstellen",
+        "generating": "Erstelle...",
+        "show": "Zusammenfassung anzeigen",
+        "hide": "Zusammenfassung ausblenden",
+        "title": "Meeting-Zusammenfassung",
+        "error": "Fehler bei der Zusammenfassung"
     },
     "task": {
         "errors": {
@@ -136,6 +145,7 @@
     "help": {
         "help": "Hilfe",
         "title": "Hilfe - Transcribo",
+        "description": "Anwendungshilfe und Anleitung für Tastenkürzel",
         "mediaControls": {
             "spectrogram": "Spektrogramm",
             "timeline": "Zeitleiste",

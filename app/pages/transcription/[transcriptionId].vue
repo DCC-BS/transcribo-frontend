@@ -29,6 +29,11 @@ const { registerService, unRegisterServer, error, isInited } =
     useTranscriptionService(transcriptionId);
 const isHelpViewOpen = ref(false);
 
+// Summary state
+const isSummaryGenerating = ref(false);
+const summaryError = ref<string | null>(null);
+const isSummaryExpanded = ref(false);
+
 onMounted(() => {
     registerService();
 });
@@ -40,6 +45,26 @@ onUnmounted(() => {
 async function handleNameChange(name: string | number) {
     if (typeof name === "string") {
         await executeCommand(new TranscriptonNameChangeCommand(name));
+    }
+}
+
+async function handleGenerateSummary(): Promise<void> {
+    if (isSummaryGenerating.value) return;
+
+    isSummaryGenerating.value = true;
+    summaryError.value = null;
+
+    try {
+        await transcriptionStore.generateSummary();
+        // Expand the summary section after generation
+        isSummaryExpanded.value = true;
+    } catch (error) {
+        summaryError.value =
+            error instanceof Error
+                ? error.message
+                : "Failed to generate summary";
+    } finally {
+        isSummaryGenerating.value = false;
     }
 }
 </script>
@@ -75,6 +100,30 @@ async function handleNameChange(name: string | number) {
                     placeholder="Transcription name"
                 />
 
+                <!-- Generate Summary Button -->
+                <UButton
+                    v-if="!transcriptionStore.currentTranscription.summary"
+                    icon="i-heroicons-light-bulb"
+                    variant="ghost"
+                    :label="isSummaryGenerating ? t('summary.generating') : t('summary.generate')"
+                    color="primary"
+                    size="sm"
+                    :loading="isSummaryGenerating"
+                    :disabled="isSummaryGenerating"
+                    @click="handleGenerateSummary"
+                />
+                
+                <!-- View Summary Button (if summary exists) -->
+                <UButton
+                    v-else
+                    icon="i-heroicons-light-bulb"
+                    variant="ghost"
+                    :label="isSummaryExpanded ? t('summary.hide') : t('summary.show')"
+                    color="success"
+                    size="sm"
+                    @click="isSummaryExpanded = !isSummaryExpanded"
+                />
+
                 <!-- Export Toolbar -->
                 <ExportToolbar />
 
@@ -102,6 +151,43 @@ async function handleNameChange(name: string | number) {
                         </div>
                     </template>
                 </UModal>
+            </div>
+
+            <!-- Summary Section -->
+            <div v-if="transcriptionStore.currentTranscription.summary" class="mb-4">
+                <UCollapsible v-model:open="isSummaryExpanded" class="border border-gray-200 rounded-lg">
+                    <UButton
+                        :label="t('summary.title')"
+                        :trailing-icon="isSummaryExpanded ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        variant="ghost"
+                        color="neutral"
+                        class="w-full justify-between p-4 text-lg font-semibold"
+                        :ui="{
+                            trailingIcon: 'transition-transform duration-200'
+                        }"
+                        block
+                    />
+                    
+                    <template #content>
+                        <div class="p-4 border-t border-gray-200">
+                            <div class="prose prose-sm max-w-none">
+                                <p class="whitespace-pre-wrap">{{ transcriptionStore.currentTranscription.summary }}</p>
+                            </div>
+                        </div>
+                    </template>
+                </UCollapsible>
+            </div>
+
+            <!-- Summary Error Alert -->
+            <div v-if="summaryError" class="mb-4">
+                <UAlert
+                    color="error"
+                    :title="t('summary.error')"
+                    :description="summaryError"
+                    icon="i-heroicons-exclamation-triangle"
+                    @close="summaryError = null"
+                    closable
+                />
             </div>
 
             <SplitView>
