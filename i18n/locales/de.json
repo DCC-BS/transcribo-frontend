@@ -10,8 +10,19 @@
     },
     "pages": {
         "index": {
+            "title": "Transcribo",
+            "subtitle": "Transkribieren Sie Ihre Audio- und Videodateien mit KI. Es werden 96 Sprachen unterstützt.",
             "uploadMedia": "Medien hochladen",
+            "uploadDescription": "Laden Sie Ihre Audio- oder Videodateien hoch",
             "recordAudio": "Audio aufnehmen",
+            "recordDescription": "Nehmen Sie Audio direkt über Ihr Mikrofon auf",
+            "featuresTitle": "Warum Transcribo wählen?",
+            "feature1Title": "Schnell & Präzise",
+            "feature1Description": "KI-gestützte Transkription mit hoher Genauigkeit und Geschwindigkeit",
+            "feature2Title": "Mehrere Sprachen",
+            "feature2Description": "Unterstützung für verschiedene Sprachen und Dialekte",
+            "feature3Title": "Sicher & Privat",
+            "feature3Description": "Ihre Daten werden sicher und privat verarbeitet",
             "experimentalTitle": "Experimentell",
             "experimental": "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Es kann sein, dass sie bei langen Aufnahmen nicht funktioniert."
         }
@@ -25,6 +36,13 @@
         "undo": "Rückgängig",
         "redo": "Wiederholen",
         "actions": "Aktionen"
+    },
+    "audioRecorder": {
+        "useRecording": "Diese Aufnahme verwenden",
+        "makeSureMicrophoneIsProperlyConnected": "Stellen Sie sicher, dass Ihr Mikrofon ordnungsgemäss verbunden ist",
+        "checkBrowserPermissionsForMicrophoneAccess": "Überprüfen Sie die Browser-Berechtigungen für Mikrofonzugriff",
+        "tryUsingDifferentBrowser": "Versuchen Sie einen anderen Browser",
+        "restartDeviceIfIssuePersists": "Starten Sie Ihr Gerät neu, wenn das Problem besteht"
     },
     "timeline": {
         "noTranscription": "Keine Transkription verfügbar"
@@ -136,7 +154,7 @@
             "clickSelect": "Klicken Sie auf ein Rechteck, um es auszuwählen und die Griffe zu sehen",
             "moveWithKeys": "Wenn ausgewählt, können Sie das Rechteck mit den Pfeiltasten um 0,5 Sekunden nach links oder rechts verschieben",
             "dragMove": "Ziehen Sie das Rechteck, um es zu verschieben",
-            "resizeHandles": "Ziehen Sie die Griffe auf der linken oder rechten Seite, um das Rechteck in der Größe zu ändern",
+            "resizeHandles": "Ziehen Sie die Griffe auf der linken oder rechten Seite, um das Rechteck in der Grösse zu ändern",
             "altSnap": "Halten Sie die {altKey}-Taste gedrückt, während Sie es verschieben, um das Einrasten an anderen Rechtecken zu verhindern"
         },
         "editing": {

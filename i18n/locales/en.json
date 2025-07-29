@@ -10,8 +10,19 @@
     },
     "pages": {
         "index": {
+            "title": "Transcribo",
+            "subtitle": "Transcribe your audio and video files with AI. 96 languages supported.",
             "uploadMedia": "Upload Media",
+            "uploadDescription": "Upload your audio or video files",
             "recordAudio": "Record Audio",
+            "recordDescription": "Record audio directly from your microphone",
+            "featuresTitle": "Why Choose Transcribo?",
+            "feature1Title": "Fast & Accurate",
+            "feature1Description": "AI-powered transcription with high accuracy and speed",
+            "feature2Title": "Multiple Languages",
+            "feature2Description": "Support for various languages and dialects",
+            "feature3Title": "Secure & Private",
+            "feature3Description": "Your data is processed securely and privately",
             "experimentalTitle": "Experimental",
             "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for long recordings."
         }
@@ -25,6 +36,13 @@
         "undo": "Undo",
         "redo": "Redo",
         "actions": "Actions"
+    },
+    "audioRecorder": {
+        "useRecording": "Use this recording",
+        "makeSureMicrophoneIsProperlyConnected": "Make sure your microphone is properly connected",
+        "checkBrowserPermissionsForMicrophoneAccess": "Check browser permissions for microphone access",
+        "tryUsingDifferentBrowser": "Try using a different browser",
+        "restartDeviceIfIssuePersists": "Restart your device if the issue persists"
     },
     "timeline": {
         "noTranscription": "No transcription available"

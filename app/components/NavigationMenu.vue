@@ -117,7 +117,7 @@ function handleRedo(): void {
     <div>
         <ClientOnly>
             <UNavigationMenu 
-                content-orientation="horizontal" 
+                content-orientation="vertical" 
                 variant="link" 
                 :items="items"
                 class="w-full grid grid-cols-3 items-center z-50 [&>*:nth-child(1)]:justify-self-start [&>*:nth-child(2)]:justify-self-center [&>*:nth-child(3)]:justify-self-end"
