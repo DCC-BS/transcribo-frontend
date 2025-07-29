@@ -35,7 +35,6 @@ onMounted(() => {
     audio.src = audioSrc;
 
     audio.onloadedmetadata = () => {
-        console.log(audio.duration);
         duration.value = audio.duration;
         timeRange.value = [0, audio.duration];
 
@@ -205,13 +204,13 @@ watch(currentTime, (newTime) => {
                         @mouseup="handleMouseUp"
                         @mousemove="handleMouseMove"
                     >
-                        <AudioSpectrogram
+                        <!-- <AudioSpectrogram
                             :audio-file="audioFile"
                             :current-time="currentTime"
                             :duration="duration"
                             :zoom-x="zoomX"
                             :start-time="timeRange[0]"
-                        />
+                        /> -->
 
                         <TimelineView
                             :current-time="currentTime"
