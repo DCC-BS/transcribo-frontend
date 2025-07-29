@@ -50,7 +50,8 @@
     "media": {
         "play": "Abspielen",
         "pause": "Pause",
-        "addSegment": "Segment hinzufügen"
+        "addSegment": "Segment hinzufügen",
+        "downloadMedia": "Medien herunterladen"
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
@@ -94,6 +95,18 @@
     },
     "export": {
         "withSpeakers": "Mit Sprechern",
+        "withTimestamps": "Zeitstempel einbeziehen",
+        "mergeSegments": "Segmente vom selben Sprecher zusammenführen",
+        "textOnly": "Nur Textformat",
+        "export": "Exportieren",
+        "options": "Optionen",
+        "optionsTitle": "Export-Optionen",
+        "formats": {
+            "title": "Export-Formate",
+            "text": "Textformat",
+            "subtitle": "Untertitelformat",
+            "json": "JSON-Format"
+        },
         "exportAsText": "Als Text exportieren",
         "exportAsSrt": "Als SRT exportieren"
     },

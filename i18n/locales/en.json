@@ -50,7 +50,8 @@
     "media": {
         "play": "Play",
         "pause": "Pause",
-        "addSegment": "Add Segment"
+        "addSegment": "Add Segment",
+        "downloadMedia": "Download Media"
     },
     "taskStatus": {
         "processing": "Processing your request...",
@@ -94,6 +95,18 @@
     },
     "export": {
         "withSpeakers": "With speakers",
+        "withTimestamps": "Include timestamps",
+        "mergeSegments": "Merge segments from same speaker",
+        "textOnly": "Text format only",
+        "export": "Export",
+        "options": "Options",
+        "optionsTitle": "Export Options",
+        "formats": {
+            "title": "Export Formats",
+            "text": "Text Format",
+            "subtitle": "Subtitle Format",
+            "json": "JSON Format"
+        },
         "exportAsText": "Export as text",
         "exportAsSrt": "Export as SRT"
     },

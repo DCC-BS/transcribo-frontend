@@ -1,29 +1,92 @@
 // Import the StoredTranscription interface
 import type { StoredTranscription } from "~/stores/transcriptionsStore";
+import type { SegementWithId } from "~/types/transcriptionResponse";
+
+export interface ExportOptions {
+    withSpeakers: boolean;
+    withTimestamps: boolean;
+    mergeSegments: boolean; // Only applies to text exports
+}
 
 export const useExport = () => {
     const { currentTranscription } = useCurrentTranscription();
     const logger = useLogger();
 
-    function exportAsText(withSpeakers: boolean) {
+    /**
+     * Merges consecutive segments from the same speaker into single segments
+     * @param segments - Array of segments to merge
+     * @returns Array of merged segments
+     */
+    function mergeConsecutiveSegments(
+        segments: SegementWithId[],
+    ): SegementWithId[] {
+        if (segments.length === 0) return [];
+
+        const merged: SegementWithId[] = [];
+        let currentSegment = { ...segments[0] };
+
+        for (let i = 1; i < segments.length; i++) {
+            const nextSegment = segments[i];
+            if (!nextSegment) continue;
+
+            // If same speaker and segments are consecutive, merge them
+            if (currentSegment.speaker === nextSegment.speaker) {
+                currentSegment.text =
+                    `${currentSegment.text} ${nextSegment.text}`.trim();
+                currentSegment.end = nextSegment.end;
+            } else {
+                // Different speaker, save current and start new
+                merged.push(currentSegment as SegementWithId);
+                currentSegment = { ...nextSegment };
+            }
+        }
+
+        // Don't forget the last segment
+        merged.push(currentSegment as SegementWithId);
+        return merged;
+    }
+
+    function exportAsText(options: ExportOptions) {
         if (!currentTranscription.value) {
             logger.error("No current transcription available for export.");
             return;
         }
 
-        const text = withSpeakers
-            ? currentTranscription.value.segments
-                  .map(
-                      (s) =>
-                          `${formatTime(s.start)}  - ${formatTime(s.end)} ${s.speaker}: ${s.text}`,
-                  )
-                  .join("\n")
-            : currentTranscription.value.segments
-                  .map(
-                      (s) =>
-                          `${formatTime(s.start)}  - ${formatTime(s.end)}: s.text`,
-                  )
-                  .join("\n");
+        let segments = currentTranscription.value.segments;
+
+        // Merge segments if requested
+        if (options.mergeSegments) {
+            segments = mergeConsecutiveSegments(segments);
+        }
+
+        const text = segments
+            .map((s) => {
+                let line = "";
+
+                // Add timestamps if requested
+                if (options.withTimestamps) {
+                    line += `${formatTime(s.start)} - ${formatTime(s.end)}`;
+                }
+
+                // Add speaker if requested
+                if (options.withSpeakers) {
+                    if (options.withTimestamps) {
+                        line += ` ${s.speaker}:`;
+                    } else {
+                        line += `${s.speaker}:`;
+                    }
+                }
+
+                // Add separator between metadata and text
+                if (options.withTimestamps || options.withSpeakers) {
+                    line += " ";
+                }
+
+                line += s.text;
+                return line;
+            })
+            .join("\n");
+
         const blob = new Blob([text], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
@@ -57,7 +120,7 @@ export const useExport = () => {
             .map((s, i) => {
                 const start = srtFormatTime(s.start);
                 const end = srtFormatTime(s.end);
-                const speaker = withSpeakers ? `${s.speaker}:` : "";
+                const speaker = withSpeakers ? `${s.speaker}: ` : "";
                 return `${i + 1}\n${start} --> ${end}\n${speaker}${s.text}\n`;
             })
             .join("\n");
@@ -71,10 +134,10 @@ export const useExport = () => {
     }
 
     /**
-     * Exports the current transcription as a binary .transcribo file
+     * Exports the current transcription as a json file
      * This format preserves all transcription data including metadata
      */
-    function exportAsBinary(): void {
+    function exportAsJson(): void {
         if (!currentTranscription.value) {
             logger.error("No current transcription available for export.");
             return;
@@ -93,93 +156,23 @@ export const useExport = () => {
         // Convert to JSON string
         const jsonString = JSON.stringify(exportData);
 
-        // Create binary blob
+        // Create json blob
         const blob = new Blob([jsonString], {
-            type: "application/octet-stream",
+            type: "application/json",
         });
 
         // Download file
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${currentTranscription.value.name}.transcribo`;
+        a.download = `${currentTranscription.value.name}.json`;
         a.click();
         URL.revokeObjectURL(url);
-    }
-
-    /**
-     * Imports a .transcribo file and returns the parsed transcription data
-     * @param file - The .transcribo file to import
-     * @returns Promise with the imported transcription data as a StoredTranscription
-     */
-    async function importFromBinary(file: File): Promise<StoredTranscription> {
-        return new Promise((resolve, reject) => {
-            // Validate file type
-            if (!file.name.endsWith(".transcribo")) {
-                reject(
-                    new Error("Invalid file format. Expected .transcribo file"),
-                );
-                return;
-            }
-
-            const reader = new FileReader();
-
-            reader.onload = (event): void => {
-                try {
-                    if (typeof event.target?.result !== "string") {
-                        throw new Error("Failed to read file");
-                    }
-
-                    // Parse the JSON data
-                    const importedData = JSON.parse(event.target.result);
-
-                    // Validate the imported data structure
-                    if (
-                        !importedData.name ||
-                        !Array.isArray(importedData.segments)
-                    ) {
-                        throw new Error(
-                            "Invalid file format or corrupted file",
-                        );
-                    }
-
-                    // Create a StoredTranscription object
-                    const now = new Date();
-                    const storedTranscription: StoredTranscription = {
-                        id: importedData.id || crypto.randomUUID(), // Use existing ID or generate new one
-                        name: importedData.name,
-                        segments: importedData.segments,
-                        createdAt: importedData.createdAt
-                            ? new Date(importedData.createdAt)
-                            : now,
-                        updatedAt: now, // Always use current time for updatedAt on import
-                        audioFileId: importedData.audioFileId,
-                        mediaFileName: importedData.mediaFileName,
-                    };
-
-                    resolve(storedTranscription);
-                } catch (error) {
-                    reject(
-                        error instanceof Error
-                            ? error
-                            : new Error("Unknown error during import"),
-                    );
-                }
-            };
-
-            reader.onerror = (): void => {
-                reject(new Error("Failed to read file"));
-            };
-
-            // Read the file as text
-            reader.readAsText(file);
-        });
     }
 
     return {
         exportAsText,
         exportAsSrt,
-        exportAsBinary,
-        importFromBinary,
+        exportAsJson,
     };
 };

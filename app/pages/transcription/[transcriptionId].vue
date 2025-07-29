@@ -46,56 +46,62 @@ async function handleNameChange(name: string | number) {
 
 <template>
     <div>
-        <!-- Top container with DisclaimerLlm positioned at the right -->
-        <div class="flex justify-end p-2">
-            <a
-                v-if="mediaUrl && mediaName"
-                :href="mediaUrl"
-                :download="mediaName"
-            >
-                <UButton
-                    icon="i-heroicons-arrow-down-tray"
-                    variant="ghost"
-                    label="Download media"
-                    color="info"
-                />
-            </a>
-            <div class="grow" />
-            <UModal v-model:open="isHelpViewOpen" fullscreen close>
-                <UButton
-                    icon="i-heroicons-question-mark-circle"
-                    variant="ghost"
-                    :label="t('help.help')"
-                    color="info"
-                />
-                <template #content>
-                    <div class="flex justify-end p-2">
-                        <UButton
-                            icon="i-heroicons-x-circle"
-                            variant="ghost"
-                            label="Close"
-                            color="error"
-                            @click="isHelpViewOpen = false"
-                        />
-                    </div>
-                    <div class="overflow-y-scroll w-full h-full">
-                        <HelpView />
-                    </div>
-                </template>
-            </UModal>
-        </div>
-
         <div
             v-if="transcriptionStore.currentTranscription && isInited"
             class="p-2"
         >
-            <div class="flex justify-items-stretch p-2 gap-2">
+            <!-- Single line with Download Media, File Name edit, Export, and Help -->
+            <div class="flex items-center gap-2 mb-4">
+                <!-- Download Media Button -->
+                <a
+                    v-if="mediaUrl && mediaName"
+                    :href="mediaUrl"
+                    :download="mediaName"
+                >
+                    <UButton
+                        icon="i-heroicons-arrow-down-tray"
+                        variant="ghost"
+                        :label="t('media.downloadMedia')"
+                        color="info"
+                        size="sm"
+                    />
+                </a>
+
+                <!-- File Name Input -->
                 <UInput
-                    class="grow"
+                    class="flex-1 min-w-0"
                     :model-value="transcriptionStore.currentTranscription.name"
                     @update:model-value="handleNameChange"
+                    placeholder="Transcription name"
                 />
+
+                <!-- Export Toolbar -->
                 <ExportToolbar />
+
+                <!-- Help Button -->
+                <UModal v-model:open="isHelpViewOpen" fullscreen close>
+                    <UButton
+                        icon="i-heroicons-question-mark-circle"
+                        variant="ghost"
+                        :label="t('help.help')"
+                        color="info"
+                        size="sm"
+                    />
+                    <template #content>
+                        <div class="flex justify-end p-2">
+                            <UButton
+                                icon="i-heroicons-x-circle"
+                                variant="ghost"
+                                label="Close"
+                                color="error"
+                                @click="isHelpViewOpen = false"
+                            />
+                        </div>
+                        <div class="overflow-y-scroll w-full h-full">
+                            <HelpView />
+                        </div>
+                    </template>
+                </UModal>
             </div>
 
             <SplitView>
