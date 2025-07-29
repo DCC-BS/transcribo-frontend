@@ -16,6 +16,8 @@
         "new": "New",
         "transcriptions": "Transcriptions",
         "languages": "Languages",
+        "en": "English",
+        "de": "German",
         "undo": "Undo",
         "redo": "Redo",
         "actions": "Actions"

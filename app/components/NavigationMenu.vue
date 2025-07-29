@@ -10,12 +10,8 @@ const route = useRoute();
 const currentPath = computed<string>(() => route.path);
 const { canRedo, canUndo, redo, undo, undoStack } = useCommandHistory();
 
-const { locale, locales } = useI18n();
+const { availableLocales } = useI18n();
 const switchLocalePath = useSwitchLocalePath();
-
-const availableLocales = computed(() => {
-    return locales.value.filter((i) => i.code !== locale.value);
-});
 
 /**
  * Check if current path is a transcription path
@@ -95,9 +91,9 @@ const items = computed<NavigationMenuItem[][]>(() => [
         {
             label: t("navigation.languages"),
             icon: "i-heroicons-language",
-            children: availableLocales.value.map((locale) => ({
-                label: locale.name,
-                to: switchLocalePath(locale.code),
+            children: availableLocales.map((locale) => ({
+                label: t(`navigation.${locale}`),
+                to: switchLocalePath(locale),
             })),
         },
     ],
