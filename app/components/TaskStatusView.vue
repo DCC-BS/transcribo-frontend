@@ -146,7 +146,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
         </div>
 
         <div v-if="status && (isInProgress || isSuccessful)">
-            <UProgress v-model="progress" :max="1" />
+            <UProgress v-model="progress" status :max="1" />
         </div>
     </div>
 </template>
