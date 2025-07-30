@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
 
     // Attempt to make the API request
     const response = await verboseFetch<SummaryResponse>(
-        `${config.public.apiUrl}/summarize`,
+        `${config.apiUrl}/summarize`,
         event,
         {
             method: "POST",

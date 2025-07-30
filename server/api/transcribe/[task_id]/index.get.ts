@@ -6,7 +6,7 @@ export default defineEventHandler(async (event) => {
     const taskId = getRouterParam(event, "task_id");
 
     return verboseFetch<TranscriptionResponse>(
-        `${config.public.apiUrl}/task/${taskId}/result`,
+        `${config.apiUrl}/task/${taskId}/result`,
         event,
     );
 });
