@@ -31,6 +31,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
     const isLoading = ref(false);
     const error = ref<string | null>(null);
     const db = ref<IDBDatabase | null>(null);
+    const isSummaryGenerating = ref(false);
 
     const logger = useLogger();
 
@@ -425,6 +426,81 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         return transcription.segments.map((segment) => segment.text).join(" ");
     }
 
+    /**
+     * Helper function to validate and sanitize transcript text
+     */
+    function validateAndSanitizeTranscriptText(text: string): string {
+        if (!text || typeof text !== "string") {
+            throw new Error(
+                "Transcript text is required and must be a string.",
+            );
+        }
+
+        // Trim whitespace
+        const trimmedText = text.trim();
+
+        if (trimmedText.length === 0) {
+            throw new Error("Transcript text cannot be empty.");
+        }
+
+        // Check minimum length (at least 10 characters for meaningful content)
+        const MIN_LENGTH = 10;
+        if (trimmedText.length < MIN_LENGTH) {
+            throw new Error(
+                `Transcript text must be at least ${MIN_LENGTH} characters long.`,
+            );
+        }
+
+        // Check maximum length to prevent oversized requests
+        const MAX_LENGTH = 32000 * 4;
+        if (trimmedText.length > MAX_LENGTH) {
+            throw new Error(
+                `Transcript text is too large. Maximum allowed length is ${MAX_LENGTH} characters.`,
+            );
+        }
+
+        return trimmedText;
+    }
+
+    /**
+     * Helper function to validate API response structure
+     */
+    function validateSummaryResponse(response: unknown): string {
+        if (!response || typeof response !== "object") {
+            throw new Error(
+                "Invalid API response: response must be an object.",
+            );
+        }
+
+        const responseObj = response as Record<string, unknown>;
+
+        if (!("summary" in responseObj)) {
+            throw new Error("Invalid API response: missing 'summary' field.");
+        }
+
+        const summary = responseObj.summary;
+
+        if (typeof summary !== "string") {
+            throw new Error(
+                "Invalid API response: 'summary' must be a string.",
+            );
+        }
+
+        if (summary.trim().length === 0) {
+            throw new Error("Invalid API response: 'summary' cannot be empty.");
+        }
+
+        // Additional validation for summary content
+        const MAX_SUMMARY_LENGTH = 10000; // 10KB max for summary
+        if (summary.length > MAX_SUMMARY_LENGTH) {
+            throw new Error(
+                `Summary response is too large. Maximum allowed length is ${MAX_SUMMARY_LENGTH} characters.`,
+            );
+        }
+
+        return summary.trim();
+    }
+
     // Computed properties (getters)
 
     /**
@@ -462,10 +538,9 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
      */
     async function generateSummary(): Promise<string | null> {
         if (!currentTranscription.value) {
-            logger.error(
+            throw new Error(
                 "No current transcription available for summary generation.",
             );
-            return null;
         }
 
         if (currentTranscription.value.summary) {
@@ -473,44 +548,59 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             return currentTranscription.value.summary;
         }
 
+        // Prevent concurrent calls
+        if (isSummaryGenerating.value) {
+            throw new Error(
+                "Summary generation is already in progress for this transcription.",
+            );
+        }
+
         try {
+            isSummaryGenerating.value = true;
+
             const transcriptText = getTranscriptionText(
                 currentTranscription.value,
             );
 
-            const formData = new FormData();
-            formData.append("transcript", transcriptText);
+            // Validate and sanitize transcript text
+            const sanitizedText =
+                validateAndSanitizeTranscriptText(transcriptText);
 
-            const summaryResponse = await $fetch<{ summary: string }>(
-                "/api/summarize/submit",
-                {
-                    method: "POST",
-                    body: formData,
-                },
-            );
+            const formData = new FormData();
+            formData.append("transcript", sanitizedText);
+
+            const summaryResponse = await $fetch("/api/summarize/submit", {
+                method: "POST",
+                body: formData,
+            });
+
+            // Validate API response structure
+            const validatedSummary = validateSummaryResponse(summaryResponse);
 
             // Store the summary in the current transcription with proper reactivity
             currentTranscription.value = {
                 ...currentTranscription.value,
-                summary: summaryResponse.summary,
+                summary: validatedSummary,
             };
 
             logger.info("Summary stored in current transcription:", {
                 transcriptionId: currentTranscription.value.id,
                 hasSummary: !!currentTranscription.value.summary,
-                summaryLength: summaryResponse.summary.length,
+                summaryLength: validatedSummary.length,
             });
 
             // Update the transcription in IndexedDB
             await updateCurrentTranscription({
-                summary: summaryResponse.summary,
+                summary: validatedSummary,
             });
 
             logger.info("Summary generated and stored successfully.");
-            return summaryResponse.summary;
+            return validatedSummary;
         } catch (error) {
             logger.error("Failed to generate summary:", error);
             throw error;
+        } finally {
+            isSummaryGenerating.value = false;
         }
     }
 
@@ -525,6 +615,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         currentTranscription,
         isLoading,
         error,
+        isSummaryGenerating,
 
         // Actions
         initializeDB,

@@ -8,6 +8,16 @@ export default defineNuxtConfig({
             apiUrl: process.env.API_URL,
         },
     },
+    nitro: {
+        routeRules: {
+            "/ffmpeg/**": {
+                headers: {
+                    "Content-Type": "application/wasm",
+                    "Cache-Control": "public, max-age=31536000, immutable",
+                },
+            },
+        },
+    },
     $development: {
         vite: {
             server: {
@@ -23,6 +33,15 @@ export default defineNuxtConfig({
             headers: {
                 "Cross-Origin-Opener-Policy": "same-origin",
                 "Cross-Origin-Embedder-Policy": "require-corp",
+            },
+            fs: {
+                allow: [".."],
+            },
+        },
+        // Configure proper MIME types for WebAssembly files
+        build: {
+            rollupOptions: {
+                external: (id) => id.includes("ffmpeg-core"),
             },
         },
     },
@@ -94,12 +113,25 @@ export default defineNuxtConfig({
         },
         registerType: "autoUpdate",
         workbox: {
-            globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg}"],
+            globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,wasm}"],
             globIgnores: ["dev-sw-dist/**/*"],
             navigateFallback: "/",
             navigateFallbackDenylist: [/^\/transcription\/.*/, /^\/task\/.*/],
             clientsClaim: true,
             skipWaiting: true,
+            runtimeCaching: [
+                {
+                    urlPattern: /\.wasm$/,
+                    handler: "CacheFirst",
+                    options: {
+                        cacheName: "wasm-cache",
+                        expiration: {
+                            maxEntries: 10,
+                            maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                        },
+                    },
+                },
+            ],
         },
         client: {
             periodicSyncForUpdates: 60 * 10, // 10 minutes

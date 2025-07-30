@@ -41,7 +41,12 @@ onMounted(() => {
         });
 });
 
+const cleanupTimeout = ref<NodeJS.Timeout>();
+
 onUnmounted(() => {
+    if (cleanupTimeout.value) {
+        clearTimeout(cleanupTimeout.value);
+    }
     unregisterHandler(
         Cmds.TranscriptionFinishedCommand,
         handleTranscriptionFinished,
@@ -67,8 +72,8 @@ async function handleTranscriptionFinished(
                 name: audioName.value ?? t("transcription.untitled"),
             });
 
+            await navigateTo(`/transcription/${transcription.id}`);
             taskStore.deleteTask(taskId);
-            navigateTo(`/transcription/${transcription.id}`);
         } catch (error) {
             logger.error("Failed to create transcription:", error);
             errorMessage.value = t("task.errors.failedToCreateTranscription");
@@ -79,7 +84,7 @@ async function handleTranscriptionFinished(
     ) {
         errorMessage.value = t("task.errors.transcriptionFailed");
         // Clean up the failed task after a delay to allow user to see the error
-        setTimeout(() => {
+        cleanupTimeout.value = setTimeout(() => {
             taskStore.deleteTask(taskId);
         }, 5000);
     } else {

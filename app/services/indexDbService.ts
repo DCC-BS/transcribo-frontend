@@ -10,14 +10,6 @@ const DB_VERSION = 2; // Updated version for summary field addition
  * - v2: Added 'summary' field to transcription records for AI-generated meeting summaries
  */
 
-// Migration types
-interface MigrationContext {
-    db: IDBDatabase;
-    transaction: IDBTransaction;
-    oldVersion: number;
-    newVersion: number;
-}
-
 /**
  * Get the current database version
  */
@@ -43,47 +35,48 @@ export async function getCurrentDBVersion(): Promise<number> {
  */
 export async function initDB() {
     return new Promise<IDBDatabase>((resolve, reject) => {
+        let migrationInfo: { oldVersion: number; newVersion: number } | null =
+            null;
+
         // Open database connection
         const request = indexedDB.open(DB_NAME, DB_VERSION);
 
         // Handle database upgrade (first time or version change)
-        request.onupgradeneeded = async (event) => {
+        request.onupgradeneeded = (event) => {
             const db = (event.target as IDBOpenDBRequest).result;
-            const transaction = (event.target as IDBOpenDBRequest).transaction;
             const oldVersion = event.oldVersion;
             const newVersion = event.newVersion || DB_VERSION;
 
-            if (!transaction) {
-                reject(
-                    new Error(
-                        "Transaction not available during database upgrade",
-                    ),
-                );
-                return;
-            }
-
             console.log(
-                `Upgrading database from version ${oldVersion} to ${newVersion}`,
+                `Upgrading database schema from version ${oldVersion} to ${newVersion}`,
             );
 
-            // Create stores if they don't exist (for new installations)
+            // Store migration info for data migrations after connection
+            migrationInfo = { oldVersion, newVersion };
+
+            // Only perform schema changes here (creating stores and indexes)
             createTaskStore(db);
             createTranscriptionStore(db);
-
-            // Run migrations for existing data
-            if (oldVersion > 0) {
-                await runMigrations({
-                    db,
-                    transaction,
-                    oldVersion,
-                    newVersion,
-                });
-            }
         };
 
         // Handle successful connection
-        request.onsuccess = (event) => {
-            resolve((event.target as IDBOpenDBRequest).result);
+        request.onsuccess = async (event) => {
+            const db = (event.target as IDBOpenDBRequest).result;
+
+            try {
+                // Run data migrations after schema is established
+                if (migrationInfo && migrationInfo.oldVersion > 0) {
+                    await runDataMigrations(
+                        db,
+                        migrationInfo.oldVersion,
+                        migrationInfo.newVersion,
+                    );
+                }
+                resolve(db);
+            } catch (error) {
+                db.close();
+                reject(error);
+            }
         };
 
         // Handle errors
@@ -125,87 +118,107 @@ function createTaskStore(db: IDBDatabase) {
 }
 
 /**
- * Run database migrations based on version changes
+ * Run data migrations based on version changes
  */
-async function runMigrations(context: MigrationContext): Promise<void> {
-    const { oldVersion, newVersion } = context;
+async function runDataMigrations(
+    db: IDBDatabase,
+    oldVersion: number,
+    newVersion: number,
+): Promise<void> {
+    console.log(
+        `Running data migrations from version ${oldVersion} to ${newVersion}`,
+    );
 
     // Migration from version 1 to version 2: Add summary field
     if (oldVersion < 2 && newVersion >= 2) {
-        await migrateToV2(context);
+        await migrateDataToV2(db);
     }
 
     // Future migrations can be added here
     // if (oldVersion < 3 && newVersion >= 3) {
-    //     await migrateToV3(context);
+    //     await migrateDataToV3(db);
     // }
 }
 
 /**
- * Migration from v1 to v2: Add summary field to transcriptions
+ * Data migration from v1 to v2: Add summary field to transcriptions
  */
-async function migrateToV2(context: MigrationContext): Promise<void> {
+async function migrateDataToV2(db: IDBDatabase): Promise<void> {
     console.log(
-        "Running migration to v2: Adding summary field to transcriptions",
+        "Running data migration to v2: Adding summary field to transcriptions",
     );
 
-    const { transaction } = context;
-
     return new Promise<void>((resolve, reject) => {
+        const transaction = db.transaction(
+            [TRANSCIPTION_STORE_NAME],
+            "readwrite",
+        );
         const store = transaction.objectStore(TRANSCIPTION_STORE_NAME);
-        const request = store.getAll();
+        const request = store.openCursor();
 
-        request.onsuccess = () => {
-            const transcriptions = request.result;
-            let completed = 0;
-            const total = transcriptions.length;
+        let processed = 0;
+        let updated = 0;
 
-            if (total === 0) {
-                console.log("No transcriptions to migrate");
-                resolve();
-                return;
-            }
+        request.onsuccess = (event) => {
+            const cursor = (event.target as IDBRequest).result;
 
-            console.log(`Migrating ${total} transcription records to v2`);
+            if (cursor) {
+                const transcription = cursor.value;
+                processed++;
 
-            transcriptions.forEach((transcription) => {
-                // Add summary field if it doesn't exist
+                // Only update if summary field doesn't exist
                 if (!Object.hasOwn(transcription, "summary")) {
                     transcription.summary = undefined;
-                }
 
-                const updateRequest = store.put(transcription);
+                    const updateRequest = cursor.update(transcription);
 
-                updateRequest.onsuccess = () => {
-                    completed++;
-                    if (completed === total) {
-                        console.log(
-                            `Successfully migrated ${total} transcription records to v2`,
+                    updateRequest.onsuccess = () => {
+                        updated++;
+                        cursor.continue();
+                    };
+
+                    updateRequest.onerror = () => {
+                        console.error(
+                            "Failed to update transcription during migration:",
+                            updateRequest.error,
                         );
-                        resolve();
-                    }
-                };
-
-                updateRequest.onerror = () => {
-                    console.error(
-                        "Failed to update transcription during migration:",
-                        updateRequest.error,
-                    );
-                    reject(
-                        new Error(
-                            `Migration failed: ${updateRequest.error?.message}`,
-                        ),
-                    );
-                };
-            });
+                        reject(
+                            new Error(
+                                `Migration failed: ${updateRequest.error?.message}`,
+                            ),
+                        );
+                    };
+                } else {
+                    // Record already has summary field, just continue
+                    cursor.continue();
+                }
+            } else {
+                // No more records
+                console.log(
+                    `Migration to v2 completed: ${updated} records updated out of ${processed} processed`,
+                );
+                resolve();
+            }
         };
 
         request.onerror = () => {
             console.error(
-                "Failed to fetch transcriptions for migration:",
+                "Failed to open cursor for migration:",
                 request.error,
             );
             reject(new Error(`Migration failed: ${request.error?.message}`));
+        };
+
+        transaction.onerror = () => {
+            console.error(
+                "Transaction failed during migration:",
+                transaction.error,
+            );
+            reject(
+                new Error(
+                    `Migration transaction failed: ${transaction.error?.message}`,
+                ),
+            );
         };
     });
 }

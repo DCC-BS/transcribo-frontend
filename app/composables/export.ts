@@ -30,7 +30,10 @@ export const useExport = () => {
             if (!nextSegment) continue;
 
             // If same speaker and segments are consecutive, merge them
-            if (currentSegment.speaker === nextSegment.speaker) {
+            if (
+                currentSegment.speaker === nextSegment.speaker &&
+                Math.abs((currentSegment.end ?? 0) - nextSegment.start) < 1.0
+            ) {
                 currentSegment.text =
                     `${currentSegment.text} ${nextSegment.text}`.trim();
                 currentSegment.end = nextSegment.end;

@@ -18,7 +18,6 @@ alwaysApply: false
 - Always include a `title` element for SVG elements.
 - Give all elements requiring alt text meaningful information for screen readers.
 - Make sure anchors have content that's accessible to screen readers.
-- Assign `tabIndex` to non-interactive HTML elements with `aria-activedescendant`.
 - Include all required ARIA attributes for elements with ARIA roles.
 - Make sure ARIA properties are valid for the element's supported roles.
 - Always include a `type` attribute for button elements.

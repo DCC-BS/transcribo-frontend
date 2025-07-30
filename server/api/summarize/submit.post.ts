@@ -5,7 +5,9 @@ export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
 
     const inputFormData = await readFormData(event);
-    const transcript = inputFormData.get("transcript") as string;
+    const transcriptValue = inputFormData.get("transcript");
+    const transcript =
+        typeof transcriptValue === "string" ? transcriptValue : null;
 
     if (!transcript) {
         throw createError({

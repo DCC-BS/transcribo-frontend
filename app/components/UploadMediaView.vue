@@ -19,6 +19,9 @@ const processedFile = ref<File | Blob | undefined>();
 const isVideoFile = ref(false);
 const showFilePreview = ref(false);
 
+// Template ref for file input
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
 // Track number of speakers selection
 const numSpeakers = ref<string>("auto");
 
@@ -89,48 +92,90 @@ async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
 
     const ffmpeg = new FFmpeg();
 
-    // Load ffmpeg with proper URLs for Nuxt/Vite
-    const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm";
-    await ffmpeg.load({
-        coreURL: await toBlobURL(
-            `${baseURL}/ffmpeg-core.js`,
-            "text/javascript",
-        ),
-        wasmURL: await toBlobURL(
-            `${baseURL}/ffmpeg-core.wasm`,
-            "application/wasm",
-        ),
-    });
+    try {
+        // Use local ffmpeg core files instead of CDN for security
+        // These files should be placed in the public/ffmpeg directory
+        const baseURL = "/ffmpeg"; // Serve from public/ffmpeg directory
+        await ffmpeg.load({
+            coreURL: await toBlobURL(
+                `${baseURL}/ffmpeg-core.js`,
+                "text/javascript",
+            ),
+            wasmURL: await toBlobURL(
+                `${baseURL}/ffmpeg-core.wasm`,
+                "application/wasm",
+            ),
+        });
 
-    // Set up basic error handling for FFmpeg
-    ffmpeg.on("log", (_event) => {
-        // Silently handle FFmpeg logs to reduce console noise
-    });
+        // Set up error handling for FFmpeg logs
+        ffmpeg.on("log", (event) => {
+            if (event.type === "fferr") {
+                logger.error("FFmpeg error:", event.message);
+            }
+        });
 
-    const inputFileName = "input_video";
-    const outputFileName = "output_audio.wav";
+        const inputFileName = "input_video";
+        const outputFileName = "output_audio.wav";
 
-    // Write input file
-    await ffmpeg.writeFile(inputFileName, await fetchFile(videoFile));
+        try {
+            // Write input file
+            await ffmpeg.writeFile(inputFileName, await fetchFile(videoFile));
 
-    // Extract audio with good quality settings
-    await ffmpeg.exec([
-        "-i",
-        inputFileName,
-        "-vn", // No video
-        "-acodec",
-        "pcm_s16le",
-        "-ab",
-        "128k", // Audio bitrate
-        "-ar",
-        "16000", // Sample rate
-        outputFileName,
-    ]);
+            // Extract audio with good quality settings
+            await ffmpeg.exec([
+                "-i",
+                inputFileName,
+                "-vn", // No video
+                "-acodec",
+                "pcm_s16le",
+                "-ab",
+                "128k", // Audio bitrate
+                "-ar",
+                "16000", // Sample rate
+                outputFileName,
+            ]);
 
-    // Read the output file
-    const data = await ffmpeg.readFile(outputFileName);
+            // Read the output file
+            const data = await ffmpeg.readFile(outputFileName);
 
-    return new Blob([data], { type: "audio/wav" });
+            // Clean up temporary files within ffmpeg
+            try {
+                await ffmpeg.deleteFile(inputFileName);
+                await ffmpeg.deleteFile(outputFileName);
+            } catch (cleanupError) {
+                // Log cleanup errors but don't throw as we have the result
+                logger.warn(
+                    "Failed to cleanup temporary ffmpeg files:",
+                    cleanupError,
+                );
+            }
+
+            return new Blob([data], { type: "audio/wav" });
+        } catch (processingError) {
+            // Clean up any files that might have been created
+            try {
+                await ffmpeg.deleteFile(inputFileName);
+                await ffmpeg.deleteFile(outputFileName);
+            } catch {
+                // Ignore cleanup errors when processing already failed
+            }
+            throw new Error(
+                `Audio extraction failed: ${processingError instanceof Error ? processingError.message : "Unknown error"}`,
+            );
+        }
+    } catch (error) {
+        logger.error("Error during audio extraction:", error);
+        throw new Error(
+            `Failed to extract audio from video: ${error instanceof Error ? error.message : "Unknown error"}`,
+        );
+    } finally {
+        // Always terminate the ffmpeg instance to free resources
+        try {
+            await ffmpeg.terminate();
+        } catch (terminateError) {
+            logger.warn("Failed to terminate FFmpeg instance:", terminateError);
+        }
+    }
 }
 
 /**
@@ -163,7 +208,11 @@ const loadAudio = async (event: Event): Promise<void> => {
 
             // Create a File object from the blob with appropriate name
             const originalName = mediaFile.name;
-            const audioFileName = originalName.replace(/\.[^/.]+$/, ".wav");
+            const lastDotIndex = originalName.lastIndexOf(".");
+            const audioFileName =
+                lastDotIndex > 0
+                    ? `${originalName.substring(0, lastDotIndex)}.wav`
+                    : `${originalName}.wav`;
             processedFile.value = new File([audioBlob], audioFileName, {
                 type: "audio/wav",
             });
@@ -191,11 +240,8 @@ function clearSelectedFile(): void {
     errorMessage.value = "";
 
     // Reset the file input
-    const fileInput = document.querySelector(
-        'input[type="file"]',
-    ) as HTMLInputElement;
-    if (fileInput) {
-        fileInput.value = "";
+    if (fileInputRef.value) {
+        fileInputRef.value.value = "";
     }
 }
 
@@ -257,6 +303,7 @@ defineExpose({ uploadFile });
                 icon="i-heroicons-document-arrow-up"
                 :disabled="showProgress"
                 @change="loadAudio"
+                ref="fileInputRef"
             />
 
             <div>
