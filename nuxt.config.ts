@@ -78,6 +78,7 @@ export default defineNuxtConfig({
         "@dcc-bs/feedback-control.bs.js",
         "@pinia/nuxt",
         "@vite-pwa/nuxt",
+        "@nuxtjs/mdc",
     ],
     typescript: {
         strict: true,

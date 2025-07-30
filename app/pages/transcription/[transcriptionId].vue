@@ -57,7 +57,7 @@ async function handleGenerateSummary(): Promise<void> {
     try {
         await transcriptionStore.generateSummary();
         // Expand the summary section after generation
-        isSummaryExpanded.value = true;
+        isSummaryExpanded.value = false;
     } catch (error) {
         summaryError.value =
             error instanceof Error
@@ -170,8 +170,8 @@ async function handleGenerateSummary(): Promise<void> {
                     
                     <template #content>
                         <div class="p-4 border-t border-gray-200">
-                            <div class="prose prose-sm max-w-none">
-                                <p class="whitespace-pre-wrap">{{ transcriptionStore.currentTranscription.summary }}</p>
+                            <div class="prose prose-sm max-w-none max-h-96 overflow-y-auto">
+                                <MDC :value="transcriptionStore.currentTranscription.summary" />
                             </div>
                         </div>
                     </template>
