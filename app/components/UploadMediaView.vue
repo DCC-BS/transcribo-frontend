@@ -15,7 +15,9 @@ const errorMessage = ref("");
 
 // Track selected file
 const selectedFile = ref<File | undefined>();
+const processedFile = ref<File | Blob | undefined>();
 const isVideoFile = ref(false);
+const showFilePreview = ref(false);
 
 // Track number of speakers selection
 const numSpeakers = ref<string>("auto");
@@ -36,6 +38,44 @@ const speakerOptions = [
  */
 function checkIfVideoFile(file: File): boolean {
     return file.type.startsWith("video/");
+}
+
+/**
+ * Format file size in human readable format
+ */
+function formatFileSize(bytes: number): string {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Number.parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+}
+
+/**
+ * Get file duration for audio/video files
+ */
+function getFileDuration(file: File): Promise<string> {
+    return new Promise((resolve) => {
+        const url = URL.createObjectURL(file);
+        const element = isVideoFile.value
+            ? document.createElement("video")
+            : document.createElement("audio");
+
+        element.onloadedmetadata = () => {
+            const duration = element.duration;
+            const minutes = Math.floor(duration / 60);
+            const seconds = Math.floor(duration % 60);
+            URL.revokeObjectURL(url);
+            resolve(`${minutes}:${seconds.toString().padStart(2, "0")}`);
+        };
+
+        element.onerror = () => {
+            URL.revokeObjectURL(url);
+            resolve("Unknown");
+        };
+
+        element.src = url;
+    });
 }
 
 /**
@@ -94,7 +134,7 @@ async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
 }
 
 /**
- * Handles the file upload and conversion process
+ * Handles the file selection and processing
  */
 const loadAudio = async (event: Event): Promise<void> => {
     if (!event.target) {
@@ -116,22 +156,23 @@ const loadAudio = async (event: Event): Promise<void> => {
     errorMessage.value = "";
 
     try {
-        let fileToUpload: File | Blob = mediaFile;
-
         if (isVideoFile.value) {
-            // Automatically extract audio from video files
+            // Extract audio from video files
             showProgress.value = true;
             const audioBlob = await extractAudioFromVideo(mediaFile);
 
             // Create a File object from the blob with appropriate name
             const originalName = mediaFile.name;
             const audioFileName = originalName.replace(/\.[^/.]+$/, ".wav");
-            fileToUpload = new File([audioBlob], audioFileName, {
+            processedFile.value = new File([audioBlob], audioFileName, {
                 type: "audio/wav",
             });
+        } else {
+            // For audio files, use them directly
+            processedFile.value = mediaFile;
         }
 
-        await uploadFile(fileToUpload, mediaFile);
+        showFilePreview.value = true;
     } catch (error) {
         logger.error("Error processing media file:", error);
         errorMessage.value = t("upload.processingError");
@@ -139,6 +180,40 @@ const loadAudio = async (event: Event): Promise<void> => {
         showProgress.value = false;
     }
 };
+
+/**
+ * Clears the selected file and resets the UI
+ */
+function clearSelectedFile(): void {
+    selectedFile.value = undefined;
+    processedFile.value = undefined;
+    showFilePreview.value = false;
+    errorMessage.value = "";
+
+    // Reset the file input
+    const fileInput = document.querySelector(
+        'input[type="file"]',
+    ) as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = "";
+    }
+}
+
+/**
+ * Uploads the file to the server when user clicks "Use this file"
+ */
+async function useThisFile(): Promise<void> {
+    if (!processedFile.value || !selectedFile.value) {
+        return;
+    }
+
+    try {
+        await uploadFile(processedFile.value, selectedFile.value);
+    } catch (error) {
+        logger.error("Error uploading file:", error);
+        errorMessage.value = t("upload.uploadError");
+    }
+}
 
 /**
  * Uploads the file to the server
@@ -173,36 +248,137 @@ defineExpose({ uploadFile });
 
 <template>
     <div>
-        <UInput
-            type="file"
-            accept="audio/*,video/*"
-            size="xl"
-            icon="i-heroicons-document-arrow-up"
-            :disabled="showProgress"
-            @change="loadAudio"
-        />
-
-        <div class="mt-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-                {{ t("upload.numSpeakers") }}
-            </label>
-            <p class="text-xs text-gray-500 mb-2">
-                {{ t("upload.numSpeakersHelp") }}
-            </p>
-            <USelect
-                v-model="numSpeakers"
-                :items="speakerOptions"
+        <!-- File Input Section -->
+        <div v-if="!showFilePreview" class="space-y-4">
+            <UInput
+                type="file"
+                accept="audio/*,video/*"
+                size="xl"
+                icon="i-heroicons-document-arrow-up"
                 :disabled="showProgress"
-                placeholder="Select number of speakers"
+                @change="loadAudio"
             />
+
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    {{ t("upload.numSpeakers") }}
+                </label>
+                <p class="text-xs text-gray-500 mb-2">
+                    {{ t("upload.numSpeakersHelp") }}
+                </p>
+                <USelect
+                    v-model="numSpeakers"
+                    :items="speakerOptions"
+                    :disabled="showProgress"
+                    placeholder="Select number of speakers"
+                />
+            </div>
         </div>
 
+        <!-- File Preview Section -->
+        <div v-else-if="selectedFile" class="space-y-4">
+            <UCard>
+                <template #header>
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            {{ t('upload.filePreview') || 'File Preview' }}
+                        </h3>
+                        <UButton
+                            variant="ghost"
+                            size="sm"
+                            icon="i-heroicons-x-mark"
+                            @click="clearSelectedFile"
+                        />
+                    </div>
+                </template>
+
+                <div class="space-y-4">
+                    <!-- File Info -->
+                    <div class="flex items-start gap-3">
+                        <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                            <UIcon 
+                                :name="isVideoFile ? 'i-heroicons-video-camera' : 'i-heroicons-musical-note'" 
+                                class="w-6 h-6 text-blue-600 dark:text-blue-400" 
+                            />
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="font-medium text-gray-900 dark:text-white truncate">
+                                {{ selectedFile.name }}
+                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                {{ formatFileSize(selectedFile.size) }}
+                                <span v-if="isVideoFile" class="ml-2 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">
+                                    {{ t('upload.videoFile') || 'Video' }}
+                                </span>
+                                <span v-else class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
+                                    {{ t('upload.audioFile') || 'Audio' }}
+                                </span>
+                            </p>
+                            <p v-if="isVideoFile" class="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                                {{ t('upload.audioWillBeExtracted') || 'Audio will be extracted for transcription' }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Speaker Configuration -->
+                    <div class="border-t pt-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ t("upload.numSpeakers") }}
+                        </label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                            {{ t("upload.numSpeakersHelp") }}
+                        </p>
+                        <USelect
+                            v-model="numSpeakers"
+                            :items="speakerOptions"
+                            :disabled="showProgress"
+                            placeholder="Select number of speakers"
+                        />
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 pt-4 border-t">
+                        <UButton
+                            color="primary"
+                            size="lg"
+                            :loading="showProgress"
+                            :disabled="showProgress"
+                            @click="useThisFile"
+                        >
+                            <template #leading>
+                                <UIcon name="i-heroicons-play" />
+                            </template>
+                            {{ t('upload.useThisFile') || 'Use this file' }}
+                        </UButton>
+                        
+                        <UButton
+                            variant="ghost"
+                            size="lg"
+                            :disabled="showProgress"
+                            @click="clearSelectedFile"
+                        >
+                            {{ t('upload.selectDifferentFile') || 'Select different file' }}
+                        </UButton>
+                    </div>
+                </div>
+            </UCard>
+        </div>
+
+        <!-- Progress Section -->
         <div v-if="showProgress" class="mt-4">
-            <p>{{ progressMessage }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">{{ progressMessage }}</p>
             <UProgress class="mt-2" />
         </div>
 
-        <p v-if="errorMessage" class="text-red-500 mt-2">{{ errorMessage }}</p>
+        <!-- Error Message -->
+        <UAlert
+            v-if="errorMessage"
+            class="mt-4"
+            color="error"
+            variant="solid"
+            :title="t('upload.error') || 'Error'"
+            :description="errorMessage"
+        />
     </div>
 </template>
 

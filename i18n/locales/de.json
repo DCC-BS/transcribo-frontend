@@ -3,10 +3,18 @@
         "convertingMedia": "Konvertiere Medien in WAV-Format...",
         "uploadingMedia": "Lade die Mediendatei hoch...",
         "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut.",
+        "uploadError": "Fehler beim Hochladen der Datei. Bitte versuchen Sie es erneut.",
         "extractingAudio": "Extrahiere Audio aus Video...",
         "numSpeakers": "Anzahl der Sprecher",
         "numSpeakersHelp": "Wählen Sie die Anzahl der Sprecher in der Audiodatei oder wählen Sie automatische Erkennung",
-        "autoDetection": "Automatische Erkennung"
+        "autoDetection": "Automatische Erkennung",
+        "filePreview": "Dateivorschau",
+        "videoFile": "Video",
+        "audioFile": "Audio",
+        "audioWillBeExtracted": "Audio wird für die Transkription extrahiert",
+        "useThisFile": "Diese Datei verwenden",
+        "selectDifferentFile": "Andere Datei auswählen",
+        "error": "Fehler"
     },
     "pages": {
         "index": {

@@ -3,10 +3,18 @@
         "convertingMedia": "Converting media to WAV format...",
         "uploadingMedia": "Uploading the media file...",
         "processingError": "Failed to process the media file. Please try again.",
+        "uploadError": "Failed to upload the file. Please try again.",
         "extractingAudio": "Extracting audio from video...",
         "numSpeakers": "Number of speakers",
         "numSpeakersHelp": "Select the number of speakers in the audio file, or choose auto-detection",
-        "autoDetection": "Auto detection"
+        "autoDetection": "Auto detection",
+        "filePreview": "File Preview",
+        "videoFile": "Video",
+        "audioFile": "Audio",
+        "audioWillBeExtracted": "Audio will be extracted for transcription",
+        "useThisFile": "Use this file",
+        "selectDifferentFile": "Select different file",
+        "error": "Error"
     },
     "pages": {
         "index": {
