@@ -26,7 +26,7 @@ jobs:
             - run: bun install
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            - run: bun generate
+            - run: bun run build
             - run: bun run test --coverage
             - name: Run Biome
               run: biome ci .

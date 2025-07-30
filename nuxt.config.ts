@@ -115,19 +115,19 @@ export default defineNuxtConfig({
         registerType: "autoUpdate",
         workbox: {
             globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,wasm}"],
-            globIgnores: ["dev-sw-dist/**/*"],
+            globIgnores: ["dev-sw-dist/**/*", "ffmpeg/**/*"],
             navigateFallback: "/",
             navigateFallbackDenylist: [/^\/transcription\/.*/, /^\/task\/.*/],
             clientsClaim: true,
             skipWaiting: true,
             runtimeCaching: [
                 {
-                    urlPattern: /\.wasm$/,
+                    urlPattern: /\/ffmpeg\/.*/,
                     handler: "CacheFirst",
                     options: {
-                        cacheName: "wasm-cache",
+                        cacheName: "ffmpeg-cache",
                         expiration: {
-                            maxEntries: 10,
+                            maxEntries: 5,
                             maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
                         },
                     },
