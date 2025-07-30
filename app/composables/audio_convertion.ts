@@ -4,10 +4,6 @@ import { fetchFile } from "@ffmpeg/util";
 export function useAudioConvertion() {
     const ffmpeg = new FFmpeg();
 
-    ffmpeg.on("log", ({ message: msg }: LogEvent) => {
-        console.log(msg);
-    });
-
     const loadPromise = ffmpeg.load();
 
     async function convertWebmToMp3(

@@ -7,6 +7,8 @@ const emit = defineEmits<{
     "recording-error": [error: Error];
 }>();
 
+const { t } = useI18n();
+
 // ------------- Composables -------------
 const logger = useLogger();
 const { convertWebmToMp3 } = useAudioConvertion();
@@ -356,7 +358,7 @@ function emitAudio(): void {
                 :disabled="isLoading"
                 @click="startRecording"
             >
-                Start Recording
+                {{ t("pages.index.recordAudio") }}
             </UButton>
             <UButton
                 v-if="isRecording"
@@ -386,7 +388,7 @@ function emitAudio(): void {
 
         <div v-if="audioBlob" class="audio-preview">
             <audio :src="audioUrl" controls />
-            <UButton @click="emitAudio">Use this recording</UButton>
+            <UButton @click="emitAudio">{{ t("audioRecorder.useRecording") }}</UButton>
         </div>
 
         <div v-if="errorMessage" class="error-message">
@@ -397,10 +399,10 @@ function emitAudio(): void {
                     errorMessage.includes('access denied')
                 "
             >
-                <li>Make sure your microphone is properly connected</li>
-                <li>Check browser permissions for microphone access</li>
-                <li>Try using a different browser</li>
-                <li>Restart your device if the issue persists</li>
+                <li>{{ t("audioRecorder.makeSureMicrophoneIsProperlyConnected") }}</li>
+                <li>{{ t("audioRecorder.checkBrowserPermissionsForMicrophoneAccess") }}</li>
+                <li>{{ t("audioRecorder.tryUsingDifferentBrowser") }}</li>
+                <li>{{ t("audioRecorder.restartDeviceIfIssuePersists") }}</li>
             </ul>
         </div>
     </div>

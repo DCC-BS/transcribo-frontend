@@ -1,12 +1,36 @@
 {
     "upload": {
+        "convertingMedia": "Konvertiere Medien in WAV-Format...",
         "uploadingMedia": "Lade die Mediendatei hoch...",
-        "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut."
+        "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut.",
+        "uploadError": "Fehler beim Hochladen der Datei. Bitte versuchen Sie es erneut.",
+        "extractingAudio": "Extrahiere Audio aus Video...",
+        "numSpeakers": "Anzahl der Sprecher",
+        "numSpeakersHelp": "Wählen Sie die Anzahl der Sprecher in der Audiodatei oder wählen Sie automatische Erkennung",
+        "autoDetection": "Automatische Erkennung",
+        "filePreview": "Dateivorschau",
+        "videoFile": "Video",
+        "audioFile": "Audio",
+        "audioWillBeExtracted": "Audio wird für die Transkription extrahiert",
+        "useThisFile": "Diese Datei verwenden",
+        "selectDifferentFile": "Andere Datei auswählen",
+        "error": "Fehler"
     },
     "pages": {
         "index": {
+            "title": "Transcribo",
+            "subtitle": "Transkribieren Sie Ihre Audio- und Videodateien mit KI. Es werden 96 Sprachen unterstützt.",
             "uploadMedia": "Medien hochladen",
+            "uploadDescription": "Laden Sie Ihre Audio- oder Videodateien hoch",
             "recordAudio": "Audio aufnehmen",
+            "recordDescription": "Nehmen Sie Audio direkt über Ihr Mikrofon auf",
+            "featuresTitle": "Warum Transcribo wählen?",
+            "feature1Title": "Schnell & Präzise",
+            "feature1Description": "KI-gestützte Transkription mit hoher Genauigkeit und Geschwindigkeit",
+            "feature2Title": "Mehrere Sprachen",
+            "feature2Description": "Unterstützung für verschiedene Sprachen und Dialekte",
+            "feature3Title": "Sicher & Privat",
+            "feature3Description": "Ihre Daten werden sicher und privat verarbeitet",
             "experimentalTitle": "Experimentell",
             "experimental": "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Es kann sein, dass sie bei langen Aufnahmen nicht funktioniert."
         }
@@ -15,20 +39,34 @@
         "new": "Neu",
         "transcriptions": "Transkriptionen",
         "languages": "Sprachen",
+        "en": "Englisch",
+        "de": "Deutsch",
         "undo": "Rückgängig",
         "redo": "Wiederholen",
         "actions": "Aktionen"
     },
+    "audioRecorder": {
+        "useRecording": "Diese Aufnahme verwenden",
+        "makeSureMicrophoneIsProperlyConnected": "Stellen Sie sicher, dass Ihr Mikrofon ordnungsgemäss verbunden ist",
+        "checkBrowserPermissionsForMicrophoneAccess": "Überprüfen Sie die Browser-Berechtigungen für Mikrofonzugriff",
+        "tryUsingDifferentBrowser": "Versuchen Sie einen anderen Browser",
+        "restartDeviceIfIssuePersists": "Starten Sie Ihr Gerät neu, wenn das Problem besteht"
+    },
     "timeline": {
-        "noTranskription": "Keine Transkription verfügbar"
+        "noTranscription": "Keine Transkription verfügbar"
     },
     "media": {
         "play": "Abspielen",
-        "pause": "Pause"
+        "pause": "Pause",
+        "addSegment": "Segment hinzufügen",
+        "downloadMedia": "Medien herunterladen"
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
-        "completed": "Transkription erfolgreich abgeschlossen!"
+        "completed": "Transkription erfolgreich abgeschlossen!",
+        "failed": "Transkription fehlgeschlagen",
+        "failedDescription": "Während der Transkription ist ein Fehler aufgetreten. Bitte versuchen Sie es mit einer anderen Datei erneut.",
+        "goBack": "Zurück"
     },
     "transcription": {
         "noSpeaker": "unbekannt",
@@ -59,17 +97,43 @@
         "emptyState": {
             "title": "Keine Daten gefunden",
             "description": "Es sind keine Daten zum Anzeigen verfügbar."
-        }
+        },
+        "cancel": "Abbrechen",
+        "confirm": "Bestätigen"
     },
     "export": {
         "withSpeakers": "Mit Sprechern",
+        "withTimestamps": "Zeitstempel hinzufügen",
+        "mergeSegments": "Segmente vom selben Sprecher zusammenführen",
+        "withSummary": "Meeting-Zusammenfassung hinzufügen",
+        "textOnly": "Nur Textformat",
+        "export": "Exportieren",
+        "options": "Optionen",
+        "optionsTitle": "Export-Optionen",
+        "formats": {
+            "title": "Export-Formate",
+            "text": "Textformat",
+            "subtitle": "Untertitelformat",
+            "json": "JSON-Format"
+        },
         "exportAsText": "Als Text exportieren",
         "exportAsSrt": "Als SRT exportieren"
+    },
+    "summary": {
+        "generate": "Zusammenfassung erstellen",
+        "generating": "Erstelle...",
+        "show": "Zusammenfassung anzeigen",
+        "hide": "Zusammenfassung ausblenden",
+        "title": "Meeting-Zusammenfassung",
+        "error": "Fehler bei der Zusammenfassung"
     },
     "task": {
         "errors": {
             "noMediaFile": "Keine Mediendatei für diese Aufgabe gefunden",
-            "failedToLoad": "Fehler beim Laden der Aufgabe"
+            "failedToLoad": "Fehler beim Laden der Aufgabe",
+            "transcriptionFailed": "Transkription fehlgeschlagen. Bitte versuchen Sie es erneut.",
+            "failedToCreateTranscription": "Fehler beim Erstellen der Transkription aus den Ergebnissen",
+            "noResult": "Kein Transkriptionsergebnis verfügbar"
         }
     },
     "commands": {
@@ -87,7 +151,9 @@
         "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\""
     },
     "help": {
+        "help": "Hilfe",
         "title": "Hilfe - Transcribo",
+        "description": "Anwendungshilfe und Anleitung für Tastenkürzel",
         "mediaControls": {
             "spectrogram": "Spektrogramm",
             "timeline": "Zeitleiste",
@@ -119,7 +185,7 @@
             "clickSelect": "Klicken Sie auf ein Rechteck, um es auszuwählen und die Griffe zu sehen",
             "moveWithKeys": "Wenn ausgewählt, können Sie das Rechteck mit den Pfeiltasten um 0,5 Sekunden nach links oder rechts verschieben",
             "dragMove": "Ziehen Sie das Rechteck, um es zu verschieben",
-            "resizeHandles": "Ziehen Sie die Griffe auf der linken oder rechten Seite, um das Rechteck in der Größe zu ändern",
+            "resizeHandles": "Ziehen Sie die Griffe auf der linken oder rechten Seite, um das Rechteck in der Grösse zu ändern",
             "altSnap": "Halten Sie die {altKey}-Taste gedrückt, während Sie es verschieben, um das Einrasten an anderen Rechtecken zu verhindern"
         },
         "editing": {

@@ -56,10 +56,6 @@ export function useSpectrogramRenderer() {
             return data;
         }
 
-        console.log(
-            `Downsampling spectrogram from height ${originalHeight} to ${targetHeight}`,
-        );
-
         // Calculate the sampling step (how many original rows to combine into one)
         const samplingFactor = originalHeight / targetHeight;
 
@@ -156,14 +152,6 @@ export function useSpectrogramRenderer() {
                     Math.min(min, ...Array.from(data)),
                 255,
             );
-
-            console.log("Frequency range:", minFrequency, "to", maxFrequency);
-
-            if (originalHeight > 400) {
-                console.log(
-                    `Using downsampled data: ${originalWidth}x${originalHeight} → ${dataWidth}x${dataHeight}`,
-                );
-            }
 
             // Ensure valid range
             const range: number = maxFrequency - minFrequency || 1;

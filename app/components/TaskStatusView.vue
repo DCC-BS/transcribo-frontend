@@ -27,6 +27,18 @@ const isSuccessful = computed(
     () => status.value?.status === TaskStatusEnum.COMPLETED,
 );
 
+// Computed property to determine if task has failed
+const hasFailed = computed(
+    () =>
+        status.value?.status === TaskStatusEnum.FAILED ||
+        status.value?.status === TaskStatusEnum.CANCELLED,
+);
+
+// Computed property to determine if task is still in progress
+const isInProgress = computed(
+    () => status.value?.status === TaskStatusEnum.IN_PROGRESS,
+);
+
 onMounted(() => {
     status.value = {
         status: TaskStatusEnum.IN_PROGRESS,
@@ -43,42 +55,97 @@ const fetchTaskStatus = async (): Promise<void> => {
         return;
     }
 
-    while (status.value?.status === TaskStatusEnum.IN_PROGRESS) {
-        await loadTaskStatus(props.taskId);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-    }
+    try {
+        let pollCount = 0;
+        const maxPolls = 300; // 5 minutes maximum (300 seconds)
 
-    let result: TranscriptionResponse | undefined;
-    if (status.value?.status === TaskStatusEnum.COMPLETED) {
-        result = await $fetch<TranscriptionResponse>(
-            `/api/transcribe/${props.taskId}`,
-        );
-    }
+        while (
+            status.value?.status === TaskStatusEnum.IN_PROGRESS &&
+            pollCount < maxPolls
+        ) {
+            await loadTaskStatus(props.taskId);
+            pollCount++;
 
-    executeCommand(new TranscriptionFinishedCommand(status.value, result));
+            // Break the loop if status is no longer IN_PROGRESS
+            if (status.value?.status !== TaskStatusEnum.IN_PROGRESS) {
+                break;
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+
+        if (pollCount >= maxPolls) {
+            if (status.value) {
+                status.value.status = TaskStatusEnum.FAILED;
+            }
+        }
+
+        let result: TranscriptionResponse | undefined;
+        if (status.value?.status === TaskStatusEnum.COMPLETED) {
+            try {
+                result = await $fetch<TranscriptionResponse>(
+                    `/api/transcribe/${props.taskId}`,
+                );
+            } catch (error) {
+                // If we can't fetch the result, mark as failed
+                if (status.value) {
+                    status.value.status = TaskStatusEnum.FAILED;
+                }
+            }
+        }
+
+        executeCommand(new TranscriptionFinishedCommand(status.value, result));
+    } catch (error) {
+        // Set status to failed if there's an error
+        if (status.value) {
+            status.value.status = TaskStatusEnum.FAILED;
+        }
+    }
 };
 
 const loadTaskStatus = async (taskId: string): Promise<void> => {
-    status.value = await $fetch<TaskStatus>(`/api/transcribe/${taskId}/status`);
+    const newStatus = await $fetch<TaskStatus>(
+        `/api/transcribe/${taskId}/status`,
+    );
+    status.value = newStatus;
 };
 </script>
 
 <template>
     <div>
-        <!-- Show loading or success animation based on status -->
-        <div v-if="!isSuccessful" class="loading-container">
+        <!-- Show loading animation when in progress -->
+        <div v-if="isInProgress" class="loading-container">
             <UIcon name="i-heroicons-arrow-path" class="loading-spinner" />
             <p class="loading-text">{{ t('taskStatus.processing') }}</p>
         </div>
+        
         <!-- Success animation shown when status is COMPLETED -->
-        <div v-else class="success-container">
+        <div v-else-if="isSuccessful" class="success-container">
             <div class="success-circle">
                 <UIcon name="i-heroicons-check" class="success-icon" />
             </div>
             <p class="success-text">{{ t('taskStatus.completed') }}</p>
         </div>
+        
+        <!-- Error animation shown when status is FAILED or CANCELLED -->
+        <div v-else-if="hasFailed" class="error-container">
+            <div class="error-circle">
+                <UIcon name="i-heroicons-x-mark" class="error-icon" />
+            </div>
+            <p class="error-text">{{ t('taskStatus.failed') }}</p>
+            <p class="error-description">{{ t('taskStatus.failedDescription') }}</p>
+            <UButton 
+                @click="$router.push('/')" 
+                variant="outline" 
+                color="error" 
+                size="sm"
+                class="mt-4"
+            >
+                {{ t('taskStatus.goBack') }}
+            </UButton>
+        </div>
 
-        <div v-if="status">
+        <div v-if="status && (isInProgress || isSuccessful)">
             <UProgress v-model="progress" status :max="1" />
         </div>
     </div>
@@ -137,6 +204,50 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
     font-weight: 600;
     color: var(--color-green-700, #047857);
     animation: fade-in 0.6s ease-out 0.5s both;
+}
+
+/* Error animation styles */
+.error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0;
+}
+
+.error-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid var(--color-red-500);
+    animation: scale-in 0.5s ease-out;
+    margin-bottom: 1rem;
+    background-color: var(--color-red-50);
+}
+
+.error-icon {
+    font-size: 2rem;
+    color: var(--color-red-500);
+    animation: check-mark 0.3s ease-out 0.2s both;
+}
+
+.error-text {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-red-700, #b91c1c);
+    animation: fade-in 0.6s ease-out 0.5s both;
+    margin-bottom: 0.5rem;
+}
+
+.error-description {
+    font-size: 0.875rem;
+    color: var(--color-gray-600, #4b5563);
+    text-align: center;
+    max-width: 300px;
+    animation: fade-in 0.6s ease-out 0.7s both;
 }
 
 @keyframes spin {

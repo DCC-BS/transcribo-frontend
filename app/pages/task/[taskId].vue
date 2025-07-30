@@ -25,10 +25,10 @@ onMounted(() => {
 
     taskStore
         .getTask(taskId)
-        .then((t) => {
-            if (t?.mediaFile) {
-                audioFile.value = t.mediaFile;
-                audioName.value = t.mediaFileName;
+        .then((task) => {
+            if (task?.mediaFile) {
+                audioFile.value = task.mediaFile;
+                audioName.value = task.mediaFileName;
                 isLoaded.value = true;
             } else {
                 errorMessage.value = t("task.errors.noMediaFile");
@@ -41,7 +41,12 @@ onMounted(() => {
         });
 });
 
+const cleanupTimeout = ref<NodeJS.Timeout>();
+
 onUnmounted(() => {
+    if (cleanupTimeout.value) {
+        clearTimeout(cleanupTimeout.value);
+    }
     unregisterHandler(
         Cmds.TranscriptionFinishedCommand,
         handleTranscriptionFinished,
@@ -51,23 +56,39 @@ onUnmounted(() => {
 async function handleTranscriptionFinished(
     command: TranscriptionFinishedCommand,
 ): Promise<void> {
-    if (command.result) {
-        const transcription = await transcriptionsStore.addTranscription({
-            segments: command.result.segments.map((x) => ({
-                ...x,
-                text: x.text?.trim() ?? "",
-                speaker:
-                    x.speaker?.trim().toUpperCase() ??
-                    t("transcription.noSpeaker"),
-                id: uuidv4(),
-            })),
-            mediaFile: audioFile.value,
-            mediaFileName: audioName.value,
-            name: audioName.value ?? t("transcription.untitled"),
-        });
+    if (command.status.status === "completed" && command.result) {
+        try {
+            const transcription = await transcriptionsStore.addTranscription({
+                segments: command.result.segments.map((x) => ({
+                    ...x,
+                    text: x.text?.trim() ?? "",
+                    speaker:
+                        x.speaker?.trim().toUpperCase() ??
+                        t("transcription.noSpeaker"),
+                    id: uuidv4(),
+                })),
+                mediaFile: audioFile.value,
+                mediaFileName: audioName.value,
+                name: audioName.value ?? t("transcription.untitled"),
+            });
 
-        taskStore.deleteTask(taskId);
-        navigateTo(`/transcription/${transcription.id}`);
+            await navigateTo(`/transcription/${transcription.id}`);
+            taskStore.deleteTask(taskId);
+        } catch (error) {
+            logger.error("Failed to create transcription:", error);
+            errorMessage.value = t("task.errors.failedToCreateTranscription");
+        }
+    } else if (
+        command.status.status === "failed" ||
+        command.status.status === "cancelled"
+    ) {
+        errorMessage.value = t("task.errors.transcriptionFailed");
+        // Clean up the failed task after a delay to allow user to see the error
+        cleanupTimeout.value = setTimeout(() => {
+            taskStore.deleteTask(taskId);
+        }, 5000);
+    } else {
+        errorMessage.value = t("task.errors.noResult");
     }
 }
 </script>

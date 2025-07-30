@@ -10,12 +10,8 @@ const route = useRoute();
 const currentPath = computed<string>(() => route.path);
 const { canRedo, canUndo, redo, undo, undoStack } = useCommandHistory();
 
-const { locale, locales } = useI18n();
+const { availableLocales } = useI18n();
 const switchLocalePath = useSwitchLocalePath();
-
-const availableLocales = computed(() => {
-    return locales.value.filter((i) => i.code !== locale.value);
-});
 
 /**
  * Check if current path is a transcription path
@@ -95,9 +91,9 @@ const items = computed<NavigationMenuItem[][]>(() => [
         {
             label: t("navigation.languages"),
             icon: "i-heroicons-language",
-            children: availableLocales.value.map((locale) => ({
-                label: locale.name,
-                to: switchLocalePath(locale.code),
+            children: availableLocales.map((locale) => ({
+                label: t(`navigation.${locale}`),
+                to: switchLocalePath(locale),
             })),
         },
     ],
@@ -119,11 +115,20 @@ function handleRedo(): void {
 
 <template>
     <div>
-         <UNavigationMenu content-orientation="vertical" variant="link" :items="items"
-            class="w-full justify-between align-top z-50">
-            <template #disclaimer>
-                <DisclaimerButton variant="ghost" />
+        <ClientOnly>
+            <UNavigationMenu 
+                content-orientation="vertical" 
+                variant="link" 
+                :items="items"
+                class="w-full grid grid-cols-3 items-center z-50 [&>*:nth-child(1)]:justify-self-start [&>*:nth-child(2)]:justify-self-center [&>*:nth-child(3)]:justify-self-end"
+            >
+                <template #disclaimer>
+                    <DisclaimerButton variant="ghost" />
+                </template>
+            </UNavigationMenu>
+            <template #fallback>
+                <div class="w-full h-12 bg-gray-100 animate-pulse rounded"></div>
             </template>
-        </UNavigationMenu>
+        </ClientOnly>
     </div>
 </template>

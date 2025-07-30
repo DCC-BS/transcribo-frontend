@@ -7,6 +7,8 @@ interface DialogViewProps {
     onCancel: () => void;
 }
 
+const { t } = useI18n();
+
 const props = defineProps<DialogViewProps>();
 
 function handleCancel() {
@@ -23,8 +25,8 @@ function handleConfirm() {
         <template #title>{{ props.title }}</template>
         <template #body>{{ props.message }}</template>
         <template #footer>
-            <UButton label="Cancel" @click="handleCancel">Cancel</UButton>
-            <UButton label="Submit" @click="handleConfirm">Confirm</UButton>
+            <UButton color="neutral" :label="t('ui.cancel')" @click="handleCancel" />
+            <UButton color="error" :label="t('ui.confirm')" @click="handleConfirm" />
         </template>
     </UModal>
 </template>

@@ -12,6 +12,7 @@ const props = defineProps<CurrentSegmentEditorProps>();
 
 const { segments, speakers } = useCurrentTranscription();
 const { executeCommand } = useCommandBus();
+const { t } = useI18n();
 
 // Function to get currently visible segments based on current time
 const currentSegments = computed(() => {
@@ -58,7 +59,9 @@ async function handleAddSegment() {
             <TranscriptionListItem :segment="segment" :speakers="speakers" />
         </div>
         <div v-if="currentSegments.length === 0">
-            <UButton @click="handleAddSegment">Add Segment</UButton>
+            <UButton @click="handleAddSegment">
+                {{ t("media.addSegment") }}
+            </UButton>
         </div>
     </div>
 </template>

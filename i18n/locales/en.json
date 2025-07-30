@@ -2,12 +2,35 @@
     "upload": {
         "convertingMedia": "Converting media to WAV format...",
         "uploadingMedia": "Uploading the media file...",
-        "processingError": "Failed to process the media file. Please try again."
+        "processingError": "Failed to process the media file. Please try again.",
+        "uploadError": "Failed to upload the file. Please try again.",
+        "extractingAudio": "Extracting audio from video...",
+        "numSpeakers": "Number of speakers",
+        "numSpeakersHelp": "Select the number of speakers in the audio file, or choose auto-detection",
+        "autoDetection": "Auto detection",
+        "filePreview": "File Preview",
+        "videoFile": "Video",
+        "audioFile": "Audio",
+        "audioWillBeExtracted": "Audio will be extracted for transcription",
+        "useThisFile": "Use this file",
+        "selectDifferentFile": "Select different file",
+        "error": "Error"
     },
     "pages": {
         "index": {
+            "title": "Transcribo",
+            "subtitle": "Transcribe your audio and video files with AI. 96 languages supported.",
             "uploadMedia": "Upload Media",
-            "recordAudio": "Record audio",
+            "uploadDescription": "Upload your audio or video files",
+            "recordAudio": "Record Audio",
+            "recordDescription": "Record audio directly from your microphone",
+            "featuresTitle": "Why Choose Transcribo?",
+            "feature1Title": "Fast & Accurate",
+            "feature1Description": "AI-powered transcription with high accuracy and speed",
+            "feature2Title": "Multiple Languages",
+            "feature2Description": "Support for various languages and dialects",
+            "feature3Title": "Secure & Private",
+            "feature3Description": "Your data is processed securely and privately",
             "experimentalTitle": "Experimental",
             "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for long recordings."
         }
@@ -16,20 +39,34 @@
         "new": "New",
         "transcriptions": "Transcriptions",
         "languages": "Languages",
+        "en": "English",
+        "de": "German",
         "undo": "Undo",
         "redo": "Redo",
         "actions": "Actions"
+    },
+    "audioRecorder": {
+        "useRecording": "Use this recording",
+        "makeSureMicrophoneIsProperlyConnected": "Make sure your microphone is properly connected",
+        "checkBrowserPermissionsForMicrophoneAccess": "Check browser permissions for microphone access",
+        "tryUsingDifferentBrowser": "Try using a different browser",
+        "restartDeviceIfIssuePersists": "Restart your device if the issue persists"
     },
     "timeline": {
         "noTranscription": "No transcription available"
     },
     "media": {
         "play": "Play",
-        "pause": "Pause"
+        "pause": "Pause",
+        "addSegment": "Add Segment",
+        "downloadMedia": "Download Media"
     },
     "taskStatus": {
         "processing": "Processing your request...",
-        "completed": "Transcription completed successfully!"
+        "completed": "Transcription completed successfully!",
+        "failed": "Transcription failed",
+        "failedDescription": "Something went wrong during the transcription process. Please try again with a different file.",
+        "goBack": "Go Back"
     },
     "transcription": {
         "noSpeaker": "unknown",
@@ -60,17 +97,43 @@
         "emptyState": {
             "title": "No data found",
             "description": "There is no data available to display."
-        }
+        },
+        "cancel": "Cancel",
+        "confirm": "Confirm"
     },
     "export": {
         "withSpeakers": "With speakers",
+        "withTimestamps": "Include timestamps",
+        "mergeSegments": "Merge segments from same speaker",
+        "withSummary": "Include meeting summary",
+        "textOnly": "Text format only",
+        "export": "Export",
+        "options": "Options",
+        "optionsTitle": "Export Options",
+        "formats": {
+            "title": "Export Formats",
+            "text": "Text Format",
+            "subtitle": "Subtitle Format",
+            "json": "JSON Format"
+        },
         "exportAsText": "Export as text",
         "exportAsSrt": "Export as SRT"
+    },
+    "summary": {
+        "generate": "Generate Summary",
+        "generating": "Generating...",
+        "show": "Show Summary",
+        "hide": "Hide Summary",
+        "title": "Meeting Summary",
+        "error": "Summary Generation Error"
     },
     "task": {
         "errors": {
             "noMediaFile": "No media file found for task",
-            "failedToLoad": "Failed to get task"
+            "failedToLoad": "Failed to get task",
+            "transcriptionFailed": "Transcription failed. Please try again.",
+            "failedToCreateTranscription": "Failed to create transcription from results",
+            "noResult": "No transcription result available"
         }
     },
     "commands": {
@@ -88,7 +151,9 @@
         "renameSpeaker": "Rename Speaker: \"{oldName}\" → \"{newName}\""
     },
     "help": {
+        "help": "Help",
         "title": "Help Guide - Transcribo",
+        "description": "Application help and keyboard shortcuts guide",
         "mediaControls": {
             "spectrogram": "Spectrogram",
             "timeline": "Timeline",
