@@ -1,4 +1,31 @@
 {
-    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:recommended"]
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":automergeAll",
+    ":prImmediately"
+  ],
+  "managers": {
+    "bun": {}
+  },
+  "packageRules": [
+    {
+      "description": "Automerge minor, patch, and high-confidence updates",
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "matchConfidence": [
+        "high",
+        "very high"
+      ],
+      "automerge": true,
+      "prHourlyLimit": 0,
+      "prConcurrentLimit": 0
+    }
+  ],
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true
+  }
 }
