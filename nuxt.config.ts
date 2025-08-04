@@ -132,7 +132,7 @@ export default defineNuxtConfig({
                         cacheName: "ffmpeg-cache",
                         expiration: {
                             maxEntries: 5,
-                            maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                            maxAgeSeconds: 60 * 60 * 24 * 1, // 1 day
                         },
                     },
                 },
