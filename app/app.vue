@@ -28,7 +28,7 @@ function handleKeyDown(event: KeyboardEvent) {
 <template>
     <NuxtPwaManifest />
     <FeedbackControl />
-    <Disclaimer app-name="Transcribo" :postfixHTML="disclaimerText" confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Tanscribo ausschliesslich unter Einhaltung der Voraussetzungen verwende."/>
+    <Disclaimer app-name="Transcribo" :postfixHTML="disclaimerText" confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Tanscribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."/>
     <UApp>
         <NavigationMenu />
         <DialogView
