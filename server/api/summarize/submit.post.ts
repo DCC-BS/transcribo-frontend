@@ -1,7 +1,10 @@
 import type { SummaryResponse } from "~/types/summarizeResponse";
 import { verboseFetch } from "../../utils/verboseFetch";
+import { getClientIp } from "../../utils/getClientIp";
 
 export default defineEventHandler(async (event) => {
+    const clientIP = getClientIp(event);
+
     const config = useRuntimeConfig();
 
     const inputFormData = await readFormData(event);
@@ -24,6 +27,7 @@ export default defineEventHandler(async (event) => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "X-Client-Id": clientIP || "",
             },
             body: JSON.stringify({
                 transcript: transcript,

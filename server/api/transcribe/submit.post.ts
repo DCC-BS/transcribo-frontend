@@ -1,8 +1,11 @@
 import type { TaskStatus } from "~/types/task";
 import { verboseFetch } from "../../utils/verboseFetch";
+import { getClientIp } from "../../utils/getClientIp";
 
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
+
+    const clientIP = getClientIp(event);
 
     const inputFormData = await readFormData(event);
     const fileContent = inputFormData.get("file") as File;
@@ -39,6 +42,9 @@ export default defineEventHandler(async (event) => {
         {
             method: "POST",
             body: formData,
+            headers: {
+                "X-Client-Id": clientIP || "",
+            },
         },
     );
 
