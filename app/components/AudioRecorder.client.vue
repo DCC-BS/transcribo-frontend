@@ -240,7 +240,9 @@ function initializeAudioVisualization(stream: MediaStream): void {
  */
 function updateAudioVisualization(): void {
     if (analyser.value && frequencyData.value) {
-        analyser.value.getByteFrequencyData(frequencyData.value);
+        analyser.value.getByteFrequencyData(
+            frequencyData.value as Uint8Array<ArrayBuffer>,
+        );
         // Transform frequency data to visualization values (0-100%)
         audioVisualization.value = Array.from(frequencyData.value)
             .slice(0, 20)

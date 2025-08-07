@@ -106,11 +106,9 @@ const loadAudio = async (file: Blob): Promise<void> => {
     audioDuration.value = audioBuffer.value.duration;
 
     // Render spectrogram to an image
-    const result = renderSpectrogram(
-        spectrogramData.value,
-        specResult.sampleRate,
-        { colorMap: "magma" },
-    );
+    const result = renderSpectrogram(spectrogramData.value, {
+        colorMap: "magma",
+    });
 
     // Create an image from the canvas
     const img = new Image();

@@ -150,7 +150,7 @@ async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
                 );
             }
 
-            return new Blob([data], { type: "audio/wav" });
+            return new Blob([data as BlobPart], { type: "audio/wav" });
         } catch (processingError) {
             // Clean up any files that might have been created
             try {
