@@ -162,34 +162,33 @@ const transformerConfig = computed(
  * Generate rectangle configurations for all segments
  */
 const rectConfigs = computed(() =>
-    segments.value.map(
-        (segment) =>
-            ({
-                id: segment.id,
-                // Scale x position and width to fit stage width
-                x: fromTimetoPixelSpace(segment.start),
-                y:
-                    speakerToIndex.value[segment.speaker ?? "unknown"] *
-                    heightPerSpeaker,
-                width: fromTimetoPixelSpace(segment.end - segment.start),
-                height: heightPerSpeaker,
-                fill: getSpeakerColor(segment.speaker).toString(),
-                // Add stroke to make segments visually distinct
-                stroke: "black",
-                strokeScaleEnabled: false,
-                draggable: true,
-                // Store segment text as a property for hover access
-                text: segment.text,
-                dragBoundFunc: createDragBoundFunc(
-                    segment,
-                    stageWidth.value,
-                    speakerToIndex.value[segment.speaker ?? "unknown"],
-                    heightPerSpeaker,
-                    fromTimetoPixelSpace,
-                    marginTop,
-                ),
-            }) as RectConfig & { text?: string },
-    ),
+    segments.value.map((segment) => {
+        const speakerIndex =
+            speakerToIndex.value[segment.speaker ?? "unknown"] ?? 0;
+        return {
+            id: segment.id,
+            // Scale x position and width to fit stage width
+            x: fromTimetoPixelSpace(segment.start),
+            y: speakerIndex * heightPerSpeaker,
+            width: fromTimetoPixelSpace(segment.end - segment.start),
+            height: heightPerSpeaker,
+            fill: getSpeakerColor(segment.speaker).toString(),
+            // Add stroke to make segments visually distinct
+            stroke: "black",
+            strokeScaleEnabled: false,
+            draggable: true,
+            // Store segment text as a property for hover access
+            text: segment.text,
+            dragBoundFunc: createDragBoundFunc(
+                segment,
+                stageWidth.value,
+                speakerIndex,
+                heightPerSpeaker,
+                fromTimetoPixelSpace,
+                marginTop,
+            ),
+        } as RectConfig & { text?: string };
+    }),
 );
 
 // -----------------------------------------------------------------
@@ -277,7 +276,10 @@ function onDragEnd(e: KonvaEventObject<MouseEvent, Rect>): void {
         rect.x() + rect.width() * rect.scaleX(),
     );
 
-    const segmentId = segments.value[segmentIndex].id;
+    const segment = segments.value[segmentIndex];
+    if (!segment?.id) return;
+
+    const segmentId = segment.id;
 
     // Update the segment with new times
     executeCommand(
@@ -306,7 +308,10 @@ function onTransformEnd(e: KonvaEventObject<MouseEvent, Rect>): void {
         rect.x() + rect.width() * rect.scaleX(),
     );
 
-    const segmentId = segments.value[segmentIndex].id;
+    const segment = segments.value[segmentIndex];
+    if (!segment?.id) return;
+
+    const segmentId = segment.id;
     executeCommand(
         new UpdateSegementCommand(segmentId, {
             start: Math.max(0, newStart),
