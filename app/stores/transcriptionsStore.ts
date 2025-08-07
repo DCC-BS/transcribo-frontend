@@ -78,7 +78,8 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                 // Store transcriptions but remove the audio blobs to save memory
                 transcriptions.value = request.result.map((transcription) => {
                     // Create a copy without the audioFile blob
-                    const { audioFile, ...restOfTranscription } = transcription;
+                    const { mediaFile: _, ...restOfTranscription } =
+                        transcription;
                     return restOfTranscription;
                 });
                 isLoading.value = false;
@@ -123,7 +124,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
                 // If includeAudio is false, remove the audio blob to save memory
                 if (!includeAudio && request.result.audioFile) {
-                    const { audioFile, ...transcriptionWithoutAudio } =
+                    const { mediaFile: _, ...transcriptionWithoutAudio } =
                         request.result;
                     resolve(transcriptionWithoutAudio);
                 } else {
@@ -224,7 +225,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
             request.onsuccess = () => {
                 // Add to local state, but without the audio blob
-                const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
+                const { mediaFile: _, ...transcriptionWithoutAudio } =
                     newTranscription;
                 transcriptions.value.push(transcriptionWithoutAudio);
                 resolve(newTranscription);
@@ -366,7 +367,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
             request.onsuccess = () => {
                 // Update local state, but without the audio blob
-                const { mediaFile: audioFile, ...transcriptionWithoutAudio } =
+                const { mediaFile: _, ...transcriptionWithoutAudio } =
                     updatedTranscription;
 
                 const index = transcriptions.value.findIndex(

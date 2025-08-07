@@ -26,6 +26,7 @@
         "rules": {
             "recommended": true,
             "style": {
+                "noNonNullAssertion": "off",
                 "noParameterAssign": "error",
                 "useAsConstAssertion": "error",
                 "useDefaultParameterLast": "error",

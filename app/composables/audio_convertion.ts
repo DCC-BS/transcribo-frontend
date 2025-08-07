@@ -1,4 +1,4 @@
-import { FFmpeg, type LogEvent } from "@ffmpeg/ffmpeg";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 
 export function useAudioConvertion() {
@@ -19,7 +19,7 @@ export function useAudioConvertion() {
         await ffmpeg.exec(["-i", webmFileName, mp3FileName]);
         const data = await ffmpeg.readFile(mp3FileName);
 
-        return new Blob([data], { type: "audio/mp3" });
+        return new Blob([data as BlobPart], { type: "audio/mp3" });
     }
 
     return {

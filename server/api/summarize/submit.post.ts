@@ -1,6 +1,6 @@
 import type { SummaryResponse } from "~/types/summarizeResponse";
-import { verboseFetch } from "../../utils/verboseFetch";
 import { getClientIp } from "../../utils/getClientIp";
+import { verboseFetch } from "../../utils/verboseFetch";
 
 export default defineEventHandler(async (event) => {
     const clientIP = getClientIp(event);

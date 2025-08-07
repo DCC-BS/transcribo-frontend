@@ -51,7 +51,7 @@ function formatFileSize(bytes: number): string {
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Number.parseFloat((bytes / k ** i).toFixed(2)) + " " + sizes[i];
+    return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -150,7 +150,7 @@ async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
                 );
             }
 
-            return new Blob([data], { type: "audio/wav" });
+            return new Blob([data as BlobPart], { type: "audio/wav" });
         } catch (processingError) {
             // Clean up any files that might have been created
             try {

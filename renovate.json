@@ -1,33 +1,22 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "dependencyDashboard": true,
-  "ignoreTests": true,
-  "extends": [
-    "config:recommended",
-    ":prImmediately"
-  ],
-  "packageRules": [
-    {
-      "matchDepTypes": [
-        "devDependencies"
-      ],
-      "matchPackageNames": [
-        "lint",
-        "prettier"
-      ],
-      "automerge": true
-    },
-    {
-      "matchUpdateTypes": [
-        "minor",
-        "patch"
-      ],
-      "matchCurrentVersion": "!/^0/",
-      "automerge": true
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "dependencyDashboard": true,
+    "ignoreTests": true,
+    "extends": ["config:recommended", ":prImmediately"],
+    "packageRules": [
+        {
+            "matchDepTypes": ["devDependencies"],
+            "matchPackageNames": ["lint", "prettier"],
+            "automerge": true
+        },
+        {
+            "matchUpdateTypes": ["minor", "patch"],
+            "matchCurrentVersion": "!/^0/",
+            "automerge": true
+        }
+    ],
+    "lockFileMaintenance": {
+        "enabled": true,
+        "automerge": true
     }
-  ],
-  "lockFileMaintenance": {
-    "enabled": true,
-    "automerge": true
-  }
 }

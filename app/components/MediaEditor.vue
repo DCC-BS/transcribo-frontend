@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { DataBsBanner } from "@dcc-bs/common-ui.bs.js";
 import { match } from "ts-pattern";
 import { SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
 import AudioSpectrogram from "./media/AudioSpectrogram.vue";
@@ -10,11 +11,11 @@ import RenameSpeakerView from "./RenameSpeakerView.vue";
 const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const currentTime = ref<number>(0); // Current playback position in seconds
 const duration = ref<number>(0); // Total audio duration in seconds
+const timeRange = ref<[number, number]>([0, duration.value]);
+
 const zoomX = computed(
     () => duration.value / (timeRange.value[1] - timeRange.value[0]),
 );
-
-const timeRange = ref([0, duration.value]);
 
 const transcriptionStore = useTranscriptionsStore();
 const { executeCommand } = useCommandBus();

@@ -5,9 +5,9 @@ export function getClientIp(event: H3Event): string | undefined {
     if (xForwardedFor) {
         // x-forwarded-for can be a comma-separated list. The first IP is the original client.
         if (Array.isArray(xForwardedFor)) {
-            return xForwardedFor[0].split(",")[0].trim();
+            return xForwardedFor[0]?.split(",")[0]?.trim() ?? "";
         }
-        return xForwardedFor.split(",")[0].trim();
+        return xForwardedFor.split(",")[0]?.trim() ?? "";
     }
 
     return event.node.req.socket.remoteAddress;

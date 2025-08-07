@@ -1,4 +1,4 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
-@source "../../node_modules/@dcc-bs/common-ui.bs.js/dist/runtime";
+@import "@dcc-bs/common-ui.bs.js";

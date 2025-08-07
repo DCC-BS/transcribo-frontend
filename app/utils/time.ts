@@ -37,7 +37,12 @@ export const formatTime = (time: number, options?: formatOptions): string => {
  * @throws {Error} If time string is invalid
  */
 export const parseTime = (time: string): number => {
-    const parts = time.split(":");
+    const parts = time.split(":") as [string, string];
+
+    if (parts.length !== 2) {
+        throw new Error("Invalid time format");
+    }
+
     const minutes = Number.parseInt(parts[0], 10);
     const seconds = Number.parseInt(parts[1], 10);
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import disclaimerText from "./assets/disclaimer.html?raw";
+import { NuxtLayout } from "#components";
 import DialogView from "./components/DialogView.vue";
 import { useInitDialog } from "./composables/dialog";
 
@@ -27,10 +27,7 @@ function handleKeyDown(event: KeyboardEvent) {
 
 <template>
     <NuxtPwaManifest />
-    <FeedbackControl />
-    <Disclaimer app-name="Transcribo" :postfixHTML="disclaimerText" confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Tanscribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."/>
-    <UApp>
-        <NavigationMenu />
+<UApp>
         <DialogView
             :is-open="isOpen"
             :title="title"
@@ -38,6 +35,8 @@ function handleKeyDown(event: KeyboardEvent) {
             :on-confirm="onSubmit"
             :on-cancel="onClose"
         />
-        <NuxtPage />
+        <NuxtLayout>
+            <NuxtPage />
+        </NuxtLayout>
     </UApp>
 </template>

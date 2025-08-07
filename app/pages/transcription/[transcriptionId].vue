@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { SplitView } from "@dcc-bs/common-ui.bs.js";
 import { UInput } from "#components";
 import { TranscriptonNameChangeCommand } from "~/types/commands";
 
