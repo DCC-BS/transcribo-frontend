@@ -11,7 +11,7 @@
         "check": "biome check --fix"
     },
     "dependencies": {
-        "@dcc-bs/common-ui.bs.js": "git+https://github.com/DCC-BS/common-ui.bs.js.git#v1.0.3",
+        "@dcc-bs/common-ui.bs.js": "../common-ui.bs.js",
         "@dcc-bs/event-system.bs.js": "git+https://github.com/DCC-BS/event-system.bs.js.git#v1.4.1",
         "@dcc-bs/feedback-control.bs.js": "git+https://github.com/DCC-BS/feedback-control.bs.js.git#v0.1.4",
         "@dcc-bs/logger.bs.js": "git+https://github.com/DCC-BS/logger.bs.js.git#v1.4.1",
@@ -25,7 +25,7 @@
         "@pinia/nuxt": "0.11.2",
         "@vite-pwa/nuxt": "1.0.4",
         "konva": "^9.3.22",
-        "nuxt": "^4.0.2",
+        "nuxt": "^4.0.3",
         "ts-pattern": "^5.8.0",
         "uuid": "^11.1.0",
         "vue": "^3.5.18",
@@ -38,6 +38,6 @@
         "jiti": "^2.5.1",
         "sass": "1.90.0",
         "sass-loader": "^16.0.5",
-        "typescript": "^5.8.3"
+        "typescript": "^5.9.2"
     }
 }

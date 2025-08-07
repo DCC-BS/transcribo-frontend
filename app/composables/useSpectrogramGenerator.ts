@@ -222,7 +222,7 @@ export function useSpectrogramGenerator() {
             await frameContext.startRendering();
 
             // Get frequency data
-            const frequencyData: Uint8Array = new Uint8Array(bufferLength);
+            const frequencyData = new Uint8Array(bufferLength);
             frameAnalyser.getByteFrequencyData(frequencyData);
 
             // Store frequency data

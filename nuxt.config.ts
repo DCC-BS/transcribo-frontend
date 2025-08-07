@@ -85,6 +85,7 @@ export default defineNuxtConfig({
     ],
     typescript: {
         strict: true,
+        typeCheck: true,
     },
     devtools: { enabled: false },
     css: ["~/assets/css/main.css"],
@@ -113,7 +114,7 @@ export default defineNuxtConfig({
     },
     pwa: {
         devOptions: {
-            enabled: true,
+            enabled: false,
         },
         registerType: "autoUpdate",
         workbox: {
