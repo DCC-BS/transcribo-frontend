@@ -67,7 +67,7 @@ export const useTasksStore = defineStore("tasksStore", () => {
                 // Store tasks but remove the media blobs to save memory
                 tasks.value = request.result.map((task) => {
                     // Create a copy without the mediaFile blob
-                    const { mediaFile, ...restOfTask } = task;
+                    const { mediaFile: _, ...restOfTask } = task;
                     return restOfTask;
                 });
                 isLoading.value = false;
@@ -148,7 +148,7 @@ export const useTasksStore = defineStore("tasksStore", () => {
 
             request.onsuccess = () => {
                 // Add to local state, but without the media blob
-                const { mediaFile, ...taskWithoutMedia } = newTask;
+                const { mediaFile: _, ...taskWithoutMedia } = newTask;
                 tasks.value.push(taskWithoutMedia);
                 resolve(newTask);
             };
@@ -215,7 +215,7 @@ export const useTasksStore = defineStore("tasksStore", () => {
 
             request.onsuccess = () => {
                 // Update local state, but without the media blob
-                const { mediaFile, ...taskWithoutMedia } = updatedTask;
+                const { mediaFile: _, ...taskWithoutMedia } = updatedTask;
 
                 const index = tasks.value.findIndex((t) => t.id === id);
                 if (index !== -1) {

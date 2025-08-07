@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { DataBsBanner } from "@dcc-bs/common-ui.bs.js";
 import type { UploadMediaView } from "#components";
 import type { TaskStatus } from "~/types/task";
 

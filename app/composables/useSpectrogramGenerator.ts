@@ -196,7 +196,7 @@ export function useSpectrogramGenerator() {
             for (let i = 0; i < fftSize; i++) {
                 tempChannel[i] =
                     startSample + i < endSample
-                        ? audioData[startSample + i]
+                        ? audioData[startSample + i]!
                         : 0;
             }
 

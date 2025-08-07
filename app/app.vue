@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Disclaimer } from "@dcc-bs/common-ui.bs.js";
 import disclaimerText from "./assets/disclaimer.html?raw";
 import DialogView from "./components/DialogView.vue";
 import { useInitDialog } from "./composables/dialog";
@@ -29,7 +30,7 @@ function handleKeyDown(event: KeyboardEvent) {
     <NuxtPwaManifest />
     <FeedbackControl />
     <Disclaimer app-name="Transcribo" :postfixHTML="disclaimerText" confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Tanscribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."/>
-    <UApp>
+<UApp>
         <NavigationMenu />
         <DialogView
             :is-open="isOpen"

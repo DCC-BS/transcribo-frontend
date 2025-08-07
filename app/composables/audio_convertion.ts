@@ -1,4 +1,4 @@
-import { FFmpeg, type LogEvent } from "@ffmpeg/ffmpeg";
+import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 
 export function useAudioConvertion() {

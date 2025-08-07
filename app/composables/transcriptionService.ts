@@ -64,6 +64,11 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
 
         const targetSegment = currentTranscription.segments[targetIndex];
 
+        if (!targetSegment) {
+            logger.warn("Target segment is undefined");
+            return;
+        }
+
         const start =
             command.direction === "before"
                 ? targetSegment.start - 2

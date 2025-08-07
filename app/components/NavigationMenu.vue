@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { DisclaimerButton } from "@dcc-bs/common-ui.bs.js";
 import type { NavigationMenuItem } from "#ui/components/NavigationMenu.vue";
 import type { ITransriboReversibleCommand } from "~/types/commands";
 

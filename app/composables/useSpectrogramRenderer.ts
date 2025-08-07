@@ -49,7 +49,7 @@ export function useSpectrogramRenderer() {
         targetHeight: number,
     ): Uint8Array[] {
         const originalWidth = data.length;
-        const originalHeight = data[0].length;
+        const originalHeight = data[0]?.length ?? 0;
 
         // If original height is already below target, return the original data
         if (originalHeight <= targetHeight) {
@@ -77,12 +77,12 @@ export function useSpectrogramRenderer() {
                 let count = 0;
 
                 for (let j = startRow; j < endRow && j < originalHeight; j++) {
-                    sum += data[x][j];
+                    sum += data[x]![j]!;
                     count++;
                 }
 
                 // Set the downsampled value (average of original values)
-                downsampled[x][y] = count > 0 ? Math.floor(sum / count) : 0;
+                downsampled[x]![y]! = count > 0 ? Math.floor(sum / count) : 0;
             }
         }
 
@@ -115,8 +115,7 @@ export function useSpectrogramRenderer() {
             }
 
             // Get original dimensions based on data
-            const originalWidth: number = spectrogramData.length;
-            const originalHeight: number = spectrogramData[0].length;
+            const originalHeight: number = spectrogramData[0]?.length ?? 0;
 
             // Downsample the data if it's taller than 400 pixels
             const processedData =
@@ -126,7 +125,7 @@ export function useSpectrogramRenderer() {
 
             // Get new dimensions after potential downsampling
             const dataWidth: number = processedData.length;
-            const dataHeight: number = processedData[0].length;
+            const dataHeight: number = processedData[0]?.length ?? 0;
 
             // Create a temporary canvas for the raw spectrogram data
             const canvas = document.createElement("canvas");
@@ -190,7 +189,7 @@ export function useSpectrogramRenderer() {
 
                     // Get frequency value
                     const value: number =
-                        processedData[x][dataHeight - scaledY - 1] || 0;
+                        processedData[x]![dataHeight - scaledY - 1] || 0;
 
                     // Calculate index in image data array
                     const index: number = (y * dataWidth + x) * 4;
