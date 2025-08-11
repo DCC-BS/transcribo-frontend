@@ -4,6 +4,8 @@ import { TranscriptionFinishedCommand } from "~/types/commands";
 import { type TaskStatus, TaskStatusEnum } from "~/types/task";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
 
+const { $api } = useNuxtApp();
+
 const props = defineProps<{
     taskId: string;
 }>();
@@ -83,7 +85,7 @@ const fetchTaskStatus = async (): Promise<void> => {
         let result: TranscriptionResponse | undefined;
         if (status.value?.status === TaskStatusEnum.COMPLETED) {
             try {
-                result = await $fetch<TranscriptionResponse>(
+                result = await $api<TranscriptionResponse>(
                     `/api/transcribe/${props.taskId}`,
                 );
             } catch (error) {
@@ -104,7 +106,7 @@ const fetchTaskStatus = async (): Promise<void> => {
 };
 
 const loadTaskStatus = async (taskId: string): Promise<void> => {
-    const newStatus = await $fetch<TaskStatus>(
+    const newStatus = await $api<TaskStatus>(
         `/api/transcribe/${taskId}/status`,
     );
     status.value = newStatus;

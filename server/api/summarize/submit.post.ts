@@ -4,6 +4,9 @@ import { verboseFetch } from "../../utils/verboseFetch";
 
 export default defineEventHandler(async (event) => {
     const clientIP = getClientIp(event);
+    const clientUUID = getHeader(event, "X-Ephemeral-UUID");
+    console.log("clientIP", clientIP);
+    console.log("clientUUID", clientUUID);
 
     const config = useRuntimeConfig();
 
@@ -27,7 +30,7 @@ export default defineEventHandler(async (event) => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-Client-Id": clientIP || "",
+                "X-Client-Id": clientUUID || "",
             },
             body: JSON.stringify({
                 transcript: transcript,

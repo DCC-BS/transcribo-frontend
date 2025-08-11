@@ -6,6 +6,9 @@ export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
 
     const clientIP = getClientIp(event);
+    const clientUUID = getHeader(event, "X-Ephemeral-UUID");
+    console.log("clientIP", clientIP);
+    console.log("clientUUID", clientUUID);
 
     const inputFormData = await readFormData(event);
     const fileContent = inputFormData.get("file") as File;
@@ -43,7 +46,7 @@ export default defineEventHandler(async (event) => {
             method: "POST",
             body: formData,
             headers: {
-                "X-Client-Id": clientIP || "",
+                "X-Client-Id": clientUUID || "",
             },
         },
     );

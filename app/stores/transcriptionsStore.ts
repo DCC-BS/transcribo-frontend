@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { v4 as uuidv4 } from "uuid";
 import { initDB } from "~/services/indexDbService";
+import type { SummaryResponse } from "~/types/summarizeResponse";
 import type { SegementWithId } from "../types/transcriptionResponse";
 
 // Define the structure of a stored transcription
@@ -15,6 +16,8 @@ export interface StoredTranscription {
     mediaFileName?: string;
     summary?: string; // AI-generated meeting summary
 }
+
+const { $api } = useNuxtApp();
 
 // Database configuration
 const STORE_NAME = "transcriptions";
@@ -570,10 +573,13 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             const formData = new FormData();
             formData.append("transcript", sanitizedText);
 
-            const summaryResponse = await $fetch("/api/summarize/submit", {
-                method: "POST",
-                body: formData,
-            });
+            const summaryResponse = await $api<SummaryResponse>(
+                "/api/summarize/submit",
+                {
+                    method: "POST",
+                    body: formData,
+                },
+            );
 
             // Validate API response structure
             const validatedSummary = validateSummaryResponse(summaryResponse);

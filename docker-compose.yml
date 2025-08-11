@@ -59,25 +59,25 @@ services:
         - "--uvicorn-log-level"
         - "warning"
         - "--disable-log-requests"
-    # transcribo-backend:
-    #     build:
-    #         context: https://github.com/DCC-BS/transcribo-backend.git
-    #         dockerfile: ./Dockerfile
-    #     depends_on:
-    #         - faster_whisper
-    #     ports:
-    #         - '8000:8000'
-    #     environment:
-    #         - WHISPER_API=http://faster_whisper:50001/v1
-    # transcribo-frontend:
-    #     build:
-    #         context: .
-    #         dockerfile: ./Dockerfile
-    #     depends_on:
-    #         - transcribo-backend
-    #     ports:
-    #         - '3000:3000'
-    #     profiles:
-    #         - frontend
+    transcribo-backend:
+        build:
+            context: https://github.com/DCC-BS/transcribo-backend.git
+            dockerfile: ./Dockerfile
+        depends_on:
+            - faster_whisper
+        ports:
+            - '8000:8000'
+        environment:
+            - WHISPER_API=http://faster_whisper:50001/v1
+    transcribo-frontend:
+        build:
+            context: .
+            dockerfile: ./Dockerfile
+        depends_on:
+            - transcribo-backend
+        ports:
+            - '3000:3000'
+        profiles:
+            - frontend
 volumes:
     hugging_face_cache:

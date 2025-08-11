@@ -7,6 +7,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const logger = useLogger();
+const { $api } = useNuxtApp();
 
 // Track the conversion progress
 const progressMessage = ref("");
@@ -281,7 +282,7 @@ async function uploadFile(
         formData.append("num_speakers", numSpeakers.value);
     }
 
-    const response = await $fetch<TaskStatus>("/api/transcribe/submit", {
+    const response = await $api<TaskStatus>("/api/transcribe/submit", {
         body: formData,
         method: "POST",
     });
