@@ -1,14 +1,10 @@
 import type { TaskStatus } from "~/types/task";
-import { getClientIp } from "../../utils/getClientIp";
 import { verboseFetch } from "../../utils/verboseFetch";
 
 export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
 
-    const clientIP = getClientIp(event);
     const clientUUID = getHeader(event, "X-Ephemeral-UUID");
-    console.log("clientIP", clientIP);
-    console.log("clientUUID", clientUUID);
 
     const inputFormData = await readFormData(event);
     const fileContent = inputFormData.get("file") as File;

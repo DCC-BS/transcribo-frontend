@@ -26,6 +26,7 @@
         "@vite-pwa/nuxt": "1.0.4",
         "konva": "^9.3.22",
         "nuxt": "4.0.3",
+        "nuxt-lucide-icons": "1.0.5",
         "ts-pattern": "^5.8.0",
         "uuid": "^11.1.0",
         "vue": "^3.5.18",
