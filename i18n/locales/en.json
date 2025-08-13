@@ -14,7 +14,9 @@
         "audioWillBeExtracted": "Audio will be extracted for transcription",
         "useThisFile": "Use this file",
         "selectDifferentFile": "Select different file",
-        "error": "Error"
+        "error": "Error",
+        "unsupportedFileTypeTitle": "Unsupported file type",
+        "unsupportedFileTypeDescription": "Allowed file types: mp3, mp4, m4a, flac, wav, webm. If you need support for other file types, please contact us through the feedback button."
     },
     "pages": {
         "index": {

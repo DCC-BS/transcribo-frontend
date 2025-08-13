@@ -17,8 +17,6 @@ export interface StoredTranscription {
     summary?: string; // AI-generated meeting summary
 }
 
-const { $api } = useNuxtApp();
-
 // Database configuration
 const STORE_NAME = "transcriptions";
 
@@ -573,6 +571,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             const formData = new FormData();
             formData.append("transcript", sanitizedText);
 
+            const { $api } = useNuxtApp();
             const summaryResponse = await $api<SummaryResponse>(
                 "/api/summarize/submit",
                 {

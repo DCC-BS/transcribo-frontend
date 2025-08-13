@@ -14,7 +14,9 @@
         "audioWillBeExtracted": "Audio wird für die Transkription extrahiert",
         "useThisFile": "Diese Datei verwenden",
         "selectDifferentFile": "Andere Datei auswählen",
-        "error": "Fehler"
+        "error": "Fehler",
+        "unsupportedFileTypeTitle": "Nicht unterstützter Dateityp",
+        "unsupportedFileTypeDescription": "Erlaubte Dateitypen: mp3, mp4, m4a, flac, wav, webm. Wenn Sie Unterstützung für weitere Dateitypen benötigen, dann kontaktieren Sie uns über den Feedback-Knopf."
     },
     "pages": {
         "index": {
