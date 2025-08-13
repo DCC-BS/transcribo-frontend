@@ -73,16 +73,21 @@ export default defineNuxtConfig({
     ui: {
         colorMode: false,
     },
+    icon: {
+        // Bundle specific collections server-side to avoid remote Iconify fetches
+        serverBundle: {
+            collections: ["lucide", "heroicons"],
+        },
+    },
     modules: [
-      "@nuxt/ui",
-      "@nuxtjs/i18n",
-      "@dcc-bs/event-system.bs.js",
-      "@dcc-bs/logger.bs.js",
-      "@dcc-bs/feedback-control.bs.js",
-      "@pinia/nuxt",
-      "@vite-pwa/nuxt",
-      "@nuxtjs/mdc",
-      "nuxt-lucide-icons",
+        "@nuxt/ui",
+        "@nuxtjs/i18n",
+        "@dcc-bs/event-system.bs.js",
+        "@dcc-bs/logger.bs.js",
+        "@dcc-bs/feedback-control.bs.js",
+        "@pinia/nuxt",
+        "@vite-pwa/nuxt",
+        "@nuxtjs/mdc",
     ],
     typescript: {
         strict: true,
