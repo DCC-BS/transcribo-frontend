@@ -32,7 +32,7 @@ export function useClientId() {
             clientId.value = newId;
 
             return newId;
-        } catch (error) {
+        } catch (_error) {
             // Fallback if localStorage is not available
             if (!clientId.value) {
                 clientId.value = uuidv4();

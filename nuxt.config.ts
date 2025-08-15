@@ -14,12 +14,16 @@ export default defineNuxtConfig({
     },
     nitro: {
         routeRules: {
-            "/ffmpeg/**": {
+            // Ensure cross-origin isolation in production so ffmpeg.wasm can use SharedArrayBuffer
+            "/**": {
                 headers: {
-                    "Content-Type": "application/wasm",
-                    "Cache-Control": "public, max-age=31536000, immutable",
+                    "Cross-Origin-Opener-Policy": "same-origin",
+                    "Cross-Origin-Embedder-Policy": "require-corp",
+                    // Restrict embedding to same-origin resources which works for files in /public
+                    "Cross-Origin-Resource-Policy": "same-origin",
                 },
             },
+
         },
     },
     $development: {
@@ -42,11 +46,16 @@ export default defineNuxtConfig({
                 allow: [".."],
             },
         },
+
+        worker: {
+            format: "es",
+        },
         // Configure proper MIME types for WebAssembly files
         build: {
             rollupOptions: {
                 external: (id) => id.includes("ffmpeg-core"),
             },
+            target: "es2020", // Changed from esnext to es2020 for better compatibility
         },
     },
     app: {
@@ -67,6 +76,11 @@ export default defineNuxtConfig({
                 },
                 { name: "application-name", content: "Transcribo" },
                 { name: "msapplication-config", content: "/browserconfig.xml" },
+            ],
+            link: [
+                { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
+                { rel: "icon", type: "image/png", sizes: "32x32", href: "/ios/32.png" },
+                { rel: "icon", type: "image/png", sizes: "16x16", href: "/ios/16.png" },
             ],
         },
     },
@@ -124,21 +138,22 @@ export default defineNuxtConfig({
         },
         registerType: "autoUpdate",
         workbox: {
-            globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,wasm}"],
-            globIgnores: ["dev-sw-dist/**/*", "ffmpeg/**/*"],
+            globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,wasm,ico}"],
+            globIgnores: ["dev-sw-dist/**/*"],
             navigateFallback: "/",
             navigateFallbackDenylist: [/^\/transcription\/.*/, /^\/task\/.*/],
             clientsClaim: true,
             skipWaiting: true,
             runtimeCaching: [
+
                 {
-                    urlPattern: /\/ffmpeg\/.*/,
+                    urlPattern: /\/favicon\.ico$/,
                     handler: "CacheFirst",
                     options: {
-                        cacheName: "ffmpeg-cache",
+                        cacheName: "favicon-cache",
                         expiration: {
-                            maxEntries: 5,
-                            maxAgeSeconds: 60 * 60 * 24 * 1, // 1 day
+                            maxEntries: 1,
+                            maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
                         },
                     },
                 },

@@ -94,22 +94,14 @@ async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
     const ffmpeg = new FFmpeg();
 
     try {
-        // Use local ffmpeg core files instead of CDN for security
-        // These files should be placed in the public/ffmpeg directory
-        const baseURL = "/ffmpeg"; // Serve from public/ffmpeg directory
+        // Load FFmpeg using CDN for better compatibility
         await ffmpeg.load({
-            coreURL: await toBlobURL(
-                `${baseURL}/ffmpeg-core.js`,
-                "text/javascript",
-            ),
-            wasmURL: await toBlobURL(
-                `${baseURL}/ffmpeg-core.wasm`,
-                "application/wasm",
-            ),
+            coreURL: "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
+            wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
         });
 
-        // Set up error handling for FFmpeg logs
         ffmpeg.on("log", (event) => {
+            // Log errors for diagnostics
             if (event.type === "fferr") {
                 logger.error("FFmpeg error:", event.message);
             }
@@ -122,15 +114,13 @@ async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
             // Write input file
             await ffmpeg.writeFile(inputFileName, await fetchFile(videoFile));
 
-            // Extract audio with good quality settings
+            // Extract audio
             await ffmpeg.exec([
                 "-i",
                 inputFileName,
                 "-vn", // No video
                 "-acodec",
                 "pcm_s16le",
-                "-ab",
-                "128k", // Audio bitrate
                 "-ar",
                 "16000", // Sample rate
                 outputFileName,
