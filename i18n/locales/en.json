@@ -34,7 +34,7 @@
             "feature3Title": "Secure & Private",
             "feature3Description": "Your data is processed securely and privately",
             "experimentalTitle": "Experimental",
-            "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for long recordings."
+            "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for recordings longer than 5 minutes. For longer recordings we recommend using the file upload."
         }
     },
     "navigation": {

@@ -34,7 +34,7 @@
             "feature3Title": "Sicher & Privat",
             "feature3Description": "Ihre Daten werden sicher und privat verarbeitet",
             "experimentalTitle": "Experimentell",
-            "experimental": "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Es kann sein, dass sie bei langen Aufnahmen nicht funktioniert."
+            "experimental": "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Aufnahmen länger als 5 Minuten können zu Fehlern und Datenverlust führen. Für lange Gespräche empfehlen wir den Dateiupload."
         }
     },
     "navigation": {

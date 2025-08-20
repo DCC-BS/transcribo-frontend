@@ -85,7 +85,9 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                         </div>
                     </div>
                 </template>
-
+                <div>
+                    <UAlert color="warning" icon="i-heroicons-exclamation-triangle" :title="t('pages.index.experimentalTitle')" :description="t('pages.index.experimental')" />
+                </div>
                 <div class="py-4">
                     <AudioRecorder @recording-complete="handleRecordingComplete" />
                 </div>
