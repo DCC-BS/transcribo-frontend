@@ -156,6 +156,19 @@
         "changeTranscriptionName": "Transkriptionsname ändern zu: {name}",
         "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\""
     },
+    "viewer": {
+        "mode": "Ansichtsmodus",
+        "displayOptions": "Anzeigeoptionen",
+        "showSpeakers": "Sprecher anzeigen",
+        "showTimestamps": "Zeitstempel anzeigen",
+        "mergeSegments": "Segmente zusammenführen",
+        "placeholder": "Keine Transkription zur Anzeige verfügbar"
+    },
+    "mode": {
+        "viewer": "Betrachter",
+        "editor": "Editor",
+        "switch": "Modus wechseln"
+    },
     "help": {
         "help": "Hilfe",
         "title": "Hilfe - Transcribo",

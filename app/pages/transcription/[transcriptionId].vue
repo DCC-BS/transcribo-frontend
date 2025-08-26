@@ -35,6 +35,9 @@ const isSummaryGenerating = ref(false);
 const summaryError = ref<string | null>(null);
 const isSummaryExpanded = ref(false);
 
+// View mode state - default to viewer mode as requested
+const isViewMode = ref(false);
+
 onMounted(() => {
     registerService();
 });
@@ -100,6 +103,30 @@ async function handleGenerateSummary(): Promise<void> {
                     @update:model-value="handleNameChange"
                     placeholder="Transcription name"
                 />
+
+                <!-- Mode Toggle Button -->
+                <div class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+                    <UButton
+                        :icon="isViewMode ? 'i-heroicons-eye' : 'i-heroicons-pencil-square'"
+                        :variant="isViewMode ? 'solid' : 'ghost'"
+                        :label="t('mode.viewer')"
+                        :color="isViewMode ? 'primary' : 'neutral'"
+                        size="sm"
+                        @click="isViewMode = true"
+                        class="min-w-20 font-medium"
+                        :class="{ 'shadow-sm': isViewMode }"
+                    />
+                    <UButton
+                        :icon="!isViewMode ? 'i-heroicons-pencil-square' : 'i-heroicons-eye'"
+                        :variant="!isViewMode ? 'solid' : 'ghost'"
+                        :label="t('mode.editor')"
+                        :color="!isViewMode ? 'primary' : 'neutral'"
+                        size="sm"
+                        @click="isViewMode = false"
+                        class="min-w-20 font-medium ml-1"
+                        :class="{ 'shadow-sm': !isViewMode }"
+                    />
+                </div>
 
                 <!-- Generate Summary Button -->
                 <UButton
@@ -191,7 +218,13 @@ async function handleGenerateSummary(): Promise<void> {
                 />
             </div>
 
-            <SplitView>
+            <!-- Viewer Mode -->
+            <div v-if="isViewMode" class="h-[calc(100vh-12rem)]">
+                <TranscriptionViewer />
+            </div>
+            
+            <!-- Editor Mode -->
+            <SplitView v-else>
                 <template #a>
                     <MediaEditor class="sticky" />
                 </template>
