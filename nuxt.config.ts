@@ -23,7 +23,6 @@ export default defineNuxtConfig({
                     "Cross-Origin-Resource-Policy": "same-origin",
                 },
             },
-
         },
     },
     $development: {
@@ -79,8 +78,18 @@ export default defineNuxtConfig({
             ],
             link: [
                 { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
-                { rel: "icon", type: "image/png", sizes: "32x32", href: "/ios/32.png" },
-                { rel: "icon", type: "image/png", sizes: "16x16", href: "/ios/16.png" },
+                {
+                    rel: "icon",
+                    type: "image/png",
+                    sizes: "32x32",
+                    href: "/ios/32.png",
+                },
+                {
+                    rel: "icon",
+                    type: "image/png",
+                    sizes: "16x16",
+                    href: "/ios/16.png",
+                },
             ],
         },
     },
@@ -145,7 +154,6 @@ export default defineNuxtConfig({
             clientsClaim: true,
             skipWaiting: true,
             runtimeCaching: [
-
                 {
                     urlPattern: /\/favicon\.ico$/,
                     handler: "CacheFirst",

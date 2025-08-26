@@ -1,8 +1,8 @@
 import { useClientId } from "~/composables/useClientId";
 
-export default defineNuxtPlugin((nuxtApp) => {
+export default defineNuxtPlugin((_) => {
     const api = $fetch.create({
-        onRequest({ request, options, error }) {
+        onRequest({ options }) {
             options.headers.set(
                 "X-Ephemeral-UUID",
                 useClientId().getClientId(),
