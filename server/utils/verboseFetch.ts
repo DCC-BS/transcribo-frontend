@@ -44,9 +44,18 @@ export async function verboseFetch<T>(
         logger.error("API request failed", errorContext);
 
         // Re-throw the error to be handled by Nuxt's error system
+        // Provide more specific error messages for common HTTP status codes
+        let statusMessage = "Transcription request failed";
+
+        if (fetchError.response?.status === 413) {
+            statusMessage = "File too large";
+        } else if (fetchError.response?.status === 429) {
+            statusMessage = "Too many requests";
+        }
+
         throw createError({
             statusCode: fetchError.response?.status ?? 500,
-            statusMessage: "Transcription request failed",
+            statusMessage,
             data: fetchError.data,
         });
     }

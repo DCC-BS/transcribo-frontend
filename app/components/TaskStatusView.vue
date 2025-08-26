@@ -73,7 +73,7 @@ const fetchTaskStatus = async (): Promise<void> => {
                 break;
             }
 
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 5000));
         }
 
         if (pollCount >= maxPolls) {

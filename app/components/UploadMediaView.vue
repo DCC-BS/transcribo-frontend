@@ -96,8 +96,10 @@ async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
     try {
         // Load FFmpeg using CDN for better compatibility
         await ffmpeg.load({
-            coreURL: "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
-            wasmURL: "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
+            coreURL:
+                "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
+            wasmURL:
+                "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
         });
 
         ffmpeg.on("log", (event) => {
@@ -305,9 +307,10 @@ async function uploadFile(
         });
         emit("uploaded", response, originalFile);
     } catch (error) {
+        const toast = useToast();
+
         // Handle unsupported media type (415) with a friendly toast
         if (isHttpStatus(error, 415)) {
-            const toast = useToast();
             toast.add({
                 title:
                     t("upload.unsupportedFileTypeTitle") ||
@@ -320,6 +323,33 @@ async function uploadFile(
             });
             return;
         }
+
+        // Handle file too large (413) with a friendly toast
+        if (isHttpStatus(error, 413)) {
+            toast.add({
+                title: t("upload.fileTooLargeTitle") || "File too large",
+                description:
+                    t("upload.fileTooLargeDescription") ||
+                    "The file size exceeds the maximum allowed limit. Please try a smaller file.",
+                color: "error",
+                icon: "i-heroicons-exclamation-triangle",
+            });
+            return;
+        }
+
+        // Handle too many requests (429) with a friendly toast
+        if (isHttpStatus(error, 429)) {
+            toast.add({
+                title: t("upload.tooManyRequestsTitle") || "Too many requests",
+                description:
+                    t("upload.tooManyRequestsDescription") ||
+                    "You've made too many requests. Please wait a few minutes before trying again.",
+                color: "error",
+                icon: "i-heroicons-clock",
+            });
+            return;
+        }
+
         throw error;
     } finally {
         // Always stop the progress indicator

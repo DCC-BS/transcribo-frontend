@@ -16,7 +16,11 @@
         "selectDifferentFile": "Select different file",
         "error": "Error",
         "unsupportedFileTypeTitle": "Unsupported file type",
-        "unsupportedFileTypeDescription": "Allowed file types: mp3, mp4, m4a, flac, wav, webm. If you need support for other file types, please contact us through the feedback button."
+        "unsupportedFileTypeDescription": "Allowed file types: mp3, mp4, m4a, flac, wav, webm. If you need support for other file types, please contact us through the feedback button.",
+        "fileTooLargeTitle": "File too large",
+        "fileTooLargeDescription": "The file size exceeds the maximum allowed limit of 500MB. Please try a smaller file.",
+        "tooManyRequestsTitle": "Too many requests",
+        "tooManyRequestsDescription": "You've made too many requests. Please wait a few minutes before trying again."
     },
     "pages": {
         "index": {
