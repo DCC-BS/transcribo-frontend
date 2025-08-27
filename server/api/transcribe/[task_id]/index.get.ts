@@ -12,10 +12,16 @@ export default defineEventHandler(async (event) => {
         );
     } catch (error: unknown) {
         // Handle 404 errors gracefully - task not found on backend
-        if (error && typeof error === 'object' && 'statusCode' in error && error.statusCode === 404) {
+        if (
+            error &&
+            typeof error === "object" &&
+            "statusCode" in error &&
+            error.statusCode === 404
+        ) {
             throw createError({
                 statusCode: 404,
-                statusMessage: "Task not found - may have been removed after backend restart",
+                statusMessage:
+                    "Task not found - may have been removed after backend restart",
             });
         }
         // Re-throw other errors

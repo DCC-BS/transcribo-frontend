@@ -1,6 +1,10 @@
 import type { ICommand, IReversibleCommand } from "#build/types/commands";
 import type { TaskStatus } from "./task";
-import type { Segment, TranscriptionResponse } from "./transcriptionResponse";
+import type {
+    SegementWithId,
+    Segment,
+    TranscriptionResponse,
+} from "./transcriptionResponse";
 
 export const Cmds = {
     StartTranscriptionCommand: "StartTranscriptionCommand",
@@ -14,6 +18,7 @@ export const Cmds = {
     RenameSpeakerCommand: "RenameSpeakerCommand",
     EmptyCommand: "EmptyCommand",
     AddSegmentCommand: "AddSegmentCommand",
+    RestoreSegmentCommand: "RestoreSegmentCommand",
 };
 
 export type ITransriboReversibleCommand = IReversibleCommand & {
@@ -179,12 +184,35 @@ export class InsertSegementCommand implements ITransriboReversibleCommand {
     }
 }
 
+export class RestoreSegmentCommand implements ICommand {
+    readonly $type = "RestoreSegmentCommand";
+
+    constructor(public readonly segmentData: SegementWithId) {}
+
+    /**
+     * Returns a string representation of the command
+     */
+    toString(): string {
+        return `Restore Segment: ${this.segmentData.text.substring(0, 30)}...`;
+    }
+
+    /**
+     * Returns a localized string representation of the command
+     * @param t - Translation function from useI18n
+     */
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.restoreSegment");
+    }
+}
+
 export class DeleteSegementCommand implements ITransriboReversibleCommand {
     readonly $type = "DeleteSegementCommand";
-    $undoCommand: ICommand;
+    $undoCommand: ICommand = new EmptyCommand();
 
-    constructor(public readonly segmentId: string) {
-        this.$undoCommand = new InsertSegementCommand(segmentId, {}, "after");
+    constructor(public readonly segmentId: string) {}
+
+    public setUndoCommand(undoCommand: ICommand) {
+        this.$undoCommand = undoCommand;
     }
 
     /**

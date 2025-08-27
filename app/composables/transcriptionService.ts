@@ -1,12 +1,13 @@
 import { v4 as uuid } from "uuid";
 import type {
-    AddSegmentCommand,
     InsertSegementCommand,
     RenameSpeakerCommand,
 } from "~/types/commands";
 import {
+    type AddSegmentCommand,
     Cmds,
     DeleteSegementCommand,
+    RestoreSegmentCommand,
     TranscriptonNameChangeCommand,
     UpdateSegementCommand,
 } from "~/types/commands";
@@ -37,6 +38,24 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
             return;
         }
 
+        // Find the segment before deleting it to store its data for undo
+        const segmentToDelete = currentTranscription.segments.find(
+            (s) => s.id === command.segmentId,
+        );
+
+        if (!segmentToDelete) {
+            logger.warn("Segment to delete not found");
+            return;
+        }
+
+        // Create an undo command with the complete segment data including its ID
+        // We'll use RestoreSegmentCommand to restore the deleted segment with its original ID
+        const undoCommand = new RestoreSegmentCommand(segmentToDelete);
+
+        // Set the undo command on the delete command
+        command.setUndoCommand(undoCommand);
+
+        // Now delete the segment
         currentTranscription.segments = currentTranscription.segments.filter(
             (s) => s.id !== command.segmentId,
         );
@@ -175,6 +194,25 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         store.updateCurrentTranscription({ segments: newSegments });
     }
 
+    async function handleRestoreSegment(command: RestoreSegmentCommand) {
+        const currentTranscription = store.currentTranscription;
+
+        if (!currentTranscription) {
+            logger.warn("Current transcription not found");
+            return;
+        }
+
+        // Add the restored segment back to the segments array
+        currentTranscription.segments.push(command.segmentData);
+
+        // Sort segments by start time to maintain proper order
+        const newSegments = currentTranscription.segments.toSorted(
+            (a, b) => a.start - b.start,
+        );
+
+        store.updateCurrentTranscription({ segments: newSegments });
+    }
+
     function registerService() {
         registerHandler(Cmds.DeleteSegementCommand, handleDeleteSegment);
         registerHandler(Cmds.InsertSegementCommand, handleInsertSegment);
@@ -182,6 +220,7 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
         registerHandler(Cmds.TranscriptonNameChangeCommand, handleNameChanged);
         registerHandler(Cmds.RenameSpeakerCommand, handleRenameSpeaker);
         registerHandler(Cmds.AddSegmentCommand, handleAddSegment);
+        registerHandler(Cmds.RestoreSegmentCommand, handleRestoreSegment);
     }
 
     function unRegisterServer() {
@@ -193,6 +232,8 @@ export const useTranscriptionService = (currentTranscriptionId: string) => {
             handleNameChanged,
         );
         unregisterHandler(Cmds.RenameSpeakerCommand, handleRenameSpeaker);
+        unregisterHandler(Cmds.AddSegmentCommand, handleAddSegment);
+        unregisterHandler(Cmds.RestoreSegmentCommand, handleRestoreSegment);
     }
 
     return { registerService, unRegisterServer, error, isInited };

@@ -158,7 +158,8 @@
         "updateSegment": "Segment aktualisieren: Änderungen: {updates}",
         "updateSegmentNoUpdates": "Segment aktualisieren: Keine Änderungen",
         "changeTranscriptionName": "Transkriptionsname ändern zu: {name}",
-        "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\""
+        "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\"",
+        "restoreSegment": "Segment wiederherstellen"
     },
     "viewer": {
         "mode": "Ansichtsmodus",

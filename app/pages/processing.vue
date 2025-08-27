@@ -80,7 +80,16 @@ function getStatusDisplay(status: TaskStatusEnum): string {
 /**
  * Get status badge color based on task status
  */
-function getStatusColor(status: TaskStatusEnum): "error" | "info" | "success" | "neutral" | "primary" | "secondary" | "warning" {
+function getStatusColor(
+    status: TaskStatusEnum,
+):
+    | "error"
+    | "info"
+    | "success"
+    | "neutral"
+    | "primary"
+    | "secondary"
+    | "warning" {
     switch (status) {
         case "in_progress":
             return "info";
@@ -144,14 +153,21 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
         }
     } catch (err: unknown) {
         // Handle 404 errors gracefully - task no longer exists on backend
-        if (err && typeof err === 'object' && 'statusCode' in err && err.statusCode === 404) {
-            console.warn(`Task ${task.id} not found on backend (likely removed after restart), cleaning up locally`);
+        if (
+            err &&
+            typeof err === "object" &&
+            "statusCode" in err &&
+            err.statusCode === 404
+        ) {
+            console.warn(
+                `Task ${task.id} not found on backend (likely removed after restart), cleaning up locally`,
+            );
             // Remove task from local store since it no longer exists on backend
             await taskStore.deleteTask(task.id);
             await loadProcessingTasks();
             return;
         }
-        
+
         console.error(`Failed to check status for task ${task.id}:`, err);
         error.value =
             err instanceof Error
@@ -239,7 +255,7 @@ async function refreshStatuses(): Promise<void> {
 // Load tasks on component mount and set up auto-refresh
 onMounted(() => {
     loadProcessingTasks();
-    
+
     // Set up auto-refresh for in-progress tasks every 10 seconds
     const refreshInterval = setInterval(() => {
         const hasInProgressTasks = processingTasks.value.some(
