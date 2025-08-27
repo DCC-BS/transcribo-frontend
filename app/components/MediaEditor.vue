@@ -199,12 +199,8 @@ watch(currentTime, (newTime) => {
                 <VideoView v-model="currentTime" :duration="duration" />
 
                 <ClientOnly>
-                    <div
-                        @wheel="handleWheel"
-                        @mousedown="handleMouseDown"
-                        @mouseup="handleMouseUp"
-                        @mousemove="handleMouseMove"
-                    >
+                    <div @wheel="handleWheel" @mousedown="handleMouseDown" @mouseup="handleMouseUp"
+                        @mousemove="handleMouseMove">
                         <!-- <AudioSpectrogram
                             :audio-file="audioFile"
                             :current-time="currentTime"
@@ -213,29 +209,15 @@ watch(currentTime, (newTime) => {
                             :start-time="timeRange[0]"
                         /> -->
 
-                        <TimelineView
-                            :current-time="currentTime"
-                            :duration="duration"
-                            :zoom-x="zoomX"
-                            :start-time="timeRange[0]"
-                            :end-time="timeRange[1]"
-                        />
+                        <TimelineView :current-time="currentTime" :duration="duration" :zoom-x="zoomX"
+                            :start-time="timeRange[0]" :end-time="timeRange[1]" />
                     </div>
                 </ClientOnly>
 
-                <USlider
-                    v-model="timeRange"
-                    :min="0"
-                    :max="duration"
-                    class="my-2"
-                />
+                <USlider v-model="timeRange" :min="0" :max="duration" class="my-2" />
             </div>
 
-            <CurrentSegementEditor
-                :current-time="currentTime"
-                :duration="duration"
-                class="m-2"
-            />
+            <CurrentSegementEditor :current-time="currentTime" :duration="duration" class="m-2" />
             <RenameSpeakerView class="m-2" />
 
             <DataBsBanner class="mt-4" />
