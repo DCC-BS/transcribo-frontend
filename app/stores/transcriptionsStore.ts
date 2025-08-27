@@ -545,11 +545,6 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             );
         }
 
-        if (currentTranscription.value.summary) {
-            logger.info("Summary already exists for this transcription.");
-            return currentTranscription.value.summary;
-        }
-
         // Prevent concurrent calls
         if (isSummaryGenerating.value) {
             throw new Error(
@@ -557,8 +552,18 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             );
         }
 
+        const isRegeneration = !!currentTranscription.value.summary;
+
         try {
             isSummaryGenerating.value = true;
+
+            // If regenerating, clear the existing summary immediately
+            if (isRegeneration) {
+                currentTranscription.value = {
+                    ...currentTranscription.value,
+                    summary: undefined,
+                };
+            }
 
             const transcriptText = getTranscriptionText(
                 currentTranscription.value,
@@ -589,18 +594,10 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                 summary: validatedSummary,
             };
 
-            logger.info("Summary stored in current transcription:", {
-                transcriptionId: currentTranscription.value.id,
-                hasSummary: !!currentTranscription.value.summary,
-                summaryLength: validatedSummary.length,
-            });
-
             // Update the transcription in IndexedDB
             await updateCurrentTranscription({
                 summary: validatedSummary,
             });
-
-            logger.info("Summary generated and stored successfully.");
             return validatedSummary;
         } catch (error) {
             logger.error("Failed to generate summary:", error);

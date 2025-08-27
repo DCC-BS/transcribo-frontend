@@ -131,7 +131,9 @@
     },
     "summary": {
         "generate": "Zusammenfassung erstellen",
-        "generating": "Erstelle...",
+        "regenerate": "Zusammenfassung neu erstellen",
+        "generating": "Erstelle Zusammenfassung..",
+        "regenerating": "Erstelle neue Zusammenfassung...",
         "show": "Zusammenfassung anzeigen",
         "hide": "Zusammenfassung ausblenden",
         "title": "Meeting-Zusammenfassung",

@@ -131,7 +131,9 @@
     },
     "summary": {
         "generate": "Generate Summary",
+        "regenerate": "Regenerate Summary",
         "generating": "Generating...",
+        "regenerating": "Regenerating...",
         "show": "Show Summary",
         "hide": "Hide Summary",
         "title": "Meeting Summary",

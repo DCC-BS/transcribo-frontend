@@ -31,7 +31,6 @@ const { registerService, unRegisterServer, error, isInited } =
 const isHelpViewOpen = ref(false);
 
 // Summary state
-const isSummaryGenerating = ref(false);
 const summaryError = ref<string | null>(null);
 const isSummaryExpanded = ref(false);
 
@@ -53,22 +52,21 @@ async function handleNameChange(name: string | number) {
 }
 
 async function handleGenerateSummary(): Promise<void> {
-    if (isSummaryGenerating.value) return;
+    if (transcriptionStore.isSummaryGenerating) return;
 
-    isSummaryGenerating.value = true;
     summaryError.value = null;
+    // Collapse summary section when regenerating (it will expand again after new summary is generated)
+    isSummaryExpanded.value = false;
 
     try {
         await transcriptionStore.generateSummary();
-        // Expand the summary section after generation
-        isSummaryExpanded.value = false;
+        // Expand the summary section after successful generation/regeneration
+        isSummaryExpanded.value = true;
     } catch (error) {
         summaryError.value =
             error instanceof Error
                 ? error.message
                 : "Failed to generate summary";
-    } finally {
-        isSummaryGenerating.value = false;
     }
 }
 </script>
@@ -102,14 +100,19 @@ async function handleGenerateSummary(): Promise<void> {
 
                 <!-- Generate Summary Button -->
                 <UButton v-if="!transcriptionStore.currentTranscription.summary" icon="i-heroicons-light-bulb"
-                    variant="ghost" :label="isSummaryGenerating ? t('summary.generating') : t('summary.generate')"
-                    color="primary" size="sm" :loading="isSummaryGenerating" :disabled="isSummaryGenerating"
-                    @click="handleGenerateSummary" />
+                    variant="ghost"
+                    :label="transcriptionStore.isSummaryGenerating ? t('summary.generating') : t('summary.generate')"
+                    color="primary" size="sm" :loading="transcriptionStore.isSummaryGenerating"
+                    :disabled="transcriptionStore.isSummaryGenerating" @click="handleGenerateSummary" />
 
-                <!-- View Summary Button (if summary exists) -->
-                <UButton v-else icon="i-heroicons-light-bulb" variant="ghost"
-                    :label="isSummaryExpanded ? t('summary.hide') : t('summary.show')" color="success" size="sm"
-                    @click="isSummaryExpanded = !isSummaryExpanded" />
+                <!-- Summary buttons when summary exists -->
+                <template v-else>
+                    <!-- Regenerate Summary Button -->
+                    <UButton icon="i-heroicons-arrow-path" variant="ghost"
+                        :label="transcriptionStore.isSummaryGenerating ? t('summary.regenerating') : t('summary.regenerate')"
+                        color="primary" size="sm" :loading="transcriptionStore.isSummaryGenerating"
+                        :disabled="transcriptionStore.isSummaryGenerating" @click="handleGenerateSummary" />
+                </template>
 
                 <!-- Export Toolbar -->
                 <ExportToolbar />
