@@ -13,7 +13,9 @@ const mergeSegments = ref(false);
  * @param segments - Array of segments to merge
  * @returns Array of merged segments
  */
-function mergeConsecutiveSegments(segments: SegementWithId[]): SegementWithId[] {
+function mergeConsecutiveSegments(
+    segments: SegementWithId[],
+): SegementWithId[] {
     if (segments.length === 0) return [];
 
     const merged: SegementWithId[] = [];
@@ -28,7 +30,8 @@ function mergeConsecutiveSegments(segments: SegementWithId[]): SegementWithId[] 
             currentSegment.speaker === nextSegment.speaker &&
             Math.abs((currentSegment.end ?? 0) - nextSegment.start) < 1.0
         ) {
-            currentSegment.text = `${currentSegment.text} ${nextSegment.text}`.trim();
+            currentSegment.text =
+                `${currentSegment.text} ${nextSegment.text}`.trim();
             currentSegment.end = nextSegment.end;
         } else {
             // Different speaker, save current and start new

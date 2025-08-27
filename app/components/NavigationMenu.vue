@@ -87,6 +87,11 @@ const items = computed<NavigationMenuItem[][]>(() => [
             to: "/transcription",
             icon: "i-heroicons-queue-list",
         },
+        {
+            label: t("navigation.processing"),
+            to: "/processing",
+            icon: "i-heroicons-clock",
+        },
     ],
     [
         {

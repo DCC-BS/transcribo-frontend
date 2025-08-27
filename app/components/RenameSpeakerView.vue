@@ -7,6 +7,8 @@ const { speakers } = useCurrentTranscription();
 const { executeCommand } = useCommandBus();
 const { getSpeakerColor } = useSpeakerColor(speakers);
 
+const { t } = useI18n();
+
 // Create a mapping of original speaker names to their new names
 // This allows us to track both the original name and the edited name
 const speakerMappings = ref<{ original: string; new: string }[]>([]);
@@ -43,7 +45,7 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
 
 <template>
     <UCard>
-        <h2 class="text-lg font-bold">Speakers</h2>
+        <h2 class="text-lg font-bold">{{ t("common.speakers") }}</h2>
         <div class="flex gap-2 flex-wrap mt-2">
             <div
                 v-for="(speakerMap, index) in speakerMappings"
