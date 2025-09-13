@@ -21,7 +21,7 @@ services:
                           device_ids: ['1']
                           capabilities: [gpu]
     llm:
-        image: vllm/vllm-openai:v0.10.1
+        image: vllm/vllm-openai:v0.10.2
         deploy:
             resources:
                 reservations:
