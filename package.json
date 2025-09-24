@@ -38,7 +38,7 @@
         "@biomejs/biome": "2.2.4",
         "@types/bun": "^1.2.19",
         "jiti": "^2.5.1",
-        "sass": "1.93.1",
+        "sass": "1.93.2",
         "sass-loader": "^16.0.5",
         "typescript": "^5.9.2"
     }
