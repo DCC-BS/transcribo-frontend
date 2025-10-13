@@ -22,7 +22,7 @@
         "@iconify-json/lucide": "^1.2.62",
         "@nuxt/ui": "^3.3.0",
         "@nuxtjs/i18n": "^10.0.3",
-        "@nuxtjs/mdc": "^0.17.2",
+        "@nuxtjs/mdc": "^0.18.0",
         "@pinia/nuxt": "0.11.2",
         "@vite-pwa/nuxt": "1.0.5",
         "konva": "^9.3.22",
