@@ -24,7 +24,7 @@
         "@nuxtjs/i18n": "^10.0.3",
         "@nuxtjs/mdc": "^0.17.2",
         "@pinia/nuxt": "0.11.2",
-        "@vite-pwa/nuxt": "1.0.5",
+        "@vite-pwa/nuxt": "1.0.6",
         "konva": "^9.3.22",
         "nuxt": "4.1.3",
         "ts-pattern": "^5.8.0",
