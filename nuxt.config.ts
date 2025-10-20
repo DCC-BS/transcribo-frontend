@@ -67,7 +67,12 @@ export default defineNuxtConfig({
             rollupOptions: {
                 external: (id) => id.includes("ffmpeg-core"),
             },
-            target: "es2020", // Changed from esnext to es2020 for better compatibility
+            target: "es2020",
+        },
+        resolve: {
+            alias: {
+                dexie: "dexie/dist/dexie.mjs",
+            },
         },
     },
     app: {
@@ -118,9 +123,11 @@ export default defineNuxtConfig({
     modules: [
         "@nuxt/ui",
         "@nuxtjs/i18n",
+        "@dcc-bs/common-ui.bs.js",
         "@dcc-bs/event-system.bs.js",
         "@dcc-bs/logger.bs.js",
         "@dcc-bs/feedback-control.bs.js",
+        "@dcc-bs/audio-recorder.bs.js",
         "@pinia/nuxt",
         "@vite-pwa/nuxt",
         "@nuxtjs/mdc",
@@ -129,7 +136,7 @@ export default defineNuxtConfig({
         strict: true,
         typeCheck: true,
     },
-    devtools: { enabled: false },
+    devtools: { enabled: true },
     css: ["~/assets/css/main.css"],
     "feedback-control.bs.js": {
         repo: "Feedback",

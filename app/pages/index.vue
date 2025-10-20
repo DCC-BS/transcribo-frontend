@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { DataBsBanner } from "@dcc-bs/common-ui.bs.js";
 import type { UploadMediaView } from "#components";
 import type { TaskStatus } from "~/types/task";
 
@@ -11,9 +10,9 @@ const uploadMediaView = ref<typeof UploadMediaView>();
 const { getClientId } = useClientId();
 
 // UUID test state
-const isTesting = ref(false);
-const testResult = ref("");
-const currentUuid = ref("");
+const isRecordingDrawerOpen = ref(false);
+const isTranscribing = ref(false);
+
 
 async function handleUpload(status: TaskStatus, file: File): Promise<void> {
     const storedTask = await tasksStore.addTask(status, file, file.name);
@@ -36,7 +35,7 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                 {{ t('pages.index.title') || 'Transcribo' }}
             </h1>
             <p class="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-                {{ t('pages.index.subtitle') || 'Transform your audio and video files into accurate transcriptions with AI-powered technology.' }}
+                {{ t('pages.index.subtitle') }}
             </p>
         </div>
 
@@ -47,24 +46,22 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                 <template #header>
                     <div class="flex items-center gap-3">
                         <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <UIcon name="i-heroicons-document-arrow-up" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            <UIcon name="i-heroicons-document-arrow-up"
+                                class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div>
                             <h2 class="text-xl font-semibold text-gray-900 dark:text-white">
                                 {{ t('pages.index.uploadMedia') }}
                             </h2>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
-                                {{ t('pages.index.uploadDescription') || 'Upload your audio or video files' }}
+                                {{ t('pages.index.uploadDescription') }}
                             </p>
                         </div>
                     </div>
                 </template>
 
                 <div class="py-4">
-                    <UploadMediaView
-                        ref="uploadMediaView"
-                        @uploaded="handleUpload"
-                    />
+                    <UploadMediaView ref="uploadMediaView" @uploaded="handleUpload" />
                 </div>
             </UCard>
 
@@ -85,18 +82,10 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                         </div>
                     </div>
                 </template>
-                <div>
-                    <UAlert color="warning" icon="i-heroicons-exclamation-triangle" :title="t('pages.index.experimentalTitle')" :description="t('pages.index.experimental')" />
-                </div>
                 <div class="py-4">
-                    <AudioRecorder @recording-complete="handleRecordingComplete" />
+                    <AudioRecordingView @on-recording-complete="handleRecordingComplete" />
                 </div>
             </UCard>
-        </div>
-
-        <!-- Footer Banner -->
-        <div class="flex justify-center">
-            <DataBsBanner />
         </div>
     </UContainer>
 </template>

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { DataBsBanner } from "@dcc-bs/common-ui.bs.js";
 import { match } from "ts-pattern";
 import { SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
 import AudioSpectrogram from "./media/AudioSpectrogram.vue";
@@ -219,8 +218,6 @@ watch(currentTime, (newTime) => {
 
             <CurrentSegementEditor :current-time="currentTime" :duration="duration" class="m-2" />
             <RenameSpeakerView class="m-2" />
-
-            <DataBsBanner class="mt-4" />
         </div>
     </div>
 </template>
