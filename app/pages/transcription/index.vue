@@ -232,10 +232,10 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
             return;
         }
 
-        processingError.value =
-            err instanceof Error
-                ? err.message
-                : t("processing.errors.statusCheckFailed");
+        const errorMsg = err instanceof Error ? err.message : t("processing.errors.statusCheckFailed");
+        if (!processingError.value) {
+            processingError.value = errorMsg;
+        }
     }
 }
 
@@ -330,7 +330,7 @@ function handleDeletedTranscription(transcriptionId: string): void {
                         <UBadge :color="getStatusColor(row.original.status.status)" variant="subtle">
                             {{ getStatusDisplay(row.original.status.status) }}
                         </UBadge>
-                        <template v-if="row.original.status.status === 'in_progress'">
+                        <template v-if="row.original.status.status === TaskStatusEnum.IN_PROGRESS">
                             <UIcon name="i-heroicons-cog-6-tooth" class="animate-spin text-blue-600" />
                             <span class="text-sm text-blue-600">({{
                                 Math.round(computeTaskProgress(row.original.status) * 100) }}%)</span>

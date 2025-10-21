@@ -227,7 +227,7 @@
         "unknownFile": "Unbekannte Datei",
         "table": {
             "fileName": "Dateiname",
-            "createdAt": "Auftragsdatum",
+            "createdAt": "Erstellt am",
             "status": "Status"
         },
         "status": {
