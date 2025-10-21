@@ -25,29 +25,29 @@ const isTranscriptionPath = computed<boolean>(() => {
 const items = computed<NavigationMenuItem[][]>(() => [
     isTranscriptionPath.value
         ? [
-            {
-                slot: "disclaimer",
-                as: "link",
-            },
-            {
-                label: t("navigation.undo"),
-                icon: "i-heroicons-arrow-uturn-left",
-                onSelect: () => handleUndo(),
-                disabled: !canUndo.value,
-            },
-            {
-                label: t("navigation.redo"),
-                icon: "i-heroicons-arrow-uturn-right",
-                onSelect: handleRedo,
-                disabled: !canRedo.value,
-            },
-        ]
+              {
+                  slot: "disclaimer",
+                  as: "link",
+              },
+              {
+                  label: t("navigation.undo"),
+                  icon: "i-heroicons-arrow-uturn-left",
+                  onSelect: () => handleUndo(),
+                  disabled: !canUndo.value,
+              },
+              {
+                  label: t("navigation.redo"),
+                  icon: "i-heroicons-arrow-uturn-right",
+                  onSelect: handleRedo,
+                  disabled: !canRedo.value,
+              },
+          ]
         : [
-            {
-                slot: "disclaimer",
-                as: "link",
-            },
-        ],
+              {
+                  slot: "disclaimer",
+                  as: "link",
+              },
+          ],
     [
         {
             label: t("navigation.new"),

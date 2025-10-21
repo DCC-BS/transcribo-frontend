@@ -231,7 +231,10 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
             return;
         }
 
-        const errorMsg = err instanceof Error ? err.message : t("processing.errors.statusCheckFailed");
+        const errorMsg =
+            err instanceof Error
+                ? err.message
+                : t("processing.errors.statusCheckFailed");
         if (!processingError.value) {
             processingError.value = errorMsg;
         }
@@ -283,7 +286,9 @@ async function cleanupFailedAndCancelledTasks(): Promise<void> {
 
         if (idsToDelete.length === 0) return;
 
-        await Promise.allSettled(idsToDelete.map((id) => taskStore.deleteTask(id)));
+        await Promise.allSettled(
+            idsToDelete.map((id) => taskStore.deleteTask(id)),
+        );
 
         // Reflect deletions in local UI state
         processingTasks.value = processingTasks.value.filter(
