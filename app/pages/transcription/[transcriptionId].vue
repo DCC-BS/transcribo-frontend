@@ -115,21 +115,6 @@ async function handleGenerateSummary(): Promise<void> {
 
                 <!-- Export Toolbar -->
                 <ExportToolbar />
-
-                <!-- Help Button -->
-                <UModal v-model:open="isHelpViewOpen" fullscreen close>
-                    <UButton icon="i-heroicons-question-mark-circle" variant="ghost" :label="t('help.help')"
-                        color="info" size="sm" />
-                    <template #content>
-                        <div class="flex justify-end p-2">
-                            <UButton icon="i-heroicons-x-circle" variant="ghost" label="Close" color="error"
-                                @click="isHelpViewOpen = false" />
-                        </div>
-                        <div class="overflow-y-scroll w-full h-full">
-                            <HelpView />
-                        </div>
-                    </template>
-                </UModal>
             </div>
 
             <!-- Summary Section -->

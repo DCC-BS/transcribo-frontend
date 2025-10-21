@@ -9,11 +9,6 @@ const { $api } = useNuxtApp();
 const uploadMediaView = ref<typeof UploadMediaView>();
 const { getClientId } = useClientId();
 
-// UUID test state
-const isRecordingDrawerOpen = ref(false);
-const isTranscribing = ref(false);
-
-
 async function handleUpload(status: TaskStatus, file: File): Promise<void> {
     const storedTask = await tasksStore.addTask(status, file, file.name);
     navigateTo(`task/${storedTask.id}`);

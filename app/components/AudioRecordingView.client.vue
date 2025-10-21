@@ -39,6 +39,12 @@ const lastAbandonedRecordingLocalDate = computed(() => {
     return null;
 });
 
+function onRecordingStarted(): void {
+    // Reset state at the beginning of a new recording so playback UI can reappear later
+    isRecording.value = true;
+    userRecording.value = false;
+}
+
 function onRecordingStopped(file: Blob, _: string) {
     isRecording.value = false;
     audioBlob.value = file;
@@ -57,9 +63,13 @@ async function recover() {
     if (lastAbandonedRecording.value) {
         try {
             const blob = await getMp3Blob(lastAbandonedRecording.value.id);
-            deleteAbandonedRecording(lastAbandonedRecording.value.id);
+            if (audioUrl.value) {
+                URL.revokeObjectURL(audioUrl.value);
+            }
             audioBlob.value = blob;
-            audioUrl.value = URL.createObjectURL(audioBlob.value);
+            audioUrl.value = URL.createObjectURL(blob);
+            userRecording.value = false;
+            deleteAbandonedRecording(lastAbandonedRecording.value.id);
         } catch (e: unknown) {
             console.error(e);
             const message = e instanceof Error ? e.message : String(e);
@@ -72,6 +82,12 @@ async function recover() {
         }
     }
 }
+
+onBeforeUnmount(() => {
+    if (audioUrl.value) {
+        URL.revokeObjectURL(audioUrl.value);
+    }
+});
 </script>
 
 <template>
@@ -91,7 +107,7 @@ async function recover() {
         </div>
         <AudioRecorder ref="audioRecorder" :logger="console.log"
             :auto-start="abandonedRecording && abandonedRecording.length === 0" :show-result="true"
-            @recording-started="isRecording = true" @recording-stopped="onRecordingStopped" />
+            @recording-started="onRecordingStarted" @recording-stopped="onRecordingStopped" />
         <div v-if="audioUrl && audioBlob && !userRecording" class="flex flex-col justify-center items-center mt-4">
             <audio :src="audioUrl" controls class="mb-4" />
             <UButton @click="emitAudio">{{ t("audioRecorder.useRecording") }}</UButton>

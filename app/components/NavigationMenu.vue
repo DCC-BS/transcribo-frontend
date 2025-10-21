@@ -41,33 +41,6 @@ const items = computed<NavigationMenuItem[][]>(() => [
                 onSelect: handleRedo,
                 disabled: !canRedo.value,
             },
-            {
-                label: t("navigation.actions"),
-                icon: "i-heroicons-list-bullet",
-                disabled: !canUndo.value,
-                children: undoStack.value
-                    .slice(-10)
-                    .reverse()
-                    .map(
-                        (
-                            action: ITransriboReversibleCommand,
-                            index: number,
-                        ) =>
-                            ({
-                                label: `${t("navigation.undo")} ${action.toLocaleString(t)}`,
-                                onSelect: () =>
-                                    handleUndo(
-                                        undoStack.value.length -
-                                        index -
-                                        (undoStack.value.length -
-                                            Math.min(
-                                                undoStack.value.length,
-                                                10,
-                                            )),
-                                    ),
-                            }) as NavigationMenuItem,
-                    ),
-            },
         ]
         : [
             {
@@ -85,11 +58,6 @@ const items = computed<NavigationMenuItem[][]>(() => [
             label: t("navigation.transcriptions"),
             to: "/transcription",
             icon: "i-heroicons-queue-list",
-        },
-        {
-            label: t("navigation.processing"),
-            to: "/processing",
-            icon: "i-heroicons-clock",
         },
     ],
     [

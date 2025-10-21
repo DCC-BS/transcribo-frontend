@@ -45,9 +45,8 @@
         }
     },
     "navigation": {
-        "new": "New",
-        "transcriptions": "Transcriptions",
-        "processing": "Processing",
+        "new": "New Transcription",
+        "transcriptions": "All Transcriptions",
         "languages": "Languages",
         "en": "English",
         "de": "German",
@@ -222,11 +221,9 @@
         }
     },
     "processing": {
-        "title": "Processing Tasks",
+        "title": "Transcriptions in Progress",
         "description": "Monitor the status of your transcription tasks",
         "refresh": "Refresh",
-        "noTasksFound": "No processing tasks found",
-        "noTasksDescription": "When you submit files for transcription, they will appear here while being processed.",
         "unknownFile": "Unknown file",
         "table": {
             "fileName": "File Name",
@@ -239,18 +236,6 @@
             "failed": "Failed",
             "cancelled": "Cancelled",
             "processing": "Processing..."
-        },
-        "actions": {
-            "openTranscription": "Open Transcription",
-            "delete": "Delete"
-        },
-        "delete": {
-            "title": "Delete Task",
-            "confirmation": "Are you sure you want to delete this task?"
-        },
-        "notice": {
-            "title": "Important Notice",
-            "description": "Finished tasks are automatically deleted after 24 hours."
         },
         "errors": {
             "title": "Error",
