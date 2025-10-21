@@ -9,7 +9,7 @@ const { isReady, abandonedRecording, deleteAbandonedRecording, getMp3Blob } =
     useAudioSessions({
         deleteOldSessionsDaysInterval: 30,
         maxSessionsToKeep: 1,
-        logger: console.log,
+        logger: useLogger().debug,
     });
 
 const audioRecorder = ref<typeof AudioRecorder>();
@@ -105,7 +105,7 @@ onBeforeUnmount(() => {
                 t("audio.recover") }}
             </UButton>
         </div>
-        <AudioRecorder ref="audioRecorder" :logger="console.log"
+        <AudioRecorder ref="audioRecorder" :logger="useLogger().debug"
             :auto-start="abandonedRecording && abandonedRecording.length === 0" :show-result="true"
             @recording-started="onRecordingStarted" @recording-stopped="onRecordingStopped" />
         <div v-if="audioUrl && audioBlob && !userRecording" class="flex flex-col justify-center items-center mt-4">

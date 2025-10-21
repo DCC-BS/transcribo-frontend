@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { UButton, ULink } from "#components";
 import type { StoredTask } from "~/stores/tasksStore";
-import type { StoredTranscription } from "~/stores/transcriptionsStore";
 import type { TaskStatus } from "~/types/task";
 import { TaskStatusEnum } from "~/types/task";
 
@@ -26,11 +25,8 @@ const columns = [
         header: t("transcription.table.createdAt"),
         enableResizing: true,
         enableSorting: true,
-        cell: (opts: unknown) => {
-            const row = (
-                opts as { row: { getValue: (key: string) => unknown } }
-            ).row;
-            return new Date(row.getValue("createdAt") as number).toLocaleString(
+        cell: (props: { row: { original: StoredTranscription } }) => {
+            return new Date(props.row.original.createdAt).toLocaleString(
                 "de-CH",
                 {
                     day: "numeric",
@@ -210,8 +206,11 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
             statusResponse.status === TaskStatusEnum.FAILED ||
             statusResponse.status === TaskStatusEnum.CANCELLED
         ) {
+            // Update local status; cleanup will remove these after polling finishes
             await taskStore.updateTask(task.id, { status: statusResponse });
-            await loadProcessingTasks();
+            processingTasks.value = processingTasks.value.map((t) =>
+                t.id === task.id ? { ...t, status: statusResponse } : t,
+            );
         } else if (statusResponse.status === TaskStatusEnum.IN_PROGRESS) {
             // Update local task status to reflect progress in UI
             await taskStore.updateTask(task.id, { status: statusResponse });
@@ -254,6 +253,9 @@ async function loadProcessingTasks(): Promise<void> {
         await Promise.allSettled(
             tasksToCheck.map((task) => checkTaskStatus(task)),
         );
+
+        // After polling, cleanup failed and cancelled tasks from local storage
+        await cleanupFailedAndCancelledTasks();
     } catch (err: unknown) {
         processingError.value =
             err instanceof Error
@@ -266,6 +268,36 @@ async function loadProcessingTasks(): Promise<void> {
 
 async function refreshStatuses(): Promise<void> {
     await loadProcessingTasks();
+}
+
+// Remove tasks with status FAILED or CANCELLED from local storage and UI
+async function cleanupFailedAndCancelledTasks(): Promise<void> {
+    try {
+        const idsToDelete = processingTasks.value
+            .filter(
+                (t) =>
+                    t.status.status === TaskStatusEnum.FAILED ||
+                    t.status.status === TaskStatusEnum.CANCELLED,
+            )
+            .map((t) => t.id);
+
+        if (idsToDelete.length === 0) return;
+
+        await Promise.allSettled(idsToDelete.map((id) => taskStore.deleteTask(id)));
+
+        // Reflect deletions in local UI state
+        processingTasks.value = processingTasks.value.filter(
+            (t) => !idsToDelete.includes(t.id),
+        );
+    } catch (err: unknown) {
+        const errorMsg =
+            err instanceof Error
+                ? err.message
+                : t("processing.errors.loadFailed");
+        if (!processingError.value) {
+            processingError.value = errorMsg;
+        }
+    }
 }
 
 onMounted(() => {
