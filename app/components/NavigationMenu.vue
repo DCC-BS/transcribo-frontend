@@ -1,6 +1,5 @@
 <script lang="ts" setup>
-import { DisclaimerButton } from "@dcc-bs/common-ui.bs.js";
-import type { NavigationMenuItem } from "#ui/components/NavigationMenu.vue";
+import type { NavigationMenuItem } from "@nuxt/ui";
 import type { ITransriboReversibleCommand } from "~/types/commands";
 
 // Add translation hook
@@ -42,33 +41,6 @@ const items = computed<NavigationMenuItem[][]>(() => [
                   onSelect: handleRedo,
                   disabled: !canRedo.value,
               },
-              {
-                  label: t("navigation.actions"),
-                  icon: "i-heroicons-list-bullet",
-                  disabled: !canUndo.value,
-                  children: undoStack.value
-                      .slice(-10)
-                      .reverse()
-                      .map(
-                          (
-                              action: ITransriboReversibleCommand,
-                              index: number,
-                          ) =>
-                              ({
-                                  label: `${t("navigation.undo")} ${action.toLocaleString(t)}`,
-                                  onSelect: () =>
-                                      handleUndo(
-                                          undoStack.value.length -
-                                              index -
-                                              (undoStack.value.length -
-                                                  Math.min(
-                                                      undoStack.value.length,
-                                                      10,
-                                                  )),
-                                      ),
-                              }) as NavigationMenuItem,
-                      ),
-              },
           ]
         : [
               {
@@ -86,11 +58,6 @@ const items = computed<NavigationMenuItem[][]>(() => [
             label: t("navigation.transcriptions"),
             to: "/transcription",
             icon: "i-heroicons-queue-list",
-        },
-        {
-            label: t("navigation.processing"),
-            to: "/processing",
-            icon: "i-heroicons-clock",
         },
     ],
     [
@@ -122,12 +89,8 @@ function handleRedo(): void {
 <template>
     <div>
         <ClientOnly>
-            <UNavigationMenu 
-                content-orientation="vertical" 
-                variant="link" 
-                :items="items"
-                class="w-full grid grid-cols-3 items-center z-50 [&>*:nth-child(1)]:justify-self-start [&>*:nth-child(2)]:justify-self-center [&>*:nth-child(3)]:justify-self-end"
-            >
+            <UNavigationMenu content-orientation="vertical" variant="link" :items="items"
+                class="w-full grid grid-cols-3 items-center z-50 [&>*:nth-child(1)]:justify-self-start [&>*:nth-child(2)]:justify-self-center [&>*:nth-child(3)]:justify-self-end">
                 <template #disclaimer>
                     <DisclaimerButton variant="ghost" />
                 </template>

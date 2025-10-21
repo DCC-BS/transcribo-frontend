@@ -45,9 +45,8 @@
         }
     },
     "navigation": {
-        "new": "Neu",
-        "transcriptions": "Transkriptionen",
-        "processing": "Verarbeitung",
+        "new": "Neue Transkription",
+        "transcriptions": "Alle Transkriptionen",
         "languages": "Sprachen",
         "en": "Englisch",
         "de": "Deutsch",
@@ -222,11 +221,9 @@
         }
     },
     "processing": {
-        "title": "Verarbeitungsaufgaben",
-        "description": "Überwachen Sie den Status Ihrer Transkriptionsaufgaben",
+        "title": "Transkriptionen in Bearbeitung",
+        "description": "Überwachen Sie den Status Ihrer Transkriptionen",
         "refresh": "Aktualisieren",
-        "noTasksFound": "Keine Verarbeitungsaufgaben gefunden",
-        "noTasksDescription": "Wenn Sie Dateien zur Transkription einreichen, werden sie hier während der Verarbeitung angezeigt.",
         "unknownFile": "Unbekannte Datei",
         "table": {
             "fileName": "Dateiname",
@@ -239,18 +236,6 @@
             "failed": "Fehlgeschlagen",
             "cancelled": "Abgebrochen",
             "processing": "Verarbeitung..."
-        },
-        "actions": {
-            "openTranscription": "Transkription öffnen",
-            "delete": "Löschen"
-        },
-        "delete": {
-            "title": "Aufgabe löschen",
-            "confirmation": "Sind Sie sicher, dass Sie diese Aufgabe löschen möchten?"
-        },
-        "notice": {
-            "title": "Wichtiger Hinweis",
-            "description": "Abgeschlossene Aufgaben werden nach 24 Stunden automatisch gelöscht."
         },
         "errors": {
             "title": "Fehler",
