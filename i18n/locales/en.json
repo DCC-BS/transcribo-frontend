@@ -242,5 +242,9 @@
             "loadFailed": "Failed to load processing tasks",
             "statusCheckFailed": "Failed to check task status"
         }
+    },
+    "audio": {
+        "abandonedRecording": "Recording abandoned at {date}",
+        "recover": "Recover"
     }
 }

@@ -242,5 +242,9 @@
             "loadFailed": "Verarbeitungsaufgaben konnten nicht geladen werden",
             "statusCheckFailed": "Status der Aufgabe konnte nicht überprüft werden"
         }
+    },
+    "audio": {
+        "abandonedRecording": "Aufnahme abgebrochen am {date}",
+        "recover": "Wiederherstellen"
     }
 }

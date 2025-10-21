@@ -108,8 +108,8 @@ onBeforeUnmount(() => {
         <AudioRecorder ref="audioRecorder" :logger="useLogger().debug"
             :auto-start="abandonedRecording && abandonedRecording.length === 0" :show-result="true"
             @recording-started="onRecordingStarted" @recording-stopped="onRecordingStopped" />
-        <div v-if="audioUrl && audioBlob && !userRecording" class="flex flex-col justify-center items-center mt-4">
-            <audio :src="audioUrl" controls class="mb-4" />
+        <div v-if="audioBlob" class="flex flex-col justify-center items-center mt-4">
+            <audio v-if="audioUrl && !userRecording" :src="audioUrl" controls class="mb-4" />
             <UButton @click="emitAudio">{{ t("audioRecorder.useRecording") }}</UButton>
         </div>
     </div>
