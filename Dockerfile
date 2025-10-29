@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:23-alpine AS build
+FROM node:24-alpine AS build
 
 # Install bun
 RUN npm install -g bun
@@ -21,7 +21,7 @@ RUN bun x nuxi prepare
 RUN bun x nuxi build
 
 # Stage 2: Run the application
-FROM node:23-alpine
+FROM node:24-alpine
 
 # Set the working directory
 WORKDIR /app
