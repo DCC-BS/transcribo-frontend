@@ -245,6 +245,8 @@
     },
     "audio": {
         "abandonedRecording": "Aufnahme abgebrochen am {date}",
-        "recover": "Wiederherstellen"
+        "recover": "Wiederherstellen",
+        "abandonedRecordings": "Sie haben {count} abgebrochene Aufnahmen.",
+        "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen"
     }
 }
