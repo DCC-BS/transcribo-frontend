@@ -245,6 +245,8 @@
     },
     "audio": {
         "abandonedRecording": "Recording abandoned at {date}",
-        "recover": "Recover"
+        "recover": "Recover",
+        "abandonedRecordings": "You have {count} abandoned recordings",
+        "showAbandonedRecordings": "Show abandoned recordings"
     }
 }

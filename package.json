@@ -11,7 +11,7 @@
         "check": "biome check --fix"
     },
     "dependencies": {
-        "@dcc-bs/audio-recorder.bs.js": "git+https://github.com/DCC-BS/audio-recorder.bs.js#v1.0.1",
+        "@dcc-bs/audio-recorder.bs.js": "git+https://github.com/DCC-BS/audio-recorder.bs.js#v1.0.3",
         "@dcc-bs/common-ui.bs.js": "git+https://github.com/DCC-BS/common-ui.bs.js.git#v1.1.3",
         "@dcc-bs/event-system.bs.js": "git+https://github.com/DCC-BS/event-system.bs.js.git#v1.4.1",
         "@dcc-bs/feedback-control.bs.js": "git+https://github.com/DCC-BS/feedback-control.bs.js.git#v0.1.6",
@@ -20,27 +20,27 @@
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
         "@iconify-json/heroicons": "^1.2.3",
-        "@iconify-json/lucide": "^1.2.70",
-        "@nuxt/ui": "^4.0.1",
-        "@nuxtjs/i18n": "^10.1.1",
+        "@iconify-json/lucide": "^1.2.72",
+        "@nuxt/ui": "^4.1.0",
+        "@nuxtjs/i18n": "^10.2.0",
         "@nuxtjs/mdc": "^0.18.0",
         "@pinia/nuxt": "0.11.2",
         "@vite-pwa/nuxt": "1.0.7",
-        "konva": "^10.0.2",
+        "konva": "^10.0.8",
         "nuxt": "4.2.0",
-        "ts-pattern": "^5.8.0",
+        "ts-pattern": "^5.9.0",
         "uuid": "^13.0.0",
         "vue": "^3.5.22",
         "vue-konva": "^3.2.6",
         "vue-router": "^4.6.3",
-        "vue-tsc": "^3.1.1"
+        "vue-tsc": "^3.1.3"
     },
     "devDependencies": {
         "@biomejs/biome": "2.3.3",
-        "@types/bun": "^1.3.0",
+        "@types/bun": "^1.3.1",
         "jiti": "^2.6.1",
         "sass": "1.93.3",
-        "sass-loader": "^16.0.5",
+        "sass-loader": "^16.0.6",
         "typescript": "^5.9.3"
     }
 }
