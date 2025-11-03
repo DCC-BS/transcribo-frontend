@@ -53,10 +53,10 @@ function emitAudio(): void {
             t("pages.index.recordAudio") }}</UButton>
     </div>
     <div v-if="isReady && shouldRecord">
-        <AudioRecorder ref="audioRecorder" :logger="debugLog" auto-start :show-result="true" <AudioRecorder
-            ref="audioRecorder" :logger="debugLog" :auto-start="true" :show-result="true"
+        <AudioRecorder ref="audioRecorder" :logger="debugLog" auto-start :show-result="true"
             @recording-stopped="onRecordingStopped" />
-        <UButton @click="emitAudio">{{ t("audioRecorder.useRecording") }}</UButton>
-    </div>
+        <div v-if="audioBlob" class="flex flex-col justify-center items-center mt-4">
+            <UButton @click="emitAudio">{{ t("audioRecorder.useRecording") }}</UButton>
+        </div>
     </div>
 </template>
