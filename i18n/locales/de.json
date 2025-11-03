@@ -167,7 +167,7 @@
         "displayOptions": "Anzeigeoptionen",
         "showSpeakers": "Sprecher anzeigen",
         "showTimestamps": "Zeitstempel anzeigen",
-        "mergeSegments": "Segmente zusammenführen",
+        "mergeSegments": "Transkriptionen zusammenführen",
         "placeholder": "Keine Transkription zur Anzeige verfügbar"
     },
     "mode": {
