@@ -9,6 +9,8 @@ export default defineEventHandler(async (event) => {
     const inputFormData = await readFormData(event);
     const fileContent = inputFormData.get("file") as File;
     const numSpeakersRaw = inputFormData.get("num_speakers") as string;
+    const audioLanguageRaw = inputFormData.get("audio_language") as string;
+    console.log("audioLanguageRaw", audioLanguageRaw);
 
     if (!fileContent) {
         throw createError({
@@ -33,6 +35,18 @@ export default defineEventHandler(async (event) => {
         }
         // If invalid value, don't include the parameter (auto detection)
     }
+
+    // Handle audio_language parameter
+    if (audioLanguageRaw && audioLanguageRaw !== "null") {
+        if (apiParameter === "") {
+            apiParameter += "?";
+        } else {
+            apiParameter = "&";
+        }
+        apiParameter += `language=${audioLanguageRaw}`;
+    }
+
+    console.log("apiParameter", apiParameter);
 
     // Attempt to make the API request
     const response = await verboseFetch<TaskStatus>(

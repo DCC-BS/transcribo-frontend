@@ -10,7 +10,7 @@ const debugLog = (msg: string): void => {
     appLogger.debug(msg);
 };
 
-const { isReady, abandonedRecording, deleteAbandonedRecording, getMp3Blob } =
+const { isReady, abandonedRecording } =
     useAudioSessions({
         deleteOldSessionsDaysInterval: 30,
         maxSessionsToKeep: 10,
