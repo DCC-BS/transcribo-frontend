@@ -3,7 +3,7 @@ import { match, P } from "ts-pattern";
 import { TranscriptionFinishedCommand } from "~/types/commands";
 import { type TaskStatus, TaskStatusEnum } from "~/types/task";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
-
+const $router = useRouter();
 const { $api } = useNuxtApp();
 
 const props = defineProps<{
@@ -120,7 +120,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
             <UIcon name="i-heroicons-arrow-path" class="loading-spinner" />
             <p class="loading-text">{{ t('taskStatus.processing') }}</p>
         </div>
-        
+
         <!-- Success animation shown when status is COMPLETED -->
         <div v-else-if="isSuccessful" class="success-container">
             <div class="success-circle">
@@ -128,7 +128,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
             </div>
             <p class="success-text">{{ t('taskStatus.completed') }}</p>
         </div>
-        
+
         <!-- Error animation shown when status is FAILED or CANCELLED -->
         <div v-else-if="hasFailed" class="error-container">
             <div class="error-circle">
@@ -136,13 +136,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
             </div>
             <p class="error-text">{{ t('taskStatus.failed') }}</p>
             <p class="error-description">{{ t('taskStatus.failedDescription') }}</p>
-            <UButton 
-                @click="$router.push('/')" 
-                variant="outline" 
-                color="error" 
-                size="sm"
-                class="mt-4"
-            >
+            <UButton @click="$router.push('/')" variant="outline" color="error" size="sm" class="mt-4">
                 {{ t('taskStatus.goBack') }}
             </UButton>
         </div>

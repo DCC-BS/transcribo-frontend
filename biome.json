@@ -7,7 +7,13 @@
     },
     "files": {
         "ignoreUnknown": false,
-        "includes": ["**", "!.nuxt", "!.output", "!logs", "!public/ffmpeg"]
+        "includes": ["**", "!.nuxt", "!!.output", "!!logs", "!!tests"]
+    },
+    "html": {
+        "experimentalFullSupportEnabled": true,
+        "formatter": {
+            "indentScriptAndStyle": true
+        }
     },
     "formatter": {
         "enabled": true,
