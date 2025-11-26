@@ -3,7 +3,6 @@
 ![Transcribo Screenshot](_imgs/Transcribo.png)
 
 Transcribo is a modern web application for audio and video transcription with advanced editing capabilities. Built with Nuxt.js and TypeScript, it provides a comprehensive set of tools for creating, editing, and managing transcriptions with timeline-based visualization. This repository contains only the frontend code; the backend is written in Python FastAPI and available at [https://github.com/DCC-BS/transcribo-backend](https://github.com/DCC-BS/transcribo-backend).
-
 ![GitHub License](https://img.shields.io/github/license/DCC-BS/transcribo-frontend) [![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev)
 
 ## Features
@@ -179,6 +178,10 @@ sudo docker compose up --build
 - Client-side media conversion using FFmpeg.wasm
 - Built-in audio recording capabilities
 - Media file management with IndexedDB storage
+
+##  Acknowledgments
+This application is based on [Transcribo](https://github.com/machinelearningZH/audio-transcription/) from the Statistical Office of the Canton of Zurich.
+We have rewritten the functionality of the original application to fit into a modular and modern web application that separates frontend, backend and AI models.
 
 ## License
 
