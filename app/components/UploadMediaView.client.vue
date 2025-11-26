@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import type { TaskStatus } from "~/types/task";
+import { isHttpStatusCode } from "~/utils/httpErrorCode";
+import type { SelectMenuItem } from "@nuxt/ui";
 
 const emit = defineEmits<{
     uploaded: [task: TaskStatus, file: File];
@@ -8,6 +10,7 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const logger = useLogger();
 const { $api } = useNuxtApp();
+
 
 // Track the conversion progress
 const progressMessage = ref("");
@@ -36,6 +39,110 @@ const speakerOptions = [
     { label: "5", value: "5" },
     { label: "6", value: "6" },
 ];
+const audioLanguage = ref<string>("de");
+const audioLanguageOptions = ref<SelectMenuItem[]>([
+    { label: t("upload.autoDetection"), value: "auto" },
+    { label: t("languages.de"), value: "de" },
+    { label: t("languages.fr"), value: "fr" },
+    { label: t("languages.it"), value: "it" },
+    { label: t("languages.en"), value: "en" },
+    { label: t("languages.es"), value: "es" },
+    { label: t("languages.pt"), value: "pt" },
+    { label: t("languages.ru"), value: "ru" },
+    { label: t("languages.zh"), value: "zh" },
+    { label: t("languages.ko"), value: "ko" },
+    { label: t("languages.ja"), value: "ja" },
+    { label: t("languages.tr"), value: "tr" },
+    { label: t("languages.pl"), value: "pl" },
+    { label: t("languages.ca"), value: "ca" },
+    { label: t("languages.nl"), value: "nl" },
+    { label: t("languages.ar"), value: "ar" },
+    { label: t("languages.sv"), value: "sv" },
+    { label: t("languages.id"), value: "id" },
+    { label: t("languages.hi"), value: "hi" },
+    { label: t("languages.fi"), value: "fi" },
+    { label: t("languages.vi"), value: "vi" },
+    { label: t("languages.he"), value: "he" },
+    { label: t("languages.uk"), value: "uk" },
+    { label: t("languages.el"), value: "el" },
+    { label: t("languages.ms"), value: "ms" },
+    { label: t("languages.cs"), value: "cs" },
+    { label: t("languages.ro"), value: "ro" },
+    { label: t("languages.da"), value: "da" },
+    { label: t("languages.hu"), value: "hu" },
+    { label: t("languages.ta"), value: "ta" },
+    { label: t("languages.no"), value: "no" },
+    { label: t("languages.th"), value: "th" },
+    { label: t("languages.ur"), value: "ur" },
+    { label: t("languages.hr"), value: "hr" },
+    { label: t("languages.bg"), value: "bg" },
+    { label: t("languages.lt"), value: "lt" },
+    { label: t("languages.la"), value: "la" },
+    { label: t("languages.mi"), value: "mi" },
+    { label: t("languages.ml"), value: "ml" },
+    { label: t("languages.cy"), value: "cy" },
+    { label: t("languages.sk"), value: "sk" },
+    { label: t("languages.te"), value: "te" },
+    { label: t("languages.fa"), value: "fa" },
+    { label: t("languages.lv"), value: "lv" },
+    { label: t("languages.bn"), value: "bn" },
+    { label: t("languages.sr"), value: "sr" },
+    { label: t("languages.az"), value: "az" },
+    { label: t("languages.sl"), value: "sl" },
+    { label: t("languages.kn"), value: "kn" },
+    { label: t("languages.et"), value: "et" },
+    { label: t("languages.mk"), value: "mk" },
+    { label: t("languages.br"), value: "br" },
+    { label: t("languages.eu"), value: "eu" },
+    { label: t("languages.is"), value: "is" },
+    { label: t("languages.hy"), value: "hy" },
+    { label: t("languages.ne"), value: "ne" },
+    { label: t("languages.mn"), value: "mn" },
+    { label: t("languages.bs"), value: "bs" },
+    { label: t("languages.kk"), value: "kk" },
+    { label: t("languages.sq"), value: "sq" },
+    { label: t("languages.sw"), value: "sw" },
+    { label: t("languages.gl"), value: "gl" },
+    { label: t("languages.mr"), value: "mr" },
+    { label: t("languages.pa"), value: "pa" },
+    { label: t("languages.si"), value: "si" },
+    { label: t("languages.km"), value: "km" },
+    { label: t("languages.sn"), value: "sn" },
+    { label: t("languages.yo"), value: "yo" },
+    { label: t("languages.so"), value: "so" },
+    { label: t("languages.af"), value: "af" },
+    { label: t("languages.oc"), value: "oc" },
+    { label: t("languages.ka"), value: "ka" },
+    { label: t("languages.be"), value: "be" },
+    { label: t("languages.tg"), value: "tg" },
+    { label: t("languages.sd"), value: "sd" },
+    { label: t("languages.gu"), value: "gu" },
+    { label: t("languages.am"), value: "am" },
+    { label: t("languages.yi"), value: "yi" },
+    { label: t("languages.lo"), value: "lo" },
+    { label: t("languages.uz"), value: "uz" },
+    { label: t("languages.fo"), value: "fo" },
+    { label: t("languages.ht"), value: "ht" },
+    { label: t("languages.ps"), value: "ps" },
+    { label: t("languages.tk"), value: "tk" },
+    { label: t("languages.nn"), value: "nn" },
+    { label: t("languages.mt"), value: "mt" },
+    { label: t("languages.sa"), value: "sa" },
+    { label: t("languages.lb"), value: "lb" },
+    { label: t("languages.my"), value: "my" },
+    { label: t("languages.bo"), value: "bo" },
+    { label: t("languages.tl"), value: "tl" },
+    { label: t("languages.mg"), value: "mg" },
+    { label: t("languages.as"), value: "as" },
+    { label: t("languages.tt"), value: "tt" },
+    { label: t("languages.haw"), value: "haw" },
+    { label: t("languages.ln"), value: "ln" },
+    { label: t("languages.ha"), value: "ha" },
+    { label: t("languages.ba"), value: "ba" },
+    { label: t("languages.jw"), value: "jw" },
+    { label: t("languages.su"), value: "su" },
+    { label: t("languages.yue"), value: "yue" }
+]);
 
 /**
  * Check if the file is a video file based on MIME type
@@ -55,121 +162,7 @@ function formatFileSize(bytes: number): string {
     return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
-/**
- * Get file duration for audio/video files
- */
-function getFileDuration(file: File): Promise<string> {
-    return new Promise((resolve) => {
-        const url = URL.createObjectURL(file);
-        const element = isVideoFile.value
-            ? document.createElement("video")
-            : document.createElement("audio");
-
-        element.onloadedmetadata = () => {
-            const duration = element.duration;
-            const minutes = Math.floor(duration / 60);
-            const seconds = Math.floor(duration % 60);
-            URL.revokeObjectURL(url);
-            resolve(`${minutes}:${seconds.toString().padStart(2, "0")}`);
-        };
-
-        element.onerror = () => {
-            URL.revokeObjectURL(url);
-            resolve("Unknown");
-        };
-
-        element.src = url;
-    });
-}
-
-/**
- * Extract audio from video file using ffmpeg.wasm
- */
-async function extractAudioFromVideo(videoFile: File): Promise<Blob> {
-    const { FFmpeg } = await import("@ffmpeg/ffmpeg");
-    const { fetchFile, toBlobURL } = await import("@ffmpeg/util");
-
-    progressMessage.value = t("upload.extractingAudio");
-
-    const ffmpeg = new FFmpeg();
-
-    try {
-        // Load FFmpeg using CDN for better compatibility
-        await ffmpeg.load({
-            coreURL:
-                "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.js",
-            wasmURL:
-                "https://unpkg.com/@ffmpeg/core@0.12.10/dist/esm/ffmpeg-core.wasm",
-        });
-
-        ffmpeg.on("log", (event) => {
-            // Log errors for diagnostics
-            if (event.type === "fferr") {
-                logger.error("FFmpeg error:", event.message);
-            }
-        });
-
-        const inputFileName = "input_video";
-        const outputFileName = "output_audio.wav";
-
-        try {
-            // Write input file
-            await ffmpeg.writeFile(inputFileName, await fetchFile(videoFile));
-
-            // Extract audio
-            await ffmpeg.exec([
-                "-i",
-                inputFileName,
-                "-vn", // No video
-                "-acodec",
-                "pcm_s16le",
-                "-ar",
-                "16000", // Sample rate
-                outputFileName,
-            ]);
-
-            // Read the output file
-            const data = await ffmpeg.readFile(outputFileName);
-
-            // Clean up temporary files within ffmpeg
-            try {
-                await ffmpeg.deleteFile(inputFileName);
-                await ffmpeg.deleteFile(outputFileName);
-            } catch (cleanupError) {
-                // Log cleanup errors but don't throw as we have the result
-                logger.warn(
-                    "Failed to cleanup temporary ffmpeg files:",
-                    cleanupError,
-                );
-            }
-
-            return new Blob([data as BlobPart], { type: "audio/wav" });
-        } catch (processingError) {
-            // Clean up any files that might have been created
-            try {
-                await ffmpeg.deleteFile(inputFileName);
-                await ffmpeg.deleteFile(outputFileName);
-            } catch {
-                // Ignore cleanup errors when processing already failed
-            }
-            throw new Error(
-                `Audio extraction failed: ${processingError instanceof Error ? processingError.message : "Unknown error"}`,
-            );
-        }
-    } catch (error) {
-        logger.error("Error during audio extraction:", error);
-        throw new Error(
-            `Failed to extract audio from video: ${error instanceof Error ? error.message : "Unknown error"}`,
-        );
-    } finally {
-        // Always terminate the ffmpeg instance to free resources
-        try {
-            await ffmpeg.terminate();
-        } catch (terminateError) {
-            logger.warn("Failed to terminate FFmpeg instance:", terminateError);
-        }
-    }
-}
+const { extractAudioFromVideo } = useAudioExtract();
 
 /**
  * Handles the file selection and processing
@@ -197,15 +190,10 @@ const loadAudio = async (event: Event): Promise<void> => {
         if (isVideoFile.value) {
             // Extract audio from video files
             showProgress.value = true;
-            const audioBlob = await extractAudioFromVideo(mediaFile);
+            progressMessage.value = t("upload.extractingAudio");
+            const { audioBlob, audioFileName } = await extractAudioFromVideo(mediaFile);
 
             // Create a File object from the blob with appropriate name
-            const originalName = mediaFile.name;
-            const lastDotIndex = originalName.lastIndexOf(".");
-            const audioFileName =
-                lastDotIndex > 0
-                    ? `${originalName.substring(0, lastDotIndex)}.wav`
-                    : `${originalName}.wav`;
             processedFile.value = new File([audioBlob], audioFileName, {
                 type: "audio/wav",
             });
@@ -274,30 +262,11 @@ async function uploadFile(
         formData.append("num_speakers", numSpeakers.value);
     }
 
-    // Helper to narrow an error to an HTTP status code
-    function isHttpStatus(error: unknown, status: number): boolean {
-        if (
-            typeof error !== "object" ||
-            error === undefined ||
-            error === null
-        ) {
-            return false;
-        }
-        const e = error as Record<string, unknown>;
-        // ofetch/FetchError may have statusCode
-        if (typeof e.statusCode === "number" && e.statusCode === status) {
-            return true;
-        }
-        // response?.status is available on some errors
-        const resp = e.response as { status?: number } | undefined;
-        if (resp && typeof resp.status === "number" && resp.status === status) {
-            return true;
-        }
-        // direct status field fallback
-        if (typeof e.status === "number" && e.status === status) {
-            return true;
-        }
-        return false;
+    // Add audio_language parameter - send null for auto detection, otherwise send the language code
+    if (audioLanguage.value === "auto") {
+        formData.append("audio_language", "null");
+    } else {
+        formData.append("audio_language", audioLanguage.value);
     }
 
     try {
@@ -310,7 +279,7 @@ async function uploadFile(
         const toast = useToast();
 
         // Handle unsupported media type (415) with a friendly toast
-        if (isHttpStatus(error, 415)) {
+        if (isHttpStatusCode(error, 415)) {
             toast.add({
                 title:
                     t("upload.unsupportedFileTypeTitle") ||
@@ -325,7 +294,7 @@ async function uploadFile(
         }
 
         // Handle file too large (413) with a friendly toast
-        if (isHttpStatus(error, 413)) {
+        if (isHttpStatusCode(error, 413)) {
             toast.add({
                 title: t("upload.fileTooLargeTitle") || "File too large",
                 description:
@@ -338,7 +307,7 @@ async function uploadFile(
         }
 
         // Handle too many requests (429) with a friendly toast
-        if (isHttpStatus(error, 429)) {
+        if (isHttpStatusCode(error, 429)) {
             toast.add({
                 title: t("upload.tooManyRequestsTitle") || "Too many requests",
                 description:
@@ -364,30 +333,8 @@ defineExpose({ uploadFile });
     <div>
         <!-- File Input Section -->
         <div v-if="!showFilePreview" class="space-y-4">
-            <UInput
-                type="file"
-                accept="audio/*,video/*"
-                size="xl"
-                icon="i-heroicons-document-arrow-up"
-                :disabled="showProgress"
-                @change="loadAudio"
-                ref="fileInputRef"
-            />
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ t("upload.numSpeakers") }}
-                </label>
-                <p class="text-xs text-gray-500 mb-2">
-                    {{ t("upload.numSpeakersHelp") }}
-                </p>
-                <USelect
-                    v-model="numSpeakers"
-                    :items="speakerOptions"
-                    :disabled="showProgress"
-                    placeholder="Select number of speakers"
-                />
-            </div>
+            <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up"
+                :disabled="showProgress" @change="loadAudio" ref="fileInputRef" />
         </div>
 
         <!-- File Preview Section -->
@@ -398,12 +345,7 @@ defineExpose({ uploadFile });
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             {{ t('upload.filePreview') || 'File Preview' }}
                         </h3>
-                        <UButton
-                            variant="ghost"
-                            size="sm"
-                            icon="i-heroicons-x-mark"
-                            @click="clearSelectedFile"
-                        />
+                        <UButton variant="ghost" size="sm" icon="i-heroicons-x-mark" @click="clearSelectedFile" />
                     </div>
                 </template>
 
@@ -411,10 +353,8 @@ defineExpose({ uploadFile });
                     <!-- File Info -->
                     <div class="flex items-start gap-3">
                         <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <UIcon 
-                                :name="isVideoFile ? 'i-heroicons-video-camera' : 'i-heroicons-musical-note'" 
-                                class="w-6 h-6 text-blue-600 dark:text-blue-400" 
-                            />
+                            <UIcon :name="isVideoFile ? 'i-heroicons-video-camera' : 'i-heroicons-musical-note'"
+                                class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="font-medium text-gray-900 dark:text-white truncate">
@@ -422,10 +362,12 @@ defineExpose({ uploadFile });
                             </p>
                             <p class="text-sm text-gray-500 dark:text-gray-400">
                                 {{ formatFileSize(selectedFile.size) }}
-                                <span v-if="isVideoFile" class="ml-2 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">
+                                <span v-if="isVideoFile"
+                                    class="ml-2 px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs rounded">
                                     {{ t('upload.videoFile') || 'Video' }}
                                 </span>
-                                <span v-else class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
+                                <span v-else
+                                    class="ml-2 px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded">
                                     {{ t('upload.audioFile') || 'Audio' }}
                                 </span>
                             </p>
@@ -435,48 +377,46 @@ defineExpose({ uploadFile });
                         </div>
                     </div>
 
-                    <!-- Speaker Configuration -->
-                    <div class="border-t pt-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {{ t("upload.numSpeakers") }}
-                        </label>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                            {{ t("upload.numSpeakersHelp") }}
-                        </p>
-                        <USelect
-                            v-model="numSpeakers"
-                            :items="speakerOptions"
-                            :disabled="showProgress"
-                            placeholder="Select number of speakers"
-                        />
-                    </div>
-
                     <!-- Action Buttons -->
                     <div class="flex gap-3 pt-4 border-t">
-                        <UButton
-                            color="primary"
-                            size="lg"
-                            :loading="showProgress"
-                            :disabled="showProgress"
-                            @click="useThisFile"
-                        >
+                        <UButton color="primary" size="lg" :loading="showProgress" :disabled="showProgress"
+                            @click="useThisFile">
                             <template #leading>
                                 <UIcon name="i-heroicons-play" />
                             </template>
                             {{ t('upload.useThisFile') || 'Use this file' }}
                         </UButton>
-                        
-                        <UButton
-                            variant="ghost"
-                            size="lg"
-                            :disabled="showProgress"
-                            @click="clearSelectedFile"
-                        >
+
+                        <UButton variant="ghost" size="lg" :disabled="showProgress" @click="clearSelectedFile">
                             {{ t('upload.selectDifferentFile') || 'Select different file' }}
                         </UButton>
                     </div>
                 </div>
             </UCard>
+        </div>
+
+        <!-- Shared Configuration Section -->
+        <div class="space-y-4 mt-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ t("upload.numSpeakers") }}
+                </label>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    {{ t("upload.numSpeakersHelp") }}
+                </p>
+                <USelect v-model="numSpeakers" :items="speakerOptions" :disabled="showProgress"
+                    :ui="{ base: 'w-[250px]' }" placeholder="Select number of speakers" />
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {{ t("upload.audioLanguage") }}
+                </label>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                    {{ t("upload.audioLanguageHelp") }}
+                </p>
+                <USelectMenu v-model="audioLanguage" value-key="value" :ui="{ base: 'w-[250px]' }"
+                    :items="audioLanguageOptions" :disabled="showProgress" />
+            </div>
         </div>
 
         <!-- Progress Section -->
@@ -486,14 +426,8 @@ defineExpose({ uploadFile });
         </div>
 
         <!-- Error Message -->
-        <UAlert
-            v-if="errorMessage"
-            class="mt-4"
-            color="error"
-            variant="solid"
-            :title="t('upload.error') || 'Error'"
-            :description="errorMessage"
-        />
+        <UAlert v-if="errorMessage" class="mt-4" color="error" variant="solid" :title="t('upload.error') || 'Error'"
+            :description="errorMessage" />
     </div>
 </template>
 
