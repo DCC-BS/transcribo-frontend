@@ -120,6 +120,12 @@ export default defineNuxtConfig({
             collections: ["lucide", "heroicons"],
         },
     },
+    // Disable Bunny Fonts provider to avoid external fetches/errors
+    fonts: {
+        providers: {
+            bunny: false,
+        },
+    },
     modules: [
         "@nuxt/ui",
         "@nuxtjs/i18n",

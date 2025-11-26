@@ -7,6 +7,7 @@ import {
     UpdateSegementCommand,
 } from "~/types/commands";
 import type { SegementWithId } from "~/types/transcriptionResponse";
+import { formatTime } from "~/utils/time";
 
 interface TranscriptionListProps {
     segment: SegementWithId;
@@ -161,7 +162,7 @@ const endTimeFormatted = computed({
                 -
                 <a @click="() => seekTo(internalSegment.end)">{{
                     formatTime(internalSegment.end)
-                    }}</a>
+                }}</a>
                 <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1" @keydown="handleKeydown">
                     <template #trailing>
                         <span class="text-xs">s</span>
@@ -179,8 +180,7 @@ const endTimeFormatted = computed({
                         @click="addSegmentAfter(internalSegment)" />
                 </UTooltip>
                 <UTooltip :text="t('help.segments.deleteSegment')">
-                    <UButton color="error" icon="i-heroicons-trash"
-                        @click="removeSegment(internalSegment)" />
+                    <UButton color="error" icon="i-heroicons-trash" @click="removeSegment(internalSegment)" />
                 </UTooltip>
             </div>
         </div>
