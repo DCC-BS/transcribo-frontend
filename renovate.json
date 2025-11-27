@@ -3,6 +3,8 @@
     "dependencyDashboard": true,
     "ignoreTests": true,
     "extends": ["config:recommended", ":prImmediately"],
+    "internalChecksFilter": "strict",
+    "minimumReleaseAge": "14 days",
     "packageRules": [
         {
             "matchDepTypes": ["devDependencies"],
