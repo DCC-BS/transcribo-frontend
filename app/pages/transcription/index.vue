@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { UButton, ULink } from "#components";
 import type { StoredTask } from "~/stores/tasksStore";
+import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
 import type { TaskStatus } from "~/types/task";
 import { TaskStatusEnum } from "~/types/task";
-import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
 
 const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
