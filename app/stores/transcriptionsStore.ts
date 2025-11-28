@@ -46,7 +46,6 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             db.value = await initDB();
             isLoading.value = false;
             await loadAllTranscriptions();
-            await cleanupOldTranscriptions();
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
@@ -105,54 +104,86 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
     async function cleanupOldTranscriptions(): Promise<number> {
         if (!db.value) await initializeDB();
 
-        const all = await loadAllTranscriptions();
-        const now = Date.now();
-        let deletedCount = 0;
+        const localDb = db.value;
+        if (!localDb) {
+            logger.error("Database not initialized for cleanup.");
+            return 0;
+        }
 
-        // Find transcriptions older than the retention period
-        const oldIds = all
-            .filter((t) => {
-                if (!t.createdAt) return false;
-                let createdAtMs: number | undefined;
+        return new Promise((resolve, reject) => {
+            const transaction = localDb.transaction(STORE_NAME, "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
 
-                if (t.createdAt instanceof Date) {
-                    createdAtMs = t.createdAt.getTime();
-                } else if (
-                    typeof t.createdAt === "string" ||
-                    typeof t.createdAt === "number"
-                ) {
-                    const parsed = new Date(t.createdAt);
-                    if (!Number.isNaN(parsed.getTime())) {
-                        createdAtMs = parsed.getTime();
-                    }
+            let index: IDBIndex;
+            try {
+                index = store.index("createdAt");
+            } catch (e: unknown) {
+                logger.error(
+                    "createdAt index missing on transcriptions store.",
+                    e,
+                );
+                if (e instanceof Error) {
+                    reject(e);
+                } else {
+                    reject(
+                        new Error(
+                            "Failed to access createdAt index during cleanup.",
+                        ),
+                    );
+                }
+                return;
+            }
+
+            const thresholdDate = new Date(
+                Date.now() - TRANSCRIPTION_RETENTION_PERIOD_MS,
+            );
+            // Iterate via the createdAt index to avoid loading the entire dataset
+            const range = IDBKeyRange.upperBound(thresholdDate);
+            let deletedCount = 0;
+
+            const request = index.openKeyCursor(range);
+
+            request.onsuccess = () => {
+                const cursor = request.result;
+                if (cursor) {
+                    const deleteRequest = store.delete(cursor.primaryKey);
+
+                    deleteRequest.onerror = () => {
+                        logger.error(
+                            `Failed to delete transcription ${String(cursor.primaryKey)} during cleanup:`,
+                            deleteRequest.error,
+                        );
+                    };
+
+                    deletedCount++;
+                    cursor.continue();
+                    return;
                 }
 
-                return (
-                    createdAtMs !== undefined &&
-                    now - createdAtMs > TRANSCRIPTION_RETENTION_PERIOD_MS
-                );
-            })
-            .map((t) => t.id);
+                if (deletedCount > 0) {
+                    logger.info(
+                        `Cleaned up ${deletedCount} transcriptions older than 30 days`,
+                    );
+                }
+                resolve(deletedCount);
+            };
 
-        for (const id of oldIds) {
-            try {
-                await deleteTranscription(id);
-                deletedCount++;
-            } catch (error) {
+            request.onerror = () => {
                 logger.error(
-                    `Failed to delete old transcription ${id}:`,
-                    error,
+                    "Failed to iterate over transcription index during cleanup:",
+                    request.error,
                 );
-            }
-        }
+                reject(request.error);
+            };
 
-        if (deletedCount > 0) {
-            logger.info(
-                `Cleaned up ${deletedCount} transcriptions older than 30 days`,
-            );
-        }
-
-        return deletedCount;
+            transaction.onerror = () => {
+                logger.error(
+                    "Transaction error during transcription cleanup:",
+                    transaction.error,
+                );
+                reject(transaction.error);
+            };
+        });
     }
 
     /**
@@ -669,7 +700,22 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
     // Initialize the store when it's first accessed
     onMounted(() => {
-        initializeDB();
+        async function bootstrapStore(): Promise<void> {
+            try {
+                // Initialize the database before running maintenance tasks
+                await initializeDB();
+                // Perform cleanup separately to avoid coupling it to initialization
+                await cleanupOldTranscriptions();
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    logger.error(e.message);
+                } else {
+                    logger.error("Failed to bootstrap transcription store", e);
+                }
+            }
+        }
+
+        void bootstrapStore();
     });
 
     return {
