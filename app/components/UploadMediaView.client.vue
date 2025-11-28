@@ -1,7 +1,7 @@
 <script lang="ts" setup>
+import type { SelectMenuItem } from "@nuxt/ui";
 import type { TaskStatus } from "~/types/task";
 import { isHttpStatusCode } from "~/utils/httpErrorCode";
-import type { SelectMenuItem } from "@nuxt/ui";
 
 const emit = defineEmits<{
     uploaded: [task: TaskStatus, file: File];
