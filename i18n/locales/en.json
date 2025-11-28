@@ -351,5 +351,9 @@
         "jw": "Javanese",
         "su": "Sundanese",
         "yue": "Chinese (traditional)"
+    },
+    "retention": {
+        "title": "Availability of Transcriptions",
+        "description": "Transcriptions older than {retentionDays} days are automatically deleted."
     }
 }

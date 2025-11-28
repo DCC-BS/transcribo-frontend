@@ -19,6 +19,8 @@ export interface StoredTranscription {
 
 // Database configuration
 const STORE_NAME = "transcriptions";
+// Define retention period (30 days in milliseconds)
+export const TRANSCRIPTION_RETENTION_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
  * Store to manage transcriptions with IndexedDB persistence
@@ -44,6 +46,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             db.value = await initDB();
             isLoading.value = false;
             await loadAllTranscriptions();
+            await cleanupOldTranscriptions();
         } catch (e: unknown) {
             if (e instanceof Error) {
                 logger.error(e.message);
@@ -93,6 +96,63 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                 reject(new Error(error.value));
             };
         });
+    }
+
+    /**
+     * Clean up transcriptions older than the retention period (30 days)
+     * @returns The number of transcriptions deleted
+     */
+    async function cleanupOldTranscriptions(): Promise<number> {
+        if (!db.value) await initializeDB();
+
+        const all = await loadAllTranscriptions();
+        const now = Date.now();
+        let deletedCount = 0;
+
+        // Find transcriptions older than the retention period
+        const oldIds = all
+            .filter((t) => {
+                if (!t.createdAt) return false;
+                let createdAtMs: number | undefined;
+
+                if (t.createdAt instanceof Date) {
+                    createdAtMs = t.createdAt.getTime();
+                } else if (
+                    typeof t.createdAt === "string" ||
+                    typeof t.createdAt === "number"
+                ) {
+                    const parsed = new Date(t.createdAt);
+                    if (!Number.isNaN(parsed.getTime())) {
+                        createdAtMs = parsed.getTime();
+                    }
+                }
+
+                return (
+                    createdAtMs !== undefined &&
+                    now - createdAtMs > TRANSCRIPTION_RETENTION_PERIOD_MS
+                );
+            })
+            .map((t) => t.id);
+
+        for (const id of oldIds) {
+            try {
+                await deleteTranscription(id);
+                deletedCount++;
+            } catch (error) {
+                logger.error(
+                    `Failed to delete old transcription ${id}:`,
+                    error,
+                );
+            }
+        }
+
+        if (deletedCount > 0) {
+            logger.info(
+                `Cleaned up ${deletedCount} transcriptions older than 30 days`,
+            );
+        }
+
+        return deletedCount;
     }
 
     /**
@@ -637,5 +697,8 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         transcriptionCount,
         transcriptionsWithAudio,
         searchTranscriptions,
+
+        // Maintenance
+        cleanupOldTranscriptions,
     };
 });
