@@ -3,6 +3,7 @@ import { match, P } from "ts-pattern";
 import { TranscriptionFinishedCommand } from "~/types/commands";
 import { type TaskStatus, TaskStatusEnum } from "~/types/task";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
+
 const $router = useRouter();
 const { $api } = useNuxtApp();
 

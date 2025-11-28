@@ -1,8 +1,13 @@
 <script lang="ts" setup>
 import { UButton, ULink } from "#components";
 import type { StoredTask } from "~/stores/tasksStore";
+import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
 import type { TaskStatus } from "~/types/task";
 import { TaskStatusEnum } from "~/types/task";
+
+const retentionDays = computed(() => {
+    return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
+});
 
 const transcriptionStore = useTranscriptionsStore();
 const taskStore = useTasksStore();
@@ -334,6 +339,8 @@ function handleDeletedTranscription(transcriptionId: string): void {
 
 <template>
     <UContainer>
+        <UAlert icon="i-heroicons-information-circle" color="info" variant="soft" :title="t('retention.title')"
+            :description="t('retention.description', { retentionDays: retentionDays })" />
         <!-- Pending tasks section (shown only when there are in-progress tasks) -->
         <div v-if="inProgressTasks.length > 0" class="space-y-6 mb-8">
             <div class="flex justify-between items-center">

@@ -352,5 +352,9 @@
         "jw": "Javanisch",
         "su": "Sundanisch",
         "yue": "Chinesisch (traditionell)"
+    },
+    "retention": {
+        "title": "Verfügbarkeit der Transkriptionen",
+        "description": "Transkriptionen älter als {retentionDays} Tage werden automatisch gelöscht."
     }
 }

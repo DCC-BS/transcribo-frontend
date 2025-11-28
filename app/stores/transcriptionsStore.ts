@@ -19,6 +19,8 @@ export interface StoredTranscription {
 
 // Database configuration
 const STORE_NAME = "transcriptions";
+// Define retention period (30 days in milliseconds)
+export const TRANSCRIPTION_RETENTION_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
 /**
  * Store to manage transcriptions with IndexedDB persistence
@@ -91,6 +93,95 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                 error.value = `Failed to load transcriptions: ${(event.target as IDBRequest).error?.message}`;
                 isLoading.value = false;
                 reject(new Error(error.value));
+            };
+        });
+    }
+
+    /**
+     * Clean up transcriptions older than the retention period (30 days)
+     * @returns The number of transcriptions deleted
+     */
+    async function cleanupOldTranscriptions(): Promise<number> {
+        if (!db.value) await initializeDB();
+
+        const localDb = db.value;
+        if (!localDb) {
+            logger.error("Database not initialized for cleanup.");
+            return 0;
+        }
+
+        return new Promise((resolve, reject) => {
+            const transaction = localDb.transaction(STORE_NAME, "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
+
+            let index: IDBIndex;
+            try {
+                index = store.index("createdAt");
+            } catch (e: unknown) {
+                logger.error(
+                    "createdAt index missing on transcriptions store.",
+                    e,
+                );
+                if (e instanceof Error) {
+                    reject(e);
+                } else {
+                    reject(
+                        new Error(
+                            "Failed to access createdAt index during cleanup.",
+                        ),
+                    );
+                }
+                return;
+            }
+
+            const thresholdDate = new Date(
+                Date.now() - TRANSCRIPTION_RETENTION_PERIOD_MS,
+            );
+            // Iterate via the createdAt index to avoid loading the entire dataset
+            const range = IDBKeyRange.upperBound(thresholdDate);
+            let deletedCount = 0;
+
+            const request = index.openKeyCursor(range);
+
+            request.onsuccess = () => {
+                const cursor = request.result;
+                if (cursor) {
+                    const deleteRequest = store.delete(cursor.primaryKey);
+
+                    deleteRequest.onerror = () => {
+                        logger.error(
+                            `Failed to delete transcription ${String(cursor.primaryKey)} during cleanup:`,
+                            deleteRequest.error,
+                        );
+                    };
+
+                    deletedCount++;
+                    cursor.continue();
+                    return;
+                }
+
+                if (deletedCount > 0) {
+                    logger.info(
+                        `Cleaned up ${deletedCount} transcriptions older than 30 days`,
+                    );
+                }
+                resolve(deletedCount);
+            };
+
+            request.onerror = () => {
+                logger.error(
+                    "Failed to iterate over transcription index during cleanup:",
+                    request.error,
+                );
+                reject(request.error);
+            };
+
+            transaction.onerror = () => {
+                logger.error(
+                    "Transaction error during transcription cleanup:",
+                    transaction.error,
+                );
+                reject(transaction.error);
             };
         });
     }
@@ -609,7 +700,22 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
     // Initialize the store when it's first accessed
     onMounted(() => {
-        initializeDB();
+        async function bootstrapStore(): Promise<void> {
+            try {
+                // Initialize the database before running maintenance tasks
+                await initializeDB();
+                // Perform cleanup separately to avoid coupling it to initialization
+                await cleanupOldTranscriptions();
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    logger.error(e.message);
+                } else {
+                    logger.error("Failed to bootstrap transcription store", e);
+                }
+            }
+        }
+
+        void bootstrapStore();
     });
 
     return {
@@ -637,5 +743,8 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         transcriptionCount,
         transcriptionsWithAudio,
         searchTranscriptions,
+
+        // Maintenance
+        cleanupOldTranscriptions,
     };
 });

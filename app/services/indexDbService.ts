@@ -2,12 +2,13 @@
 const DB_NAME = "transcribo-db";
 const TRANSCIPTION_STORE_NAME = "transcriptions";
 const TASK_STORE_NAME = "tasks";
-const DB_VERSION = 2; // Updated version for summary field addition
+const DB_VERSION = 3; // Updated version for createdAt index addition
 
 /**
  * Database migration history:
  * - v1: Initial schema with transcriptions and tasks stores
  * - v2: Added 'summary' field to transcription records for AI-generated meeting summaries
+ * - v3: Added 'createdAt' index for efficient retention cleanup
  */
 
 /**
@@ -43,7 +44,9 @@ export async function initDB() {
 
         // Handle database upgrade (first time or version change)
         request.onupgradeneeded = (event) => {
-            const db = (event.target as IDBOpenDBRequest).result;
+            const requestInstance = event.target as IDBOpenDBRequest;
+            const db = requestInstance.result;
+            const upgradeTransaction = requestInstance.transaction;
             const oldVersion = event.oldVersion;
             const newVersion = event.newVersion || DB_VERSION;
 
@@ -55,8 +58,8 @@ export async function initDB() {
             migrationInfo = { oldVersion, newVersion };
 
             // Only perform schema changes here (creating stores and indexes)
-            createTaskStore(db);
-            createTranscriptionStore(db);
+            createTaskStore(db, upgradeTransaction);
+            createTranscriptionStore(db, upgradeTransaction);
         };
 
         // Handle successful connection
@@ -87,30 +90,65 @@ export async function initDB() {
     });
 }
 
-function createTranscriptionStore(db: IDBDatabase) {
-    // Create object store for tasks if it doesn't exist
+function createTranscriptionStore(
+    db: IDBDatabase,
+    transaction: IDBTransaction | null,
+) {
+    let store: IDBObjectStore | undefined;
+
     if (!db.objectStoreNames.contains(TRANSCIPTION_STORE_NAME)) {
-        const store = db.createObjectStore(TRANSCIPTION_STORE_NAME, {
+        store = db.createObjectStore(TRANSCIPTION_STORE_NAME, {
             keyPath: "id",
         });
+    } else if (transaction) {
+        store = transaction.objectStore(TRANSCIPTION_STORE_NAME);
+    }
+
+    if (!store) {
+        return;
+    }
+
+    if (!store.indexNames.contains("status")) {
         store.createIndex("status", "status", {
             unique: false,
         });
+    }
+
+    if (!store.indexNames.contains("mediaFileId")) {
         store.createIndex("mediaFileId", "mediaFileId", {
+            unique: false,
+        });
+    }
+
+    if (!store.indexNames.contains("createdAt")) {
+        store.createIndex("createdAt", "createdAt", {
             unique: false,
         });
     }
 }
 
-function createTaskStore(db: IDBDatabase) {
-    // Create object store for tasks if it doesn't exist
+function createTaskStore(db: IDBDatabase, transaction: IDBTransaction | null) {
+    let store: IDBObjectStore | undefined;
+
     if (!db.objectStoreNames.contains(TASK_STORE_NAME)) {
-        const store = db.createObjectStore(TASK_STORE_NAME, {
+        store = db.createObjectStore(TASK_STORE_NAME, {
             keyPath: "id",
         });
+    } else if (transaction) {
+        store = transaction.objectStore(TASK_STORE_NAME);
+    }
+
+    if (!store) {
+        return;
+    }
+
+    if (!store.indexNames.contains("status")) {
         store.createIndex("status", "status", {
             unique: false,
         });
+    }
+
+    if (!store.indexNames.contains("mediaFileId")) {
         store.createIndex("mediaFileId", "mediaFileId", {
             unique: false,
         });
