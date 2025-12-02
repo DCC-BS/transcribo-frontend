@@ -7,7 +7,7 @@ services:
                 - linux/amd64
                 - linux/arm64
         ports:
-            - '50001:50001'
+            - "50001:50001"
         environment:
             - HF_AUTH_TOKEN=${HF_AUTH_TOKEN}
         volumes:
@@ -18,7 +18,7 @@ services:
                     memory: 16g
                     devices:
                         - driver: nvidia
-                          device_ids: ['1']
+                          device_ids: ["1"]
                           capabilities: [gpu]
     llm:
         image: vllm/vllm-openai:v0.11.2
@@ -26,39 +26,39 @@ services:
             resources:
                 reservations:
                     devices:
-                    - driver: nvidia
-                      device_ids: [ '0' ]
-                      capabilities: [gpu]
+                        - driver: nvidia
+                          device_ids: ["0"]
+                          capabilities: [gpu]
         volumes:
-        - "${HOME}/.cache/huggingface:/root/.cache/huggingface"
+            - "${HOME}/.cache/huggingface:/root/.cache/huggingface"
         environment:
-        - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
+            - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
         ports:
-        - "8001:8000"
+            - "8001:8000"
         ipc: host
         command:
-        - "--port"
-        - "8000"
-        - "--model"
-        - "Qwen/Qwen3-32B-AWQ"
-        - "--max-model-len"
-        - "10000"
-        - "--max-num-seqs"
-        - "1"
-        - "--kv-cache-dtype"
-        - "fp8"
-        - "--reasoning-parser"
-        - "qwen3"
-        - "--enable-auto-tool-choice"
-        - "--tool-call-parser"
-        - "hermes"
-        - "--gpu-memory-utilization"
-        - "0.95"
-        - "--tensor-parallel-size"
-        - "1"
-        - "--uvicorn-log-level"
-        - "warning"
-        - "--disable-log-requests"
+            - "--port"
+            - "8000"
+            - "--model"
+            - "Qwen/Qwen3-32B-AWQ"
+            - "--max-model-len"
+            - "10000"
+            - "--max-num-seqs"
+            - "1"
+            - "--kv-cache-dtype"
+            - "fp8"
+            - "--reasoning-parser"
+            - "qwen3"
+            - "--enable-auto-tool-choice"
+            - "--tool-call-parser"
+            - "hermes"
+            - "--gpu-memory-utilization"
+            - "0.95"
+            - "--tensor-parallel-size"
+            - "1"
+            - "--uvicorn-log-level"
+            - "warning"
+            - "--disable-log-requests"
     transcribo-backend:
         build:
             context: https://github.com/DCC-BS/transcribo-backend.git
@@ -66,7 +66,7 @@ services:
         depends_on:
             - faster_whisper
         ports:
-            - '8000:8000'
+            - "8000:8000"
         environment:
             - WHISPER_API=http://faster_whisper:50001/v1
     transcribo-frontend:
@@ -76,7 +76,7 @@ services:
         depends_on:
             - transcribo-backend
         ports:
-            - '3000:3000'
+            - "3000:3000"
         profiles:
             - frontend
 volumes:

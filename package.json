@@ -8,11 +8,15 @@
         "start": "nuxt start",
         "generate": "nuxt generate",
         "lint": "biome format --write",
-        "check": "biome check --fix"
+        "check": "biome check --fix",
+        "docker:dev": "docker compose -f ./docker-compose.dev.yml up --build",
+        "docker:prod": "docker compose -f ./docker-compose.yml up --build",
+        "docker:dev:down": "docker compose -f ./docker-compose.dev.yml down",
+        "docker:prod:down": "docker compose -f ./docker-compose.yml down"
     },
     "dependencies": {
         "@dcc-bs/audio-recorder.bs.js": "^2.0.1",
-        "@dcc-bs/common-ui.bs.js": "git+https://github.com/DCC-BS/common-ui.bs.js.git#v1.1.3",
+        "@dcc-bs/common-ui.bs.js": "git+https://github.com/DCC-BS/common-ui.bs.js.git#v1.1.9",
         "@dcc-bs/event-system.bs.js": "git+https://github.com/DCC-BS/event-system.bs.js.git#v1.4.1",
         "@dcc-bs/feedback-control.bs.js": "git+https://github.com/DCC-BS/feedback-control.bs.js.git#v0.1.6",
         "@dcc-bs/logger.bs.js": "git+https://github.com/DCC-BS/logger.bs.js.git#v1.4.1",
