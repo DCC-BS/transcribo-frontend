@@ -35,6 +35,16 @@ function emitAudio(): void {
         emit("onRecordingComplete", audioBlob.value);
     }
 }
+
+const audioSessionActions = computed(() => [
+    {
+        label: 'Process',
+        icon: 'i-lucide-play',
+        handler: async (_: string, mp3Blob: Blob, __: () => Promise<void>) => {
+            emit("onRecordingComplete", mp3Blob);
+        }
+    }
+]);
 </script>
 
 <template>
@@ -45,7 +55,7 @@ function emitAudio(): void {
                 <UButton :label="t('audio.showAbandonedRecordings')" color="neutral" variant="subtle"
                     icon="i-lucide-history" />
                 <template #content>
-                    <AudioSessionExplorer ref="audioSessionExplorer" />
+                    <AudioSessionExplorer ref="audioSessionExplorer" :custom-actions="audioSessionActions" />
                 </template>
             </UDrawer>
         </div>
