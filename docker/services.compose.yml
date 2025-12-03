@@ -1,0 +1,73 @@
+services:
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - '8090:80'
+      - '8443:443'
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  llm:
+    platform: linux/amd64
+    image: vllm/vllm-openai:v0.11.2
+    container_name: llm
+    expose:
+      - "8000"
+    env_file: ".env.backend"
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ["0"]
+              capabilities: [gpu]
+    ipc: host
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    command: >
+      Qwen/Qwen3-32B-AWQ
+      --port 8000
+      --max-model-len 8000
+      --max-num-seqs 1
+      --kv-cache-dtype fp8
+      --gpu-memory-utilization 0.90
+      --enable-auto-tool-choice
+      --tool-call-parser hermes
+      --tensor-parallel-size 1
+      --reasoning-parser qwen3
+      --uvicorn-log-level warning
+      --disable-log-requests
+
+  faster_whisper:
+    image: quay.io/ktbs/fd-itbs/faster-whisper:v1.4.1
+    ports:
+      - "50001:50001"
+    env_file: ".env.backend"
+    deploy:
+      resources:
+        reservations:
+          memory: 16g
+          devices:
+            - driver: nvidia
+              device_ids: ["1"]
+              capabilities: [gpu]
+
+  transcribo-backend:
+    image: ghcr.io/dcc-bs/transcribo-backend:latest
+    expose:
+     - "8000"
+    env_file:
+     - .env.backend
+
+  transcribo-frontend:
+    container_name: transcribo-frontend
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+    env_file: "../.env"
+    environment:
+      - NUXT_API_URL=http://transcribo-backend:8000
+      - PORT=3000
+    expose:
+      - 3000
