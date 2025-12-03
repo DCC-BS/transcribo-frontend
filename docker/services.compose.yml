@@ -1,4 +1,5 @@
 services:
+
   nginx:
     image: nginx:alpine
     ports:
@@ -27,16 +28,17 @@ services:
     command: >
       Qwen/Qwen3-32B-AWQ
       --port 8000
-      --max-model-len 10000
+      --max-model-len 8000
       --max-num-seqs 1
       --kv-cache-dtype fp8
-      --gpu-memory-utilization 0.95
+      --gpu-memory-utilization 0.90
       --enable-auto-tool-choice
       --tool-call-parser hermes
       --tensor-parallel-size 1
       --reasoning-parser qwen3
       --uvicorn-log-level warning
       --disable-log-requests
+
   faster_whisper:
     image: quay.io/ktbs/fd-itbs/faster-whisper:v1.4.1
     ports:
@@ -50,12 +52,14 @@ services:
             - driver: nvidia
               device_ids: ["1"]
               capabilities: [gpu]
+
   transcribo-backend:
     image: ghcr.io/dcc-bs/transcribo-backend:latest
     expose:
      - "8000"
     env_file:
      - .env.backend
+
   transcribo-frontend:
     container_name: transcribo-frontend
     build:

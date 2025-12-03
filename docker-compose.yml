@@ -1,83 +1,41 @@
+networks:
+    transcribo-network:
+        driver: bridge
+
 services:
-    faster_whisper:
-        build:
-            context: https://github.com/DCC-BS/bentoml-faster-whisper.git
-            dockerfile: ./Dockerfile
-            platforms:
-                - linux/amd64
-                - linux/arm64
-        ports:
-            - "50001:50001"
-        environment:
-            - HF_AUTH_TOKEN=${HF_AUTH_TOKEN}
-        volumes:
-            - hugging_face_cache:/root/.cache/huggingface
-        deploy:
-            resources:
-                reservations:
-                    memory: 16g
-                    devices:
-                        - driver: nvidia
-                          device_ids: ["1"]
-                          capabilities: [gpu]
+    nginx:
+        extends:
+            file: ./docker/services.compose.yml
+            service: nginx
+        depends_on:
+            - transcribo-frontend
+        networks:
+            - transcribo-network
+
     llm:
-        image: vllm/vllm-openai:v0.11.2
-        deploy:
-            resources:
-                reservations:
-                    devices:
-                        - driver: nvidia
-                          device_ids: ["0"]
-                          capabilities: [gpu]
-        volumes:
-            - "${HOME}/.cache/huggingface:/root/.cache/huggingface"
-        environment:
-            - HUGGING_FACE_HUB_TOKEN=${HUGGING_FACE_HUB_TOKEN}
-        ports:
-            - "8001:8000"
-        ipc: host
-        command:
-            - "--port"
-            - "8000"
-            - "--model"
-            - "Qwen/Qwen3-32B-AWQ"
-            - "--max-model-len"
-            - "10000"
-            - "--max-num-seqs"
-            - "1"
-            - "--kv-cache-dtype"
-            - "fp8"
-            - "--reasoning-parser"
-            - "qwen3"
-            - "--enable-auto-tool-choice"
-            - "--tool-call-parser"
-            - "hermes"
-            - "--gpu-memory-utilization"
-            - "0.95"
-            - "--tensor-parallel-size"
-            - "1"
-            - "--uvicorn-log-level"
-            - "warning"
-            - "--disable-log-requests"
+        extends:
+            file: ./docker/services.compose.yml
+            service: llm
+        networks:
+            - transcribo-network
+
+    faster_whisper:
+        extends:
+            file: ./docker/services.compose.yml
+            service: faster_whisper
+        networks:
+            - transcribo-network
+
     transcribo-backend:
-        build:
-            context: https://github.com/DCC-BS/transcribo-backend.git
-            dockerfile: ./Dockerfile
-        depends_on:
-            - faster_whisper
-        ports:
-            - "8000:8000"
-        environment:
-            - WHISPER_API=http://faster_whisper:50001/v1
+        extends:
+            file: ./docker/services.compose.yml
+            service: transcribo-backend
+        networks:
+            - transcribo-network
+
     transcribo-frontend:
-        build:
-            context: .
-            dockerfile: ./Dockerfile
-        depends_on:
-            - transcribo-backend
-        ports:
-            - "3000:3000"
-        profiles:
-            - frontend
-volumes:
-    hugging_face_cache:
+        extends:
+            file: ./docker/services.compose.yml
+            service: transcribo-frontend
+        networks:
+            - transcribo-network

@@ -23,7 +23,6 @@ const isRecording = ref(false);
 const audioBlob = ref<Blob | undefined>(undefined);
 const userRecording = ref(false);
 
-
 function onRecordingStopped(file: Blob, _: string) {
     isRecording.value = false;
     audioBlob.value = file;
@@ -38,12 +37,12 @@ function emitAudio(): void {
 
 const audioSessionActions = computed(() => [
     {
-        label: 'Process',
-        icon: 'i-lucide-play',
+        label: "Process",
+        icon: "i-lucide-play",
         handler: async (_: string, mp3Blob: Blob, __: () => Promise<void>) => {
             emit("onRecordingComplete", mp3Blob);
-        }
-    }
+        },
+    },
 ]);
 </script>
 
