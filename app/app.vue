@@ -6,7 +6,7 @@ import DialogView from "./components/DialogView.vue";
 import { useInitDialog } from "./composables/dialog";
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
-const { undo, redo, canUndo, canRedo, undoStack } = useCommandHistory();
+const { undo, redo, canUndo, canRedo } = useCommandHistory();
 
 onMounted(() => {
     window.addEventListener("keydown", handleKeyDown);

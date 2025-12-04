@@ -1,20 +1,12 @@
 <script lang="ts" setup>
 import type { SelectMenuItem } from "@nuxt/ui";
-import type { TaskStatus } from "~/types/task";
-import { isHttpStatusCode } from "~/utils/httpErrorCode";
-
-const emit = defineEmits<{
-    uploaded: [task: TaskStatus, file: File];
-}>();
 
 const { t } = useI18n();
 const logger = useLogger();
-const { $api } = useNuxtApp();
 
+const { uploadFile, audioLanguage, numSpeakers, progressMessage, showProgress } = useAudioUpload();
 
 // Track the conversion progress
-const progressMessage = ref("");
-const showProgress = ref(false);
 const errorMessage = ref("");
 
 // Track selected file
@@ -26,9 +18,6 @@ const showFilePreview = ref(false);
 // Template ref for file input
 const fileInputRef = ref<HTMLInputElement | null>(null);
 
-// Track number of speakers selection
-const numSpeakers = ref<string>("auto");
-
 // Speaker options for the select input
 const speakerOptions = [
     { label: t("upload.autoDetection"), value: "auto" },
@@ -39,7 +28,6 @@ const speakerOptions = [
     { label: "5", value: "5" },
     { label: "6", value: "6" },
 ];
-const audioLanguage = ref<string>("de");
 const audioLanguageOptions = ref<SelectMenuItem[]>([
     { label: t("upload.autoDetection"), value: "auto" },
     { label: t("languages.de"), value: "de" },
@@ -241,92 +229,6 @@ async function useThisFile(): Promise<void> {
         errorMessage.value = t("upload.uploadError");
     }
 }
-
-/**
- * Uploads the file to the server
- */
-async function uploadFile(
-    file: File | Blob,
-    originalFile: File,
-): Promise<void> {
-    showProgress.value = true;
-    progressMessage.value = t("upload.uploadingMedia");
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    // Add num_speakers parameter - send null for auto detection, otherwise send the integer value
-    if (numSpeakers.value === "auto") {
-        formData.append("num_speakers", "null");
-    } else {
-        formData.append("num_speakers", numSpeakers.value);
-    }
-
-    // Add audio_language parameter - send null for auto detection, otherwise send the language code
-    if (audioLanguage.value === "auto") {
-        formData.append("audio_language", "null");
-    } else {
-        formData.append("audio_language", audioLanguage.value);
-    }
-
-    try {
-        const response = await $api<TaskStatus>("/api/transcribe/submit", {
-            body: formData,
-            method: "POST",
-        });
-        emit("uploaded", response, originalFile);
-    } catch (error) {
-        const toast = useToast();
-
-        // Handle unsupported media type (415) with a friendly toast
-        if (isHttpStatusCode(error, 415)) {
-            toast.add({
-                title:
-                    t("upload.unsupportedFileTypeTitle") ||
-                    "Unsupported file type",
-                description:
-                    t("upload.unsupportedFileTypeDescription") ||
-                    "Allowed file types: mp3, mp4, wav, webm",
-                color: "error",
-                icon: "i-heroicons-exclamation-triangle",
-            });
-            return;
-        }
-
-        // Handle file too large (413) with a friendly toast
-        if (isHttpStatusCode(error, 413)) {
-            toast.add({
-                title: t("upload.fileTooLargeTitle") || "File too large",
-                description:
-                    t("upload.fileTooLargeDescription") ||
-                    "The file size exceeds the maximum allowed limit. Please try a smaller file.",
-                color: "error",
-                icon: "i-heroicons-exclamation-triangle",
-            });
-            return;
-        }
-
-        // Handle too many requests (429) with a friendly toast
-        if (isHttpStatusCode(error, 429)) {
-            toast.add({
-                title: t("upload.tooManyRequestsTitle") || "Too many requests",
-                description:
-                    t("upload.tooManyRequestsDescription") ||
-                    "You've made too many requests. Please wait a few minutes before trying again.",
-                color: "error",
-                icon: "i-heroicons-clock",
-            });
-            return;
-        }
-
-        throw error;
-    } finally {
-        // Always stop the progress indicator
-        showProgress.value = false;
-    }
-}
-
-defineExpose({ uploadFile });
 </script>
 
 <template>

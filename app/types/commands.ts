@@ -7,6 +7,7 @@ import type {
 } from "./transcriptionResponse";
 
 export const Cmds = {
+    UploadFileCommand: "UploadFileCommand",
     StartTranscriptionCommand: "StartTranscriptionCommand",
     TranscriptionFinishedCommand: "TranscriptionFinishedCommand",
     SeekToSecondsCommand: "SeekToSecondsCommand",
@@ -24,6 +25,15 @@ export const Cmds = {
 export type ITransriboReversibleCommand = IReversibleCommand & {
     toLocaleString: (t: (key: string, params?: object) => string) => string;
 };
+
+export class UploadFileCommand implements ICommand {
+    readonly $type = "UploadFileCommand";
+
+    constructor(
+        public readonly file: File,
+        public readonly status: TaskStatus,
+    ) {}
+}
 
 export class EmptyCommand implements ICommand {
     readonly $type = "EmptyCommand";

@@ -50,7 +50,7 @@ const audioSessionActions = computed(() => [
     <div class="flex flex-col justify-center items-center">
         <div v-if="abandonedRecording && abandonedRecording.length > 0 && !shouldRecord" class="mb-4">
             <p class="mb-2">{{ t("audio.abandonedRecordings", { count: abandonedRecording.length }) }}</p>
-            <UDrawer>
+            <UDrawer title="Audio Recordings" description="Abondend audio recodings">
                 <UButton :label="t('audio.showAbandonedRecordings')" color="neutral" variant="subtle"
                     icon="i-lucide-history" />
                 <template #content>

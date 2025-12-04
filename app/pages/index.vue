@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import type { UploadMediaView } from "#components";
-import type { TaskStatus } from "~/types/task";
+import { Cmds, type UploadFileCommand } from "~/types/commands";
 
 const tasksStore = useTasksStore();
 const { t } = useI18n();
-const { $api } = useNuxtApp();
+const { onCommand } = useCommandBus();
+const { uploadFile } = useAudioUpload();
 
-const uploadMediaView = ref<typeof UploadMediaView>();
+const uploadMediaView = shallowRef<InstanceType<typeof UploadMediaView>>();
 
 interface FeaturePanel {
     id: "upload" | "record";
@@ -49,16 +50,24 @@ const featurePanels: FeaturePanel[] = [
     },
 ];
 
-async function handleUpload(status: TaskStatus, file: File): Promise<void> {
+onCommand<UploadFileCommand>(Cmds.UploadFileCommand, async (command) => {
+    const file = command.file;
+    const status = command.status;
+
     const storedTask = await tasksStore.addTask(status, file, file.name);
     navigateTo(`task/${storedTask.id}`);
-}
+});
 
 async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
     const file = new File([audioBlob], "recording.webm", {
         type: "audio/webm",
     });
-    await uploadMediaView.value?.uploadFile(audioBlob, file);
+
+    if (!uploadMediaView.value) {
+        throw new Error("UploadMediaView reference is not set.");
+    }
+
+    uploadFile(file, file);
 }
 </script>
 
@@ -94,7 +103,7 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                 </div>
                 <!-- Center the recording button vertically while keeping upload content anchored -->
                 <div :class="panel.id === 'record' ? 'flex-1 flex items-center justify-center' : 'mt-auto'">
-                    <UploadMediaView v-if="panel.id === 'upload'" ref="uploadMediaView" @uploaded="handleUpload" />
+                    <UploadMediaView v-if="panel.id === 'upload'" ref="uploadMediaView" />
                     <AudioRecordingView v-else @on-recording-complete="handleRecordingComplete" />
                 </div>
             </section>

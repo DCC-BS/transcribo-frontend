@@ -25,8 +25,6 @@ export default defineEventHandler(async () => {
     try {
         const config = useRuntimeConfig();
 
-        console.log(`${config.apiUrl}/health/readiness`);
-
         const response = await apiFetch<ReadinessCheck>(
             `${config.apiUrl}/health/readiness`,
         );
