@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { NuxtLayout } from "#components";
-import disclaimerText from "./assets/disclaimer.html?raw";
+import disclaimerTextRaw from "./assets/disclaimer.html?raw";
 
 import DialogView from "./components/DialogView.vue";
 import { useInitDialog } from "./composables/dialog";
+
+const disclaimerText = disclaimerTextRaw as string;
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
 const { undo, redo, canUndo, canRedo } = useCommandHistory();

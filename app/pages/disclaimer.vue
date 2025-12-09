@@ -1,5 +1,7 @@
 <script lang="ts" setup>
-import disclaimerText from "./assets/disclaimer.html?raw";
+import disclaimerTextRaw from "../assets/disclaimer.html?raw";
+
+const disclaimerText = disclaimerTextRaw as string;
 
 definePageMeta({
     layout: false,
