@@ -7,6 +7,9 @@ definePageMeta({
 </script>
 
 <template>
-    <Disclaimer appName="Transcribo" :postfixHTML="disclaimerText"
-        confirmationText="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende." />
+    <Disclaimer
+        appName="Transcribo"
+        :postfixHTML="disclaimerText"
+        confirmationText="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."
+    />
 </template>
