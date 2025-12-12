@@ -58,7 +58,7 @@ onMounted(() => {
 const fetchTaskStatus = async (): Promise<void> => {
     if (!props.taskId || !status.value) {
         return;
-    } loadTaskStatus
+    }
 
     try {
         let pollCount = 0;
@@ -127,6 +127,13 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
 
     if (isApiError(newStatus)) {
         showError(newStatus);
+        status.value = {
+            status: TaskStatusEnum.FAILED,
+            task_id: taskId,
+            created_at: "",
+            executed_at: "",
+            progress: 0,
+        };
         return;
     }
 
