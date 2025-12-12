@@ -109,4 +109,6 @@ export const VerboseTranscriptionResponseSchema = z.object({
  * Type representing a verbose transcription response
  * Inferred from VerboseTranscriptionResponseSchema
  */
-export type VerboseTranscriptionResponse = z.infer<typeof VerboseTranscriptionResponseSchema>;
+export type VerboseTranscriptionResponse = z.infer<
+    typeof VerboseTranscriptionResponseSchema
+>;

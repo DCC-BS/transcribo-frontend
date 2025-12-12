@@ -12,7 +12,7 @@ export const SummaryResponseSchema = z.object({
         .string()
         .trim()
         .max(MAX_SUMMARY_LENGTH, {
-            message: `Summary is too long. Maximum length is ${MAX_SUMMARY_LENGTH} characters.`
+            message: `Summary is too long. Maximum length is ${MAX_SUMMARY_LENGTH} characters.`,
         }),
 });
 

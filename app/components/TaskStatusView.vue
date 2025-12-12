@@ -3,7 +3,7 @@ import { isApiError } from "@dcc-bs/communication.bs.js";
 import { match, P } from "ts-pattern";
 import { TranscriptionFinishedCommand } from "~/types/commands";
 import { type TaskStatus, TaskStatusEnum, TaskStatusSchema } from "~/types/task";
-import { TranscriptionResponseSchema, type TranscriptionResponse } from "~/types/transcriptionResponse";
+import { type TranscriptionResponse, TranscriptionResponseSchema } from "~/types/transcriptionResponse";
 
 const $router = useRouter();
 const { apiFetch } = useApi();

@@ -1,7 +1,7 @@
 export const useResizeObserver = (
     container: Ref<HTMLDivElement | undefined>,
 ) => {
-    let observer = (_: ResizeObserverEntry) => { };
+    let observer = (_: ResizeObserverEntry) => {};
 
     const resizeObserver = ref<ResizeObserver>();
 

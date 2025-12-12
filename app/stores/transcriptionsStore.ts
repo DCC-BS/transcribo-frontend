@@ -1,9 +1,9 @@
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { defineStore } from "pinia";
 import { v4 as uuidv4 } from "uuid";
 import { initDB } from "~/services/indexDbService";
-import { SummaryResponseSchema, type SummaryResponse } from "~/types/summarizeResponse";
+import { SummaryResponseSchema } from "~/types/summarizeResponse";
 import type { StoredTranscription } from "../types/storedTranscription";
-import { isApiError } from "@dcc-bs/communication.bs.js";
 
 // Database configuration
 const STORE_NAME = "transcriptions";
@@ -617,14 +617,11 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             const formData = new FormData();
             formData.append("transcript", sanitizedText);
 
-            const summaryResponse = await apiFetch(
-                "/api/summarize/submit",
-                {
-                    schema: SummaryResponseSchema,
-                    method: "POST",
-                    body: formData,
-                },
-            );
+            const summaryResponse = await apiFetch("/api/summarize/submit", {
+                schema: SummaryResponseSchema,
+                method: "POST",
+                body: formData,
+            });
 
             if (isApiError(summaryResponse)) {
                 throw summaryResponse;

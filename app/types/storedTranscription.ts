@@ -1,5 +1,5 @@
-import { SegmentWithIdSchema } from "~/types/transcriptionResponse";
 import { z } from "zod";
+import { SegmentWithIdSchema } from "~/types/transcriptionResponse";
 
 export const StoredTranscriptionSchema = z.object({
     id: z.string(),

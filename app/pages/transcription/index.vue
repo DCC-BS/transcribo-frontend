@@ -3,9 +3,9 @@ import { isApiError } from "@dcc-bs/communication.bs.js";
 import { UButton, ULink } from "#components";
 import type { StoredTask } from "~/stores/tasksStore";
 import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
+import type { StoredTranscription } from "~/types/storedTranscription";
 import type { TaskStatus } from "~/types/task";
 import { TaskStatusEnum } from "~/types/task";
-import type { StoredTranscription } from "~/types/storedTranscription";
 
 const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
