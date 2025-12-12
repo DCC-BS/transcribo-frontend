@@ -356,5 +356,20 @@
     "retention": {
         "title": "Verfügbarkeit der Transkriptionen",
         "description": "Transkriptionen älter als {retentionDays} Tage werden automatisch gelöscht."
+    },
+    "errors": {
+        "audio_file_no_content_type": "Der Audiodatei fehlen Informationen zum Inhaltstyp. Bitte versuchen Sie, die Datei erneut hochzuladen.",
+        "audio_file_no_filename": "Der Audiodatei fehlt ein Dateiname. Bitte stellen Sie sicher, dass Ihre Datei einen gültigen Namen hat.",
+        "unsupported_file_type": "Dieser Dateityp wird nicht unterstützt. Bitte verwenden Sie das Format mp3, mp4, m4a, flac, wav oder webm.",
+        "too_many_requests": "Sie haben zu viele Anfragen gestellt. Bitte warten Sie einige Minuten, bevor Sie es erneut versuchen.",
+        "file_too_large": "Die Dateigröße überschreitet das maximale Limit von 500MB. Bitte verwenden Sie eine kleinere Datei.",
+        "transcription_task_failed": "Die Transkription ist fehlgeschlagen. Bitte versuchen Sie es mit einer anderen Datei erneut.",
+        "transcript_empty": "Die Transkription hat keinen Text ergeben. Das Audio könnte stumm oder unklar sein.",
+        "transcript_too_long": "Die Transkription ist zu lang für die Verarbeitung. Bitte versuchen Sie es mit einer kürzeren Audiodatei.",
+        "summary_generation_failed": "Zusammenfassung konnte nicht erstellt werden. Die Transkription könnte zu kurz oder unklar sein.",
+        "task_not_found": "Die Transkription wurde nicht gefunden. Sie wurde möglicherweise gelöscht oder ist abgelaufen.",
+        "progress_not_found": "Fortschrittsinformationen für diese Aufgabe können nicht abgerufen werden.",
+        "audio_conversion_failed": "Die Audiodatei konnte nicht konvertiert werden. Die Datei könnte beschädigt oder in einem nicht unterstützten Format sein.",
+        "audio_conversion_unexpected_error": "Ein unerwarteter Fehler ist während der Audiokonvertierung aufgetreten. Bitte versuchen Sie es erneut."
     }
 }

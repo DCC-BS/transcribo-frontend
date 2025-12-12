@@ -355,5 +355,20 @@
     "retention": {
         "title": "Availability of Transcriptions",
         "description": "Transcriptions older than {retentionDays} days are automatically deleted."
+    },
+    "errors": {
+        "audio_file_no_content_type": "The audio file is missing content type information. Please try uploading the file again.",
+        "audio_file_no_filename": "The audio file is missing a filename. Please ensure your file has a valid name.",
+        "unsupported_file_type": "This file type is not supported. Please use mp3, mp4, m4a, wav, or webm format.",
+        "too_many_requests": "You've made too many requests. Please wait a few minutes before trying again.",
+        "file_too_large": "The file size exceeds the maximum limit of 500MB. Please use a smaller file.",
+        "transcription_task_failed": "The transcription task failed. Please try again with a different file.",
+        "transcript_empty": "The transcription resulted in no text. The audio may be silent or unclear.",
+        "transcript_too_long": "The transcript is too long to process. Please try with a shorter audio file.",
+        "summary_generation_failed": "Failed to generate a summary. The transcription may be too short or unclear.",
+        "task_not_found": "The transcription task was not found. It may have been deleted or expired.",
+        "progress_not_found": "Unable to retrieve progress information for this task.",
+        "audio_conversion_failed": "Failed to convert the audio file. The file may be corrupted or in an unsupported format.",
+        "audio_conversion_unexpected_error": "An unexpected error occurred during audio conversion. Please try again."
     }
 }

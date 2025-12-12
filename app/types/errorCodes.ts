@@ -1,0 +1,15 @@
+export enum TranscriboErrorCodes {
+    AUDIO_FILE_NO_CONTENT_TYPE = "audio_file_no_content_type",
+    AUDIO_FILE_NO_FILENAME = "audio_file_no_filename",
+    UNSUPPORTED_FILE_TYPE = "unsupported_file_type",
+    TOO_MANY_REQUESTS = "too_many_requests",
+    FILE_TOO_LARGE = "file_too_large",
+    TRANSCRIPTION_TASK_FAILED = "transcription_task_failed",
+    TRANSCRIPT_EMPTY = "transcript_empty",
+    TRANSCRIPT_TOO_LONG = "transcript_too_long",
+    SUMMARY_GENERATION_FAILED = "summary_generation_failed",
+    TASK_NOT_FOUND = "task_not_found",
+    PROGRESS_NOT_FOUND = "progress_not_found",
+    AUDIO_CONVERSION_FAILED = "audio_conversion_failed",
+    AUDIO_CONVERSION_UNEXPECTED_ERROR = "audio_conversion_unexpected_error",
+}
