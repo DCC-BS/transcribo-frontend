@@ -268,14 +268,8 @@ const handleMouseUp = (): void => {
     <div ref="container" class="audio-spectrogram">
         <!-- Audio spectrogram display using Konva, shown when audio is loaded -->
         <div v-if="audioLoaded">
-            <v-stage
-                :config="configKonva"
-                @click="handleStageClick"
-                @mousedown="handleMouseDown"
-                @mousemove="handleMouseMove"
-                @mouseup="handleMouseUp"
-                @mouseleave="handleMouseUp"
-            >
+            <v-stage :config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
+                @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
                 <v-layer :config="transformedLayerConfig">
                     <!-- Spectrogram image -->
                     <v-image :config="spectrogramImageConfig" />
@@ -285,11 +279,7 @@ const handleMouseUp = (): void => {
                     <v-rect :config="freqAxisBackground" />
 
                     <!-- Frequency labels -->
-                    <v-text
-                        v-for="(labelConfig, index) in frequencyLabels"
-                        :key="index"
-                        :config="labelConfig"
-                    />
+                    <v-text v-for="(labelConfig, index) in frequencyLabels" :key="index" :config="labelConfig" />
 
                     <!-- Transparent rectangle to capture events -->
                     <v-rect :config="backgroundRectConfig" />
@@ -301,12 +291,10 @@ const handleMouseUp = (): void => {
             </v-stage>
         </div>
         <div v-else>
-            <USkeleton
-                :style="{
-                    width: `${stageWidth}px`,
-                    height: `${stageHeight}px`,
-                }"
-            />
+            <USkeleton :style="{
+                width: `${stageWidth}px`,
+                height: `${stageHeight}px`,
+            }" />
         </div>
     </div>
 </template>

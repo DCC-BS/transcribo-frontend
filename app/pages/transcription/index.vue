@@ -5,6 +5,7 @@ import type { StoredTask } from "~/stores/tasksStore";
 import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
 import type { TaskStatus } from "~/types/task";
 import { TaskStatusEnum } from "~/types/task";
+import type { StoredTranscription } from "~/types/storedTranscription";
 
 const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
@@ -350,15 +351,8 @@ function handleDeletedTranscription(transcriptionId: string): void {
 
 <template>
     <UContainer>
-        <UAlert
-            icon="i-heroicons-information-circle"
-            color="info"
-            variant="soft"
-            :title="t('retention.title')"
-            :description="
-                t('retention.description', { retentionDays: retentionDays })
-            "
-        />
+        <UAlert icon="i-lucide-info" color="info" variant="soft" :title="t('retention.title')" :description="t('retention.description', { retentionDays: retentionDays })
+            " />
         <!-- Pending tasks section (shown only when there are in-progress tasks) -->
         <div v-if="inProgressTasks.length > 0" class="space-y-6 mb-8">
             <div class="flex justify-between items-center">
@@ -370,37 +364,21 @@ function handleDeletedTranscription(transcriptionId: string): void {
                         {{ t("processing.description") }}
                     </p>
                 </div>
-                <UButton
-                    icon="i-heroicons-arrow-path"
-                    @click="refreshStatuses"
-                    :loading="isProcessingLoading"
-                >
+                <UButton icon="i-lucide-loader-circle" @click="refreshStatuses" :loading="isProcessingLoading">
                     {{ t("processing.refresh") }}
                 </UButton>
             </div>
 
-            <UAlert
-                v-if="processingError"
-                icon="i-heroicons-exclamation-triangle"
-                color="error"
-                variant="soft"
-                :title="t('processing.errors.title')"
-                :description="processingError"
-                @dismiss="processingError = null"
-            />
+            <UAlert v-if="processingError" icon="i-lucide-triangle-alert" color="error" variant="soft"
+                :title="t('processing.errors.title')" :description="processingError"
+                @dismiss="processingError = null" />
 
-            <UTable
-                :columns="processingColumns"
-                :data="inProgressTasks"
-                sticky
-                :loading="isProcessingLoading"
+            <UTable :columns="processingColumns" :data="inProgressTasks" sticky :loading="isProcessingLoading"
                 :empty-state="{
-                    icon: 'i-heroicons-clock',
+                    icon: 'i-lucide-clock',
                     label: t('processing.noTasksFound'),
                     description: t('processing.noTasksDescription'),
-                }"
-                :sorting-options="{ enableSorting: true }"
-            >
+                }" :sorting-options="{ enableSorting: true }">
                 <template #mediaFileName-cell="{ row }">
                     <div class="font-medium text-wrap">
                         {{
@@ -412,48 +390,32 @@ function handleDeletedTranscription(transcriptionId: string): void {
 
                 <template #status-cell="{ row }">
                     <div class="flex items-center gap-2">
-                        <UBadge
-                            :color="getStatusColor(row.original.status.status)"
-                            variant="subtle"
-                        >
+                        <UBadge :color="getStatusColor(row.original.status.status)" variant="subtle">
                             {{ getStatusDisplay(row.original.status.status) }}
                         </UBadge>
-                        <template
-                            v-if="
-                                row.original.status.status ===
-                                TaskStatusEnum.IN_PROGRESS
-                            "
-                        >
-                            <UIcon
-                                name="i-heroicons-cog-6-tooth"
-                                class="animate-spin text-blue-600"
-                            />
-                            <span class="text-sm text-blue-600"
-                                >({{
-                                    Math.round(
-                                        computeTaskProgress(
-                                            row.original.status,
-                                        ) * 100,
-                                    )
-                                }}%)</span
-                            >
+                        <template v-if="
+                            row.original.status.status ===
+                            TaskStatusEnum.IN_PROGRESS
+                        ">
+                            <UIcon name="i-lucide-cog" class="animate-spin text-blue-600" />
+                            <span class="text-sm text-blue-600">({{
+                                Math.round(
+                                    computeTaskProgress(
+                                        row.original.status,
+                                    ) * 100,
+                                )
+                            }}%)</span>
                         </template>
                     </div>
                 </template>
             </UTable>
         </div>
 
-        <UTable
-            :columns="columns"
-            :data="transcriptionStore.transcriptions"
-            sticky
-            :empty-state="{
-                icon: 'i-heroicons-document-text',
-                label: t('transcription.noTranscriptionsFound'),
-                description: t('ui.emptyState.description'),
-            }"
-            :sorting-options="{ enableSorting: true }"
-        >
+        <UTable :columns="columns" :data="transcriptionStore.transcriptions" sticky :empty-state="{
+            icon: 'i-lucide-file-text',
+            label: t('transcription.noTranscriptionsFound'),
+            description: t('ui.emptyState.description'),
+        }" :sorting-options="{ enableSorting: true }">
             <!-- Custom cell renderer for the name column -->
             <template #name-cell="{ row }">
                 <div class="font-bold text-wrap">{{ row.original.name }}</div>
@@ -463,15 +425,11 @@ function handleDeletedTranscription(transcriptionId: string): void {
             <template #actions-cell="{ row }">
                 <div class="flex gap-2 justify-end">
                     <ULink :to="`transcription/${row.original.id}`">
-                        <UButton icon="i-heroicons-pencil" color="primary">
+                        <UButton icon="i-lucide-pencil" color="primary">
                             {{ t("transcription.actions.edit") }}
                         </UButton>
                     </ULink>
-                    <UButton
-                        icon="i-heroicons-trash"
-                        color="error"
-                        @click="handleDeletedTranscription(row.original.id)"
-                    >
+                    <UButton icon="i-lucide-trash" color="error" @click="handleDeletedTranscription(row.original.id)">
                         {{ t("transcription.actions.delete") }}
                     </UButton>
                 </div>

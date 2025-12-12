@@ -162,7 +162,7 @@ const endTimeFormatted = computed({
                 -
                 <a @click="() => seekTo(internalSegment.end)">{{
                     formatTime(internalSegment.end)
-                }}</a>
+                    }}</a>
                 <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1" @keydown="handleKeydown">
                     <template #trailing>
                         <span class="text-xs">s</span>
@@ -172,15 +172,13 @@ const endTimeFormatted = computed({
 
             <div class="flex gap-2">
                 <UTooltip :text="t('help.segments.insertBefore')">
-                    <UButton color="primary" icon="i-heroicons-arrow-up-on-square-stack"
-                        @click="addSegmentBefore(internalSegment)" />
+                    <UButton color="primary" icon="i-lucide-move-up" @click="addSegmentBefore(internalSegment)" />
                 </UTooltip>
                 <UTooltip :text="t('help.segments.insertAfter')">
-                    <UButton color="primary" icon="i-heroicons-arrow-down-on-square-stack"
-                        @click="addSegmentAfter(internalSegment)" />
+                    <UButton color="primary" icon="i-lucide-move-down" @click="addSegmentAfter(internalSegment)" />
                 </UTooltip>
                 <UTooltip :text="t('help.segments.deleteSegment')">
-                    <UButton color="error" icon="i-heroicons-trash" @click="removeSegment(internalSegment)" />
+                    <UButton color="error" icon="i-lucide-trash" @click="removeSegment(internalSegment)" />
                 </UTooltip>
             </div>
         </div>

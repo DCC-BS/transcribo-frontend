@@ -47,6 +47,7 @@
         }
     },
     "navigation": {
+        "app": "Transcribo",
         "new": "New Transcription",
         "transcriptions": "All Transcriptions",
         "languages": "Languages",

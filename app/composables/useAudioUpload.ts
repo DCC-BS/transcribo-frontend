@@ -51,7 +51,7 @@ export function useAudioUpload() {
                 toast.add({
                     title: t(`errors.${response.errorId}`),
                     color: "error",
-                    icon: "i-heroicons-exclamation-triangle",
+                    icon: "i-lucide-triangle-alert",
                 });
                 return;
             }
@@ -68,7 +68,7 @@ export function useAudioUpload() {
                         t("upload.unsupportedFileTypeDescription") ||
                         "Allowed file types: mp3, mp4, wav, webm",
                     color: "error",
-                    icon: "i-heroicons-exclamation-triangle",
+                    icon: "i-lucide-triangle-alert",
                 });
                 return;
             }
@@ -81,7 +81,7 @@ export function useAudioUpload() {
                         t("upload.fileTooLargeDescription") ||
                         "The file size exceeds the maximum allowed limit. Please try a smaller file.",
                     color: "error",
-                    icon: "i-heroicons-exclamation-triangle",
+                    icon: "i-lucide-triangle-alert",
                 });
                 return;
             }
@@ -95,7 +95,7 @@ export function useAudioUpload() {
                         t("upload.tooManyRequestsDescription") ||
                         "You've made too many requests. Please wait a few minutes before trying again.",
                     color: "error",
-                    icon: "i-heroicons-clock",
+                    icon: "i-lucide-clock",
                 });
                 return;
             }
