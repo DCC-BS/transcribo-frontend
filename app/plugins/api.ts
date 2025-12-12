@@ -1,18 +1,21 @@
+import {
+    createApiClient,
+    createFetcherBuilder,
+} from "@dcc-bs/communication.bs.js";
 import { useClientId } from "~/composables/useClientId";
 
 export default defineNuxtPlugin((_) => {
-    const api = $fetch.create({
-        onRequest({ options }) {
-            options.headers.set(
-                "X-Ephemeral-UUID",
-                useClientId().getClientId(),
-            );
-        },
-    });
+    const clientId = useClientId().getClientId();
+
+    const fetcher = createFetcherBuilder()
+        .addHeader("X-Ephemeral-UUID", clientId)
+        .build();
+
+    const apiClient = createApiClient(fetcher);
 
     return {
         provide: {
-            api: api as typeof $fetch,
+            apiClient: apiClient,
         },
     };
 });

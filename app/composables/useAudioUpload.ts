@@ -1,3 +1,4 @@
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { UploadFileCommand } from "~/types/commands";
 import type { TaskStatus } from "~/types/task";
 
@@ -7,7 +8,7 @@ export function useAudioUpload() {
     const numSpeakers = useState<string>("numSpeakers", () => "auto");
     const audioLanguage = useState<string>("audioLanguage", () => "de");
 
-    const { $api } = useNuxtApp();
+    const { apiFetch } = useApi();
     const { t } = useI18n();
     const { executeCommand } = useCommandBus();
 
@@ -35,16 +36,28 @@ export function useAudioUpload() {
             formData.append("audio_language", audioLanguage.value);
         }
 
+        const toast = useToast();
+
         try {
-            const response = await $api<TaskStatus>("/api/transcribe/submit", {
-                body: formData,
-                method: "POST",
-            });
+            const response = await apiFetch<TaskStatus>(
+                "/api/transcribe/submit",
+                {
+                    body: formData,
+                    method: "POST",
+                },
+            );
+
+            if (isApiError(response)) {
+                toast.add({
+                    title: t(`errors.${response.errorId}`),
+                    color: "error",
+                    icon: "i-heroicons-exclamation-triangle",
+                });
+                return;
+            }
 
             executeCommand(new UploadFileCommand(originalFile, response));
         } catch (error) {
-            const toast = useToast();
-
             // Handle unsupported media type (415) with a friendly toast
             if (isHttpStatusCode(error, 415)) {
                 toast.add({

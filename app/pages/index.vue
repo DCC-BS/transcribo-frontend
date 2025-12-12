@@ -75,25 +75,41 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
     <UContainer class="py-12 space-y-12">
         <section class="text-center space-y-4 max-w-3xl mx-auto">
             <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
-                {{ t('pages.index.title') || 'Transcribo' }}
+                {{ t("pages.index.title") || "Transcribo" }}
             </h1>
             <p class="text-lg text-gray-600 dark:text-gray-300">
-                {{ t('pages.index.subtitle') }}
+                {{ t("pages.index.subtitle") }}
             </p>
         </section>
 
         <div class="grid gap-8 md:grid-cols-2">
-            <section v-for="panel in featurePanels" :key="panel.id" :id="panel.id"
-                class="flex h-full flex-col gap-6 rounded-3xl border border-gray-200/60 dark:border-gray-800/70 bg-white/80 dark:bg-gray-900/60 p-6 shadow-sm backdrop-blur">
+            <section
+                v-for="panel in featurePanels"
+                :key="panel.id"
+                :id="panel.id"
+                class="flex h-full flex-col gap-6 rounded-3xl border border-gray-200/60 dark:border-gray-800/70 bg-white/80 dark:bg-gray-900/60 p-6 shadow-sm backdrop-blur"
+            >
                 <div class="flex items-start gap-4">
-                    <div class="p-3 rounded-2xl" :class="panel.accentClasses.wrapper">
-                        <UIcon :name="panel.icon" class="w-6 h-6" :class="panel.accentClasses.icon" />
+                    <div
+                        class="p-3 rounded-2xl"
+                        :class="panel.accentClasses.wrapper"
+                    >
+                        <UIcon
+                            :name="panel.icon"
+                            class="w-6 h-6"
+                            :class="panel.accentClasses.icon"
+                        />
                     </div>
                     <div class="space-y-1">
-                        <span class="text-xs font-semibold uppercase tracking-wide" :class="panel.accentClasses.text">
+                        <span
+                            class="text-xs font-semibold uppercase tracking-wide"
+                            :class="panel.accentClasses.text"
+                        >
                             {{ panel.label }}
                         </span>
-                        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
+                        <h2
+                            class="text-2xl font-semibold text-gray-900 dark:text-white"
+                        >
                             {{ t(panel.titleKey) }}
                         </h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -102,9 +118,21 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                     </div>
                 </div>
                 <!-- Center the recording button vertically while keeping upload content anchored -->
-                <div :class="panel.id === 'record' ? 'flex-1 flex items-center justify-center' : 'mt-auto'">
-                    <UploadMediaView v-if="panel.id === 'upload'" ref="uploadMediaView" />
-                    <AudioRecordingView v-else @on-recording-complete="handleRecordingComplete" />
+                <div
+                    :class="
+                        panel.id === 'record'
+                            ? 'flex-1 flex items-center justify-center'
+                            : 'mt-auto'
+                    "
+                >
+                    <UploadMediaView
+                        v-if="panel.id === 'upload'"
+                        ref="uploadMediaView"
+                    />
+                    <AudioRecordingView
+                        v-else
+                        @on-recording-complete="handleRecordingComplete"
+                    />
                 </div>
             </section>
         </div>

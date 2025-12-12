@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { UButton, ULink } from "#components";
 import type { StoredTask } from "~/stores/tasksStore";
 import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
@@ -13,7 +14,7 @@ const transcriptionStore = useTranscriptionsStore();
 const taskStore = useTasksStore();
 const { openDialog } = useDialog();
 const { t } = useI18n();
-const { $api } = useNuxtApp();
+const { apiFetch } = useApi();
 
 // Define columns for the table
 const columns = [
@@ -179,18 +180,28 @@ function computeTaskProgress(taskStatus: TaskStatus): number {
 // Check task status and convert to transcription if completed
 async function checkTaskStatus(task: StoredTask): Promise<void> {
     try {
-        const statusResponse = await $api<TaskStatus>(
+        const statusResponse = await apiFetch<TaskStatus>(
             `/api/transcribe/${task.id}/status`,
         );
 
+        if (isApiError(statusResponse)) {
+            throw new Error(statusResponse.debugMessage);
+        }
+
         if (statusResponse.status === TaskStatusEnum.COMPLETED) {
-            const transcriptionResponse = await $api<
+            const transcriptionResponse = await apiFetch<
                 import("~/types/transcriptionResponse").TranscriptionResponse
             >(`/api/transcribe/${task.id}`);
 
             const fullTask = await taskStore.getTask(task.id);
             if (!fullTask?.mediaFile) {
                 throw new Error(t("task.errors.noMediaFile"));
+            }
+
+            if (isApiError(transcriptionResponse)) {
+                // todo transalte error message
+                processingError.value = transcriptionResponse.errorId;
+                return;
             }
 
             await transcriptionStore.addTranscription(
@@ -339,56 +350,110 @@ function handleDeletedTranscription(transcriptionId: string): void {
 
 <template>
     <UContainer>
-        <UAlert icon="i-heroicons-information-circle" color="info" variant="soft" :title="t('retention.title')"
-            :description="t('retention.description', { retentionDays: retentionDays })" />
+        <UAlert
+            icon="i-heroicons-information-circle"
+            color="info"
+            variant="soft"
+            :title="t('retention.title')"
+            :description="
+                t('retention.description', { retentionDays: retentionDays })
+            "
+        />
         <!-- Pending tasks section (shown only when there are in-progress tasks) -->
         <div v-if="inProgressTasks.length > 0" class="space-y-6 mb-8">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-xl font-bold">{{ t('processing.title') }}</h2>
-                    <p class="text-gray-600 mt-1">{{ t('processing.description') }}</p>
+                    <h2 class="text-xl font-bold">
+                        {{ t("processing.title") }}
+                    </h2>
+                    <p class="text-gray-600 mt-1">
+                        {{ t("processing.description") }}
+                    </p>
                 </div>
-                <UButton icon="i-heroicons-arrow-path" @click="refreshStatuses" :loading="isProcessingLoading">
-                    {{ t('processing.refresh') }}
+                <UButton
+                    icon="i-heroicons-arrow-path"
+                    @click="refreshStatuses"
+                    :loading="isProcessingLoading"
+                >
+                    {{ t("processing.refresh") }}
                 </UButton>
             </div>
 
-            <UAlert v-if="processingError" icon="i-heroicons-exclamation-triangle" color="error" variant="soft"
-                :title="t('processing.errors.title')" :description="processingError"
-                @dismiss="processingError = null" />
+            <UAlert
+                v-if="processingError"
+                icon="i-heroicons-exclamation-triangle"
+                color="error"
+                variant="soft"
+                :title="t('processing.errors.title')"
+                :description="processingError"
+                @dismiss="processingError = null"
+            />
 
-            <UTable :columns="processingColumns" :data="inProgressTasks" sticky :loading="isProcessingLoading"
+            <UTable
+                :columns="processingColumns"
+                :data="inProgressTasks"
+                sticky
+                :loading="isProcessingLoading"
                 :empty-state="{
                     icon: 'i-heroicons-clock',
                     label: t('processing.noTasksFound'),
                     description: t('processing.noTasksDescription'),
-                }" :sorting-options="{ enableSorting: true }">
+                }"
+                :sorting-options="{ enableSorting: true }"
+            >
                 <template #mediaFileName-cell="{ row }">
                     <div class="font-medium text-wrap">
-                        {{ row.original.mediaFileName || t('processing.unknownFile') }}
+                        {{
+                            row.original.mediaFileName ||
+                            t("processing.unknownFile")
+                        }}
                     </div>
                 </template>
 
                 <template #status-cell="{ row }">
                     <div class="flex items-center gap-2">
-                        <UBadge :color="getStatusColor(row.original.status.status)" variant="subtle">
+                        <UBadge
+                            :color="getStatusColor(row.original.status.status)"
+                            variant="subtle"
+                        >
                             {{ getStatusDisplay(row.original.status.status) }}
                         </UBadge>
-                        <template v-if="row.original.status.status === TaskStatusEnum.IN_PROGRESS">
-                            <UIcon name="i-heroicons-cog-6-tooth" class="animate-spin text-blue-600" />
-                            <span class="text-sm text-blue-600">({{
-                                Math.round(computeTaskProgress(row.original.status) * 100) }}%)</span>
+                        <template
+                            v-if="
+                                row.original.status.status ===
+                                TaskStatusEnum.IN_PROGRESS
+                            "
+                        >
+                            <UIcon
+                                name="i-heroicons-cog-6-tooth"
+                                class="animate-spin text-blue-600"
+                            />
+                            <span class="text-sm text-blue-600"
+                                >({{
+                                    Math.round(
+                                        computeTaskProgress(
+                                            row.original.status,
+                                        ) * 100,
+                                    )
+                                }}%)</span
+                            >
                         </template>
                     </div>
                 </template>
             </UTable>
         </div>
 
-        <UTable :columns="columns" :data="transcriptionStore.transcriptions" sticky :empty-state="{
-            icon: 'i-heroicons-document-text',
-            label: t('transcription.noTranscriptionsFound'),
-            description: t('ui.emptyState.description'),
-        }" :sorting-options="{ enableSorting: true }">
+        <UTable
+            :columns="columns"
+            :data="transcriptionStore.transcriptions"
+            sticky
+            :empty-state="{
+                icon: 'i-heroicons-document-text',
+                label: t('transcription.noTranscriptionsFound'),
+                description: t('ui.emptyState.description'),
+            }"
+            :sorting-options="{ enableSorting: true }"
+        >
             <!-- Custom cell renderer for the name column -->
             <template #name-cell="{ row }">
                 <div class="font-bold text-wrap">{{ row.original.name }}</div>
@@ -399,12 +464,15 @@ function handleDeletedTranscription(transcriptionId: string): void {
                 <div class="flex gap-2 justify-end">
                     <ULink :to="`transcription/${row.original.id}`">
                         <UButton icon="i-heroicons-pencil" color="primary">
-                            {{ t('transcription.actions.edit') }}
+                            {{ t("transcription.actions.edit") }}
                         </UButton>
                     </ULink>
-                    <UButton icon="i-heroicons-trash" color="error"
-                        @click="handleDeletedTranscription(row.original.id)">
-                        {{ t('transcription.actions.delete') }}
+                    <UButton
+                        icon="i-heroicons-trash"
+                        color="error"
+                        @click="handleDeletedTranscription(row.original.id)"
+                    >
+                        {{ t("transcription.actions.delete") }}
                     </UButton>
                 </div>
             </template>
