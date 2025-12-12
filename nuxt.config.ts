@@ -117,7 +117,7 @@ export default defineNuxtConfig({
     icon: {
         // Bundle specific collections server-side to avoid remote Iconify fetches
         serverBundle: {
-            collections: ["lucide", "heroicons"],
+            collections: ["lucide"],
         },
     },
     // Disable Bunny Fonts provider to avoid external fetches/errors

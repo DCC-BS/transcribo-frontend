@@ -1,19 +1,19 @@
 services:
-  llm:
-    extends:
-      file: ./docker/services.compose.yml
-      service: llm
-    ports:
-      - "9000:8000"
+    llm:
+        extends:
+            file: ./docker/services.compose.yml
+            service: llm
+        ports:
+            - "9000:8000"
 
-  faster_whisper:
-    extends:
-      file: ./docker/services.compose.yml
-      service: faster_whisper
+    faster_whisper:
+        extends:
+            file: ./docker/services.compose.yml
+            service: faster_whisper
 
-  transcribo-backend:
-    extends:
-      file: ./docker/services.compose.yml
-      service: transcribo-backend
-    ports:
-      - "8000:8000"
+    transcribo-backend:
+        extends:
+            file: ./docker/services.compose.yml
+            service: transcribo-backend
+        ports:
+            - "8000:8000"

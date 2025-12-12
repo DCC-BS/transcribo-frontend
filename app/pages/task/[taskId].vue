@@ -96,12 +96,6 @@ async function handleTranscriptionFinished(
 <template>
     <UContainer>
         <TaskStatusView v-if="taskId && isLoaded" :task-id="taskId" />
-        <UAlert
-            v-if="errorMessage"
-            color="error"
-            :title="errorMessage"
-            icon="i-heroicons-exclamation-circle"
-            type="error"
-        />
+        <UAlert v-if="errorMessage" color="error" :title="errorMessage" icon="i-lucide-circle-alert" type="error" />
     </UContainer>
 </template>

@@ -1,25 +1,25 @@
 name: Build & Test
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    push:
+        branches:
+            - main
+    pull_request:
+        branches:
+            - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: DCC-BS/ci-workflows/actions/node-bun-biome-playwright@v1
-        with:
-          node_version: "24.x"
-          working_directory: "."
-          run_biome: "true"
-          run_playwright: "false"
-          install_method: "bun"
-          build_command: "bun run build"
-          test_command: "bunx playwright test"
-          artifact_name: "playwright-report"
-          artifact_retention_days: 30
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: DCC-BS/ci-workflows/actions/node-bun-biome-playwright@v1
+              with:
+                  node_version: "24.x"
+                  working_directory: "."
+                  run_biome: "true"
+                  run_playwright: "false"
+                  install_method: "bun"
+                  build_command: "bun run build"
+                  test_command: "bunx playwright test"
+                  artifact_name: "playwright-report"
+                  artifact_retention_days: 30

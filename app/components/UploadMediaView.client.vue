@@ -235,8 +235,8 @@ async function useThisFile(): Promise<void> {
     <div>
         <!-- File Input Section -->
         <div v-if="!showFilePreview" class="space-y-4">
-            <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up"
-                :disabled="showProgress" @change="loadAudio" ref="fileInputRef" />
+            <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-lucide-file-up" :disabled="showProgress"
+                @change="loadAudio" ref="fileInputRef" />
         </div>
 
         <!-- File Preview Section -->
@@ -247,7 +247,7 @@ async function useThisFile(): Promise<void> {
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                             {{ t('upload.filePreview') || 'File Preview' }}
                         </h3>
-                        <UButton variant="ghost" size="sm" icon="i-heroicons-x-mark" @click="clearSelectedFile" />
+                        <UButton variant="ghost" size="sm" icon="i-lucide-x" @click="clearSelectedFile" />
                     </div>
                 </template>
 
@@ -255,7 +255,7 @@ async function useThisFile(): Promise<void> {
                     <!-- File Info -->
                     <div class="flex items-start gap-3">
                         <div class="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <UIcon :name="isVideoFile ? 'i-heroicons-video-camera' : 'i-heroicons-musical-note'"
+                            <UIcon :name="isVideoFile ? 'i-lucide-file-video-camera' : 'i-lucide-file-music'"
                                 class="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div class="flex-1 min-w-0">
@@ -284,7 +284,7 @@ async function useThisFile(): Promise<void> {
                         <UButton color="primary" size="lg" :loading="showProgress" :disabled="showProgress"
                             @click="useThisFile">
                             <template #leading>
-                                <UIcon name="i-heroicons-play" />
+                                <UIcon name="i-lucide-play" />
                             </template>
                             {{ t('upload.useThisFile') || 'Use this file' }}
                         </UButton>

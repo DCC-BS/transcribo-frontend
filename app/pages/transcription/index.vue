@@ -1,9 +1,12 @@
 <script lang="ts" setup>
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { UButton, ULink } from "#components";
 import type { StoredTask } from "~/stores/tasksStore";
 import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
+import type { StoredTranscription } from "~/types/storedTranscription";
 import type { TaskStatus } from "~/types/task";
-import { TaskStatusEnum } from "~/types/task";
+import { TaskStatusEnum, TaskStatusSchema } from "~/types/task";
+import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
 
 const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
@@ -13,7 +16,7 @@ const transcriptionStore = useTranscriptionsStore();
 const taskStore = useTasksStore();
 const { openDialog } = useDialog();
 const { t } = useI18n();
-const { $api } = useNuxtApp();
+const { apiFetch } = useApi();
 
 // Define columns for the table
 const columns = [
@@ -73,7 +76,7 @@ const columns = [
 // Pending (in-progress) tasks state
 const processingTasks = ref<StoredTask[]>([]);
 const isProcessingLoading = ref(false);
-const processingError = ref<string | null>(null);
+const processingError = ref<string>();
 
 // Columns for pending tasks table
 const processingColumns = [
@@ -179,18 +182,30 @@ function computeTaskProgress(taskStatus: TaskStatus): number {
 // Check task status and convert to transcription if completed
 async function checkTaskStatus(task: StoredTask): Promise<void> {
     try {
-        const statusResponse = await $api<TaskStatus>(
+        const statusResponse = await apiFetch(
             `/api/transcribe/${task.id}/status`,
+            {
+                schema: TaskStatusSchema
+            }
         );
 
+        if (isApiError(statusResponse)) {
+            throw statusResponse;
+        }
+
         if (statusResponse.status === TaskStatusEnum.COMPLETED) {
-            const transcriptionResponse = await $api<
-                import("~/types/transcriptionResponse").TranscriptionResponse
-            >(`/api/transcribe/${task.id}`);
+            const transcriptionResponse = await apiFetch(`/api/transcribe/${task.id}`, {
+                schema: TranscriptionResponseSchema
+            });
 
             const fullTask = await taskStore.getTask(task.id);
             if (!fullTask?.mediaFile) {
                 throw new Error(t("task.errors.noMediaFile"));
+            }
+
+            if (isApiError(transcriptionResponse)) {
+                processingError.value = t(`errors.${transcriptionResponse.errorId}`);
+                return;
             }
 
             await transcriptionStore.addTranscription(
@@ -250,7 +265,7 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
 async function loadProcessingTasks(): Promise<void> {
     try {
         isProcessingLoading.value = true;
-        processingError.value = null;
+        processingError.value = undefined;
         const allTasks = await taskStore.loadAllTasks();
         processingTasks.value = allTasks;
 
@@ -339,33 +354,40 @@ function handleDeletedTranscription(transcriptionId: string): void {
 
 <template>
     <UContainer>
-        <UAlert icon="i-heroicons-information-circle" color="info" variant="soft" :title="t('retention.title')"
-            :description="t('retention.description', { retentionDays: retentionDays })" />
+        <UAlert icon="i-lucide-info" color="info" variant="soft" :title="t('retention.title')" :description="t('retention.description', { retentionDays: retentionDays })
+            " />
         <!-- Pending tasks section (shown only when there are in-progress tasks) -->
         <div v-if="inProgressTasks.length > 0" class="space-y-6 mb-8">
             <div class="flex justify-between items-center">
                 <div>
-                    <h2 class="text-xl font-bold">{{ t('processing.title') }}</h2>
-                    <p class="text-gray-600 mt-1">{{ t('processing.description') }}</p>
+                    <h2 class="text-xl font-bold">
+                        {{ t("processing.title") }}
+                    </h2>
+                    <p class="text-gray-600 mt-1">
+                        {{ t("processing.description") }}
+                    </p>
                 </div>
-                <UButton icon="i-heroicons-arrow-path" @click="refreshStatuses" :loading="isProcessingLoading">
-                    {{ t('processing.refresh') }}
+                <UButton icon="i-lucide-loader-circle" @click="refreshStatuses" :loading="isProcessingLoading">
+                    {{ t("processing.refresh") }}
                 </UButton>
             </div>
 
-            <UAlert v-if="processingError" icon="i-heroicons-exclamation-triangle" color="error" variant="soft"
+            <UAlert v-if="processingError" icon="i-lucide-triangle-alert" color="error" variant="soft"
                 :title="t('processing.errors.title')" :description="processingError"
-                @dismiss="processingError = null" />
+                @dismiss="processingError = undefined" />
 
             <UTable :columns="processingColumns" :data="inProgressTasks" sticky :loading="isProcessingLoading"
                 :empty-state="{
-                    icon: 'i-heroicons-clock',
+                    icon: 'i-lucide-clock',
                     label: t('processing.noTasksFound'),
                     description: t('processing.noTasksDescription'),
                 }" :sorting-options="{ enableSorting: true }">
                 <template #mediaFileName-cell="{ row }">
                     <div class="font-medium text-wrap">
-                        {{ row.original.mediaFileName || t('processing.unknownFile') }}
+                        {{
+                            row.original.mediaFileName ||
+                            t("processing.unknownFile")
+                        }}
                     </div>
                 </template>
 
@@ -374,10 +396,18 @@ function handleDeletedTranscription(transcriptionId: string): void {
                         <UBadge :color="getStatusColor(row.original.status.status)" variant="subtle">
                             {{ getStatusDisplay(row.original.status.status) }}
                         </UBadge>
-                        <template v-if="row.original.status.status === TaskStatusEnum.IN_PROGRESS">
-                            <UIcon name="i-heroicons-cog-6-tooth" class="animate-spin text-blue-600" />
+                        <template v-if="
+                            row.original.status.status ===
+                            TaskStatusEnum.IN_PROGRESS
+                        ">
+                            <UIcon name="i-lucide-cog" class="animate-spin text-blue-600" />
                             <span class="text-sm text-blue-600">({{
-                                Math.round(computeTaskProgress(row.original.status) * 100) }}%)</span>
+                                Math.round(
+                                    computeTaskProgress(
+                                        row.original.status,
+                                    ) * 100,
+                                )
+                            }}%)</span>
                         </template>
                     </div>
                 </template>
@@ -385,7 +415,7 @@ function handleDeletedTranscription(transcriptionId: string): void {
         </div>
 
         <UTable :columns="columns" :data="transcriptionStore.transcriptions" sticky :empty-state="{
-            icon: 'i-heroicons-document-text',
+            icon: 'i-lucide-file-text',
             label: t('transcription.noTranscriptionsFound'),
             description: t('ui.emptyState.description'),
         }" :sorting-options="{ enableSorting: true }">
@@ -398,13 +428,12 @@ function handleDeletedTranscription(transcriptionId: string): void {
             <template #actions-cell="{ row }">
                 <div class="flex gap-2 justify-end">
                     <ULink :to="`transcription/${row.original.id}`">
-                        <UButton icon="i-heroicons-pencil" color="primary">
-                            {{ t('transcription.actions.edit') }}
+                        <UButton icon="i-lucide-pencil" color="primary">
+                            {{ t("transcription.actions.edit") }}
                         </UButton>
                     </ULink>
-                    <UButton icon="i-heroicons-trash" color="error"
-                        @click="handleDeletedTranscription(row.original.id)">
-                        {{ t('transcription.actions.delete') }}
+                    <UButton icon="i-lucide-trash-2" color="error" @click="handleDeletedTranscription(row.original.id)">
+                        {{ t("transcription.actions.delete") }}
                     </UButton>
                 </div>
             </template>

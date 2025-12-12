@@ -1,11 +1,13 @@
 <script lang="ts" setup>
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { match, P } from "ts-pattern";
 import { TranscriptionFinishedCommand } from "~/types/commands";
-import { type TaskStatus, TaskStatusEnum } from "~/types/task";
-import type { TranscriptionResponse } from "~/types/transcriptionResponse";
+import { type TaskStatus, TaskStatusEnum, TaskStatusSchema } from "~/types/task";
+import { type TranscriptionResponse, TranscriptionResponseSchema } from "~/types/transcriptionResponse";
 
 const $router = useRouter();
-const { $api } = useNuxtApp();
+const { apiFetch } = useApi();
+const { showError } = useUserFeedback();
 
 const props = defineProps<{
     taskId: string;
@@ -86,9 +88,18 @@ const fetchTaskStatus = async (): Promise<void> => {
         let result: TranscriptionResponse | undefined;
         if (status.value?.status === TaskStatusEnum.COMPLETED) {
             try {
-                result = await $api<TranscriptionResponse>(
+                const response = await apiFetch(
                     `/api/transcribe/${props.taskId}`,
+                    {
+                        schema: TranscriptionResponseSchema,
+                    },
                 );
+
+                if (isApiError(response)) {
+                    throw response;
+                }
+
+                result = response;
             } catch (error) {
                 // If we can't fetch the result, mark as failed
                 if (status.value) {
@@ -107,9 +118,25 @@ const fetchTaskStatus = async (): Promise<void> => {
 };
 
 const loadTaskStatus = async (taskId: string): Promise<void> => {
-    const newStatus = await $api<TaskStatus>(
+    const newStatus = await apiFetch(
         `/api/transcribe/${taskId}/status`,
+        {
+            schema: TaskStatusSchema,
+        }
     );
+
+    if (isApiError(newStatus)) {
+        showError(newStatus);
+        status.value = {
+            status: TaskStatusEnum.FAILED,
+            task_id: taskId,
+            created_at: "",
+            executed_at: "",
+            progress: 0,
+        };
+        return;
+    }
+
     status.value = newStatus;
 };
 </script>
@@ -118,14 +145,14 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
     <div>
         <!-- Show loading animation when in progress -->
         <div v-if="isInProgress" class="loading-container">
-            <UIcon name="i-heroicons-arrow-path" class="loading-spinner" />
+            <UIcon name="i-lucide-loader-circle" class="loading-spinner" />
             <p class="loading-text">{{ t('taskStatus.processing') }}</p>
         </div>
 
         <!-- Success animation shown when status is COMPLETED -->
         <div v-else-if="isSuccessful" class="success-container">
             <div class="success-circle">
-                <UIcon name="i-heroicons-check" class="success-icon" />
+                <UIcon name="i-lucide-check" class="success-icon" />
             </div>
             <p class="success-text">{{ t('taskStatus.completed') }}</p>
         </div>
@@ -133,7 +160,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
         <!-- Error animation shown when status is FAILED or CANCELLED -->
         <div v-else-if="hasFailed" class="error-container">
             <div class="error-circle">
-                <UIcon name="i-heroicons-x-mark" class="error-icon" />
+                <UIcon name="i-lucide-x" class="error-icon" />
             </div>
             <p class="error-text">{{ t('taskStatus.failed') }}</p>
             <p class="error-description">{{ t('taskStatus.failedDescription') }}</p>

@@ -1,21 +1,9 @@
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { defineStore } from "pinia";
 import { v4 as uuidv4 } from "uuid";
 import { initDB } from "~/services/indexDbService";
-import type { SummaryResponse } from "~/types/summarizeResponse";
-import type { SegementWithId } from "../types/transcriptionResponse";
-
-// Define the structure of a stored transcription
-export interface StoredTranscription {
-    id: string;
-    segments: SegementWithId[]; // Using Segment[] instead of text
-    name: string; // Added name property for the transcription
-    createdAt: Date;
-    updatedAt: Date;
-    audioFileId?: string;
-    mediaFile?: Blob;
-    mediaFileName?: string;
-    summary?: string; // AI-generated meeting summary
-}
+import { SummaryResponseSchema } from "~/types/summarizeResponse";
+import type { StoredTranscription } from "../types/storedTranscription";
 
 // Database configuration
 const STORE_NAME = "transcriptions";
@@ -35,6 +23,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
     const error = ref<string | null>(null);
     const db = ref<IDBDatabase | null>(null);
     const isSummaryGenerating = ref(false);
+    const { apiFetch } = useApi();
 
     const logger = useLogger();
 
@@ -555,45 +544,6 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
         return trimmedText;
     }
 
-    /**
-     * Helper function to validate API response structure
-     */
-    function validateSummaryResponse(response: unknown): string {
-        if (!response || typeof response !== "object") {
-            throw new Error(
-                "Invalid API response: response must be an object.",
-            );
-        }
-
-        const responseObj = response as Record<string, unknown>;
-
-        if (!("summary" in responseObj)) {
-            throw new Error("Invalid API response: missing 'summary' field.");
-        }
-
-        const summary = responseObj.summary;
-
-        if (typeof summary !== "string") {
-            throw new Error(
-                "Invalid API response: 'summary' must be a string.",
-            );
-        }
-
-        if (summary.trim().length === 0) {
-            throw new Error("Invalid API response: 'summary' cannot be empty.");
-        }
-
-        // Additional validation for summary content
-        const MAX_SUMMARY_LENGTH = 10000; // 10KB max for summary
-        if (summary.length > MAX_SUMMARY_LENGTH) {
-            throw new Error(
-                `Summary response is too large. Maximum allowed length is ${MAX_SUMMARY_LENGTH} characters.`,
-            );
-        }
-
-        return summary.trim();
-    }
-
     // Computed properties (getters)
 
     /**
@@ -667,29 +617,30 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             const formData = new FormData();
             formData.append("transcript", sanitizedText);
 
-            const { $api } = useNuxtApp();
-            const summaryResponse = await $api<SummaryResponse>(
-                "/api/summarize/submit",
-                {
-                    method: "POST",
-                    body: formData,
-                },
-            );
+            const summaryResponse = await apiFetch("/api/summarize/submit", {
+                schema: SummaryResponseSchema,
+                method: "POST",
+                body: formData,
+            });
 
-            // Validate API response structure
-            const validatedSummary = validateSummaryResponse(summaryResponse);
+            if (isApiError(summaryResponse)) {
+                throw summaryResponse;
+            }
+
+            const summary = summaryResponse.summary;
 
             // Store the summary in the current transcription with proper reactivity
             currentTranscription.value = {
                 ...currentTranscription.value,
-                summary: validatedSummary,
+                summary: summary,
             };
 
             // Update the transcription in IndexedDB
             await updateCurrentTranscription({
-                summary: validatedSummary,
+                summary: summary,
             });
-            return validatedSummary;
+
+            return summary;
         } catch (error) {
             logger.error("Failed to generate summary:", error);
             throw error;
