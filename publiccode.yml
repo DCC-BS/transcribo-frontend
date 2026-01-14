@@ -1,0 +1,37 @@
+publiccodeYmlVersion: 0.5.0
+name: Transcribo Frontend
+url: https://github.com/DCC-BS/transcribo-frontend
+softwareVersion: 0.5.4
+releaseDate: 2025-08-21
+platforms:
+  - web
+developmentStatus: beta
+softwareType: standalone/web
+organisation:
+  name: DCC Data Competence Center - Statistisches Amt Kanton Basel-Stadt
+description:
+  en:
+    localisedName: Transcribo
+    shortDescription: "Transcribo is a modern web application for audio and video transcription with advanced editing capabilities."
+    longDescription: Transcribo is a modern web application for audio and video transcription with advanced editing capabilities. Built with Nuxt.js and TypeScript, it provides a comprehensive set of tools for creating, editing, and managing transcriptions with timeline-based visualization
+    documentation: https://dcc-bs.github.io/documentation/
+    apiDocumentation: https://dcc-bs.github.io/documentation/
+    features:
+      - LLM
+      - SpeechToText
+      - PWA
+    screenshots:
+      - https://github.com/DCC-BS/transcribo-frontend/blob/main/_imgs/Transcribo.png
+legal:
+  license: MIT-0
+maintenance:
+  type: internal
+  contacts:
+    - name: Data Competence Center
+      email: dcc@bs.ch
+      affiliation: Statistisches Amt Kanton Basel-Stadt
+localisation:
+  localisationReady: true
+  availableLanguages:
+    - en
+    - de-CH
