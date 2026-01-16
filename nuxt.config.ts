@@ -47,7 +47,7 @@ export default defineNuxtConfig({
     },
     vite: {
         optimizeDeps: {
-            exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"],
+            exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "@vueuse/core"],
         },
         server: {
             headers: {
