@@ -38,7 +38,7 @@ export const useTasksStore = defineStore("tasksStore", () => {
             if (e instanceof Error) {
                 logger.error(e.message);
             } else {
-                logger.error("Unknown error initializing database", e);
+                logger.error(e, "Unknown error initializing database");
             }
 
             isLoading.value = false;
@@ -287,7 +287,7 @@ export const useTasksStore = defineStore("tasksStore", () => {
                 await deleteTask(taskId);
                 deletedCount++;
             } catch (error) {
-                logger.error(`Failed to delete old task ${taskId}:`, error);
+                logger.error(error, `Failed to delete old task ${taskId}:`);
             }
         }
 

@@ -3,6 +3,12 @@ import pwaIcons from "./public/icons.json";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: "2024-11-01",
+    extends: [
+        ["github:DCC-BS/nuxt-layers/backend_communication", { install: true }],
+        ["github:DCC-BS/nuxt-layers/health_check", { install: true }],
+        ["github:DCC-BS/nuxt-layers/feedback-control", { install: true }],
+        ["github:DCC-BS/nuxt-layers/logger"],
+    ],
     routeRules: {
         "/api/ping": {
             cors: true,
@@ -24,6 +30,11 @@ export default defineNuxtConfig({
                 loglevel: process.env.LOG_LEVEL || "debug",
             },
         },
+        feedback: {
+            repo: "Feedback",
+            repoOwner: "DCC-BS",
+            project: "Transcribo"
+        }
     },
     nitro: {
         routeRules: {
@@ -131,8 +142,6 @@ export default defineNuxtConfig({
         "@nuxtjs/i18n",
         "@dcc-bs/common-ui.bs.js",
         "@dcc-bs/event-system.bs.js",
-        "@dcc-bs/logger.bs.js",
-        "@dcc-bs/feedback-control.bs.js",
         "@dcc-bs/audio-recorder.bs.js",
         "@pinia/nuxt",
         "@vite-pwa/nuxt",
@@ -144,12 +153,6 @@ export default defineNuxtConfig({
     },
     devtools: { enabled: true },
     css: ["~/assets/css/main.css"],
-    "feedback-control.bs.js": {
-        repo: "Feedback",
-        owner: "DCC-BS",
-        project: "Transcribo",
-        githubToken: process.env.GITHUB_TOKEN,
-    },
     // localization
     i18n: {
         locales: [

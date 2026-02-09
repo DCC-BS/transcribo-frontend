@@ -30,13 +30,13 @@ const items = computed<NavigationMenuItem[][]>(() => [
             },
             {
                 label: t("navigation.undo"),
-                icon: "i-lucide-undo",
+                icon: "i-heroicons-arrow-uturn-left",
                 onSelect: () => handleUndo(),
                 disabled: !canUndo.value,
             },
             {
                 label: t("navigation.redo"),
-                icon: "i-lucide-redo",
+                icon: "i-heroicons-arrow-uturn-right",
                 onSelect: handleRedo,
                 disabled: !canRedo.value,
             },
@@ -87,52 +87,19 @@ function handleRedo(): void {
 
 <template>
     <div>
-
-        <!-- [
-            {
-                label: t("navigation.new"),
-                to: "/",
-                icon: "i-heroicons-plus",
-            },
-            {
-                label: t("navigation.transcriptions"),
-                to: "/transcription",
-                icon: "i-heroicons-queue-list",
-            },
-        ], -->
-
         <NavigationBar>
-            <template #center>
-                <div class="flex items-end justify-between w-full">
-                    <div v-if="isTranscriptionPath" class="flex gap-2 ml-8">
-                        <UButton icon="i-lucide-undo" @click="() => handleUndo()" :disabled="!canUndo" variant="link">
-                            {{ t('navigation.undo') }}
-                        </UButton>
-                        <UButton icon="i-lucide-redo" @click="handleRedo" :disabled="!canRedo" variant="link">
-                            {{ t('navigation.redo') }}
-                        </UButton>
-                    </div>
-                    <div v-else class="flex-1"></div>
-                    <div class="flex gap-2 absolute left-1/2 transform -translate-x-1/2">
-                        <UButton icon="i-lucide-plus" to="/" variant="link">
-                            {{ t('navigation.new') }}
-                        </UButton>
-                        <UButton icon="i-lucide-list-music" to="/transcription" variant="link">
-                            {{ t('navigation.transcriptions') }}
-                        </UButton>
-                    </div>
-                </div>
-            </template>
-        </NavigationBar>
 
+        </NavigationBar>
         <!-- <ClientOnly>
             <UNavigationMenu content-orientation="vertical" variant="link" :items="items"
                 class="w-full grid grid-cols-3 items-center z-50 [&>*:nth-child(1)]:justify-self-start [&>*:nth-child(2)]:justify-self-center [&>*:nth-child(3)]:justify-self-end">
                 <template #disclaimer>
                     <DisclaimerButton variant="ghost" />
                 </template>
-            </UNavigationMenu>
-
-        </ClientOnly> -->
+</UNavigationMenu>
+<template #fallback>
+                <div class="w-full h-12 bg-gray-100 animate-pulse rounded"></div>
+            </template>
+</ClientOnly> -->
     </div>
 </template>

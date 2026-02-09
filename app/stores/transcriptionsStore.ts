@@ -39,7 +39,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             if (e instanceof Error) {
                 logger.error(e.message);
             } else {
-                logger.error("Unknown error initializing database", e);
+                logger.error(e, "Unknown error initializing database");
             }
 
             isLoading.value = false;
@@ -108,8 +108,8 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                 index = store.index("createdAt");
             } catch (e: unknown) {
                 logger.error(
-                    "createdAt index missing on transcriptions store.",
                     e,
+                    "createdAt index missing on transcriptions store.",
                 );
                 if (e instanceof Error) {
                     reject(e);
@@ -139,8 +139,8 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
                     deleteRequest.onerror = () => {
                         logger.error(
-                            `Failed to delete transcription ${String(cursor.primaryKey)} during cleanup:`,
                             deleteRequest.error,
+                            `Failed to delete transcription ${String(cursor.primaryKey)} during cleanup:`,
                         );
                     };
 
@@ -159,16 +159,16 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
             request.onerror = () => {
                 logger.error(
-                    "Failed to iterate over transcription index during cleanup:",
                     request.error,
+                    "Failed to iterate over transcription index during cleanup:",
                 );
                 reject(request.error);
             };
 
             transaction.onerror = () => {
                 logger.error(
-                    "Transaction error during transcription cleanup:",
                     transaction.error,
+                    "Transaction error during transcription cleanup:",
                 );
                 reject(transaction.error);
             };
@@ -642,7 +642,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
 
             return summary;
         } catch (error) {
-            logger.error("Failed to generate summary:", error);
+            logger.error(error, "Failed to generate summary:");
             throw error;
         } finally {
             isSummaryGenerating.value = false;
@@ -661,7 +661,7 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
                 if (e instanceof Error) {
                     logger.error(e.message);
                 } else {
-                    logger.error("Failed to bootstrap transcription store", e);
+                    logger.error(e, "Failed to bootstrap transcription store");
                 }
             }
         }

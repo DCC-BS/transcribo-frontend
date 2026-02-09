@@ -1,38 +1,22 @@
-import type { SummaryResponse } from "~/types/summarizeResponse";
-import { verboseFetch } from "../../utils/verboseFetch";
+import { ApiError } from "@dcc-bs/communication.bs.js";
+import { z } from "zod";
+import { apiHandler } from "~~/server/utils/apiHanlder";
 
-export default defineEventHandler(async (event) => {
-    const clientUUID = getHeader(event, "X-Ephemeral-UUID");
-
-    const config = useRuntimeConfig();
-
-    const inputFormData = await readFormData(event);
-    const transcriptValue = inputFormData.get("transcript");
-    const transcript =
-        typeof transcriptValue === "string" ? transcriptValue : null;
-
-    if (!transcript) {
-        throw createError({
-            statusCode: 400,
-            statusMessage: "transcript not provided",
-        });
-    }
-
-    // Attempt to make the API request
-    const response = await verboseFetch<SummaryResponse>(
-        `${config.apiUrl}/summarize`,
-        event,
-        {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "X-Client-Id": clientUUID || "",
-            },
-            body: JSON.stringify({
-                transcript: transcript,
-            }),
-        },
-    );
-
-    return response;
+const summarizeSchema = z.object({
+    transcript: z.string()
 });
+
+export default apiHandler
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const inputData = await readFormData(event);
+
+        const result = summarizeSchema.safeParse(inputData);
+
+        if (!result.success) {
+            throw new ApiError("summarize_invalid_input", 400, result.error.message);
+        }
+
+        return result.data;
+    })
+    .build("/summarize");

@@ -192,7 +192,7 @@ const loadAudio = async (event: Event): Promise<void> => {
 
         showFilePreview.value = true;
     } catch (error) {
-        logger.error("Error processing media file:", error);
+        logger.error(error, "Error processing media file:");
         errorMessage.value = t("upload.processingError");
     } finally {
         showProgress.value = false;
@@ -225,7 +225,7 @@ async function useThisFile(): Promise<void> {
     try {
         await uploadFile(processedFile.value, selectedFile.value);
     } catch (error) {
-        logger.error("Error uploading file:", error);
+        logger.error(error, "Error uploading file:");
         errorMessage.value = t("upload.uploadError");
     }
 }
@@ -235,8 +235,11 @@ async function useThisFile(): Promise<void> {
     <div>
         <!-- File Input Section -->
         <div v-if="!showFilePreview" class="space-y-4">
-            <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-lucide-file-up" :disabled="showProgress"
-                @change="loadAudio" ref="fileInputRef" />
+            <UFileUpload :disabled="showProgress" accept="audio/*, video/*" icon="i-lucide-file-up"
+                label="Audio- oder Videodatei hierher ziehen oder klicken zum Hochladen"></UFileUpload>
+
+            <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up"
+                :disabled="showProgress" @change="loadAudio" ref="fileInputRef" />
         </div>
 
         <!-- File Preview Section -->

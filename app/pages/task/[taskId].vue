@@ -37,7 +37,7 @@ onMounted(() => {
         })
         .catch((e) => {
             errorMessage.value = t("task.errors.failedToLoad");
-            logger.error("Failed to get task", taskId, e);
+            logger.error({ taskId, error: e }, "Failed to get task");
         });
 });
 
@@ -75,7 +75,7 @@ async function handleTranscriptionFinished(
             await navigateTo(`/transcription/${transcription.id}`);
             taskStore.deleteTask(taskId);
         } catch (error) {
-            logger.error("Failed to create transcription:", error);
+            logger.error(error, "Failed to create transcription");
             errorMessage.value = t("task.errors.failedToCreateTranscription");
         }
     } else if (
@@ -96,6 +96,7 @@ async function handleTranscriptionFinished(
 <template>
     <UContainer>
         <TaskStatusView v-if="taskId && isLoaded" :task-id="taskId" />
-        <UAlert v-if="errorMessage" color="error" :title="errorMessage" icon="i-lucide-circle-alert" type="error" />
+        <UAlert v-if="errorMessage" color="error" :title="errorMessage" icon="i-heroicons-exclamation-circle"
+            type="error" />
     </UContainer>
 </template>
