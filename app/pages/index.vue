@@ -70,9 +70,11 @@ async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
                     </template>
                 </div>
 
-                <MediaSelectionView v-if="step === 1" @onMediaSelected="onMediaSelected" />
-                <MediaPreviewView v-if="step === 2 && mediaSelectionData" :data="mediaSelectionData" />
-                <MediaProcessingView v-if="step === 3 && mediaPreviewData" :data="mediaPreviewData" />
+                <div class="p-2">
+                    <MediaSelectionView v-if="step === 1" @onMediaSelected="onMediaSelected" />
+                    <MediaPreviewView v-if="step === 2 && mediaSelectionData" :data="mediaSelectionData" />
+                    <MediaProcessingView v-if="step === 3 && mediaPreviewData" :data="mediaPreviewData" />
+                </div>
             </div>
         </div>
     </UContainer>
