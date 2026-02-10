@@ -33,8 +33,8 @@ export default defineNuxtConfig({
         feedback: {
             repo: "Feedback",
             repoOwner: "DCC-BS",
-            project: "Transcribo"
-        }
+            project: "Transcribo",
+        },
     },
     nitro: {
         routeRules: {
@@ -146,6 +146,7 @@ export default defineNuxtConfig({
         "@pinia/nuxt",
         "@vite-pwa/nuxt",
         "@nuxtjs/mdc",
+        "motion-v/nuxt",
     ],
     typescript: {
         strict: true,
@@ -168,7 +169,7 @@ export default defineNuxtConfig({
             },
         ],
         defaultLocale: "de",
-        strategy: "prefix_except_default",
+        strategy: "no_prefix",
     },
     pwa: {
         devOptions: {

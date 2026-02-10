@@ -1,17 +1,16 @@
-
 export type MediaSelectionData = {
-    media: File
-}
+    media: File;
+};
 
 export type MediaConfigureData = {
-    media: File,
-    numSpeaker: number | undefined,
-    language: string | undefined
-}
+    media: File;
+    numSpeaker: string;
+    language: string;
+};
 
-export type MediaProcess = {
-    originalMedia: File,
-    processedMedia: File,
-    numSpeaker: number | undefined,
-    language: string | undefined
-}
+export type MediaProcessData = {
+    originalMedia: File;
+    processedMedia: File;
+    numSpeaker: number | undefined;
+    language: string | undefined;
+};

@@ -14,6 +14,10 @@ function toBlob(data: Uint8Array | string, mimeType: string): Blob {
 export const useAudioExtract = () => {
     const ffmpeg = new FFmpeg();
 
+    onUnmounted(() => {
+        ffmpeg.terminate();
+    });
+
     async function extractAudioFromVideo(
         videoFile: File,
     ): Promise<{ audioBlob: Blob; audioFileName: string }> {
@@ -49,7 +53,6 @@ export const useAudioExtract = () => {
         } finally {
             await ffmpeg.deleteFile(videoFileName);
             await ffmpeg.deleteFile(audioFileName);
-            await ffmpeg.terminate();
         }
     }
     return {

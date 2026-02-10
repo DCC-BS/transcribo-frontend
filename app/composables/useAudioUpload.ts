@@ -22,6 +22,8 @@ export function useAudioUpload() {
         const formData = new FormData();
         formData.append("file", file);
 
+        await new Promise((resolve) => setTimeout(resolve, 5000)); // Ensure the progress indicator is visible for at least 500ms
+
         // Add num_speakers parameter - send null for auto detection, otherwise send the integer value
         if (numSpeakers.value === "auto") {
             formData.append("num_speakers", "null");
@@ -53,7 +55,7 @@ export function useAudioUpload() {
                     color: "error",
                     icon: "i-lucide-triangle-alert",
                 });
-                return;
+                throw response;
             }
 
             executeCommand(new UploadFileCommand(originalFile, response));
