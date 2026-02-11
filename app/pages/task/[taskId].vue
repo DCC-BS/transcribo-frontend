@@ -1,102 +1,82 @@
 <script lang="ts" setup>
-import { v4 as uuidv4 } from "uuid";
-import type { TranscriptionFinishedCommand } from "~/types/commands";
-import { Cmds } from "~/types/commands";
+import { motion } from "motion-v";
+import type { MediaProgress } from "~/types/mediaProgress";
 
-const { registerHandler, unregisterHandler } = useCommandBus();
 const taskStore = useTasksStore();
-const transcriptionsStore = useTranscriptionsStore();
 const { t } = useI18n();
 const logger = useLogger();
+const { pollTaskStatus, applyTaskResult } = useTaskListener();
 
 const route = useRoute();
-const taskId = route.params.taskId as string;
-const audioFile = ref<Blob>();
-const audioName = ref<string>();
 
-const isLoaded = ref(false);
+const taskId = route.params.taskId as string;
+
+const mediaFile = ref<Blob>();
+const mediaFileName = ref<string>();
+
 const errorMessage = ref<string>();
 
-onMounted(() => {
-    registerHandler(
-        Cmds.TranscriptionFinishedCommand,
-        handleTranscriptionFinished,
-    );
+const progression = ref<[MediaProgress]>([
+    {
+        icon: "i-lucide-cpu",
+        message: "..",
+        progress: 0
+    }]
+);
 
+onMounted(() => {
     taskStore
         .getTask(taskId)
         .then((task) => {
-            if (task?.mediaFile) {
-                audioFile.value = task.mediaFile;
-                audioName.value = task.mediaFileName;
-                isLoaded.value = true;
-            } else {
-                errorMessage.value = t("task.errors.noMediaFile");
-                logger.error("No media file found for task", taskId);
+            if (!task) {
+                logger.error(taskId, "Task not found");
+                errorMessage.value = t("task.errors.TaskNotFound");
+                return;
             }
+
+            if (!task.mediaFile) {
+                errorMessage.value = t("task.errors.noMediaFile");
+                logger.error(taskId, "No media file found for task");
+                return;
+            }
+
+            mediaFile.value = task.mediaFile;
+            mediaFileName.value = task.mediaFileName;
+
+            pollTaskStatus(
+                taskId,
+                ({ message, progress }) => {
+                    progression.value[0].message = message;
+                    progression.value[0].progress = progress;
+                }, async (transcription) => {
+                    try {
+                        if (!task.mediaFile || !task.mediaFileName) {
+                            throw new Error("Task has no media file");
+                        }
+
+                        await applyTaskResult(taskId, transcription, task.mediaFile, task.mediaFileName);
+                    } catch (e) {
+                        logger.error(e, "Failed to finihs the task");
+                        errorMessage.value = t("task.errors.failedToCreateTranscription");
+                    }
+                });
         })
         .catch((e) => {
             errorMessage.value = t("task.errors.failedToLoad");
             logger.error({ taskId, error: e }, "Failed to get task");
         });
 });
-
-const cleanupTimeout = ref<NodeJS.Timeout>();
-
-onUnmounted(() => {
-    if (cleanupTimeout.value) {
-        clearTimeout(cleanupTimeout.value);
-    }
-    unregisterHandler(
-        Cmds.TranscriptionFinishedCommand,
-        handleTranscriptionFinished,
-    );
-});
-
-async function handleTranscriptionFinished(
-    command: TranscriptionFinishedCommand,
-): Promise<void> {
-    if (command.status.status === "completed" && command.result) {
-        try {
-            const transcription = await transcriptionsStore.addTranscription({
-                segments: command.result.segments.map((x) => ({
-                    ...x,
-                    text: x.text?.trim() ?? "",
-                    speaker:
-                        x.speaker?.trim().toUpperCase() ??
-                        t("transcription.noSpeaker"),
-                    id: uuidv4(),
-                })),
-                mediaFile: audioFile.value,
-                mediaFileName: audioName.value,
-                name: audioName.value ?? t("transcription.untitled"),
-            });
-
-            await navigateTo(`/transcription/${transcription.id}`);
-            taskStore.deleteTask(taskId);
-        } catch (error) {
-            logger.error(error, "Failed to create transcription");
-            errorMessage.value = t("task.errors.failedToCreateTranscription");
-        }
-    } else if (
-        command.status.status === "failed" ||
-        command.status.status === "cancelled"
-    ) {
-        errorMessage.value = t("task.errors.transcriptionFailed");
-        // Clean up the failed task after a delay to allow user to see the error
-        cleanupTimeout.value = setTimeout(() => {
-            taskStore.deleteTask(taskId);
-        }, 5000);
-    } else {
-        errorMessage.value = t("task.errors.noResult");
-    }
-}
 </script>
 
 <template>
-    <UContainer>
-        <TaskStatusView v-if="taskId && isLoaded" :task-id="taskId" />
-        <UAlert v-if="errorMessage" color="error" :title="errorMessage" icon="i-heroicons-exclamation-circle"
-            type="error" />
-    </UContainer>
+    <div class="flex items-center justify-center">
+        <MediaProgressView v-if="mediaFile && mediaFileName" :media="mediaFile" :media-name="mediaFileName"
+            :progress-steps="progression" />
+
+        <!-- Error Message Display -->
+        <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
+            :transition="{ type: 'spring', stiffness: 200, damping: 20 }" class="mt-8 max-w-md w-full">
+            <UAlert icon="i-lucide-alert-circle" color="error" title="error" :description="errorMessage"></UAlert>
+        </motion.div>
+    </div>
 </template>

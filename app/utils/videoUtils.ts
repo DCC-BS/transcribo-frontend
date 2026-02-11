@@ -1,3 +1,3 @@
-export function isVideoFile(file: File): boolean {
+export function isVideoFile(file: File | Blob): boolean {
     return file.type.startsWith("video/");
 }

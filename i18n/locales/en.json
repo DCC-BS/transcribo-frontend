@@ -147,7 +147,8 @@
             "failedToLoad": "Failed to get task",
             "transcriptionFailed": "Transcription failed. Please try again.",
             "failedToCreateTranscription": "Failed to create transcription from results",
-            "noResult": "No transcription result available"
+            "noResult": "No transcription result available",
+            "TaskNotFound": "Task not found"
         }
     },
     "commands": {

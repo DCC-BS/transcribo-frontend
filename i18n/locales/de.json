@@ -147,7 +147,8 @@
             "failedToLoad": "Fehler beim Laden der Aufgabe",
             "transcriptionFailed": "Transkription fehlgeschlagen. Bitte versuchen Sie es erneut.",
             "failedToCreateTranscription": "Fehler beim Erstellen der Transkription aus den Ergebnissen",
-            "noResult": "Kein Transkriptionsergebnis verfügbar"
+            "noResult": "Kein Transkriptionsergebnis verfügbar",
+            "TaskNotFound": "Aufgabe nicht gefunden"
         }
     },
     "commands": {
