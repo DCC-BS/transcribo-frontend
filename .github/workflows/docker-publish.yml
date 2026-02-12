@@ -15,7 +15,7 @@ permissions:
 
 jobs:
     publish:
-        uses: DCC-BS/ci-workflows/.github/workflows/publish-docker.yml@v7
+        uses: DCC-BS/ci-workflows/.github/workflows/publish-docker.yml@v8
         secrets: inherit
         with:
             release_type: ${{ inputs.version_bump }} # major|minor|patch
