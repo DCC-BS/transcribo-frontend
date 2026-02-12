@@ -2,6 +2,8 @@
 import { UInput } from "#components";
 import { TranscriptonNameChangeCommand } from "~/types/commands";
 
+definePageMeta({ layout: "edit" });
+
 const route = useRoute();
 const transcriptionStore = useTranscriptionsStore();
 const { executeCommand } = useCommandBus();

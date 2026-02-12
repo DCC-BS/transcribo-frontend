@@ -9,9 +9,9 @@ const summarizeSchema = z.object({
 export default apiHandler
     .withMethod("POST")
     .withBodyProvider(async (event) => {
-        const inputData = await readFormData(event);
+        const body = await readBody(event);
 
-        const result = summarizeSchema.safeParse(inputData);
+        const result = summarizeSchema.safeParse(body);
 
         if (!result.success) {
             throw new ApiError(

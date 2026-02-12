@@ -614,13 +614,10 @@ export const useTranscriptionsStore = defineStore("transcriptions", () => {
             const sanitizedText =
                 validateAndSanitizeTranscriptText(transcriptText);
 
-            const formData = new FormData();
-            formData.append("transcript", sanitizedText);
-
             const summaryResponse = await apiFetch("/api/summarize/submit", {
                 schema: SummaryResponseSchema,
                 method: "POST",
-                body: formData,
+                body: { transcript: sanitizedText },
             });
 
             if (isApiError(summaryResponse)) {
