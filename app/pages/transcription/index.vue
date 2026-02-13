@@ -2,7 +2,6 @@
 import { isApiError } from "@dcc-bs/communication.bs.js";
 import { UButton, ULink } from "#components";
 import type { StoredTask } from "~/types/task";
-import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import type { TaskStatus } from "~/types/task";
 import { TaskStatusEnum, TaskStatusSchema } from "~/types/task";
@@ -13,11 +12,13 @@ const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
 });
 
-const transcriptionStore = useTranscriptionsStore();
+const { getTranscriptions, addTranscription, deleteTranscription } = useTranscription()
 const { getTask, getTasks, updateTaskStatus, deleteTask, cleanupFailedAndCanceledTasks } = useTasks();
 const { openDialog } = useDialog();
 const { t } = useI18n();
 const { apiFetch } = useApi();
+
+const transcriptions = shallowRef<StoredTranscription[]>();
 
 // Define columns for the table
 const columns = [
@@ -209,16 +210,16 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
                 return;
             }
 
-            await transcriptionStore.addTranscription(
+            await addTranscription(
                 {
                     segments: transcriptionResponse.segments.map((segment) => ({
                         ...segment,
                         id: crypto.randomUUID(),
                     })),
                     name: task.mediaFileName || t("transcription.untitled"),
+                    mediaFile: fullTask.mediaFile,
+                    mediaFileName: task.mediaFileName
                 },
-                fullTask.mediaFile,
-                task.mediaFileName,
             );
 
             await deleteTask(task.id);
@@ -309,8 +310,8 @@ async function cleanupFailedAndCancelledTasks(): Promise<void> {
     }
 }
 
-onMounted(() => {
-    transcriptionStore.loadAllTranscriptions();
+onMounted(async () => {
+    transcriptions.value = await getTranscriptions();
     loadProcessingTasks();
 
     const refreshInterval = setInterval(() => {
@@ -331,7 +332,7 @@ function handleDeletedTranscription(transcriptionId: string): void {
     openDialog({
         title: t("transcription.delete.title"),
         message: t("transcription.delete.confirmation"),
-        onSubmit: () => transcriptionStore.deleteTranscription(transcriptionId),
+        onSubmit: () => deleteTranscription(transcriptionId),
     });
 }
 </script>
@@ -398,7 +399,7 @@ function handleDeletedTranscription(transcriptionId: string): void {
             </UTable>
         </div>
 
-        <UTable :columns="columns" :data="transcriptionStore.transcriptions" sticky :empty-state="{
+        <UTable :columns="columns" :data="transcriptions" sticky :empty-state="{
             icon: 'i-lucide-file-text',
             label: t('transcription.noTranscriptionsFound'),
             description: t('ui.emptyState.description'),

@@ -6,9 +6,9 @@ import type {
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
 
-const tasksStore = useTasksStore();
 const { t } = useI18n();
 const { onCommand } = useCommandBus();
+const { addTask } = useTasks();
 
 const step = ref(1);
 const mediaSelectionData = ref<MediaSelectionData>();
@@ -18,7 +18,7 @@ onCommand<UploadFileCommand>(Cmds.UploadFileCommand, async (command) => {
     const file = command.file;
     const status = command.status;
 
-    const storedTask = await tasksStore.addTask(status, file, file.name);
+    const storedTask = await addTask(status, file, file.name);
     navigateTo(`task/${storedTask.id}`);
 });
 

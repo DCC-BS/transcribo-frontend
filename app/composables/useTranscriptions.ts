@@ -17,7 +17,7 @@ export function useTranscription() {
     }
 
     async function addTranscription(
-        transcription: Omit<StoredTranscription, "id" | "createdAt" | "updateAt">
+        transcription: Omit<StoredTranscription, "id" | "createdAt" | "updatedAt">
     ) {
         const now = new Date();
 
