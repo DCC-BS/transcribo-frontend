@@ -1,19 +1,20 @@
 <script lang="ts" setup>
 import { isApiError } from "@dcc-bs/communication.bs.js";
 import { UButton, ULink } from "#components";
-import type { StoredTask } from "~/stores/tasksStore";
+import type { StoredTask } from "~/types/task";
 import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "~/stores/transcriptionsStore";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import type { TaskStatus } from "~/types/task";
 import { TaskStatusEnum, TaskStatusSchema } from "~/types/task";
 import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
+import { useTasks } from "~/composables/useTasks";
 
 const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
 });
 
 const transcriptionStore = useTranscriptionsStore();
-const taskStore = useTasksStore();
+const { getTask, getTasks, updateTaskStatus, deleteTask, cleanupFailedAndCanceledTasks } = useTasks();
 const { openDialog } = useDialog();
 const { t } = useI18n();
 const { apiFetch } = useApi();
@@ -198,7 +199,7 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
                 schema: TranscriptionResponseSchema
             });
 
-            const fullTask = await taskStore.getTask(task.id);
+            const fullTask = await getTask(task.id);
             if (!fullTask?.mediaFile) {
                 throw new Error(t("task.errors.noMediaFile"));
             }
@@ -220,20 +221,20 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
                 task.mediaFileName,
             );
 
-            await taskStore.deleteTask(task.id);
+            await deleteTask(task.id);
             await loadProcessingTasks();
         } else if (
             statusResponse.status === TaskStatusEnum.FAILED ||
             statusResponse.status === TaskStatusEnum.CANCELLED
         ) {
             // Update local status; cleanup will remove these after polling finishes
-            await taskStore.updateTask(task.id, { status: statusResponse });
+            await updateTaskStatus(task.id, statusResponse);
             processingTasks.value = processingTasks.value.map((t) =>
                 t.id === task.id ? { ...t, status: statusResponse } : t,
             );
         } else if (statusResponse.status === TaskStatusEnum.IN_PROGRESS) {
             // Update local task status to reflect progress in UI
-            await taskStore.updateTask(task.id, { status: statusResponse });
+            updateTaskStatus(task.id, statusResponse);
             processingTasks.value = processingTasks.value.map((t) =>
                 t.id === task.id ? { ...t, status: statusResponse } : t,
             );
@@ -246,7 +247,7 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
             (err as { statusCode?: number }).statusCode === 404
         ) {
             // Task no longer exists on backend; remove locally
-            await taskStore.deleteTask(task.id);
+            await deleteTask(task.id);
             await loadProcessingTasks();
             return;
         }
@@ -266,7 +267,7 @@ async function loadProcessingTasks(): Promise<void> {
     try {
         isProcessingLoading.value = true;
         processingError.value = undefined;
-        const allTasks = await taskStore.loadAllTasks();
+        const allTasks = await getTasks();
         processingTasks.value = allTasks;
 
         const tasksToCheck = allTasks.filter(
@@ -296,24 +297,7 @@ async function refreshStatuses(): Promise<void> {
 // Remove tasks with status FAILED or CANCELLED from local storage and UI
 async function cleanupFailedAndCancelledTasks(): Promise<void> {
     try {
-        const idsToDelete = processingTasks.value
-            .filter(
-                (t) =>
-                    t.status.status === TaskStatusEnum.FAILED ||
-                    t.status.status === TaskStatusEnum.CANCELLED,
-            )
-            .map((t) => t.id);
-
-        if (idsToDelete.length === 0) return;
-
-        await Promise.allSettled(
-            idsToDelete.map((id) => taskStore.deleteTask(id)),
-        );
-
-        // Reflect deletions in local UI state
-        processingTasks.value = processingTasks.value.filter(
-            (t) => !idsToDelete.includes(t.id),
-        );
+        await cleanupFailedAndCanceledTasks();
     } catch (err: unknown) {
         const errorMsg =
             err instanceof Error
