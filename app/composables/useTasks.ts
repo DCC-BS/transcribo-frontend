@@ -1,11 +1,9 @@
 import { db } from "@/stores/db";
-import { TaskStatusEnum, type TaskStatus } from "~/types/task";
+import { type TaskStatus, TaskStatusEnum } from "~/types/task";
 
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
 
 export function useTasks() {
-
-
     function getTasks(): Promise<StoredTask[]> {
         return db.tasks.toArray();
     }
@@ -19,11 +17,10 @@ export function useTasks() {
         mediaFile?: File | Blob,
         mediaFileName?: string,
     ): Promise<StoredTask> {
-
         const newTask: StoredTask = {
             id: status.task_id,
             status,
-            createdAt: Date.now()
+            createdAt: Date.now(),
         };
 
         if (mediaFile) {
@@ -50,13 +47,21 @@ export function useTasks() {
     async function cleanupOldTask(): Promise<number> {
         const now = Date.now();
 
-        return db.tasks.filter((t) => !!t.createdAt && now - t.createdAt > RETENTION_PERIOD_MS).delete()
+        return db.tasks
+            .filter(
+                (t) => !!t.createdAt && now - t.createdAt > RETENTION_PERIOD_MS,
+            )
+            .delete();
     }
 
     async function cleanupFailedAndCanceledTasks() {
         await db.tasks
-            .filter((t) => t.status === TaskStatusEnum.FAILED || t.status === TaskStatusEnum.COMPLETED)
-            .delete()
+            .filter(
+                (t) =>
+                    t.status === TaskStatusEnum.FAILED ||
+                    t.status === TaskStatusEnum.COMPLETED,
+            )
+            .delete();
     }
 
     return {
@@ -66,6 +71,6 @@ export function useTasks() {
         deleteTask,
         updateTaskStatus,
         cleanupOldTask,
-        cleanupFailedAndCanceledTasks
-    }
+        cleanupFailedAndCanceledTasks,
+    };
 }

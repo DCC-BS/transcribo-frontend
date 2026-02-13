@@ -1,11 +1,17 @@
 <script lang="ts" setup>
 import { match } from "ts-pattern";
 import { SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
-import AudioSpectrogram from "./media/AudioSpectrogram.vue";
 import CurrentSegementEditor from "./media/CurrentSegementEditor.vue";
 import TimelineView from "./media/TimelineView.client.vue";
 import VideoView from "./media/VideoView.vue";
 import RenameSpeakerView from "./RenameSpeakerView.vue";
+import type { StoredTranscription } from "~/types/storedTranscription";
+
+interface InputProps {
+    currentTranscription: StoredTranscription
+}
+
+const props = defineProps<InputProps>();
 
 const audioFile = ref<Blob>(); // Reference to the uploaded audio file
 const currentTime = ref<number>(0); // Current playback position in seconds
@@ -16,12 +22,11 @@ const zoomX = computed(
     () => duration.value / (timeRange.value[1] - timeRange.value[0]),
 );
 
-const transcriptionStore = useTranscriptionsStore();
 const { executeCommand } = useCommandBus();
 
 onMounted(() => {
     duration.value = 0;
-    const currentTranscription = transcriptionStore.currentTranscription;
+    const currentTranscription = props.currentTranscription;
 
     if (!currentTranscription?.mediaFile) {
         return;
@@ -195,7 +200,7 @@ watch(currentTime, (newTime) => {
     <div class="p-1">
         <div v-if="audioFile && duration > 0">
             <div tabindex="0" @keydown="handleKeyDown" @keyup="handleKeyUp">
-                <VideoView v-model="currentTime" :duration="duration" />
+                <VideoView v-model="currentTime" :duration="duration" :transcription="props.currentTranscription" />
 
                 <ClientOnly>
                     <div @wheel="handleWheel" @mousedown="handleMouseDown" @mouseup="handleMouseUp"

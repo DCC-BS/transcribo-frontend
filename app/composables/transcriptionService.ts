@@ -14,21 +14,9 @@ import {
 import type { SegementWithId } from "~/types/transcriptionResponse";
 
 export const useTranscriptionService = (currentTranscriptionId: string) => {
-    const store = useTranscriptionsStore();
     const error = ref<string>();
-    const isInited = ref(false);
     const logger = useLogger();
     const { registerHandler, unregisterHandler } = useCommandBus();
-
-    store.initializeDB();
-    store
-        .setCurrentTranscription(currentTranscriptionId)
-        .then(() => {
-            isInited.value = true;
-        })
-        .catch((err) => {
-            error.value = err;
-        });
 
     async function handleDeleteSegment(command: DeleteSegementCommand) {
         const currentTranscription = store.currentTranscription;

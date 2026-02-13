@@ -1,5 +1,6 @@
 import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
 import { match } from "ts-pattern";
+import { v4 as uuidv4 } from "uuid";
 import type { MediaProgress } from "~/types/mediaProgress";
 import {
     type TaskStatus,
@@ -10,11 +11,10 @@ import {
     type TranscriptionResponse,
     TranscriptionResponseSchema,
 } from "~/types/transcriptionResponse";
-import { v4 as uuidv4 } from "uuid";
 
 export function useTaskListener() {
-    const taskStore = useTasksStore();
-    const transcriptionsStore = useTranscriptionsStore();
+    const { deleteTask } = useTasks();
+    const { addTranscription } = useTranscription();
     const { showError } = useUserFeedback();
     const { t } = useI18n();
     const logger = useLogger();
@@ -47,10 +47,9 @@ export function useTaskListener() {
             created_at: "",
             executed_at: "",
             progress: 0,
-            status: TaskStatusEnum.IN_PROGRESS
+            status: TaskStatusEnum.IN_PROGRESS,
         } as TaskStatus;
         try {
-
             while (status.status === TaskStatusEnum.IN_PROGRESS) {
                 status = await fetchTaskStatus(taskId);
                 onProgressUpdate(createProgress(status));
@@ -124,9 +123,9 @@ export function useTaskListener() {
         taskId: string,
         result: TranscriptionResponse,
         mediaFile: Blob,
-        mediaName: string
+        mediaName: string,
     ): Promise<void> {
-        const transcription = await transcriptionsStore.addTranscription({
+        const transcription = await addTranscription({
             segments: result.segments.map((x) => ({
                 ...x,
                 text: x.text?.trim() ?? "",
@@ -140,12 +139,12 @@ export function useTaskListener() {
             name: mediaName ?? t("transcription.untitled"),
         });
 
-        await taskStore.deleteTask(taskId);
+        await deleteTask(taskId);
         await navigateTo(`/transcription/${transcription.id}`);
     }
 
     return {
         pollTaskStatus,
-        applyTaskResult
+        applyTaskResult,
     };
 }

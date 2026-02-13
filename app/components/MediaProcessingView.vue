@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
 import { motion } from "motion-v";
-import { type MediaProgress } from "~/types/mediaProgress";
+import type { MediaProgress } from "~/types/mediaProgress";
 import type { MediaConfigureData } from "~/types/mediaStepInOut";
-import { TaskStatusSchema, type TaskStatus } from "~/types/task";
+import { type TaskStatus, TaskStatusSchema } from "~/types/task";
 import { isVideoFile } from "~/utils/videoUtils";
 
 const input = defineModel<MediaConfigureData>("input", { required: true });
@@ -31,7 +31,7 @@ const progressions = ref<[MediaProgress, MediaProgress, MediaProgress]>([
 const { extractAudioFromVideo } = useAudioExtract();
 const { t } = useI18n();
 const logger = useLogger();
-const tasksStore = useTasksStore();
+const { addTask } = useTasks();
 const { pollTaskStatus, applyTaskResult } = useTaskListener();
 
 onMounted(() => {
@@ -98,7 +98,7 @@ async function uploadFile(
     }
 
     progress.progress = 90;
-    await tasksStore.addTask(
+    await addTask(
         response,
         input.value.media,
         input.value.media.name,
@@ -141,28 +141,14 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">
-                <MediaProgressView
-                    :media="input.media"
-                    :mediaName="input.media.name"
-                    :progressSteps="progressions"
-                />
+                <MediaProgressView :media="input.media" :mediaName="input.media.name" :progressSteps="progressions" />
             </div>
         </div>
 
         <!-- Error Message Display -->
-        <motion.div
-            v-if="errorMessage"
-            :animate="{ opacity: 1, y: 0 }"
-            :initial="{ opacity: 0, y: 20 }"
-            :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
-            class="mt-8 max-w-md w-full"
-        >
-            <UAlert
-                icon="i-lucide-alert-circle"
-                color="error"
-                title="error"
-                :description="errorMessage"
-            ></UAlert>
+        <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
+            :transition="{ type: 'spring', stiffness: 200, damping: 20 }" class="mt-8 max-w-md w-full">
+            <UAlert icon="i-lucide-alert-circle" color="error" title="error" :description="errorMessage"></UAlert>
         </motion.div>
     </div>
 </template>

@@ -1,9 +1,15 @@
 <script lang="ts" setup>
 import type { ExportOptions } from "~/composables/export";
+import type { StoredTranscription } from "~/types/storedTranscription";
+
+interface InputProps {
+    transcription: StoredTranscription
+}
+
+const props = defineProps<InputProps>();
 
 const { t } = useI18n();
 const { exportAsText, exportAsSrt, exportAsJson } = useExport();
-const transcriptionStore = useTranscriptionsStore();
 
 // Export options state
 const exportOptions = ref<ExportOptions>({
@@ -63,8 +69,7 @@ function handleJsonExport(): void {
                     </div>
 
                     <!-- Meeting summary toggle (text only) -->
-                    <div v-if="transcriptionStore.currentTranscription?.summary"
-                        class="flex items-center justify-between mb-3">
+                    <div v-if="props.transcription.summary" class="flex items-center justify-between mb-3">
                         <div class="flex flex-col">
                             <span class="text-sm">{{ t('export.withSummary') }}</span>
                             <span class="text-xs text-gray-500">{{ t('export.textOnly') }}</span>
