@@ -1,9 +1,18 @@
 <script lang="ts" setup>
 import { UInput } from "#components";
 import { RenameSpeakerCommand } from "~/types/commands";
+import type { StoredTranscription } from "~/types/storedTranscription";
+
+interface InputProps {
+    transcription: StoredTranscription
+}
+
+const props = defineProps<InputProps>();
 
 // Get speakers from the current transcription
-const { speakers } = useCurrentTranscription();
+const speakers = computed(() =>
+    Array.from(getUniqueSpeakers(props.transcription.segments)),
+);
 const { executeCommand } = useCommandBus();
 const { getSpeakerColor } = useSpeakerColor(speakers);
 
@@ -47,22 +56,14 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
     <UCard>
         <h2 class="text-lg font-bold">{{ t("common.speakers") }}</h2>
         <div class="flex gap-2 flex-wrap mt-2">
-            <div
-                v-for="(speakerMap, index) in speakerMappings"
-                :key="index"
-                class="speaker-item"
-            >
-                <UInput
-                    v-model="speakerMap.new"
-                    :style="{ color: getSpeakerColor(speakerMap.original) }"
-                    placeholder="Speaker name"
-                    @change="
+            <div v-for="(speakerMap, index) in speakerMappings" :key="index" class="speaker-item">
+                <UInput v-model="speakerMap.new" :style="{ color: getSpeakerColor(speakerMap.original) }"
+                    placeholder="Speaker name" @change="
                         handleSpeakerNameChange(
                             speakerMap.original,
                             speakerMap.new,
                         )
-                    "
-                />
+                        " />
             </div>
         </div>
     </UCard>

@@ -12,7 +12,7 @@ const { t } = useI18n();
 const { exportAsText, exportAsSrt, exportAsJson } = useExport();
 
 // Export options state
-const exportOptions = ref<ExportOptions>({
+const exportOptions = ref<Omit<ExportOptions, "transciption">>({
     withSpeakers: true,
     withTimestamps: true,
     mergeSegments: false,
@@ -21,15 +21,15 @@ const exportOptions = ref<ExportOptions>({
 
 // Functions to handle exports
 function handleTextExport(): void {
-    exportAsText(exportOptions.value);
+    exportAsText({ ...exportOptions.value, transciption: props.transcription });
 }
 
 function handleSubtitleExport(): void {
-    exportAsSrt(exportOptions.value.withSpeakers);
+    exportAsSrt(props.transcription, exportOptions.value.withSpeakers);
 }
 
 function handleJsonExport(): void {
-    exportAsJson();
+    exportAsJson(props.transcription);
 }
 </script>
 

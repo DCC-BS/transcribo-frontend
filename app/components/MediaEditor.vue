@@ -8,7 +8,7 @@ import RenameSpeakerView from "./RenameSpeakerView.vue";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface InputProps {
-    currentTranscription: StoredTranscription
+    transcription: StoredTranscription
 }
 
 const props = defineProps<InputProps>();
@@ -26,7 +26,7 @@ const { executeCommand } = useCommandBus();
 
 onMounted(() => {
     duration.value = 0;
-    const currentTranscription = props.currentTranscription;
+    const currentTranscription = props.transcription;
 
     if (!currentTranscription?.mediaFile) {
         return;
@@ -200,7 +200,7 @@ watch(currentTime, (newTime) => {
     <div class="p-1">
         <div v-if="audioFile && duration > 0">
             <div tabindex="0" @keydown="handleKeyDown" @keyup="handleKeyUp">
-                <VideoView v-model="currentTime" :duration="duration" :transcription="props.currentTranscription" />
+                <VideoView v-model="currentTime" :duration="duration" :transcription="props.transcription" />
 
                 <ClientOnly>
                     <div @wheel="handleWheel" @mousedown="handleMouseDown" @mouseup="handleMouseUp"
@@ -213,16 +213,17 @@ watch(currentTime, (newTime) => {
                             :start-time="timeRange[0]"
                         /> -->
 
-                        <TimelineView :current-time="currentTime" :duration="duration" :zoom-x="zoomX"
-                            :start-time="timeRange[0]" :end-time="timeRange[1]" />
+                        <TimelineView :transcription="props.transcription" :current-time="currentTime"
+                            :duration="duration" :zoom-x="zoomX" :start-time="timeRange[0]" :end-time="timeRange[1]" />
                     </div>
                 </ClientOnly>
 
                 <USlider v-model="timeRange" :min="0" :max="duration" class="my-2" />
             </div>
 
-            <CurrentSegementEditor :current-time="currentTime" :duration="duration" class="m-2" />
-            <RenameSpeakerView class="m-2" />
+            <CurrentSegementEditor :transcription="props.transcription" :current-time="currentTime" :duration="duration"
+                class="m-2" />
+            <RenameSpeakerView :transcription="props.transcription" class="m-2" />
         </div>
     </div>
 </template>

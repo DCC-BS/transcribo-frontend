@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { UInput } from "#components";
-import { TranscriptonNameChangeCommand } from "~/types/commands";
+import { useTranscriptionSummary } from "~/composables/useTranscriptionSummary";
+import { TranscriptionNameChangeCommand } from "~/types/commands";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 definePageMeta({ layout: "edit" });
@@ -9,6 +10,9 @@ const route = useRoute();
 const { executeCommand } = useCommandBus();
 const { t } = useI18n();
 const { getTranscription } = useTranscription();
+const { isSummaryGenerating, generateSummary } = useTranscriptionSummary()
+
+const transcriptionId = route.params.transcriptionId as string;
 
 const currentTranscription = ref<StoredTranscription>();
 
@@ -30,9 +34,7 @@ const mediaName = computed(() => {
     return undefined;
 });
 
-const transcriptionId = route.params.transcriptionId as string;
-const { registerService, unRegisterServer, error, isInited } =
-    useTranscriptionService(transcriptionId);
+useTranscriptionService(currentTranscription);
 const isHelpViewOpen = ref(false);
 
 // Summary state
@@ -44,28 +46,23 @@ const isViewMode = ref(false);
 
 onMounted(async () => {
     currentTranscription.value = await getTranscription(transcriptionId);
-    registerService();
-});
-
-onUnmounted(() => {
-    unRegisterServer();
 });
 
 async function handleNameChange(name: string | number) {
     if (typeof name === "string") {
-        await executeCommand(new TranscriptonNameChangeCommand(name));
+        await executeCommand(new TranscriptionNameChangeCommand(name));
     }
 }
 
 async function handleGenerateSummary(): Promise<void> {
-    if (transcriptionStore.isSummaryGenerating) return;
+    if (isSummaryGenerating.value || !currentTranscription.value) return;
 
     summaryError.value = null;
     // Collapse summary section when regenerating (it will expand again after new summary is generated)
     isSummaryExpanded.value = false;
 
     try {
-        await transcriptionStore.generateSummary();
+        await generateSummary(currentTranscription.value);
         // Expand the summary section after successful generation/regeneration
         isSummaryExpanded.value = true;
     } catch (error) {
@@ -79,7 +76,7 @@ async function handleGenerateSummary(): Promise<void> {
 
 <template>
     <div>
-        <div v-if="currentTranscription && isInited" class="p-2">
+        <div v-if="currentTranscription" class="p-2">
             <!-- Single line with Download Media, File Name edit, Export, and Help -->
             <div class="flex items-center gap-2 mb-4">
                 <!-- Download Media Button -->
@@ -104,24 +101,24 @@ async function handleGenerateSummary(): Promise<void> {
                 </div>
 
                 <!-- Generate Summary Button -->
-                <UButton v-if="!currentTranscription.summary" icon="i-lucide-lightbulb" variant="ghost" :label="transcriptionStore.isSummaryGenerating
+                <UButton v-if="!currentTranscription.summary" icon="i-lucide-lightbulb" variant="ghost" :label="isSummaryGenerating
                     ? t('summary.generating')
                     : t('summary.generate')
-                    " color="primary" size="sm" :loading="transcriptionStore.isSummaryGenerating"
-                    :disabled="transcriptionStore.isSummaryGenerating" @click="handleGenerateSummary" />
+                    " color="primary" size="sm" :loading="isSummaryGenerating" :disabled="isSummaryGenerating"
+                    @click="handleGenerateSummary" />
 
                 <!-- Summary buttons when summary exists -->
                 <template v-else>
                     <!-- Regenerate Summary Button -->
-                    <UButton icon="i-lucide-loader-circle" variant="ghost" :label="transcriptionStore.isSummaryGenerating
+                    <UButton icon="i-lucide-loader-circle" variant="ghost" :label="isSummaryGenerating
                         ? t('summary.regenerating')
                         : t('summary.regenerate')
-                        " color="primary" size="sm" :loading="transcriptionStore.isSummaryGenerating"
-                        :disabled="transcriptionStore.isSummaryGenerating" @click="handleGenerateSummary" />
+                        " color="primary" size="sm" :loading="isSummaryGenerating" :disabled="isSummaryGenerating"
+                        @click="handleGenerateSummary" />
                 </template>
 
                 <!-- Export Toolbar -->
-                <ExportToolbar />
+                <ExportToolbar :transcription="currentTranscription" />
             </div>
 
             <!-- Summary Section -->
@@ -154,24 +151,13 @@ async function handleGenerateSummary(): Promise<void> {
 
             <!-- Viewer Mode -->
             <div v-if="isViewMode" class="h-[calc(100vh-12rem)]">
-                <TranscriptionViewer />
+                <TranscriptionViewer :transcription="currentTranscription" />
             </div>
 
             <!-- Editor Mode -->
-            <SplitView v-else>
-                <template #a>
-                    <MediaEditor />
-                </template>
-                <template #b>
-                    <div class="overflow-y-auto max-h-[calc(100vh-12rem)]">
-                        <TranscriptionList class="p-2" />
-                    </div>
-                </template>
-            </SplitView>
-        </div>
-        <div v-else-if="error" class="p-4 text-center">
-            <UAlert color="error" title="Error" :description="t('transcription.notFound')"
-                icon="i-lucide-triangle-alert" />
+            <div v-else>
+                <TranscriptionEditView :transcription="currentTranscription" />
+            </div>
         </div>
         <div v-else class="p-4 text-center">
             <p>{{ t("transcription.loading") }}</p>

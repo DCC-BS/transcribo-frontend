@@ -4,6 +4,9 @@ import type { StoredTranscription } from "~/types/storedTranscription";
 import type { StoredTask } from "~/types/task";
 import { TaskStatusEnum, TaskStatusSchema } from "~/types/task";
 import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
+import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "#imports";
+import TranscriptionTable from "~/components/transcription/TranscriptionTable.vue";
+import ProcessingTasksTable from "~/components/transcription/ProcessingTasksTable.vue";
 
 const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
@@ -159,9 +162,9 @@ onMounted(async () => {
         <UAlert icon="i-lucide-info" color="info" variant="soft" :title="t('retention.title')"
             :description="t('retention.description', { retentionDays: retentionDays })" />
 
-        <TranscriptionProcessingTasksTable :tasks="inProgressTasks" :loading="isProcessingLoading"
-            :error="processingError" @refresh="refreshStatuses" @dismiss-error="processingError = undefined" />
+        <ProcessingTasksTable :tasks="inProgressTasks" :loading="isProcessingLoading" :error="processingError"
+            @refresh="refreshStatuses" @dismiss-error="processingError = undefined" />
 
-        <TranscriptionTranscriptionTable :transcriptions="transcriptions" @delete="deleteTranscription" />
+        <TranscriptionTable :transcriptions="transcriptions" @delete="deleteTranscription" />
     </UContainer>
 </template>

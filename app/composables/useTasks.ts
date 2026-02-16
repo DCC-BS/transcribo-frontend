@@ -1,5 +1,5 @@
 import { db } from "@/stores/db";
-import { type TaskStatus, TaskStatusEnum } from "~/types/task";
+import { type StoredTask, type TaskStatus, TaskStatusEnum } from "~/types/task";
 
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
 
@@ -58,8 +58,8 @@ export function useTasks() {
         await db.tasks
             .filter(
                 (t) =>
-                    t.status === TaskStatusEnum.FAILED ||
-                    t.status === TaskStatusEnum.COMPLETED,
+                    t.status.status === TaskStatusEnum.FAILED ||
+                    t.status.status === TaskStatusEnum.COMPLETED,
             )
             .delete();
     }

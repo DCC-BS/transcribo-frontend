@@ -49,7 +49,7 @@ export type TaskStatus = z.infer<typeof TaskStatusSchema>;
 
 export interface StoredTask {
     id: string;
-    status: TaskStatus;
+    status: TaskStatus,
     mediaFile?: Blob;
     mediaFileName?: string;
     createdAt?: number; // Timestamp when task was created
