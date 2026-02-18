@@ -88,7 +88,9 @@ function handleRedo(): void {
 <template>
     <div>
         <NavigationBar>
-
+            <template #center>
+                <div id="nav-center-portal"></div>
+            </template>
         </NavigationBar>
         <!-- <ClientOnly>
             <UNavigationMenu content-orientation="vertical" variant="link" :items="items"

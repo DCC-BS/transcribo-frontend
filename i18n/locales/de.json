@@ -71,7 +71,8 @@
         "play": "Abspielen",
         "pause": "Pause",
         "addSegment": "Segment hinzufügen",
-        "downloadMedia": "Medien herunterladen"
+        "downloadMedia": "Medien herunterladen",
+        "noMedia": "Keine Mediendatei verfügbar"
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
@@ -90,6 +91,9 @@
         "notFound": "Transkription nicht gefunden oder konnte nicht geladen werden",
         "noTranscriptionsFound": "Keine Transkriptionen gefunden",
         "untitled": "Ohne Titel",
+        "info": "Transkriptions-Info",
+        "nameLabel": "Name",
+        "namePlaceholder": "Transkriptionsname",
         "delete": {
             "title": "Transkription löschen",
             "confirmation": "Sind Sie sicher, dass Sie diese Transkription löschen möchten?"

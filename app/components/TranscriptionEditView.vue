@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import type { StoredTranscription } from '~/types/storedTranscription';
 import { useMediaQuery } from '@vueuse/core'
+import type { StoredTranscription } from '~/types/storedTranscription';
 
 
 interface InputProps {

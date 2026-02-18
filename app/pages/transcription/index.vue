@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { isApiError } from "@dcc-bs/communication.bs.js";
+import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "#imports";
+import ProcessingTasksTable from "~/components/transcription/ProcessingTasksTable.vue";
+import TranscriptionTable from "~/components/transcription/TranscriptionTable.vue";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import type { StoredTask } from "~/types/task";
 import { TaskStatusEnum, TaskStatusSchema } from "~/types/task";
 import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
-import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "#imports";
-import TranscriptionTable from "~/components/transcription/TranscriptionTable.vue";
-import ProcessingTasksTable from "~/components/transcription/ProcessingTasksTable.vue";
 
 const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));

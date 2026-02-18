@@ -14,7 +14,9 @@ import {
 import type { StoredTranscription } from "~/types/storedTranscription";
 import type { SegmentWithId } from "~/types/transcriptionResponse";
 
-export const useTranscriptionService = (transcription: Ref<StoredTranscription | undefined>) => {
+export const useTranscriptionService = (
+    transcription: Ref<StoredTranscription | undefined>,
+) => {
     const logger = useLogger();
     const { registerHandler, unregisterHandler } = useCommandBus();
     const { updateTranscription } = useTranscription();
@@ -94,7 +96,9 @@ export const useTranscriptionService = (transcription: Ref<StoredTranscription |
             (a, b) => a.start - b.start,
         );
 
-        await updateTranscription(transcription.value.id, { segments: newTranscriptions });
+        await updateTranscription(transcription.value.id, {
+            segments: newTranscriptions,
+        });
     }
 
     async function handleAddSegment(command: AddSegmentCommand): Promise<void> {
@@ -116,7 +120,9 @@ export const useTranscriptionService = (transcription: Ref<StoredTranscription |
             (a, b) => a.start - b.start,
         );
 
-        await updateTranscription(transcription.value.id, { segments: newTranscriptions })
+        await updateTranscription(transcription.value.id, {
+            segments: newTranscriptions,
+        });
     }
 
     async function handleUpdateSegment(command: UpdateSegmentCommand) {
@@ -143,7 +149,9 @@ export const useTranscriptionService = (transcription: Ref<StoredTranscription |
             .map((s) => (s.id === command.segmentId ? updatedSegment : s))
             .sort((a, b) => a.start - b.start);
 
-        await updateTranscription(transcription.value.id, { segments: newSegments });
+        await updateTranscription(transcription.value.id, {
+            segments: newSegments,
+        });
     }
 
     async function handleNameChanged(command: TranscriptionNameChangeCommand) {

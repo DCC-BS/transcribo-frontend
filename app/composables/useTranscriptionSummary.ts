@@ -2,7 +2,6 @@ import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { SummaryResponseSchema } from "~/types/summarizeResponse";
 
-
 export function useTranscriptionSummary() {
     const { updateTranscription } = useTranscription();
     const logger = useLogger();
@@ -56,7 +55,9 @@ export function useTranscriptionSummary() {
     /**
      * Generate and store a summary for the current transcription
      */
-    async function generateSummary(transcription: StoredTranscription): Promise<string | null> {
+    async function generateSummary(
+        transcription: StoredTranscription,
+    ): Promise<string | null> {
         // Prevent concurrent calls
         if (isSummaryGenerating.value) {
             throw new Error(
@@ -74,9 +75,7 @@ export function useTranscriptionSummary() {
                 transcription.summary = undefined;
             }
 
-            const transcriptText = getTranscriptionText(
-                transcription,
-            );
+            const transcriptText = getTranscriptionText(transcription);
 
             // Validate and sanitize transcript text
             const sanitizedText =
@@ -100,7 +99,9 @@ export function useTranscriptionSummary() {
             // Store the summary in the current transcription with proper reactivity
             transcription.summary = summary;
 
-            await updateTranscription(transcription.id, { summary: transcription.summary });
+            await updateTranscription(transcription.id, {
+                summary: transcription.summary,
+            });
 
             return summary;
         } catch (error) {

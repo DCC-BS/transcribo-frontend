@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { match } from "ts-pattern";
 import { SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
+import type { StoredTranscription } from "~/types/storedTranscription";
 import CurrentSegementEditor from "./media/CurrentSegementEditor.vue";
 import TimelineView from "./media/TimelineView.client.vue";
 import VideoView from "./media/VideoView.vue";
 import RenameSpeakerView from "./RenameSpeakerView.vue";
-import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface InputProps {
     transcription: StoredTranscription

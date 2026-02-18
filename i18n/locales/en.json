@@ -71,7 +71,8 @@
         "play": "Play",
         "pause": "Pause",
         "addSegment": "Add Segment",
-        "downloadMedia": "Download Media"
+        "downloadMedia": "Download Media",
+        "noMedia": "No media file available"
     },
     "taskStatus": {
         "processing": "Processing your request...",
@@ -90,6 +91,9 @@
         "notFound": "Transcription not found or failed to load",
         "noTranscriptionsFound": "No transcriptions found",
         "untitled": "Untitled",
+        "info": "Transcription Info",
+        "nameLabel": "Name",
+        "namePlaceholder": "Transcription name",
         "delete": {
             "title": "Delete Transcription",
             "confirmation": "Are you sure you want to delete this transcription?"

@@ -3,7 +3,7 @@ import type { StoredTranscription } from "~/types/storedTranscription";
 import type { SegmentWithId } from "~/types/transcriptionResponse";
 
 export interface ExportOptions {
-    transciption: StoredTranscription,
+    transciption: StoredTranscription;
     withSpeakers: boolean;
     withTimestamps: boolean;
     mergeSegments: boolean; // Only applies to text exports
@@ -115,7 +115,10 @@ export const useExport = () => {
         return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")},${milliseconds.toString().padStart(3, "0")}`;
     }
 
-    function exportAsSrt(transciption: StoredTranscription, withSpeakers: boolean) {
+    function exportAsSrt(
+        transciption: StoredTranscription,
+        withSpeakers: boolean,
+    ) {
         const srt = transciption.segments
             .map((s, i) => {
                 const start = srtFormatTime(s.start);
