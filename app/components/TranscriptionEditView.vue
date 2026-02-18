@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { StoredTranscription } from '~/types/storedTranscription';
+import { useMediaQuery } from '@vueuse/core'
 
 
 interface InputProps {
@@ -8,10 +9,11 @@ interface InputProps {
 
 const props = defineProps<InputProps>();
 
+const isMobile = useMediaQuery('(max-width: 800px)');
 </script>
 
 <template>
-    <SplitView>
+    <SplitView :isHorizontal="isMobile">
         <template #a>
             <MediaEditor :transcription="props.transcription" />
         </template>
