@@ -143,7 +143,8 @@
         "show": "Show Summary",
         "hide": "Hide Summary",
         "title": "Meeting Summary",
-        "error": "Summary Generation Error"
+        "error": "Summary Generation Error",
+        "empty": "No summary generated yet"
     },
     "task": {
         "errors": {
@@ -180,6 +181,7 @@
     },
     "mode": {
         "viewer": "Viewer",
+        "summary": "Summary",
         "editor": "Editor",
         "switch": "Switch Mode"
     },

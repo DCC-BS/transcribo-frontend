@@ -16,8 +16,8 @@ const isTranscriptionPage = computed(() => route.fullPath === "/transcription");
                     {{ t("pages.index.subtitle") }}
                 </p>
 
-                <div class="ring-1 ring-default rounded-md shadow-[2px_2px_1px_1px_#0000000D]">
-                    <div class="border-b border-default p-2">
+                <HContainer>
+                    <template #top>
                         <div class="w-full flex justify-center items-center">
                             <ULink to="/">
                                 <UButton :variant="isHomePage ? 'soft' : 'ghost'" icon="i-lucide-plus">
@@ -30,12 +30,9 @@ const isTranscriptionPage = computed(() => route.fullPath === "/transcription");
                                 </UButton>
                             </ULink>
                         </div>
-                    </div>
-
-                    <div class="p-2">
-                        <slot />
-                    </div>
-                </div>
+                    </template>
+                    <slot />
+                </HContainer>
             </UContainer>
         </div>
         <DataBsFooter />
