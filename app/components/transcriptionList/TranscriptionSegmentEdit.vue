@@ -12,6 +12,7 @@ import { formatTime } from "~/utils/time";
 interface TranscriptionListProps {
     segment: SegmentWithId;
     speakers: string[];
+    isActive?: boolean;
 }
 
 const props = defineProps<TranscriptionListProps>();
@@ -129,7 +130,14 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <UCard variant="subtle">
+    <UCard
+        variant="subtle"
+        :ui="{
+            root: props.isActive
+                ? 'ring-2 ring-blue-500 bg-blue-50'
+                : ''
+        }"
+        class="transition-all duration-200">
         <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
             variant="outline" :actions="[
                 {

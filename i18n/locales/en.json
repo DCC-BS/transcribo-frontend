@@ -94,6 +94,10 @@
         "info": "Transcription Info",
         "nameLabel": "Name",
         "namePlaceholder": "Transcription name",
+        "autoScrollOn": "Auto-scroll ON",
+        "autoScrollOff": "Auto-scroll OFF",
+        "tab": "Transcription",
+        "timelineTab": "Timeline",
         "delete": {
             "title": "Delete Transcription",
             "confirmation": "Are you sure you want to delete this transcription?"

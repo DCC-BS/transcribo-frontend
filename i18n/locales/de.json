@@ -94,6 +94,10 @@
         "info": "Transkriptions-Info",
         "nameLabel": "Name",
         "namePlaceholder": "Transkriptionsname",
+        "autoScrollOn": "Auto-Scroll AN",
+        "autoScrollOff": "Auto-Scroll AUS",
+        "tab": "Transkription",
+        "timelineTab": "Zeitleiste",
         "delete": {
             "title": "Transkription löschen",
             "confirmation": "Sind Sie sicher, dass Sie diese Transkription löschen möchten?"
