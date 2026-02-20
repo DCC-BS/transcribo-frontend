@@ -35,6 +35,10 @@ const isTranscriptionPage = computed(() => route.fullPath === "/transcription");
                 </HContainer>
             </UContainer>
         </div>
-        <DataBsFooter />
+        <DataBsFooter>
+            <template #right>
+                <FeedbackControl inline />
+            </template>
+        </DataBsFooter>
     </div>
 </template>

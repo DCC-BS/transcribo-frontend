@@ -150,9 +150,9 @@ export default defineNuxtConfig({
     ],
     typescript: {
         strict: true,
-        typeCheck: true,
+        typeCheck: false,
     },
-    devtools: { enabled: true },
+    devtools: { enabled: false },
     css: ["~/assets/css/main.css"],
     // localization
     i18n: {

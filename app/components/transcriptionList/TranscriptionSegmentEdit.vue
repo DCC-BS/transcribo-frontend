@@ -129,7 +129,7 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <UCard>
+    <UCard variant="subtle">
         <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
             variant="outline" :actions="[
                 {

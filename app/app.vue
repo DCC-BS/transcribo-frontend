@@ -32,20 +32,10 @@ function handleKeyDown(event: KeyboardEvent) {
 <template>
     <NuxtPwaManifest />
     <Changelogs />
-    <FeedbackControl />
-    <Disclaimer
-        app-name="Transcribo"
-        :postfixHTML="disclaimerText"
-        confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."
-    />
+    <Disclaimer app-name="Transcribo" :postfixHTML="disclaimerText"
+        confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende." />
     <UApp>
-        <DialogView
-            :is-open="isOpen"
-            :title="title"
-            :message="message"
-            :on-confirm="onSubmit"
-            :on-cancel="onClose"
-        />
+        <DialogView :is-open="isOpen" :title="title" :message="message" :on-confirm="onSubmit" :on-cancel="onClose" />
         <NuxtLayout>
             <NuxtPage />
         </NuxtLayout>

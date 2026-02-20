@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { createReusableTemplate } from "@vueuse/core";
 import { motion } from "motion-v";
-import { useTranscriptionSummary } from "~/composables/useTranscriptionSummary";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 definePageMeta({ layout: "edit" });
@@ -18,8 +17,6 @@ const isTranscriptionLoading = ref(true);
 
 useTranscriptionService(currentTranscription);
 
-
-
 // Editor mode state - default to view mode
 type EditorMode = "view" | "summary" | "edit";
 const editorMode = ref<EditorMode>("view");
@@ -32,7 +29,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <HContainer>
+    <HContainer class="grow min-h-125">
         <template #top>
             <div class="flex md:hidden items-center justify-center mb-2">
                 <EditorModeSelector v-model="editorMode" />
@@ -50,52 +47,53 @@ onMounted(async () => {
 
                 <!-- Export Portal Target (right-aligned) -->
                 <div class="flex-1 min-w-0 flex justify-end">
-                    <ExportToolbar v-if="currentTranscription" :transcription="currentTranscription"/>
+                    <ExportToolbar v-if="currentTranscription" :transcription="currentTranscription" />
                 </div>
             </div>
         </template>
-        <div>
-            <div v-if="isTranscriptionLoading">
+        <template #default>
+            <template v-if="isTranscriptionLoading">
                 <LoadingView :loadingText="t('transcription.loading')" />
-            </div>
-            <div v-else-if="currentTranscription">
+            </template>
+            <template v-else-if="currentTranscription">
                 <UseMainContent />
-            </div>
-            <div v-else>
+            </template>
+            <template v-else>
                 <motion.div :animate="{ opacity: 1, scale: 1 }" :initial="{ opacity: 0, scale: 0.95 }"
                     :transition="{ duration: 0.4 }" class="flex flex-col items-center justify-center min-h-[60vh] p-8">
-                    <div class="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                    <div
+                        class="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
                         <UIcon name="i-lucide-file-x" class="w-10 h-10 text-gray-400 dark:text-gray-500" />
                     </div>
                     <p class="text-gray-500 dark:text-gray-400 text-lg font-medium">
                         {{ t("transcription.notFound") || "Transcription not found" }}
                     </p>
                 </motion.div>
-            </div>
-        </div>
+            </template>
+        </template>
     </HContainer>
 
-    <DefineMainContent>
+    <DefineMainContent id="does-this-work">
         <template v-if="currentTranscription">
-            <motion.div :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
-                :transition="pageTransition" class="p-2 sm:p-4">
+            <motion.div id="main-content" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }" :transition="pageTransition"
+                class="flex flex-col p-2 sm:p-4 grow">
 
                 <!-- Content Area with Mode Transition -->
-                <motion.div :key="editorMode" :animate="{ opacity: 1, y: 0 }"
-                    :initial="{ opacity: 0, y: 10 }" :transition="{ duration: 0.25, ease: 'easeOut' }">
+                <motion.div class="grow flex flex-col" :key="editorMode" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 10 }"
+                    :transition="{ duration: 0.25, ease: 'easeOut' }">
                     <!-- Viewer Mode -->
-                    <div v-if="editorMode === 'view'" class="h-[calc(100vh-12rem)]">
+                    <template v-if="editorMode === 'view'">
                         <TranscriptionViewer :transcription="currentTranscription" />
-                    </div>
+                    </template>
 
-                    <div v-else-if="editorMode === 'summary'" class="h-[calc(100vh-12rem)]">
+                    <template v-else-if="editorMode === 'summary'">
                         <TranscriptionSummaryView :transcription="currentTranscription" />
-                    </div>
+                    </template>
 
                     <!-- Editor Mode -->
-                    <div v-else-if="editorMode === 'edit'">
+                    <template v-else-if="editorMode === 'edit'">
                         <TranscriptionEditView :transcription="currentTranscription" />
-                    </div>
+                    </template>
                 </motion.div>
             </motion.div>
         </template>

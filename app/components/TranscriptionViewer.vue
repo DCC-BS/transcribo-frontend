@@ -92,7 +92,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
+    <div class="grow h-full flex flex-col">
         <!-- Viewer Controls -->
         <div class="flex items-center gap-4 p-4 border-b border-gray-200 bg-gray-50">
             <h3 class="font-medium text-sm">{{ t('viewer.displayOptions') }}</h3>
