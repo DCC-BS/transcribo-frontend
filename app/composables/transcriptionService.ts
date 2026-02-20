@@ -1,7 +1,7 @@
 import { v4 as uuid } from "uuid";
-import type {
+import {
     InsertSegmentCommand,
-    RenameSpeakerCommand,
+    type RenameSpeakerCommand,
 } from "~/types/commands";
 import {
     type AddSegmentCommand,
@@ -18,10 +18,10 @@ export const useTranscriptionService = (
     transcription: Ref<StoredTranscription | undefined>,
 ) => {
     const logger = useLogger();
-    const { registerHandler, unregisterHandler } = useCommandBus();
+    const { onCommand } = useCommandBus();
     const { updateTranscription } = useTranscription();
 
-    async function handleDeleteSegment(command: DeleteSegmentCommand) {
+    onCommand<DeleteSegmentCommand>(Cmds.DeleteSegmentCommand, async (command) => {
         if (!transcription.value) {
             logger.warn("Current transcription not found");
             return;
@@ -52,9 +52,10 @@ export const useTranscriptionService = (
         await updateTranscription(transcription.value.id, {
             segments: transcription.value.segments,
         });
-    }
 
-    async function handleInsertSegment(command: InsertSegmentCommand) {
+    });
+
+    onCommand<InsertSegmentCommand>(Cmds.InsertSegmentCommand, async (command) => {
         if (!transcription.value) {
             logger.warn("Current transcription not found");
             return;
@@ -99,9 +100,9 @@ export const useTranscriptionService = (
         await updateTranscription(transcription.value.id, {
             segments: newTranscriptions,
         });
-    }
+    });
 
-    async function handleAddSegment(command: AddSegmentCommand): Promise<void> {
+    onCommand<AddSegmentCommand>(Cmds.AddSegmentCommand, async (command) => {
         if (!transcription.value) {
             logger.warn("Current transcription not found");
             return;
@@ -123,9 +124,9 @@ export const useTranscriptionService = (
         await updateTranscription(transcription.value.id, {
             segments: newTranscriptions,
         });
-    }
+    });
 
-    async function handleUpdateSegment(command: UpdateSegmentCommand) {
+    onCommand<UpdateSegmentCommand>(Cmds.UpdateSegmentCommand, async (command) => {
         if (!transcription.value) {
             logger.warn("Current transcription not found");
             return;
@@ -152,9 +153,9 @@ export const useTranscriptionService = (
         await updateTranscription(transcription.value.id, {
             segments: newSegments,
         });
-    }
+    });
 
-    async function handleNameChanged(command: TranscriptionNameChangeCommand) {
+    onCommand<TranscriptionNameChangeCommand>(Cmds.TranscriptionNameChangeCommand, async (command) => {
         if (!transcription.value) {
             logger.warn("Current transcription not found");
             return;
@@ -164,9 +165,9 @@ export const useTranscriptionService = (
         command.setUndoCommand(new TranscriptionNameChangeCommand(oldName));
 
         updateTranscription(transcription.value.id, { name: command.newName });
-    }
+    });
 
-    async function handleRenameSpeaker(command: RenameSpeakerCommand) {
+    onCommand<RenameSpeakerCommand>(Cmds.RenameSpeakerCommand, async (command) => {
         if (!transcription.value) {
             logger.warn("Current transcription not found");
             return;
@@ -179,9 +180,9 @@ export const useTranscriptionService = (
         );
 
         updateTranscription(transcription.value.id, { segments: newSegments });
-    }
+    });
 
-    async function handleRestoreSegment(command: RestoreSegmentCommand) {
+    onCommand<RestoreSegmentCommand>(Cmds.RestoreSegmentCommand, async (command) => {
         if (!transcription.value) {
             logger.warn("Current transcription not found");
             return;
@@ -196,28 +197,5 @@ export const useTranscriptionService = (
         );
 
         updateTranscription(transcription.value.id, { segments: newSegments });
-    }
-
-    onMounted(() => {
-        registerHandler(Cmds.DeleteSegmentCommand, handleDeleteSegment);
-        registerHandler(Cmds.InsertSegmentCommand, handleInsertSegment);
-        registerHandler(Cmds.UpdateSegmentCommand, handleUpdateSegment);
-        registerHandler(Cmds.TranscriptionNameChangeCommand, handleNameChanged);
-        registerHandler(Cmds.RenameSpeakerCommand, handleRenameSpeaker);
-        registerHandler(Cmds.AddSegmentCommand, handleAddSegment);
-        registerHandler(Cmds.RestoreSegmentCommand, handleRestoreSegment);
-    });
-
-    onUnmounted(() => {
-        unregisterHandler(Cmds.DeleteSegmentCommand, handleDeleteSegment);
-        unregisterHandler(Cmds.InsertSegmentCommand, handleInsertSegment);
-        unregisterHandler(Cmds.UpdateSegmentCommand, handleUpdateSegment);
-        unregisterHandler(
-            Cmds.TranscriptionNameChangeCommand,
-            handleNameChanged,
-        );
-        unregisterHandler(Cmds.RenameSpeakerCommand, handleRenameSpeaker);
-        unregisterHandler(Cmds.AddSegmentCommand, handleAddSegment);
-        unregisterHandler(Cmds.RestoreSegmentCommand, handleRestoreSegment);
     });
 };
