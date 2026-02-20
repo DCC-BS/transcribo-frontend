@@ -28,7 +28,7 @@
         "@nuxtjs/i18n": "^10.2.1",
         "@nuxtjs/mdc": "^0.20.0",
         "@pinia/nuxt": "0.11.3",
-        "@vite-pwa/nuxt": "1.1.0",
+        "@vite-pwa/nuxt": "1.1.1",
         "konva": "^10.0.12",
         "motion-v": "^1.7.4",
         "nuxt": "4.3.0",
