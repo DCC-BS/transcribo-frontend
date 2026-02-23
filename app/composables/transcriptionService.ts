@@ -137,9 +137,11 @@ export const useTranscriptionService = (
                 return;
             }
 
-            const segment = transcription.value.segments.find(
+            const segmentIndex = transcription.value.segments.findIndex(
                 (s) => s.id === command.segmentId,
             );
+
+            const segment = transcription.value.segments[segmentIndex];
 
             if (!segment) {
                 logger.warn("Target segment not found");
@@ -152,8 +154,10 @@ export const useTranscriptionService = (
             );
 
             const newSegments = transcription.value.segments
-                .map((s) => (s.id === command.segmentId ? updatedSegment : s))
+                .map((s) => (s.id === command.segmentId ? { ...updatedSegment } : { ...s }))
                 .sort((a, b) => a.start - b.start);
+
+            transcription.value.segments[segmentIndex] = updatedSegment;
 
             await updateTranscription(transcription.value.id, {
                 segments: newSegments,

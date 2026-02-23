@@ -125,31 +125,22 @@ function toggleExpanded(): void {
 
 <template>
     <div class=" bg-default border-b border-default shadow-sm">
-        <div v-if="isExpanded" class="p-2">
-            <div class="media-container relative">
-                <video
-                    v-if="isVideoFile && mediaFile"
-                    ref="videoElement"
-                    class="media-player w-full rounded"
-                    @timeupdate="onTimeUpdate"
-                    @click="togglePlay"
-                >
+        <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
+        <div v-show="isExpanded" class="p-2">
+            <div class="media-container">
+                <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player rounded"
+                    @timeupdate="onTimeUpdate" @click="togglePlay">
                     <source :src="mediaSrc" :type="mediaFile.type">
                 </video>
+                <audio v-else-if="mediaFile" ref="audioElement" :src="mediaSrc" @timeupdate="onTimeUpdate" />
 
-                <div v-else class="audio-visualization w-full h-24 bg-muted rounded flex items-center justify-center">
-                    <UIcon name="i-lucide-audio-waveform" class="w-12 h-12 text-muted-foreground" />
+                <div v-else class="audio-visualization h-30 bg-muted rounded">
                 </div>
 
                 <div class="subtitles-container">
-                    <div
-                        v-for="segment in currentSegments"
-                        :key="segment.id"
-                        class="subtitle-segment"
-                        :style="{
-                            '--text-color': getSpeakerColor(segment.speaker ?? 'unknown').toString(),
-                        }"
-                    >
+                    <div v-for="segment in currentSegments" :key="segment.id" class="subtitle-segment" :style="{
+                        '--text-color': getSpeakerColor(segment.speaker ?? 'unknown').toString(),
+                    }">
                         <span class="font-bold">{{ segment.speaker }}: </span>
                         <span>{{ segment.text }}</span>
                     </div>
@@ -161,14 +152,8 @@ function toggleExpanded(): void {
                     <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
                 </UButton>
 
-                <USlider
-                    :model-value="currentTime"
-                    :min="0"
-                    :max="props.duration"
-                    :step="0.1"
-                    class="flex-1"
-                    @update:model-value="onSliderChange"
-                />
+                <USlider :model-value="currentTime" :min="0" :max="props.duration" :step="0.1" class="flex-1"
+                    @update:model-value="onSliderChange" />
 
                 <div class="text-sm text-muted-foreground min-w-[100px] text-right">
                     {{ formatTime(currentTime, { milliseconds: false }) }} /
@@ -181,19 +166,13 @@ function toggleExpanded(): void {
             </div>
         </div>
 
-        <div v-else class="flex items-center gap-2 p-2">
+        <div v-show="!isExpanded" class="flex items-center gap-2 p-2">
             <UButton size="sm" variant="ghost" @click="togglePlay">
                 <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
             </UButton>
 
-            <USlider
-                :model-value="currentTime"
-                :min="0"
-                :max="props.duration"
-                :step="0.1"
-                class="flex-1"
-                @update:model-value="onSliderChange"
-            />
+            <USlider :model-value="currentTime" :min="0" :max="props.duration" :step="0.1" class="flex-1"
+                @update:model-value="onSliderChange" />
 
             <div class="text-sm text-muted-foreground min-w-[100px] text-right">
                 {{ formatTime(currentTime, { milliseconds: false }) }} /
@@ -205,42 +184,38 @@ function toggleExpanded(): void {
             </UButton>
         </div>
 
-        <audio
-            v-if="!isVideoFile && mediaFile"
-            ref="audioElement"
-            :src="mediaSrc"
-            @timeupdate="onTimeUpdate"
-        />
     </div>
 </template>
 
 <style lang="scss" scoped>
 .media-container {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    position: relative;
+    display: grid;
+    justify-content: stretch;
+    align-items: end;
+    margin: auto;
 }
 
 .media-player {
-    width: 100%;
+    @apply rounded;
+    grid-area: 1 / 1;
     border-radius: 4px;
     max-height: 300px;
-    object-fit: contain;
+    margin: auto;
+}
+
+.audio-visualization {
+    grid-area: 1 / 1;
 }
 
 .subtitles-container {
-    position: absolute;
-    bottom: 10px;
-    left: 0;
-    right: 0;
+    grid-area: 1 / 1;
+    display: flex;
+    justify-content: center;
     background-color: rgba(177, 177, 177, 0.9);
     border-radius: 4px;
     padding: 8px 12px;
+    margin: 0.5rem;
     min-height: 30px;
-    z-index: 10;
-    margin: 0 auto;
-    max-width: 90%;
 }
 
 .subtitle-segment {

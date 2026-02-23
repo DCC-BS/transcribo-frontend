@@ -43,7 +43,8 @@ export function useTranscription() {
         id: string,
         updates: Partial<StoredTranscription>,
     ) {
-        await db.transcriptions.update(id, updates);
+        console.log("update", updates);
+        await db.transcriptions.update(id, { ...updates });
     }
 
     async function deleteTranscription(id: string) {
