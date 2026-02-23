@@ -22,7 +22,7 @@ const { canRedo, canUndo, redo, undo } = useCommandHistory();
                 </UTooltip>
 
                 <UTooltip :text="t('navigation.transcriptions')">
-                    <ULink to="transcription">
+                    <ULink to="/transcription">
                         <UButton variant="ghost" icon="i-lucide-list">
                             <span class="hidden md:inline">
                                 {{ t("navigation.transcriptions") }}

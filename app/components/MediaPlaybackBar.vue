@@ -127,14 +127,14 @@ function toggleExpanded(): void {
     <div class=" bg-default border-b border-default shadow-sm">
         <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
         <div v-show="isExpanded" class="p-2">
-            <div class="media-container">
+            <div class="media-container" :class="{ 'media-container--audio': !isVideoFile }">
                 <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player rounded"
                     @timeupdate="onTimeUpdate" @click="togglePlay">
                     <source :src="mediaSrc" :type="mediaFile.type">
                 </video>
-                <audio v-else-if="mediaFile" ref="audioElement" :src="mediaSrc" @timeupdate="onTimeUpdate" />
+                <audio v-if="!isVideoFile && mediaFile" ref="audioElement" :src="mediaSrc" @timeupdate="onTimeUpdate" />
 
-                <div v-else class="audio-visualization h-30 bg-muted rounded">
+                <div v-if="!isVideoFile && mediaFile" class="audio-visualization">
                 </div>
 
                 <div class="subtitles-container">
@@ -189,32 +189,39 @@ function toggleExpanded(): void {
 
 <style lang="scss" scoped>
 .media-container {
-    display: grid;
-    justify-content: stretch;
-    align-items: end;
+    position: relative;
     margin: auto;
+    width: fit-content;
+}
+
+.media-container--audio {
+    width: 100%;
 }
 
 .media-player {
     @apply rounded;
-    grid-area: 1 / 1;
+    display: block;
     border-radius: 4px;
     max-height: 300px;
-    margin: auto;
 }
 
 .audio-visualization {
-    grid-area: 1 / 1;
+    @apply bg-muted rounded
+    display: block;
+    width: 100%;
+    height: 120px;
 }
 
 .subtitles-container {
-    grid-area: 1 / 1;
+    position: absolute;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem;
     display: flex;
     justify-content: center;
     background-color: rgba(177, 177, 177, 0.9);
     border-radius: 4px;
     padding: 8px 12px;
-    margin: 0.5rem;
     min-height: 30px;
 }
 
