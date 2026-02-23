@@ -50,7 +50,7 @@ export const useTranscriptionService = (
             );
 
             await updateTranscription(transcription.value.id, {
-                segments: transcription.value.segments,
+                segments: transcription.value.segments.map(x => ({ ...x })),
             });
         },
     );
@@ -93,11 +93,12 @@ export const useTranscriptionService = (
 
             command.setUndoCommand(new DeleteSegmentCommand(newSegment.id));
 
-            transcription.value.segments.splice(targetIndex, 0, newSegment);
+            transcription.value.segments
+                .splice(targetIndex, 0, newSegment);
 
             const newTranscriptions = transcription.value.segments.toSorted(
                 (a, b) => a.start - b.start,
-            );
+            ).map(x => ({ ...x }));
 
             await updateTranscription(transcription.value.id, {
                 segments: newTranscriptions,
@@ -120,9 +121,9 @@ export const useTranscriptionService = (
 
         transcription.value.segments.push(newSegment);
 
-        const newTranscriptions = transcription.value.segments.toSorted(
-            (a, b) => a.start - b.start,
-        );
+        const newTranscriptions = transcription.value.segments
+            .toSorted((a, b) => a.start - b.start)
+            .map(x => ({ ...x }));
 
         await updateTranscription(transcription.value.id, {
             segments: newTranscriptions,
@@ -193,7 +194,7 @@ export const useTranscriptionService = (
             const newSegments = transcription.value.segments.map((s) =>
                 s.speaker === command.oldName
                     ? { ...s, speaker: command.newName }
-                    : s,
+                    : { ...s },
             );
 
             updateTranscription(transcription.value.id, {
@@ -214,9 +215,9 @@ export const useTranscriptionService = (
             transcription.value.segments.push(command.segmentData);
 
             // Sort segments by start time to maintain proper order
-            const newSegments = transcription.value.segments.toSorted(
-                (a, b) => a.start - b.start,
-            );
+            const newSegments = transcription.value.segments
+                .toSorted((a, b) => a.start - b.start)
+                .map(x => ({ ...x }));
 
             updateTranscription(transcription.value.id, {
                 segments: newSegments,

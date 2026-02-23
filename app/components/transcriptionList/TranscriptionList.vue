@@ -1,6 +1,10 @@
 <script lang="ts" setup>
 import type { StoredTranscription } from "~/types/storedTranscription";
 import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
+import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
+import type { SegmentWithId } from "~/types/transcriptionResponse";
+import { v4 as uuid } from "uuid";
+import { motion } from "motion-v";
 
 interface InputProps {
     transcription: StoredTranscription;
@@ -12,10 +16,13 @@ const props = withDefaults(defineProps<InputProps>(), {
     currentTime: 0,
     autoScrollEnabled: true,
 });
+
+const { executeCommand } = useCommandBus();
+
 const listContainer = ref<HTMLElement>();
 const segmentRefs = ref<Map<string, HTMLElement>>(new Map());
 
-const segments = computed(() => props.transcription.segments);
+const segments = computed(() => props.transcription.segments.toSorted((a, b) => a.start - b.start));
 const speakers = computed(() =>
     Array.from(getUniqueSpeakers(props.transcription.segments)),
 );
@@ -63,20 +70,40 @@ watch(currentSegmentId, (newId, oldId) => {
         segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 });
+
+async function addSegmentAfter(segment: SegmentWithId) {
+    executeCommand(new InsertSegmentCommand(segment.id, {}, "after"));
+}
+
+async function addSegemntAtZero() {
+    const segment: SegmentWithId = {
+        id: uuid(),
+        text: "",
+        start: 0,
+        end: 2,
+        speaker: speakers.value[0]
+    };
+    executeCommand(new AddSegmentCommand(segment));
+}
 </script>
 
 <template>
-    <div ref="listContainer" class="flex flex-col gap-4">
-        <div
-            v-for="segment in segments"
-            :key="segment.id"
-            :ref="(el) => setSegmentRef(segment.id, el)"
-        >
-            <TranscriptionListItem
-                :segment="segment"
-                :speakers="speakers"
-                :isActive="isSegmentActive(segment.id)"
-            />
-        </div>
+    <div ref="listContainer" class="flex flex-col">
+        <USeparator>
+            <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegemntAtZero()" />
+        </USeparator>
+
+        <AnimatePresence>
+            <motion.div v-for="segment in segments" :key="segment.id" :ref="(el) => setSegmentRef(segment.id, el)"
+                :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
+                <TranscriptionListItem :segment="segment" :speakers="speakers"
+                    :isActive="isSegmentActive(segment.id)" />
+
+                <USeparator>
+                    <UButton icon="i-lucide-plus" variant="link" color="neutral"
+                        @click="() => addSegmentAfter(segment)" />
+                </USeparator>
+            </motion.div>
+        </AnimatePresence>
     </div>
 </template>
