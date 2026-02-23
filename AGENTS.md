@@ -12,14 +12,21 @@ bun run dev
 # Build for production
 bun run build
 
-# Linting & Formatting
-bun run lint      # Biome format
-bun run check      # Biome check & fix
+# Start production server
+bun run start
 
-# Testing (Vitest)
-bun test          # Run tests
-bun test:watch    # Watch mode
-bun test:coverage # Coverage report
+# Generate static site
+bun run generate
+
+# Linting & Formatting
+bun run lint      # Biome format --write
+bun run check     # Biome check --fix
+
+# Docker
+bun run docker:dev       # Start dev container
+bun run docker:dev:down  # Stop dev container
+bun run docker:prod      # Start production container
+bun run docker:prod:down # Stop production container
 ```
 
 ## Package Manager
@@ -50,7 +57,6 @@ bun test:coverage # Coverage report
 ~/        // app/ directory
 ~~/       // root directory
 ~~/server  // server directory
-#shared   // shared client/server code
 ```
 
 ### UI & Styling
@@ -81,17 +87,32 @@ bun test:coverage # Coverage report
 ```
 app/
   components/    # Vue components (PascalCase)
-  composables/   # use* functions (camelCase)
+  composables/   # use* functions (camelCase) + other composables
   pages/         # Routes (kebab-case)
   utils/         # Framework-agnostic utilities
-  services/      # API/business logic
+  services/      # API/business logic (e.g., indexDbService.ts)
   types/         # TypeScript definitions
+  plugins/       # Nuxt plugins (e.g., api.ts, konvaPlugin.client.ts)
+  layouts/       # Page layouts (default.vue, edit.vue)
+  assets/        # Static assets (CSS, images, disclaimer.html)
 server/
-  api/           # API endpoints (kebab-case)
-  plugins/       # Nitro plugins
-shared/
-  types/         # Shared client/server types
+  api/           # API endpoints (kebab-case with HTTP method suffix)
+  utils/         # Server utilities
+  changelogs/    # Version changelog markdown files
+  tsconfig.json  # Server-specific TypeScript config
+public/
+  ios/           # PWA icons for iOS
+  icons.json     # PWA icon configuration
 ```
+
+## Key Dependencies
+- **Nuxt UI 4.x** - Component library
+- **@ffmpeg/ffmpeg** - Audio/video processing in browser
+- **dexie** - IndexedDB wrapper for local storage
+- **konva / vue-konva** - Canvas rendering for timeline editor
+- **ts-pattern** - Pattern matching
+- **zod** - Runtime type validation
+- **motion-v** - Vue animations
 
 ## Nuxt Features
 - Auto-imports enabled for composables, utils, components
@@ -99,13 +120,13 @@ shared/
 - Pinia for state management
 - Nuxt UI for components
 - i18n for internationalization (en, de)
+- PWA support via @vite-pwa/nuxt
+- Extends GitHub layers: backend_communication, health_check, feedback-control, logger
 
 ## Testing
-- Vitest is the test runner
-- Run tests before committing
-- Tests are currently minimal - expand coverage when adding features
+- No test framework currently configured
+- Tests should be added when implementing new features
 
 ## Before Committing
 1. Run `bun run check` - fix all linting issues
-2. Run `bun test` - ensure tests pass
-3. Run `bun run build` - ensure production build works
+2. Run `bun run build` - ensure production build works

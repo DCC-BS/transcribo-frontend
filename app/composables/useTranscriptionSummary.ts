@@ -85,7 +85,7 @@ export function useTranscriptionSummary() {
                 schema: SummaryResponseSchema,
                 method: "POST",
                 body: {
-                    transcript: sanitizedText
+                    transcript: sanitizedText,
                 },
             });
 
