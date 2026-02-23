@@ -1,10 +1,14 @@
 import { apiFetch } from "@dcc-bs/communication.bs.js";
 import { z } from "zod";
 import { apiHandler } from "~~/server/utils/apiHanlder";
+import {
+    createDummyTaskStatus,
+    generateDummyTaskId,
+} from "~~/server/utils/dummyData";
 
 const transcribeSchema = z.object({
     audio_file: z.file(),
-    num_speakers: z.enum(["0", "1", "2", "3", "4", "5", "6"]).optional(), // TODO - validate that it's either auto or a number from 0 to 6
+    num_speakers: z.enum(["0", "1", "2", "3", "4", "5", "6"]).optional(),
     language: z.string().optional(),
 });
 
@@ -42,4 +46,5 @@ export default apiHandler
 
         return response;
     })
+    .withDummyFetcher(createDummyTaskStatus(generateDummyTaskId()))
     .build("/transcribe");

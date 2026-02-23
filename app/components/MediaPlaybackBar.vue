@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { Cmds, SeekToSecondsCommand, TogglePlayCommand } from "~/types/commands";
+import { Cmds, type SeekToSecondsCommand, type TogglePlayCommand } from "~/types/commands";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { formatTime } from "~/utils/time";
 

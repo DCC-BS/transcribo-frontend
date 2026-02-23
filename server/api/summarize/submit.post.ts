@@ -1,6 +1,7 @@
 import { ApiError } from "@dcc-bs/communication.bs.js";
 import { z } from "zod";
 import { apiHandler } from "~~/server/utils/apiHanlder";
+import { dummySummaryFetcher } from "~~/server/utils/dummyData";
 
 const summarizeSchema = z.object({
     transcript: z.string(),
@@ -23,4 +24,5 @@ export default apiHandler
 
         return result.data;
     })
+    .withDummyFetcher(dummySummaryFetcher)
     .build("/summarize");

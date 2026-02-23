@@ -25,6 +25,7 @@ export default defineNuxtConfig({
     runtimeConfig: {
         githubToken: process.env.GITHUB_TOKEN,
         apiUrl: process.env.API_URL,
+        useDummyData: process.env.DUMMY || "",
         public: {
             logger_bs: {
                 loglevel: process.env.LOG_LEVEL || "debug",
