@@ -27,16 +27,15 @@ const speakers = computed(() =>
     Array.from(getUniqueSpeakers(props.transcription.segments)),
 );
 
-const activeSegemntProgress = computed(() => {
-    const current = segments.value.find(
-        (segment) =>
-            props.currentTime >= segment.start && props.currentTime < segment.end,
-    );
-    if (!current) {
-        return 0;
-    }
 
-    return (props.currentTime - current.start) / (current.end - current.start);
+const throttledProgress = ref(0);
+let progressTimeout: ReturnType<typeof setTimeout> | undefined;
+
+
+onUnmounted(() => {
+    if (progressTimeout) {
+        clearTimeout(progressTimeout);
+    }
 });
 
 const currentSegmentId = computed(() => {
@@ -46,6 +45,27 @@ const currentSegmentId = computed(() => {
     );
     return current?.id;
 });
+
+const activeSegemntProgress = computed(() => {
+    const current = segments.value.find(
+        (segment) => segment.id === currentSegmentId.value);
+    if (!current) {
+        return 0;
+    }
+
+    return (props.currentTime - current.start) / (current.end - current.start);
+});
+
+watch(activeSegemntProgress, (newProgress) => {
+    if (progressTimeout) {
+        return;
+    }
+
+    throttledProgress.value = newProgress;
+    progressTimeout = setTimeout(() => {
+        progressTimeout = undefined;
+    }, 300);
+}, { immediate: true });
 
 function setSegmentRef(id: string, el: unknown): void {
     if (el instanceof HTMLElement) {
@@ -105,7 +125,7 @@ async function addSegemntAtZero() {
                 :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
                 <div :ref="(el) => setSegmentRef(segment.id, el)">
                     <TranscriptionListItem :segment="segment" :speakers="speakers"
-                        :isActive="isSegmentActive(segment.id)" :progress="activeSegemntProgress" />
+                        :isActive="isSegmentActive(segment.id)" :currentTime="props.currentTime" />
                 </div>
 
                 <USeparator>

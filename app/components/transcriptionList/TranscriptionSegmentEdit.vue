@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { motion } from "motion-v";
 import { UCard, UTextarea } from "#components";
 import {
     DeleteSegmentCommand,
@@ -7,20 +8,25 @@ import {
 } from "~/types/commands";
 import type { SegmentWithId } from "~/types/transcriptionResponse";
 import { formatTime } from "~/utils/time";
+import type { WatchHandle } from "vue";
 
 interface TranscriptionListProps {
     segment: SegmentWithId;
     speakers: string[];
     isActive?: boolean;
-    progress: number;
+    currentTime: number;
 }
 
 const props = defineProps<TranscriptionListProps>();
+
+const MotionCard = motion.create(UCard);
 
 const { executeCommand } = useCommandBus();
 const internalSegment = ref<SegmentWithId>({ ...props.segment });
 const isDirty = ref(false);
 const { t } = useI18n();
+const progress = ref(0);
+const duration = ref(0);
 
 watch(
     () => props.segment,
@@ -46,6 +52,19 @@ watch(
     },
     { deep: true },
 );
+
+let unsubsribe: WatchHandle | undefined = undefined;
+
+watch(() => props.isActive, () => {
+    if (props.isActive) {
+        unsubsribe = watch(() => props.currentTime, (tNew, tOld) => {
+            progress.value = (tNew - internalSegment.value.start) / (internalSegment.value.end - internalSegment.value.start);
+            duration.value = Math.abs(tNew - tOld);
+        });
+    } else if (unsubsribe) {
+        unsubsribe();
+    }
+}, { immediate: true });
 
 function removeSegment(segment: SegmentWithId): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
@@ -122,60 +141,67 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <UCard variant="subtle" :ui="{
+    <MotionCard layout variant="subtle" :ui="{
         root: props.isActive
-            ? 'ring-2 ring-teal-500 bg-teal-50'
+            ? 'ring-2 ring-teal-500'
             : ''
-    }" class="transition-all duration-200">
-        <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
-            variant="outline" :actions="[
-                {
-                    label: t('transcription.undoChanges'),
-                    onClick: unDoChanges,
-                },
-                {
-                    label: t('transcription.applyChanges'),
-                    color: 'neutral',
-                    variant: 'subtle',
-                    onClick: applyChanges,
-                },
-            ]" />
-        <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" />
+    }" class="relative overflow-hidden">
+        <motion.div v-if="props.isActive" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
+            :transition="{ duration: duration, ease: 'linear' }"
+            class="absolute inset-0 origin-left pointer-events-none z-0"
+            style="background: linear-gradient(to right, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.25));" />
+        <div class="relative z-10">
+            <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
+                variant="outline" :actions="[
+                    {
+                        label: t('transcription.undoChanges'),
+                        onClick: unDoChanges,
+                    },
+                    {
+                        label: t('transcription.applyChanges'),
+                        color: 'neutral',
+                        variant: 'subtle',
+                        onClick: applyChanges,
+                    },
+                ]" />
+            <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" />
 
-        <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
-            <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
-                :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
+            <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
+                <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
+                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
 
-            <div class="flex gap-2 items-center">
-                <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"
-                    @keydown="handleKeydown">
-                    <template #trailing>
-                        <span class="text-xs">s</span>
-                    </template>
-                </UInput>
-                <div class="text-gray-700">
-                    <a @click="() => seekTo(internalSegment.start)">
-                        {{ formatTime(internalSegment.start) }}
-                    </a>
-                    -
-                    <a @click="() => seekTo(internalSegment.end)">{{
-                        formatTime(internalSegment.end)
+                <div class="flex gap-2 items-center">
+                    <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"
+                        @keydown="handleKeydown">
+                        <template #trailing>
+                            <span class="text-xs">s</span>
+                        </template>
+                    </UInput>
+                    <div class="text-gray-700">
+                        <a @click="() => seekTo(internalSegment.start)">
+                            {{ formatTime(internalSegment.start) }}
+                        </a>
+                        -
+                        <a @click="() => seekTo(internalSegment.end)">{{
+                            formatTime(internalSegment.end)
                         }}</a>
+                    </div>
+                    <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1"
+                        @keydown="handleKeydown">
+                        <template #trailing>
+                            <span class="text-xs">s</span>
+                        </template>
+                    </UInput>
                 </div>
-                <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1" @keydown="handleKeydown">
-                    <template #trailing>
-                        <span class="text-xs">s</span>
-                    </template>
-                </UInput>
-            </div>
 
-            <div class="flex gap-2">
-                <UTooltip :text="t('help.segments.deleteSegment')">
-                    <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(internalSegment)" />
-                </UTooltip>
+                <div class="flex gap-2">
+                    <UTooltip :text="t('help.segments.deleteSegment')">
+                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(internalSegment)" />
+                    </UTooltip>
+                </div>
             </div>
         </div>
-    </UCard>
+    </MotionCard>
 </template>
 
 <style lang="scss" scoped>
