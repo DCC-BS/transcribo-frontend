@@ -8,9 +8,9 @@ const isTranscriptionPage = computed(() => route.fullPath === "/transcription");
 </script>
 
 <template>
-    <NavigationMenu />
-    <div>
-        <div>
+    <div class="flex flex-col min-h-screen">
+        <NavigationMenu />
+        <div class="grow">
             <UContainer class="py-12 space-y-12">
                 <p class="text-lg text-gray-600 dark:text-gray-300">
                     {{ t("pages.index.subtitle") }}

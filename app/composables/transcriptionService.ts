@@ -50,7 +50,7 @@ export const useTranscriptionService = (
             );
 
             await updateTranscription(transcription.value.id, {
-                segments: transcription.value.segments.map(x => ({ ...x })),
+                segments: transcription.value.segments.map((x) => ({ ...x })),
             });
         },
     );
@@ -93,12 +93,11 @@ export const useTranscriptionService = (
 
             command.setUndoCommand(new DeleteSegmentCommand(newSegment.id));
 
-            transcription.value.segments
-                .splice(targetIndex, 0, newSegment);
+            transcription.value.segments.splice(targetIndex, 0, newSegment);
 
-            const newTranscriptions = transcription.value.segments.toSorted(
-                (a, b) => a.start - b.start,
-            ).map(x => ({ ...x }));
+            const newTranscriptions = transcription.value.segments
+                .toSorted((a, b) => a.start - b.start)
+                .map((x) => ({ ...x }));
 
             await updateTranscription(transcription.value.id, {
                 segments: newTranscriptions,
@@ -123,7 +122,7 @@ export const useTranscriptionService = (
 
         const newTranscriptions = transcription.value.segments
             .toSorted((a, b) => a.start - b.start)
-            .map(x => ({ ...x }));
+            .map((x) => ({ ...x }));
 
         await updateTranscription(transcription.value.id, {
             segments: newTranscriptions,
@@ -155,7 +154,11 @@ export const useTranscriptionService = (
             );
 
             const newSegments = transcription.value.segments
-                .map((s) => (s.id === command.segmentId ? { ...updatedSegment } : { ...s }))
+                .map((s) =>
+                    s.id === command.segmentId
+                        ? { ...updatedSegment }
+                        : { ...s },
+                )
                 .sort((a, b) => a.start - b.start);
 
             transcription.value.segments[segmentIndex] = updatedSegment;
@@ -217,7 +220,7 @@ export const useTranscriptionService = (
             // Sort segments by start time to maintain proper order
             const newSegments = transcription.value.segments
                 .toSorted((a, b) => a.start - b.start)
-                .map(x => ({ ...x }));
+                .map((x) => ({ ...x }));
 
             updateTranscription(transcription.value.id, {
                 segments: newSegments,

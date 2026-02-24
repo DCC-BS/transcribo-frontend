@@ -2,7 +2,6 @@
 import { UCard, UTextarea } from "#components";
 import {
     DeleteSegmentCommand,
-    InsertSegmentCommand,
     SeekToSecondsCommand,
     UpdateSegmentCommand,
 } from "~/types/commands";
@@ -160,7 +159,7 @@ const endTimeFormatted = computed({
                     -
                     <a @click="() => seekTo(internalSegment.end)">{{
                         formatTime(internalSegment.end)
-                        }}</a>
+                    }}</a>
                 </div>
                 <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1" @keydown="handleKeydown">
                     <template #trailing>

@@ -29,7 +29,6 @@ const { t } = useI18n();
                     </UTooltip>
                 </div>
             </template>
-
         </NavigationMenu>
 
 

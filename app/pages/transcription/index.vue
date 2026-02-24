@@ -158,7 +158,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <UContainer>
+    <div class="m-auto">
         <UAlert icon="i-lucide-info" color="info" variant="soft" :title="t('retention.title')"
             :description="t('retention.description', { retentionDays: retentionDays })" />
 
@@ -166,5 +166,5 @@ onMounted(async () => {
             @refresh="refreshStatuses" @dismiss-error="processingError = undefined" />
 
         <TranscriptionTable :transcriptions="transcriptions" @delete="deleteTranscription" />
-    </UContainer>
+    </div>
 </template>

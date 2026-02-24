@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { StoredTranscription } from "~/types/storedTranscription";
-import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
-import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
-import type { SegmentWithId } from "~/types/transcriptionResponse";
-import { v4 as uuid } from "uuid";
 import { motion } from "motion-v";
+import { v4 as uuid } from "uuid";
+import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
+import type { StoredTranscription } from "~/types/storedTranscription";
+import type { SegmentWithId } from "~/types/transcriptionResponse";
+import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
 
 interface InputProps {
     transcription: StoredTranscription;
@@ -38,6 +38,8 @@ const currentSegmentId = computed(() => {
 function setSegmentRef(id: string, el: unknown): void {
     if (el instanceof HTMLElement) {
         segmentRefs.value.set(id, el);
+    } else {
+        console.warn(`Attempted to set segment ref for ID ${id} with a non-HTMLElement`, el);
     }
 }
 
@@ -57,18 +59,11 @@ watch(currentSegmentId, (newId, oldId) => {
 
     const segmentEl = segmentRefs.value.get(newId);
     if (!segmentEl) {
+        console.warn(`No element found for segment ID: ${newId}`);
         return;
     }
 
-    const containerRect = listContainer.value.getBoundingClientRect();
-    const segmentRect = segmentEl.getBoundingClientRect();
-
-    const bottomThreshold = containerRect.bottom - containerRect.height * 0.2;
-    const topThreshold = containerRect.top + containerRect.height * 0.2;
-
-    if (segmentRect.bottom > bottomThreshold || segmentRect.top < topThreshold) {
-        segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
 async function addSegmentAfter(segment: SegmentWithId) {
@@ -94,10 +89,12 @@ async function addSegemntAtZero() {
         </USeparator>
 
         <AnimatePresence>
-            <motion.div v-for="segment in segments" :key="segment.id" :ref="(el) => setSegmentRef(segment.id, el)"
-                :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
-                <TranscriptionListItem :segment="segment" :speakers="speakers"
-                    :isActive="isSegmentActive(segment.id)" />
+            <motion.div v-for="segment in segments" :key="segment.id" :initial="{ opacity: 0, scaleY: 0 }"
+                :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
+                <div :ref="(el) => setSegmentRef(segment.id, el)">
+                    <TranscriptionListItem :segment="segment" :speakers="speakers"
+                        :isActive="isSegmentActive(segment.id)" />
+                </div>
 
                 <USeparator>
                     <UButton icon="i-lucide-plus" variant="link" color="neutral"

@@ -34,7 +34,7 @@ function onMediaConfigure(payload: MediaConfigureData) {
 </script>
 
 <template>
-    <div>
+    <div class="m-auto">
         <div class="flex items-center justify-center">
             <UButton variant="link" :class="{ 'font-bold': step === 1 }" @click="step = 1">
                 1. Upload Media
