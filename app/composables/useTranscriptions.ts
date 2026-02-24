@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "~/stores/db";
-import type { StoredTranscription } from "~/types/storedTranscription";
+import { StoredTranscriptionSchema, type StoredTranscription } from "~/types/storedTranscription";
 
 export const TRANSCRIPTION_RETENTION_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -23,7 +23,7 @@ export function useTranscription() {
     ) {
         const now = new Date();
 
-        const newTranscription: StoredTranscription = {
+        const newTranscription = StoredTranscriptionSchema.parse({
             ...transcription,
             id: uuidv4(),
             name:
@@ -32,7 +32,7 @@ export function useTranscription() {
                 `Transcription ${now.toLocaleDateString()}`,
             createdAt: now,
             updatedAt: now,
-        };
+        } as StoredTranscription);
 
         await db.transcriptions.add(newTranscription);
 
@@ -43,8 +43,8 @@ export function useTranscription() {
         id: string,
         updates: Partial<StoredTranscription>,
     ) {
-        console.log("update", updates);
-        await db.transcriptions.update(id, { ...updates });
+        const updatesParsed = StoredTranscriptionSchema.partial().parse({ ...updates });
+        await db.transcriptions.update(id, updatesParsed);
     }
 
     async function deleteTranscription(id: string) {

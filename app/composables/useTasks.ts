@@ -1,5 +1,5 @@
 import { db } from "@/stores/db";
-import { type StoredTask, type TaskStatus, TaskStatusEnum } from "~/types/task";
+import { type StoredTask, StoredTaskSchema, type TaskStatus, TaskStatusEnum } from "~/types/task";
 
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
 
@@ -17,11 +17,11 @@ export function useTasks() {
         mediaFile?: File | Blob,
         mediaFileName?: string,
     ): Promise<StoredTask> {
-        const newTask: StoredTask = {
+        const newTask = StoredTaskSchema.parse({
             id: status.task_id,
             status,
-            createdAt: Date.now(),
-        };
+            createdAt: new Date(),
+        } as StoredTask);
 
         if (mediaFile) {
             newTask.mediaFile = mediaFile;
@@ -45,11 +45,11 @@ export function useTasks() {
     }
 
     async function cleanupOldTask(): Promise<number> {
-        const now = Date.now();
+        const now = new Date();
 
         return db.tasks
             .filter(
-                (t) => !!t.createdAt && now - t.createdAt > RETENTION_PERIOD_MS,
+                (t) => !!t.createdAt && now.getTime() - t.createdAt.getTime() > RETENTION_PERIOD_MS,
             )
             .delete();
     }

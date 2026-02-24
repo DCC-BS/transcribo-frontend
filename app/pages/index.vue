@@ -34,7 +34,11 @@ function onMediaConfigure(payload: MediaConfigureData) {
 </script>
 
 <template>
-    <div class="m-auto">
+    <div class="mx-auto">
+        <p class="text-lg text-gray-600 dark:text-gray-300 m-4">
+            {{ t("pages.index.subtitle") }}
+        </p>
+
         <div class="flex items-center justify-center">
             <UButton variant="link" :class="{ 'font-bold': step === 1 }" @click="step = 1">
                 1. Upload Media

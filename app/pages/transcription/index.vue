@@ -22,6 +22,7 @@ const transcriptions = shallowRef<StoredTranscription[]>();
 const processingTasks = ref<StoredTask[]>([]);
 const isProcessingLoading = ref(false);
 const processingError = ref<string>();
+let refreshInterval: number | unknown | undefined;
 
 const inProgressTasks = computed(() =>
     processingTasks.value.filter(
@@ -142,7 +143,7 @@ onMounted(async () => {
     transcriptions.value = await getTranscriptions();
     loadProcessingTasks();
 
-    const refreshInterval = setInterval(() => {
+    refreshInterval = setInterval(() => {
         const hasInProgressTasks = processingTasks.value.some(
             (task) => task.status.status === TaskStatusEnum.IN_PROGRESS,
         );
@@ -151,9 +152,12 @@ onMounted(async () => {
         }
     }, 10000);
 
-    onUnmounted(() => {
-        clearInterval(refreshInterval);
-    });
+});
+
+onUnmounted(() => {
+    if (refreshInterval) {
+        clearInterval(refreshInterval as number);
+    }
 });
 </script>
 

@@ -31,7 +31,6 @@ const { t } = useI18n();
             </template>
         </NavigationMenu>
 
-
         <div class="grow flex flex-col justify-stretch">
             <div class="flex flex-col grow">
                 <slot />

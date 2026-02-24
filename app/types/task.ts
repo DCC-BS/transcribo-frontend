@@ -36,8 +36,8 @@ export const TaskStatusEnum = {
 export const TaskStatusSchema = z.object({
     task_id: z.string(),
     status: TaskStatusEnumSchema,
-    created_at: z.string().nullable(), // ISO date string or null
-    executed_at: z.string().nullable(), // ISO date string or null
+    created_at: z.coerce.date().nullable(), // ISO date string or null
+    executed_at: z.coerce.date().nullable(), // ISO date string or null
     progress: z.number().nullable(),
 });
 
@@ -47,10 +47,12 @@ export const TaskStatusSchema = z.object({
  */
 export type TaskStatus = z.infer<typeof TaskStatusSchema>;
 
-export interface StoredTask {
-    id: string;
-    status: TaskStatus;
-    mediaFile?: Blob;
-    mediaFileName?: string;
-    createdAt?: number; // Timestamp when task was created
-}
+export const StoredTaskSchema = z.object({
+    id: z.string(),
+    status: TaskStatusSchema,
+    mediaFile: z.instanceof(Blob).optional(),
+    mediaFileName: z.string().optional(),
+    createdAt: z.date().optional()
+});
+
+export type StoredTask = z.infer<typeof StoredTaskSchema>;

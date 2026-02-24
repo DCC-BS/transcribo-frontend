@@ -8,37 +8,43 @@ const isTranscriptionPage = computed(() => route.fullPath === "/transcription");
 </script>
 
 <template>
-    <div class="flex flex-col min-h-screen">
-        <NavigationMenu />
-        <div class="grow">
-            <UContainer class="py-12 space-y-12">
-                <p class="text-lg text-gray-600 dark:text-gray-300">
-                    {{ t("pages.index.subtitle") }}
-                </p>
-
-                <HContainer>
-                    <template #top>
-                        <div class="w-full flex justify-center items-center">
-                            <ULink to="/">
-                                <UButton :variant="isHomePage ? 'soft' : 'ghost'" icon="i-lucide-plus">
+    <div class="min-h-screen flex flex-col justify-stretch">
+        <NavigationMenu>
+            <template #center>
+                <!-- Center: Action buttons -->
+                <div class="flex items-center justify-center shrink-0 h-full">
+                    <UTooltip :text="t('navigation.new')">
+                        <ULink to="/">
+                            <UButton variant="ghost" icon="i-lucide-plus">
+                                <span class="hidden md:inline">
                                     {{ t("navigation.new") }}
-                                </UButton>
-                            </ULink>
-                            <ULink to="transcription">
-                                <UButton :variant="isTranscriptionPage ? 'soft' : 'ghost'" icon="i-lucide-list">
+                                </span>
+                            </UButton>
+                        </ULink>
+                    </UTooltip>
+
+                    <UTooltip :text="t('navigation.transcriptions')">
+                        <ULink to="/transcription">
+                            <UButton variant="ghost" icon="i-lucide-list">
+                                <span class="hidden md:inline">
                                     {{ t("navigation.transcriptions") }}
-                                </UButton>
-                            </ULink>
-                        </div>
-                    </template>
-                    <slot />
-                </HContainer>
-            </UContainer>
-        </div>
-        <DataBsFooter>
-            <template #right>
-                <FeedbackControl inline />
+                                </span>
+                            </UButton>
+                        </ULink>
+                    </UTooltip>
+                </div>
             </template>
-        </DataBsFooter>
+        </NavigationMenu>
+
+        <div class="grow flex flex-col justify-stretch">
+            <div class="flex flex-col grow">
+                <slot />
+            </div>
+            <DataBsFooter>
+                <template #right>
+                    <FeedbackControl inline />
+                </template>
+            </DataBsFooter>
+        </div>
     </div>
 </template>
