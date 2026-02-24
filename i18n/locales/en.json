@@ -187,7 +187,17 @@
         "viewer": "Viewer",
         "summary": "Summary",
         "editor": "Editor",
+        "statistics": "Statistics",
         "switch": "Switch Mode"
+    },
+    "statistics": {
+        "title": "Speaker Statistics",
+        "description": "Speaking time distribution by speaker",
+        "noData": "No speaker data available",
+        "audioDuration": "Audio Duration",
+        "speakingTime": "Speaking Time",
+        "speakingPercentage": "Speech Ratio",
+        "bySpeaker": "By Speaker"
     },
     "help": {
         "help": "Help",

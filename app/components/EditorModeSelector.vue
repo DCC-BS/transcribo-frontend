@@ -2,7 +2,7 @@
 import { motion } from "motion-v";
 import { UButton } from "#components";
 
-type EditorMode = "view" | "summary" | "edit";
+type EditorMode = "view" | "summary" | "edit" | "statistics";
 
 const UButtonMotion = motion.create(UButton)
 
@@ -14,6 +14,7 @@ const modes: { value: EditorMode; icon: string; label: string }[] = [
     { value: "view", icon: "i-lucide-eye", label: "viewer" },
     { value: "summary", icon: "i-lucide-sparkles", label: "summary" },
     { value: "edit", icon: "i-lucide-square-pen", label: "editor" },
+    { value: "statistics", icon: "i-lucide-bar-chart-2", label: "statistics" },
 ];
 
 const containerRef = ref<HTMLDivElement>();

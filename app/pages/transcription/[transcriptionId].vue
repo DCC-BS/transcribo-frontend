@@ -18,7 +18,7 @@ const isTranscriptionLoading = ref(true);
 useTranscriptionService(currentTranscription);
 
 // Editor mode state - default to view mode
-type EditorMode = "view" | "summary" | "edit";
+type EditorMode = "view" | "summary" | "edit" | "statistics";
 const editorMode = ref<EditorMode>("view");
 
 onMounted(async () => {
@@ -93,6 +93,11 @@ onMounted(async () => {
                     <!-- Editor Mode -->
                     <template v-else-if="editorMode === 'edit'">
                         <TranscriptionEditView :transcription="currentTranscription" />
+                    </template>
+
+                    <!-- Statistics Mode -->
+                    <template v-else-if="editorMode === 'statistics'">
+                        <SpeakerStatisticsView :transcription="currentTranscription" />
                     </template>
                 </motion.div>
             </motion.div>

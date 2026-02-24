@@ -1,6 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import { db } from "~/stores/db";
-import { StoredTranscriptionSchema, type StoredTranscription } from "~/types/storedTranscription";
+import {
+    type StoredTranscription,
+    StoredTranscriptionSchema,
+} from "~/types/storedTranscription";
 
 export const TRANSCRIPTION_RETENTION_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -43,7 +46,9 @@ export function useTranscription() {
         id: string,
         updates: Partial<StoredTranscription>,
     ) {
-        const updatesParsed = StoredTranscriptionSchema.partial().parse({ ...updates });
+        const updatesParsed = StoredTranscriptionSchema.partial().parse({
+            ...updates,
+        });
         await db.transcriptions.update(id, updatesParsed);
     }
 

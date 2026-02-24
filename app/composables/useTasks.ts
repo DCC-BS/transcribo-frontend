@@ -1,5 +1,10 @@
 import { db } from "@/stores/db";
-import { type StoredTask, StoredTaskSchema, type TaskStatus, TaskStatusEnum } from "~/types/task";
+import {
+    type StoredTask,
+    StoredTaskSchema,
+    type TaskStatus,
+    TaskStatusEnum,
+} from "~/types/task";
 
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
 
@@ -49,7 +54,9 @@ export function useTasks() {
 
         return db.tasks
             .filter(
-                (t) => !!t.createdAt && now.getTime() - t.createdAt.getTime() > RETENTION_PERIOD_MS,
+                (t) =>
+                    !!t.createdAt &&
+                    now.getTime() - t.createdAt.getTime() > RETENTION_PERIOD_MS,
             )
             .delete();
     }

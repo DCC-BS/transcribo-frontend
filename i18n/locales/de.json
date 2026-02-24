@@ -187,7 +187,17 @@
         "viewer": "Betrachter",
         "summary": "Zusammenfassung",
         "editor": "Editor",
+        "statistics": "Statistik",
         "switch": "Modus wechseln"
+    },
+    "statistics": {
+        "title": "Sprecher-Statistik",
+        "description": "Sprechzeit-Verteilung nach Sprecher",
+        "noData": "Keine Sprecherdaten verfügbar",
+        "audioDuration": "Audiodauer",
+        "speakingTime": "Sprechzeit",
+        "speakingPercentage": "Sprachanteil",
+        "bySpeaker": "Nach Sprecher"
     },
     "help": {
         "help": "Hilfe",
