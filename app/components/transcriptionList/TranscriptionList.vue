@@ -27,6 +27,18 @@ const speakers = computed(() =>
     Array.from(getUniqueSpeakers(props.transcription.segments)),
 );
 
+const activeSegemntProgress = computed(() => {
+    const current = segments.value.find(
+        (segment) =>
+            props.currentTime >= segment.start && props.currentTime < segment.end,
+    );
+    if (!current) {
+        return 0;
+    }
+
+    return (props.currentTime - current.start) / (current.end - current.start);
+});
+
 const currentSegmentId = computed(() => {
     const current = segments.value.find(
         (segment) =>
@@ -93,7 +105,7 @@ async function addSegemntAtZero() {
                 :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
                 <div :ref="(el) => setSegmentRef(segment.id, el)">
                     <TranscriptionListItem :segment="segment" :speakers="speakers"
-                        :isActive="isSegmentActive(segment.id)" />
+                        :isActive="isSegmentActive(segment.id)" :progress="activeSegemntProgress" />
                 </div>
 
                 <USeparator>

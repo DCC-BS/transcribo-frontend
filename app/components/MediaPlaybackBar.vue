@@ -148,12 +148,12 @@ function toggleExpanded(): void {
             </div>
 
             <div class="controls flex gap-2 items-center mt-2">
-                <UButton size="sm" @click="togglePlay">
+                <UButton size="sm" color="secondary" @click="togglePlay">
                     <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
                 </UButton>
 
-                <USlider :model-value="currentTime" :min="0" :max="props.duration" :step="0.1" class="flex-1"
-                    @update:model-value="onSliderChange" />
+                <USlider :model-value="currentTime" color="secondary" :min="0" :max="props.duration" :step="0.1"
+                    class="flex-1" @update:model-value="onSliderChange" />
 
                 <div class="text-sm text-muted-foreground min-w-[100px] text-right">
                     {{ formatTime(currentTime, { milliseconds: false }) }} /
@@ -167,12 +167,12 @@ function toggleExpanded(): void {
         </div>
 
         <div v-show="!isExpanded" class="flex items-center gap-2 p-2">
-            <UButton size="sm" variant="ghost" @click="togglePlay">
+            <UButton size="sm" color="secondary" variant="ghost" @click="togglePlay">
                 <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
             </UButton>
 
-            <USlider :model-value="currentTime" :min="0" :max="props.duration" :step="0.1" class="flex-1"
-                @update:model-value="onSliderChange" />
+            <USlider :model-value="currentTime" color="secondary" :min="0" :max="props.duration" :step="0.1"
+                class="flex-1" @update:model-value="onSliderChange" />
 
             <div class="text-sm text-muted-foreground min-w-[100px] text-right">
                 {{ formatTime(currentTime, { milliseconds: false }) }} /
@@ -206,8 +206,7 @@ function toggleExpanded(): void {
 }
 
 .audio-visualization {
-    @apply bg-muted rounded
-    display: block;
+    @apply bg-muted rounded display: block;
     width: 100%;
     height: 120px;
 }

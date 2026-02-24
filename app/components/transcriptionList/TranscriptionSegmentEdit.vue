@@ -12,6 +12,7 @@ interface TranscriptionListProps {
     segment: SegmentWithId;
     speakers: string[];
     isActive?: boolean;
+    progress: number;
 }
 
 const props = defineProps<TranscriptionListProps>();
@@ -123,7 +124,7 @@ const endTimeFormatted = computed({
 <template>
     <UCard variant="subtle" :ui="{
         root: props.isActive
-            ? 'ring-2 ring-blue-500 bg-blue-50'
+            ? 'ring-2 ring-teal-500 bg-teal-50'
             : ''
     }" class="transition-all duration-200">
         <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
@@ -159,7 +160,7 @@ const endTimeFormatted = computed({
                     -
                     <a @click="() => seekTo(internalSegment.end)">{{
                         formatTime(internalSegment.end)
-                    }}</a>
+                        }}</a>
                 </div>
                 <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1" @keydown="handleKeydown">
                     <template #trailing>

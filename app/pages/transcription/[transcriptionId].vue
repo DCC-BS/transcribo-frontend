@@ -3,8 +3,6 @@ import { createReusableTemplate } from "@vueuse/core";
 import { motion } from "motion-v";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
-definePageMeta({ layout: "edit" });
-
 const route = useRoute();
 const { t } = useI18n();
 const { getTranscription } = useTranscription();
@@ -75,12 +73,12 @@ onMounted(async () => {
 
     <DefineMainContent id="does-this-work">
         <template v-if="currentTranscription">
-            <motion.div id="main-content" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }" :transition="pageTransition"
-                class="flex flex-col p-2 sm:p-4 grow">
+            <motion.div id="main-content" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
+                :transition="pageTransition" class="flex flex-col p-2 sm:p-4 grow">
 
                 <!-- Content Area with Mode Transition -->
-                <motion.div class="grow flex flex-col" :key="editorMode" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 10 }"
-                    :transition="{ duration: 0.25, ease: 'easeOut' }">
+                <motion.div class="grow flex flex-col" :key="editorMode" :animate="{ opacity: 1, y: 0 }"
+                    :initial="{ opacity: 0, y: 10 }" :transition="{ duration: 0.25, ease: 'easeOut' }">
                     <!-- Viewer Mode -->
                     <template v-if="editorMode === 'view'">
                         <TranscriptionViewer :transcription="currentTranscription" />

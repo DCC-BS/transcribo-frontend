@@ -1,10 +1,5 @@
 <script setup lang="ts">
 const { t } = useI18n();
-
-const route = useRoute();
-
-const isHomePage = computed(() => route.fullPath === "/");
-const isTranscriptionPage = computed(() => route.fullPath === "/transcription");
 </script>
 
 <template>
