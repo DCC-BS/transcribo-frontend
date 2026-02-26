@@ -148,7 +148,15 @@
         "hide": "Zusammenfassung ausblenden",
         "title": "Meeting-Zusammenfassung",
         "error": "Fehler bei der Zusammenfassung",
-        "empty": "Noch keine Zusammenfassung erstellt"
+        "empty": "Noch keine Zusammenfassung erstellt",
+        "types": {
+            "kurzprotokoll": "Kurzprotokoll",
+            "kurzprotokollDesc": "Kurze Zusammenfassung der wichtigsten Punkte und Entscheidungen",
+            "ergebnisprotokoll": "Ergebnisprotokoll",
+            "ergebnisprotokollDesc": "Fokus ausschliesslich auf Ergebnisse, Entscheidungen und Aufgaben",
+            "verhandlungsprotokoll": "Verhandlungsprotokoll",
+            "verhandlungsprotokollDesc": "Detailliertes Protokoll mit Diskussionen und Begründungen"
+        }
     },
     "task": {
         "errors": {

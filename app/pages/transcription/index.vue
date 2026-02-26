@@ -3,7 +3,6 @@ import { isApiError } from "@dcc-bs/communication.bs.js";
 import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "#imports";
 import ProcessingTasksTable from "~/components/transcription/ProcessingTasksTable.vue";
 import TranscriptionTable from "~/components/transcription/TranscriptionTable.vue";
-import type { StoredTranscription } from "~/types/storedTranscription";
 import type { StoredTask } from "~/types/task";
 import { TaskStatusEnum, TaskStatusSchema } from "~/types/task";
 import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
@@ -12,12 +11,17 @@ const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
 });
 
-const { getTranscriptions, addTranscription, deleteTranscription } = useTranscription();
-const { getTask, getTasks, updateTaskStatus, deleteTask, cleanupFailedAndCanceledTasks } = useTasks();
+const { transcriptions, addTranscription, deleteTranscription } =
+    useTranscription();
+const {
+    getTask,
+    getTasks,
+    updateTaskStatus,
+    deleteTask,
+    cleanupFailedAndCanceledTasks,
+} = useTasks();
 const { t } = useI18n();
 const { apiFetch } = useApi();
-
-const transcriptions = shallowRef<StoredTranscription[]>();
 
 const processingTasks = ref<StoredTask[]>([]);
 const isProcessingLoading = ref(false);
@@ -53,7 +57,9 @@ async function checkTaskStatus(task: StoredTask): Promise<void> {
             }
 
             if (isApiError(transcriptionResponse)) {
-                processingError.value = t(`errors.${transcriptionResponse.errorId}`);
+                processingError.value = t(
+                    `errors.${transcriptionResponse.errorId}`,
+                );
                 return;
             }
 
@@ -140,7 +146,6 @@ async function refreshStatuses(): Promise<void> {
 }
 
 onMounted(async () => {
-    transcriptions.value = await getTranscriptions();
     loadProcessingTasks();
 
     refreshInterval = setInterval(() => {
@@ -151,7 +156,6 @@ onMounted(async () => {
             refreshStatuses();
         }
     }, 10000);
-
 });
 
 onUnmounted(() => {
@@ -163,12 +167,27 @@ onUnmounted(() => {
 
 <template>
     <div class="m-auto">
-        <UAlert icon="i-lucide-info" color="info" variant="soft" :title="t('retention.title')"
-            :description="t('retention.description', { retentionDays: retentionDays })" />
+        <UAlert
+            icon="i-lucide-info"
+            color="info"
+            variant="soft"
+            :title="t('retention.title')"
+            :description="
+                t('retention.description', { retentionDays: retentionDays })
+            "
+        />
 
-        <ProcessingTasksTable :tasks="inProgressTasks" :loading="isProcessingLoading" :error="processingError"
-            @refresh="refreshStatuses" @dismiss-error="processingError = undefined" />
+        <ProcessingTasksTable
+            :tasks="inProgressTasks"
+            :loading="isProcessingLoading"
+            :error="processingError"
+            @refresh="refreshStatuses"
+            @dismiss-error="processingError = undefined"
+        />
 
-        <TranscriptionTable :transcriptions="transcriptions" @delete="deleteTranscription" />
+        <TranscriptionTable
+            :transcriptions="transcriptions"
+            @delete="deleteTranscription"
+        />
     </div>
 </template>

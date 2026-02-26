@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
+import { liveQuery, type Subscription } from "dexie";
 import { db } from "~/stores/db";
 import {
     type StoredTranscription,
@@ -8,6 +9,27 @@ import {
 export const TRANSCRIPTION_RETENTION_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function useTranscription() {
+    const transcriptions = ref<StoredTranscription[]>();
+    const logger = useLogger();
+
+    let subscription: Subscription | undefined;
+
+    onMounted(() => {
+        const transcriptionObservable = liveQuery(() =>
+            db.transcriptions.toArray(),
+        );
+
+        subscription = transcriptionObservable.subscribe({
+            next: (next) => (transcriptions.value = next),
+            error: (error) =>
+                logger.error(error, "Error fetching transcriptions:"),
+        });
+    });
+
+    onUnmounted(() => {
+        subscription?.unsubscribe();
+    });
+
     function getTranscriptions(): Promise<StoredTranscription[]> {
         return db.transcriptions.toArray();
     }
@@ -68,6 +90,7 @@ export function useTranscription() {
     }
 
     return {
+        transcriptions,
         getTranscriptions,
         getTranscription,
         addTranscription,

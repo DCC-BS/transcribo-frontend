@@ -183,6 +183,8 @@ export const useTranscriptionService = (
             updateTranscription(transcription.value.id, {
                 name: command.newName,
             });
+
+            transcription.value.name = command.newName;
         },
     );
 

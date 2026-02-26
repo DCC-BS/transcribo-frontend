@@ -1,6 +1,7 @@
 import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { SummaryResponseSchema } from "~/types/summarizeResponse";
+import type { SummarizeRequest, SummaryType } from "~~/shared/types/summary";
 
 export function useTranscriptionSummary() {
     const { updateTranscription } = useTranscription();
@@ -57,6 +58,7 @@ export function useTranscriptionSummary() {
      */
     async function generateSummary(
         transcription: StoredTranscription,
+        type: SummaryType,
     ): Promise<string | null> {
         // Prevent concurrent calls
         if (isSummaryGenerating.value) {
@@ -86,7 +88,8 @@ export function useTranscriptionSummary() {
                 method: "POST",
                 body: {
                     transcript: sanitizedText,
-                },
+                    summary_type: type,
+                } as SummarizeRequest,
             });
 
             if (isApiError(summaryResponse)) {
