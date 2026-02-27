@@ -1,7 +1,7 @@
 import { ApiError } from "@dcc-bs/communication.bs.js";
+import { summarizeSchema } from "#shared/types/summary";
 import { apiHandler } from "~~/server/utils/apiHanlder";
 import { dummySummaryFetcher } from "~~/server/utils/dummyData";
-import { summarizeSchema } from "#shared/types/summary";
 
 export default apiHandler
     .withMethod("POST")

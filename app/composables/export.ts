@@ -168,9 +168,65 @@ export const useExport = () => {
         URL.revokeObjectURL(url);
     }
 
+    async function exportAsDocx(options: ExportOptions) {
+        let segments = options.transciption.segments;
+
+        if (options.mergeSegments) {
+            segments = mergeConsecutiveSegments(segments);
+        }
+
+        const transcriptMarkdown = segments
+            .map((s) => {
+                let line = "";
+
+                if (options.withTimestamps) {
+                    line += `*[${formatTime(s.start)} - ${formatTime(s.end)}]* `;
+                }
+
+                if (options.withSpeakers) {
+                    line += `**${s.speaker}:** `;
+                }
+
+                line += s.text;
+                return line;
+            })
+            .join("\n\n");
+
+        let markdown = `# ${options.transciption.name}\n\n`;
+
+        if (options.withSummary && options.transciption.summary) {
+            markdown += `## Meeting Summary\n\n${options.transciption.summary}\n\n---\n\n`;
+        }
+
+        markdown += `## Transcript\n\n${transcriptMarkdown}`;
+
+        const blob = await markdownToDocx(markdown);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${options.transciption.name}.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    async function exportSummaryAsDocx(transciption: StoredTranscription) {
+        if (!transciption.summary) return;
+
+        const markdown = `# ${transciption.name}\n\n${transciption.summary}`;
+        const blob = await markdownToDocx(markdown);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${transciption.name}-summary.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     return {
         exportAsText,
         exportAsSrt,
         exportAsJson,
+        exportAsDocx,
+        exportSummaryAsDocx,
     };
 };

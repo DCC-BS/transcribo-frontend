@@ -126,7 +126,7 @@
         "withTimestamps": "Zeitstempel hinzufügen",
         "mergeSegments": "Segmente vom selben Sprecher zusammenführen",
         "withSummary": "Meeting-Zusammenfassung hinzufügen",
-        "textOnly": "Nur Textformat",
+        "textOnly": "Nur Text- und Word-Format",
         "export": "Exportieren",
         "options": "Optionen",
         "optionsTitle": "Export-Optionen",
@@ -134,7 +134,8 @@
             "title": "Export-Formate",
             "text": "Textformat",
             "subtitle": "Untertitelformat",
-            "json": "JSON-Format"
+            "json": "JSON-Format",
+            "docx": "Word-Dokument"
         },
         "exportAsText": "Als Text exportieren",
         "exportAsSrt": "Als SRT exportieren"
@@ -149,6 +150,8 @@
         "title": "Meeting-Zusammenfassung",
         "error": "Fehler bei der Zusammenfassung",
         "empty": "Noch keine Zusammenfassung erstellt",
+        "export": "Zusammenfassung exportieren",
+        "selectType": "Zusammenfassungsart wählen",
         "types": {
             "kurzprotokoll": "Kurzprotokoll",
             "kurzprotokollDesc": "Kurze Zusammenfassung der wichtigsten Punkte und Entscheidungen",

@@ -126,7 +126,7 @@
         "withTimestamps": "Include timestamps",
         "mergeSegments": "Merge segments from same speaker",
         "withSummary": "Include meeting summary",
-        "textOnly": "Text format only",
+        "textOnly": "Text and Word formats only",
         "export": "Export",
         "options": "Options",
         "optionsTitle": "Export Options",
@@ -134,7 +134,8 @@
             "title": "Export Formats",
             "text": "Text Format",
             "subtitle": "Subtitle Format",
-            "json": "JSON Format"
+            "json": "JSON Format",
+            "docx": "Word Document"
         },
         "exportAsText": "Export as text",
         "exportAsSrt": "Export as SRT"
@@ -149,6 +150,8 @@
         "title": "Meeting Summary",
         "error": "Summary Generation Error",
         "empty": "No summary generated yet",
+        "export": "Export Summary",
+        "selectType": "Select Summary Type",
         "types": {
             "kurzprotokoll": "Short Protocol",
             "kurzprotokollDesc": "Brief summary of key points and decisions",

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { motion } from "motion-v";
+import type { WatchHandle } from "vue";
 import { UCard, UTextarea } from "#components";
 import {
     DeleteSegmentCommand,
@@ -8,7 +9,6 @@ import {
 } from "~/types/commands";
 import type { SegmentWithId } from "~/types/transcriptionResponse";
 import { formatTime } from "~/utils/time";
-import type { WatchHandle } from "vue";
 
 interface TranscriptionListProps {
     segment: SegmentWithId;
@@ -53,7 +53,7 @@ watch(
     { deep: true },
 );
 
-let unsubsribe: WatchHandle | undefined = undefined;
+let unsubsribe: WatchHandle | undefined ;
 
 watch(() => props.isActive, () => {
     if (props.isActive) {

@@ -9,7 +9,7 @@ interface InputProps {
 const props = defineProps<InputProps>();
 
 const { t } = useI18n();
-const { exportAsText, exportAsSrt, exportAsJson } = useExport();
+const { exportAsText, exportAsSrt, exportAsJson, exportAsDocx } = useExport();
 
 // Export options state
 const exportOptions = ref<Omit<ExportOptions, "transciption">>({
@@ -30,6 +30,10 @@ function handleSubtitleExport(): void {
 
 function handleJsonExport(): void {
     exportAsJson(props.transcription);
+}
+
+async function handleDocxExport(): Promise<void> {
+    await exportAsDocx({ ...exportOptions.value, transciption: props.transcription });
 }
 </script>
 
@@ -96,6 +100,10 @@ function handleJsonExport(): void {
                     <!-- Json Format -->
                     <UButton block variant="ghost" color="primary" icon="i-lucide-file-braces"
                         :label="t('export.formats.json')" @click="handleJsonExport" class="justify-start" />
+
+                    <!-- Docx Format -->
+                    <UButton block variant="ghost" color="primary" icon="i-lucide-file-type"
+                        :label="t('export.formats.docx')" @click="handleDocxExport" class="justify-start" />
                 </div>
             </div>
         </template>

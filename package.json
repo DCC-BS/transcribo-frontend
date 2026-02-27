@@ -25,6 +25,7 @@
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
         "@iconify-json/lucide": "1.2.90",
+        "@mohtasham/md-to-docx": "^2.8.0",
         "@nuxt/ui": "4.4.0",
         "@nuxtjs/i18n": "10.2.3",
         "@nuxtjs/mdc": "0.20.1",
