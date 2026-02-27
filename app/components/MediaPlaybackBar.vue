@@ -121,7 +121,7 @@ function toggleExpanded(): void {
     isExpanded.value = !isExpanded.value;
 }
 </script>
-valid Tailwind CSS class and will no
+
 <template>
     <div class=" bg-default border-b border-default shadow-sm">
         <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
