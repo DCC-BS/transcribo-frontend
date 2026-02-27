@@ -1,12 +1,18 @@
 <script lang="ts" setup>
 import type { ExportOptions } from "~/composables/export";
+import type { StoredTranscription } from "~/types/storedTranscription";
+
+interface InputProps {
+    transcription: StoredTranscription
+}
+
+const props = defineProps<InputProps>();
 
 const { t } = useI18n();
-const { exportAsText, exportAsSrt, exportAsJson } = useExport();
-const transcriptionStore = useTranscriptionsStore();
+const { exportAsText, exportAsSrt, exportAsJson, exportAsDocx } = useExport();
 
 // Export options state
-const exportOptions = ref<ExportOptions>({
+const exportOptions = ref<Omit<ExportOptions, "transcription">>({
     withSpeakers: true,
     withTimestamps: true,
     mergeSegments: false,
@@ -15,15 +21,19 @@ const exportOptions = ref<ExportOptions>({
 
 // Functions to handle exports
 function handleTextExport(): void {
-    exportAsText(exportOptions.value);
+    exportAsText({ ...exportOptions.value, transcription: props.transcription });
 }
 
 function handleSubtitleExport(): void {
-    exportAsSrt(exportOptions.value.withSpeakers);
+    exportAsSrt(props.transcription, exportOptions.value.withSpeakers);
 }
 
 function handleJsonExport(): void {
-    exportAsJson();
+    exportAsJson(props.transcription);
+}
+
+async function handleDocxExport(): Promise<void> {
+    await exportAsDocx({ ...exportOptions.value, transcription: props.transcription });
 }
 </script>
 
@@ -63,8 +73,7 @@ function handleJsonExport(): void {
                     </div>
 
                     <!-- Meeting summary toggle (text only) -->
-                    <div v-if="transcriptionStore.currentTranscription?.summary"
-                        class="flex items-center justify-between mb-3">
+                    <div v-if="props.transcription.summary" class="flex items-center justify-between mb-3">
                         <div class="flex flex-col">
                             <span class="text-sm">{{ t('export.withSummary') }}</span>
                             <span class="text-xs text-gray-500">{{ t('export.textOnly') }}</span>
@@ -91,6 +100,10 @@ function handleJsonExport(): void {
                     <!-- Json Format -->
                     <UButton block variant="ghost" color="primary" icon="i-lucide-file-braces"
                         :label="t('export.formats.json')" @click="handleJsonExport" class="justify-start" />
+
+                    <!-- Docx Format -->
+                    <UButton block variant="ghost" color="primary" icon="i-lucide-file-type"
+                        :label="t('export.formats.docx')" @click="handleDocxExport" class="justify-start" />
                 </div>
             </div>
         </template>

@@ -1,7 +1,9 @@
 // Import the StoredTranscription interface
-import type { SegementWithId } from "~/types/transcriptionResponse";
+import type { StoredTranscription } from "~/types/storedTranscription";
+import type { SegmentWithId } from "~/types/transcriptionResponse";
 
 export interface ExportOptions {
+    transcription: StoredTranscription;
     withSpeakers: boolean;
     withTimestamps: boolean;
     mergeSegments: boolean; // Only applies to text exports
@@ -9,20 +11,17 @@ export interface ExportOptions {
 }
 
 export const useExport = () => {
-    const { currentTranscription } = useCurrentTranscription();
-    const logger = useLogger();
-
     /**
      * Merges consecutive segments from the same speaker into single segments
      * @param segments - Array of segments to merge
      * @returns Array of merged segments
      */
     function mergeConsecutiveSegments(
-        segments: SegementWithId[],
-    ): SegementWithId[] {
+        segments: SegmentWithId[],
+    ): SegmentWithId[] {
         if (segments.length === 0) return [];
 
-        const merged: SegementWithId[] = [];
+        const merged: SegmentWithId[] = [];
         let currentSegment = { ...segments[0] };
 
         for (let i = 1; i < segments.length; i++) {
@@ -39,23 +38,18 @@ export const useExport = () => {
                 currentSegment.end = nextSegment.end;
             } else {
                 // Different speaker, save current and start new
-                merged.push(currentSegment as SegementWithId);
+                merged.push(currentSegment as SegmentWithId);
                 currentSegment = { ...nextSegment };
             }
         }
 
         // Don't forget the last segment
-        merged.push(currentSegment as SegementWithId);
+        merged.push(currentSegment as SegmentWithId);
         return merged;
     }
 
     function exportAsText(options: ExportOptions) {
-        if (!currentTranscription.value) {
-            logger.error("No current transcription available for export.");
-            return;
-        }
-
-        let segments = currentTranscription.value.segments;
+        let segments = options.transcription.segments;
 
         // Merge segments if requested
         if (options.mergeSegments) {
@@ -93,16 +87,16 @@ export const useExport = () => {
         let finalText = transcriptText;
 
         // Add summary if requested
-        if (options.withSummary && currentTranscription.value?.summary) {
+        if (options.withSummary && options.transcription.summary) {
             // Use the stored summary
-            finalText = `MEETING SUMMARY:\n${currentTranscription.value.summary}\n\n---\n\nFULL TRANSCRIPT:\n${transcriptText}`;
+            finalText = `MEETING SUMMARY:\n${options.transcription.summary}\n\n---\n\nFULL TRANSCRIPT:\n${transcriptText}`;
         }
 
         const blob = new Blob([finalText], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${currentTranscription.value?.name}.txt`;
+        a.download = `${options.transcription.name}.txt`;
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -121,13 +115,11 @@ export const useExport = () => {
         return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")},${milliseconds.toString().padStart(3, "0")}`;
     }
 
-    function exportAsSrt(withSpeakers: boolean) {
-        if (!currentTranscription.value) {
-            logger.error("No current transcription available for export.");
-            return;
-        }
-
-        const srt = currentTranscription.value.segments
+    function exportAsSrt(
+        transciption: StoredTranscription,
+        withSpeakers: boolean,
+    ) {
+        const srt = transciption.segments
             .map((s, i) => {
                 const start = srtFormatTime(s.start);
                 const end = srtFormatTime(s.end);
@@ -139,7 +131,7 @@ export const useExport = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${currentTranscription.value.name}.srt`;
+        a.download = `${transciption.name}.srt`;
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -148,19 +140,14 @@ export const useExport = () => {
      * Exports the current transcription as a json file
      * This format preserves all transcription data including metadata
      */
-    function exportAsJson(): void {
-        if (!currentTranscription.value) {
-            logger.error("No current transcription available for export.");
-            return;
-        }
-
+    function exportAsJson(transciption: StoredTranscription): void {
         // Create a serializable object with all transcription data
         const exportData = {
-            name: currentTranscription.value.name,
-            segments: currentTranscription.value.segments,
-            audioFileId: currentTranscription.value.audioFileId,
-            createdAt: currentTranscription.value.createdAt,
-            mediaFileName: currentTranscription.value.mediaFileName,
+            name: transciption.name,
+            segments: transciption.segments,
+            audioFileId: transciption.audioFileId,
+            createdAt: transciption.createdAt,
+            mediaFileName: transciption.mediaFileName,
             version: "1.0.0", // Adding version for future compatibility
         };
 
@@ -176,7 +163,61 @@ export const useExport = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${currentTranscription.value.name}.json`;
+        a.download = `${transciption.name}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    async function exportAsDocx(options: ExportOptions) {
+        let segments = options.transcription.segments;
+
+        if (options.mergeSegments) {
+            segments = mergeConsecutiveSegments(segments);
+        }
+
+        const transcriptMarkdown = segments
+            .map((s) => {
+                let line = "";
+
+                if (options.withTimestamps) {
+                    line += `*[${formatTime(s.start)} - ${formatTime(s.end)}]* `;
+                }
+
+                if (options.withSpeakers) {
+                    line += `**${s.speaker}:** `;
+                }
+
+                line += s.text;
+                return line;
+            })
+            .join("\n\n");
+
+        let markdown = `# ${options.transcription.name}\n\n`;
+
+        if (options.withSummary && options.transcription.summary) {
+            markdown += `## Meeting Summary\n\n${options.transcription.summary}\n\n---\n\n`;
+        }
+
+        markdown += `## Transcript\n\n${transcriptMarkdown}`;
+
+        const blob = await markdownToDocx(markdown);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${options.transcription.name}.docx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    async function exportSummaryAsDocx(transciption: StoredTranscription) {
+        if (!transciption.summary) return;
+
+        const markdown = `# ${transciption.name}\n\n${transciption.summary}`;
+        const blob = await markdownToDocx(markdown);
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${transciption.name}-summary.docx`;
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -185,5 +226,7 @@ export const useExport = () => {
         exportAsText,
         exportAsSrt,
         exportAsJson,
+        exportAsDocx,
+        exportSummaryAsDocx,
     };
 };

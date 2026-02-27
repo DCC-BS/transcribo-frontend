@@ -25,7 +25,10 @@
         "tooManyRequestsTitle": "Too many requests",
         "tooManyRequestsDescription": "You've made too many requests. Please wait a few minutes before trying again.",
         "audioLanguage": "Audio Language",
-        "audioLanguageHelp": "What language was spoken in the audio file? If you are not sure, select 'Auto detection'."
+        "audioLanguageHelp": "What language was spoken in the audio file? If you are not sure, select 'Auto detection'.",
+        "settings": "Settings",
+        "configureTranscription": "Configure your transcription",
+        "settingsInfo": "These settings help improve transcription accuracy. You can leave both on auto-detection if you're unsure."
     },
     "pages": {
         "index": {
@@ -71,7 +74,8 @@
         "play": "Play",
         "pause": "Pause",
         "addSegment": "Add Segment",
-        "downloadMedia": "Download Media"
+        "downloadMedia": "Download Media",
+        "noMedia": "No media file available"
     },
     "taskStatus": {
         "processing": "Processing your request...",
@@ -90,6 +94,13 @@
         "notFound": "Transcription not found or failed to load",
         "noTranscriptionsFound": "No transcriptions found",
         "untitled": "Untitled",
+        "info": "Transcription Info",
+        "nameLabel": "Name",
+        "namePlaceholder": "Transcription name",
+        "autoScrollOn": "Auto-scroll ON",
+        "autoScrollOff": "Auto-scroll OFF",
+        "tab": "Transcription",
+        "timelineTab": "Timeline",
         "delete": {
             "title": "Delete Transcription",
             "confirmation": "Are you sure you want to delete this transcription?"
@@ -118,7 +129,7 @@
         "withTimestamps": "Include timestamps",
         "mergeSegments": "Merge segments from same speaker",
         "withSummary": "Include meeting summary",
-        "textOnly": "Text format only",
+        "textOnly": "Text and Word formats only",
         "export": "Export",
         "options": "Options",
         "optionsTitle": "Export Options",
@@ -126,7 +137,8 @@
             "title": "Export Formats",
             "text": "Text Format",
             "subtitle": "Subtitle Format",
-            "json": "JSON Format"
+            "json": "JSON Format",
+            "docx": "Word Document"
         },
         "exportAsText": "Export as text",
         "exportAsSrt": "Export as SRT"
@@ -139,7 +151,18 @@
         "show": "Show Summary",
         "hide": "Hide Summary",
         "title": "Meeting Summary",
-        "error": "Summary Generation Error"
+        "error": "Summary Generation Error",
+        "empty": "No summary generated yet",
+        "export": "Export Summary",
+        "selectType": "Select Summary Type",
+        "types": {
+            "kurzprotokoll": "Short Protocol",
+            "kurzprotokollDesc": "Brief summary of key points and decisions",
+            "ergebnisprotokoll": "Results Protocol",
+            "ergebnisprotokollDesc": "Focus exclusively on outcomes, decisions, and action items",
+            "verhandlungsprotokoll": "Negotiation Protocol",
+            "verhandlungsprotokollDesc": "Detailed protocol with discussions and reasoning"
+        }
     },
     "task": {
         "errors": {
@@ -147,7 +170,8 @@
             "failedToLoad": "Failed to get task",
             "transcriptionFailed": "Transcription failed. Please try again.",
             "failedToCreateTranscription": "Failed to create transcription from results",
-            "noResult": "No transcription result available"
+            "noResult": "No transcription result available",
+            "TaskNotFound": "Task not found"
         }
     },
     "commands": {
@@ -175,8 +199,19 @@
     },
     "mode": {
         "viewer": "Viewer",
+        "summary": "Summary",
         "editor": "Editor",
+        "statistics": "Statistics",
         "switch": "Switch Mode"
+    },
+    "statistics": {
+        "title": "Speaker Statistics",
+        "description": "Speaking time distribution by speaker",
+        "noData": "No speaker data available",
+        "audioDuration": "Audio Duration",
+        "speakingTime": "Speaking Time",
+        "speakingPercentage": "Speech Ratio",
+        "bySpeaker": "By Speaker"
     },
     "help": {
         "help": "Help",

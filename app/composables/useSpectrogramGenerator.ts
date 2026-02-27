@@ -69,7 +69,7 @@ export function useSpectrogramGenerator() {
                 err instanceof Error
                     ? err.message
                     : "Unknown error generating spectrogram";
-            logger.error("Spectrogram generation error:", err);
+            logger.error(err, "Spectrogram generation error:");
             error.value = errorMessage;
 
             // Return an empty result with the error
@@ -116,7 +116,7 @@ export function useSpectrogramGenerator() {
                 err instanceof Error
                     ? err.message
                     : "Unknown error generating spectrogram";
-            logger.error("Spectrogram generation error:", err);
+            logger.error(err, "Spectrogram generation error:");
             error.value = errorMessage;
 
             // Return an empty result with the error

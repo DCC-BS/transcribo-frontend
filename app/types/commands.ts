@@ -1,8 +1,8 @@
 import type { ICommand, IReversibleCommand } from "#build/types/commands";
 import type { TaskStatus } from "./task";
 import type {
-    SegementWithId,
     Segment,
+    SegmentWithId,
     TranscriptionResponse,
 } from "./transcriptionResponse";
 
@@ -12,10 +12,10 @@ export const Cmds = {
     TranscriptionFinishedCommand: "TranscriptionFinishedCommand",
     SeekToSecondsCommand: "SeekToSecondsCommand",
     TogglePlayCommand: "TogglePlayCommand",
-    InsertSegementCommand: "InsertSegementCommand",
-    DeleteSegementCommand: "DeleteSegementCommand",
-    UpdateSegementCommand: "UpdateSegementCommand",
-    TranscriptonNameChangeCommand: "TranscriptonNameChangeCommand",
+    InsertSegmentCommand: "InsertSegmentCommand",
+    DeleteSegmentCommand: "DeleteSegmentCommand",
+    UpdateSegmentCommand: "UpdateSegmentCommand",
+    TranscriptionNameChangeCommand: "TranscriptionNameChangeCommand",
     RenameSpeakerCommand: "RenameSpeakerCommand",
     EmptyCommand: "EmptyCommand",
     AddSegmentCommand: "AddSegmentCommand",
@@ -157,20 +157,20 @@ export class AddSegmentCommand implements ITransriboReversibleCommand {
     readonly $type = "AddSegmentCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
-    constructor(public readonly newSegement: Segment) {}
+    constructor(public readonly newSegment: Segment) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;
     }
 }
 
-export class InsertSegementCommand implements ITransriboReversibleCommand {
-    readonly $type = "InsertSegementCommand";
+export class InsertSegmentCommand implements ITransriboReversibleCommand {
+    readonly $type = "InsertSegmentCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
     constructor(
         public readonly targetSegmentId: string,
-        public readonly newSegement: Partial<Segment>,
+        public readonly newSegment: Partial<Segment>,
         public readonly direction: "before" | "after",
     ) {}
 
@@ -197,7 +197,7 @@ export class InsertSegementCommand implements ITransriboReversibleCommand {
 export class RestoreSegmentCommand implements ICommand {
     readonly $type = "RestoreSegmentCommand";
 
-    constructor(public readonly segmentData: SegementWithId) {}
+    constructor(public readonly segmentData: SegmentWithId) {}
 
     /**
      * Returns a string representation of the command
@@ -215,8 +215,8 @@ export class RestoreSegmentCommand implements ICommand {
     }
 }
 
-export class DeleteSegementCommand implements ITransriboReversibleCommand {
-    readonly $type = "DeleteSegementCommand";
+export class DeleteSegmentCommand implements ITransriboReversibleCommand {
+    readonly $type = "DeleteSegmentCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
     constructor(public readonly segmentId: string) {}
@@ -241,8 +241,8 @@ export class DeleteSegementCommand implements ITransriboReversibleCommand {
     }
 }
 
-export class UpdateSegementCommand implements ITransriboReversibleCommand {
-    readonly $type = "UpdateSegementCommand";
+export class UpdateSegmentCommand implements ITransriboReversibleCommand {
+    readonly $type = "UpdateSegmentCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
     constructor(
@@ -281,10 +281,10 @@ export class UpdateSegementCommand implements ITransriboReversibleCommand {
     }
 }
 
-export class TranscriptonNameChangeCommand
+export class TranscriptionNameChangeCommand
     implements ITransriboReversibleCommand
 {
-    readonly $type = "TranscriptonNameChangeCommand";
+    readonly $type = "TranscriptionNameChangeCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
     constructor(public readonly newName: string) {}

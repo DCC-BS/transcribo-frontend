@@ -1,16 +1,22 @@
 <script lang="ts" setup>
 import { UButton } from "#components";
+import type { StoredTranscription } from "~/types/storedTranscription";
 import { AddSegmentCommand } from "../../types/commands";
 import TranscriptionListItem from "../transcriptionList/TranscriptionSegmentEdit.vue";
 
 interface CurrentSegmentEditorProps {
+    transcription: StoredTranscription,
     currentTime: number;
     duration: number;
 }
 
 const props = defineProps<CurrentSegmentEditorProps>();
 
-const { segments, speakers } = useCurrentTranscription();
+const segments = computed(() => props.transcription.segments);
+const speakers = computed(() =>
+    Array.from(getUniqueSpeakers(segments.value)),
+);
+
 const { executeCommand } = useCommandBus();
 const { t } = useI18n();
 
@@ -52,10 +58,7 @@ async function handleAddSegment() {
 
 <template>
     <div>
-        <div
-            v-for="segment in currentSegments"
-            :key="segment.text + segment.start"
-        >
+        <div v-for="segment in currentSegments" :key="segment.text + segment.start">
             <TranscriptionListItem :segment="segment" :speakers="speakers" />
         </div>
         <div v-if="currentSegments.length === 0">

@@ -1,21 +1,24 @@
 <script lang="ts" setup>
 import { UInput } from "#components";
 import { RenameSpeakerCommand } from "~/types/commands";
+import type { StoredTranscription } from "~/types/storedTranscription";
 
-// Get speakers from the current transcription
-const { speakers } = useCurrentTranscription();
+interface InputProps {
+    transcription: StoredTranscription;
+}
+
+const props = defineProps<InputProps>();
+
+const speakers = computed(() =>
+    Array.from(getUniqueSpeakers(props.transcription.segments)),
+);
 const { executeCommand } = useCommandBus();
 const { getSpeakerColor } = useSpeakerColor(speakers);
 
 const { t } = useI18n();
 
-// Create a mapping of original speaker names to their new names
-// This allows us to track both the original name and the edited name
 const speakerMappings = ref<{ original: string; new: string }[]>([]);
 
-/**
- * Initialize speaker mappings when speakers change
- */
 watch(
     speakers,
     () => {
@@ -27,43 +30,34 @@ watch(
     { immediate: true },
 );
 
-/**
- * Handle speaker name change
- * @param originalName - The original speaker name
- * @param newName - The updated speaker name
- */
 function handleSpeakerNameChange(originalName: string, newName: string): void {
-    // Don't execute command if the name hasn't actually changed
     if (originalName === newName) {
         return;
     }
 
-    // Execute the rename speaker command
     executeCommand(new RenameSpeakerCommand(originalName, newName));
 }
 </script>
 
 <template>
-    <UCard>
-        <h2 class="text-lg font-bold">{{ t("common.speakers") }}</h2>
-        <div class="flex gap-2 flex-wrap mt-2">
+    <div class="bg-muted/50 rounded-lg p-3">
+        <h3 class="text-sm font-semibold mb-2 text-muted-foreground">
+            {{ t("common.speakers") }}
+        </h3>
+        <div class="flex gap-2 flex-wrap">
             <div
                 v-for="(speakerMap, index) in speakerMappings"
                 :key="index"
-                class="speaker-item"
             >
                 <UInput
                     v-model="speakerMap.new"
+                    size="sm"
                     :style="{ color: getSpeakerColor(speakerMap.original) }"
-                    placeholder="Speaker name"
-                    @change="
-                        handleSpeakerNameChange(
-                            speakerMap.original,
-                            speakerMap.new,
-                        )
-                    "
+                    :placeholder="t('transcription.placeholderSpeakerName')"
+                    class="w-32"
+                    @change="handleSpeakerNameChange(speakerMap.original, speakerMap.new)"
                 />
             </div>
         </div>
-    </UCard>
+    </div>
 </template>

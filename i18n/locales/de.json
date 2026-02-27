@@ -25,7 +25,10 @@
         "tooManyRequestsTitle": "Zu viele Anfragen",
         "tooManyRequestsDescription": "Sie haben zu viele Anfragen gestellt. Bitte warten Sie einige Minuten, bevor Sie es erneut versuchen.",
         "audioLanguage": "Audio-Sprache",
-        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn Sie nicht sicher sind, wählen Sie 'Automatische Erkennung'."
+        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn Sie nicht sicher sind, wählen Sie 'Automatische Erkennung'.",
+        "settings": "Einstellungen",
+        "configureTranscription": "Konfigurieren Sie Ihre Transkription",
+        "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Sie können beide auf automatische Erkennung lassen, wenn Sie unsicher sind."
     },
     "pages": {
         "index": {
@@ -71,7 +74,8 @@
         "play": "Abspielen",
         "pause": "Pause",
         "addSegment": "Segment hinzufügen",
-        "downloadMedia": "Medien herunterladen"
+        "downloadMedia": "Medien herunterladen",
+        "noMedia": "Keine Mediendatei verfügbar"
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
@@ -90,6 +94,13 @@
         "notFound": "Transkription nicht gefunden oder konnte nicht geladen werden",
         "noTranscriptionsFound": "Keine Transkriptionen gefunden",
         "untitled": "Ohne Titel",
+        "info": "Transkriptions-Info",
+        "nameLabel": "Name",
+        "namePlaceholder": "Transkriptionsname",
+        "autoScrollOn": "Auto-Scroll AN",
+        "autoScrollOff": "Auto-Scroll AUS",
+        "tab": "Transkription",
+        "timelineTab": "Zeitleiste",
         "delete": {
             "title": "Transkription löschen",
             "confirmation": "Sind Sie sicher, dass Sie diese Transkription löschen möchten?"
@@ -118,7 +129,7 @@
         "withTimestamps": "Zeitstempel hinzufügen",
         "mergeSegments": "Segmente vom selben Sprecher zusammenführen",
         "withSummary": "Meeting-Zusammenfassung hinzufügen",
-        "textOnly": "Nur Textformat",
+        "textOnly": "Nur Text- und Word-Format",
         "export": "Exportieren",
         "options": "Optionen",
         "optionsTitle": "Export-Optionen",
@@ -126,7 +137,8 @@
             "title": "Export-Formate",
             "text": "Textformat",
             "subtitle": "Untertitelformat",
-            "json": "JSON-Format"
+            "json": "JSON-Format",
+            "docx": "Word-Dokument"
         },
         "exportAsText": "Als Text exportieren",
         "exportAsSrt": "Als SRT exportieren"
@@ -139,7 +151,18 @@
         "show": "Zusammenfassung anzeigen",
         "hide": "Zusammenfassung ausblenden",
         "title": "Meeting-Zusammenfassung",
-        "error": "Fehler bei der Zusammenfassung"
+        "error": "Fehler bei der Zusammenfassung",
+        "empty": "Noch keine Zusammenfassung erstellt",
+        "export": "Zusammenfassung exportieren",
+        "selectType": "Zusammenfassungsart wählen",
+        "types": {
+            "kurzprotokoll": "Kurzprotokoll",
+            "kurzprotokollDesc": "Kurze Zusammenfassung der wichtigsten Punkte und Entscheidungen",
+            "ergebnisprotokoll": "Ergebnisprotokoll",
+            "ergebnisprotokollDesc": "Fokus ausschliesslich auf Ergebnisse, Entscheidungen und Aufgaben",
+            "verhandlungsprotokoll": "Verhandlungsprotokoll",
+            "verhandlungsprotokollDesc": "Detailliertes Protokoll mit Diskussionen und Begründungen"
+        }
     },
     "task": {
         "errors": {
@@ -147,7 +170,8 @@
             "failedToLoad": "Fehler beim Laden der Aufgabe",
             "transcriptionFailed": "Transkription fehlgeschlagen. Bitte versuchen Sie es erneut.",
             "failedToCreateTranscription": "Fehler beim Erstellen der Transkription aus den Ergebnissen",
-            "noResult": "Kein Transkriptionsergebnis verfügbar"
+            "noResult": "Kein Transkriptionsergebnis verfügbar",
+            "TaskNotFound": "Aufgabe nicht gefunden"
         }
     },
     "commands": {
@@ -175,8 +199,19 @@
     },
     "mode": {
         "viewer": "Betrachter",
+        "summary": "Zusammenfassung",
         "editor": "Editor",
+        "statistics": "Statistik",
         "switch": "Modus wechseln"
+    },
+    "statistics": {
+        "title": "Sprecher-Statistik",
+        "description": "Sprechzeit-Verteilung nach Sprecher",
+        "noData": "Keine Sprecherdaten verfügbar",
+        "audioDuration": "Audiodauer",
+        "speakingTime": "Sprechzeit",
+        "speakingPercentage": "Sprachanteil",
+        "bySpeaker": "Nach Sprecher"
     },
     "help": {
         "help": "Hilfe",

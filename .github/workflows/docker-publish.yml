@@ -1,13 +1,6 @@
 name: Build and Publish Docker Image
 on:
     workflow_dispatch:
-        inputs:
-            version_bump:
-                description: Version bump type
-                required: true
-                default: patch
-                type: choice
-                options: [major, minor, patch]
 
 permissions:
     contents: write
@@ -18,7 +11,6 @@ jobs:
         uses: DCC-BS/ci-workflows/.github/workflows/publish-docker.yml@v8
         secrets: inherit
         with:
-            release_type: ${{ inputs.version_bump }} # major|minor|patch
             version_project_type: "node" # or "python"
             registry: ghcr.io
             image_name: ghcr.io/${{ github.repository }}
