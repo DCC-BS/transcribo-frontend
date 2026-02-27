@@ -127,6 +127,7 @@ function toggleExpanded(): void {
         <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
         <div v-show="isExpanded" class="p-2">
             <div class="media-container" :class="{ 'media-container--audio': !isVideoFile }">
+                <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
                 <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player rounded"
                     @timeupdate="onTimeUpdate" @click="togglePlay">
                     <source :src="mediaSrc" :type="mediaFile.type">

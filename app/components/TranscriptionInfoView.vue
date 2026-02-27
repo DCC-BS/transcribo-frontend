@@ -75,7 +75,8 @@ async function handleNameChange(name: string | number) {
 
                     <!-- Download Media Button -->
                     <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <a v-if="mediaUrl && mediaName" :href="mediaUrl" :download="mediaName">
+                        <!-- biome-ignore lint/a11y/useAnchorContent: UButton inside provides accessible content -->
+                        <a v-if="mediaUrl && mediaName" :href="mediaUrl" :download="mediaName" :aria-label="t('media.downloadMedia')">
                             <motion.div :whileHover="{ scale: 1.02 }" :whileTap="{ scale: 0.98 }"
                                 :transition="{ type: 'spring' as const, stiffness: 400, damping: 17 }">
                                 <UButton icon="i-lucide-download" variant="soft" :label="t('media.downloadMedia')"

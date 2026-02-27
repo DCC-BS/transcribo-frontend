@@ -199,6 +199,7 @@ function onNext() {
                         <div
                             class="aspect-video w-full overflow-hidden shadow-lg rounded-b-2xl"
                         >
+                            <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
                             <video
                                 controls
                                 class="w-full h-full object-contain"
@@ -240,6 +241,7 @@ function onNext() {
                             </div>
                         </div>
                         <div class="relative">
+                            <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
                             <audio
                                 controls
                                 class="w-full h-12 rounded-xl"

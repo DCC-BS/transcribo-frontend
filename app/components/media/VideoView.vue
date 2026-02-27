@@ -130,6 +130,7 @@ async function handleSeekToSeconds(
 <template>
     <div class="media-container">
         <!-- Show video if it's a video file -->
+        <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
         <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player" @timeupdate="onTimeUpdate"
             @click="togglePlay">
             <source :src="mediaSrc" type="video/mp4">
