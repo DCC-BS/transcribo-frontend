@@ -3,7 +3,7 @@ import type { StoredTranscription } from "~/types/storedTranscription";
 import type { SegmentWithId } from "~/types/transcriptionResponse";
 
 export interface ExportOptions {
-    transciption: StoredTranscription;
+    transcription: StoredTranscription;
     withSpeakers: boolean;
     withTimestamps: boolean;
     mergeSegments: boolean; // Only applies to text exports
@@ -49,7 +49,7 @@ export const useExport = () => {
     }
 
     function exportAsText(options: ExportOptions) {
-        let segments = options.transciption.segments;
+        let segments = options.transcription.segments;
 
         // Merge segments if requested
         if (options.mergeSegments) {
@@ -87,16 +87,16 @@ export const useExport = () => {
         let finalText = transcriptText;
 
         // Add summary if requested
-        if (options.withSummary && options.transciption.summary) {
+        if (options.withSummary && options.transcription.summary) {
             // Use the stored summary
-            finalText = `MEETING SUMMARY:\n${options.transciption.summary}\n\n---\n\nFULL TRANSCRIPT:\n${transcriptText}`;
+            finalText = `MEETING SUMMARY:\n${options.transcription.summary}\n\n---\n\nFULL TRANSCRIPT:\n${transcriptText}`;
         }
 
         const blob = new Blob([finalText], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${options.transciption.name}.txt`;
+        a.download = `${options.transcription.name}.txt`;
         a.click();
         URL.revokeObjectURL(url);
     }
@@ -169,7 +169,7 @@ export const useExport = () => {
     }
 
     async function exportAsDocx(options: ExportOptions) {
-        let segments = options.transciption.segments;
+        let segments = options.transcription.segments;
 
         if (options.mergeSegments) {
             segments = mergeConsecutiveSegments(segments);
@@ -192,10 +192,10 @@ export const useExport = () => {
             })
             .join("\n\n");
 
-        let markdown = `# ${options.transciption.name}\n\n`;
+        let markdown = `# ${options.transcription.name}\n\n`;
 
-        if (options.withSummary && options.transciption.summary) {
-            markdown += `## Meeting Summary\n\n${options.transciption.summary}\n\n---\n\n`;
+        if (options.withSummary && options.transcription.summary) {
+            markdown += `## Meeting Summary\n\n${options.transcription.summary}\n\n---\n\n`;
         }
 
         markdown += `## Transcript\n\n${transcriptMarkdown}`;
@@ -204,7 +204,7 @@ export const useExport = () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `${options.transciption.name}.docx`;
+        a.download = `${options.transcription.name}.docx`;
         a.click();
         URL.revokeObjectURL(url);
     }

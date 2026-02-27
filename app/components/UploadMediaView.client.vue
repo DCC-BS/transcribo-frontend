@@ -237,9 +237,6 @@ async function useThisFile(): Promise<void> {
         <div v-if="!showFilePreview" class="space-y-4">
             <UFileUpload :disabled="showProgress" accept="audio/*, video/*" icon="i-lucide-file-up"
                 label="Audio- oder Videodatei hierher ziehen oder klicken zum Hochladen"></UFileUpload>
-
-            <UInput type="file" accept="audio/*,video/*" size="xl" icon="i-heroicons-document-arrow-up"
-                :disabled="showProgress" @change="loadAudio" ref="fileInputRef" />
         </div>
 
         <!-- File Preview Section -->

@@ -11,7 +11,6 @@ interface MediaPlaybackBarProps {
 const props = defineProps<MediaPlaybackBarProps>();
 
 const currentTime = defineModel<number>({ default: 0 });
-const { t } = useI18n();
 
 const isExpanded = ref(false);
 const mediaFile = ref<Blob | null>(null);
@@ -122,7 +121,7 @@ function toggleExpanded(): void {
     isExpanded.value = !isExpanded.value;
 }
 </script>
-
+valid Tailwind CSS class and will no
 <template>
     <div class=" bg-default border-b border-default shadow-sm">
         <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
@@ -206,7 +205,8 @@ function toggleExpanded(): void {
 }
 
 .audio-visualization {
-    @apply bg-muted rounded display: block;
+    @apply bg-muted rounded;
+    display: block;
     width: 100%;
     height: 120px;
 }

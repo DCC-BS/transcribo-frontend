@@ -61,7 +61,7 @@ async function preprocessMedia(progress: MediaProgress) {
         return audioFile;
     }
 
-    progress.message = "adio preprocessed";
+    progress.message = "audio preprocessed";
     progress.progress = 100;
     // on audio do nothin
     return input.value.media;
@@ -94,7 +94,7 @@ async function uploadFile(
     if (isApiError(response)) {
         logger.error(response, response.debugMessage);
         errorMessage.value = t(`errors.${response.errorId}`);
-        throw errorMessage;
+        throw response;
     }
 
     progress.progress = 90;
