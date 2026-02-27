@@ -25,7 +25,10 @@
         "tooManyRequestsTitle": "Too many requests",
         "tooManyRequestsDescription": "You've made too many requests. Please wait a few minutes before trying again.",
         "audioLanguage": "Audio Language",
-        "audioLanguageHelp": "What language was spoken in the audio file? If you are not sure, select 'Auto detection'."
+        "audioLanguageHelp": "What language was spoken in the audio file? If you are not sure, select 'Auto detection'.",
+        "settings": "Settings",
+        "configureTranscription": "Configure your transcription",
+        "settingsInfo": "These settings help improve transcription accuracy. You can leave both on auto-detection if you're unsure."
     },
     "pages": {
         "index": {

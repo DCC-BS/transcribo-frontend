@@ -25,7 +25,10 @@
         "tooManyRequestsTitle": "Zu viele Anfragen",
         "tooManyRequestsDescription": "Sie haben zu viele Anfragen gestellt. Bitte warten Sie einige Minuten, bevor Sie es erneut versuchen.",
         "audioLanguage": "Audio-Sprache",
-        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn Sie nicht sicher sind, wählen Sie 'Automatische Erkennung'."
+        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn Sie nicht sicher sind, wählen Sie 'Automatische Erkennung'.",
+        "settings": "Einstellungen",
+        "configureTranscription": "Konfigurieren Sie Ihre Transkription",
+        "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Sie können beide auf automatische Erkennung lassen, wenn Sie unsicher sind."
     },
     "pages": {
         "index": {
