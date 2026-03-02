@@ -1,6 +1,9 @@
 <script setup lang="ts">
+import type { SelectMenuItem } from "@nuxt/ui";
+import { useStorage } from "@vueuse/core";
 import type { SummaryType } from "#shared/types/summary";
 import type { StoredTranscription } from "~/types/storedTranscription";
+import { languages } from "~/utils/languages";
 
 interface Props {
     transcription: StoredTranscription;
@@ -35,6 +38,19 @@ const summaryOptions: {
     ];
 const summaryType = ref<SummaryType>("kurzprotokoll");
 
+// Language selection with persistence
+const selectedLanguage = useStorage<string | undefined>("summary-language", undefined);
+
+// Language options for the select menu
+const languageOptions: SelectMenuItem[] = [
+    { label: t("summary.autoDetect"), value: undefined, icon: "i-lucide-languages" },
+    ...languages.map((lang) => ({
+        label: lang.code.toUpperCase(),
+        value: lang.code,
+        icon: lang.icon,
+    })),
+];
+
 const summaryError = ref<string | null>(null);
 
 async function handleGenerateSummary(): Promise<void> {
@@ -43,7 +59,7 @@ async function handleGenerateSummary(): Promise<void> {
     summaryError.value = null;
 
     try {
-        await generateSummary(props.transcription, summaryType.value);
+        await generateSummary(props.transcription, summaryType.value, selectedLanguage.value);
     } catch (error) {
         summaryError.value =
             error instanceof Error
@@ -78,6 +94,15 @@ async function handleGenerateSummary(): Promise<void> {
                                 {{ t("summary.selectType") }}
                             </h4>
                             <URadioGroup v-model="summaryType" :items="summaryOptions" value-key="value" class="mb-4" />
+                            <h4 class="font-medium text-sm mb-2">
+                                {{ t("summary.selectLanguage") }}
+                            </h4>
+                            <USelectMenu
+                                v-model="selectedLanguage"
+                                :items="languageOptions"
+                                value-key="value"
+                                class="mb-4"
+                            />
                             <UButton block color="warning" :label="t('summary.generate')" :loading="isSummaryGenerating"
                                 :disabled="isSummaryGenerating" @click="handleGenerateSummary" />
                         </div>
@@ -96,6 +121,15 @@ async function handleGenerateSummary(): Promise<void> {
                                 </h4>
                                 <URadioGroup v-model="summaryType" :items="summaryOptions" value-key="value"
                                     class="mb-4" />
+                                <h4 class="font-medium text-sm mb-2">
+                                    {{ t("summary.selectLanguage") }}
+                                </h4>
+                                <USelectMenu
+                                    v-model="selectedLanguage"
+                                    :items="languageOptions"
+                                    value-key="value"
+                                    class="mb-4"
+                                />
                                 <UButton block color="primary" :label="t('summary.regenerate')"
                                     :loading="isSummaryGenerating" :disabled="isSummaryGenerating"
                                     @click="handleGenerateSummary" />
