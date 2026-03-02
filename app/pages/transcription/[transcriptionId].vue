@@ -23,6 +23,13 @@ onMounted(async () => {
     currentTranscription.value = await getTranscription(transcriptionId);
     isTranscriptionLoading.value = false;
 });
+
+// Animation variants
+const pageTransition = {
+    type: "spring" as const,
+    stiffness: 200,
+    damping: 25,
+};
 </script>
 
 <template>

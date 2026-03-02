@@ -3,6 +3,8 @@ const { t } = useI18n();
 </script>
 
 <template>
+    <Onboarding />
+
     <div class="min-h-screen flex flex-col justify-stretch">
         <NavigationMenu>
             <template #center>
@@ -10,7 +12,11 @@ const { t } = useI18n();
                 <div class="flex items-center justify-center shrink-0 h-full">
                     <UTooltip :text="t('navigation.new')">
                         <ULink to="/">
-                            <UButton variant="ghost" icon="i-lucide-plus">
+                            <UButton
+                                id="new-transcription-button"
+                                variant="ghost"
+                                icon="i-lucide-plus"
+                            >
                                 <span class="hidden md:inline">
                                     {{ t("navigation.new") }}
                                 </span>
