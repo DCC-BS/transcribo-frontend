@@ -11,8 +11,9 @@ const retentionDays = computed(() => {
     return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
 });
 
-const { transcriptions, addTranscription, deleteTranscription } =
-    useTranscription();
+const { transcriptions } = useTranscriptions();
+const { addTranscription, deleteTranscription } = getTranscriptionService();
+
 const {
     getTask,
     getTasks,

@@ -12,12 +12,12 @@ import {
 import type { StoredTranscription } from "~/types/storedTranscription";
 import type { SegmentWithId } from "~/types/transcriptionResponse";
 
-export const useTranscriptionService = (
+export const useTranscriptionCommandHandler = (
     transcription: Ref<StoredTranscription | undefined>,
 ) => {
     const logger = useLogger();
     const { onCommand } = useCommandBus();
-    const { updateTranscription } = useTranscription();
+    const { updateTranscription } = getTranscriptionService();
 
     onCommand<DeleteSegmentCommand>(
         Cmds.DeleteSegmentCommand,

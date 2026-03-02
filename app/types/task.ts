@@ -36,8 +36,8 @@ export const TaskStatusEnum = {
 export const TaskStatusSchema = z.object({
     task_id: z.string(),
     status: TaskStatusEnumSchema,
-    created_at: z.coerce.date().nullable(), // ISO date string or null
-    executed_at: z.coerce.date().nullable(), // ISO date string or null
+    created_at: z.coerce.date().optional(), // ISO date string or null
+    executed_at: z.coerce.date().optional(), // ISO date string or null
     progress: z.number().nullable(),
 });
 

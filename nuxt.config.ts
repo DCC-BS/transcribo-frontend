@@ -144,7 +144,6 @@ export default defineNuxtConfig({
         "@dcc-bs/common-ui.bs.js",
         "@dcc-bs/event-system.bs.js",
         "@dcc-bs/audio-recorder.bs.js",
-        "@pinia/nuxt",
         "@vite-pwa/nuxt",
         "@nuxtjs/mdc",
         "motion-v/nuxt",
@@ -154,6 +153,22 @@ export default defineNuxtConfig({
         typeCheck: false,
     },
     devtools: { enabled: false },
+    hooks: {
+        "imports:extend"(imports) {
+            for (let i = imports.length - 1; i >= 0; i--) {
+                const e = imports[i];
+                if (
+                    e?.name === "options" &&
+                    typeof e.from === "string" &&
+                    e.from.includes(
+                        "@nuxt/ui/dist/runtime/composables/useResizable",
+                    )
+                ) {
+                    imports.splice(i, 1);
+                }
+            }
+        },
+    },
     css: ["~/assets/css/main.css"],
     // localization
     i18n: {

@@ -4,7 +4,7 @@ import { SummaryResponseSchema } from "~/types/summarizeResponse";
 import type { SummarizeRequest, SummaryType } from "~~/shared/types/summary";
 
 export function useTranscriptionSummary() {
-    const { updateTranscription } = useTranscription();
+    const { updateTranscription } = getTranscriptionService();
     const logger = useLogger();
 
     const isSummaryGenerating = ref(false);

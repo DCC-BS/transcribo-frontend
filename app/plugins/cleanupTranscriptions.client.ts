@@ -1,6 +1,6 @@
 export default defineNuxtPlugin(async (_) => {
     const logger = useLogger();
-    const { cleanupOldTranscriptions } = useTranscription();
+    const { cleanupOldTranscriptions } = getTranscriptionService();
 
     try {
         const n = await cleanupOldTranscriptions();

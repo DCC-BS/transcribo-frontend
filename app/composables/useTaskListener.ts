@@ -14,7 +14,7 @@ import {
 
 export function useTaskListener() {
     const { deleteTask } = useTasks();
-    const { addTranscription } = useTranscription();
+    const { addTranscription } = getTranscriptionService();
     const { showError } = useUserFeedback();
     const { t } = useI18n();
     const logger = useLogger();
@@ -44,8 +44,6 @@ export function useTaskListener() {
     ) {
         let status = {
             task_id: taskId,
-            created_at: "",
-            executed_at: "",
             progress: 0,
             status: TaskStatusEnum.IN_PROGRESS,
         } as TaskStatus;
@@ -87,10 +85,8 @@ export function useTaskListener() {
             return {
                 status: TaskStatusEnum.FAILED,
                 task_id: taskId,
-                created_at: "",
-                executed_at: "",
                 progress: 0,
-            };
+            } as TaskStatus;
         }
 
         return newStatus;

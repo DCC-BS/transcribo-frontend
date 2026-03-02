@@ -10,7 +10,7 @@ export interface ExportOptions {
     withSummary: boolean; // Only applies to text exports
 }
 
-export const useExport = () => {
+export function useExport() {
     /**
      * Merges consecutive segments from the same speaker into single segments
      * @param segments - Array of segments to merge
@@ -229,4 +229,4 @@ export const useExport = () => {
         exportAsDocx,
         exportSummaryAsDocx,
     };
-};
+}
