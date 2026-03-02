@@ -11,7 +11,7 @@ const props = defineProps<InputProps>();
 // Viewer mode options
 const showSpeakers = ref(true);
 const showTimestamps = ref(false);
-const mergeSegments = ref(false);
+const mergeSegments = ref(true);
 
 /**
  * Merges consecutive segments from the same speaker into single segments

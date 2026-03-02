@@ -8,7 +8,6 @@ const { executeCommand } = useCommandBus();
 const { currentRoute } = useRouter();
 
 const isInEditor = computed(() => {
-    console.log("Current route:", currentRoute.value.path);
     return currentRoute.value.path.match(/transcription\/.+/) !== null;
 });
 </script>
