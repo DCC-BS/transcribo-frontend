@@ -40,7 +40,7 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
 </script>
 
 <template>
-    <div class="bg-muted/50 rounded-lg p-3">
+    <div id="speaker-names-section" class="bg-muted/50 rounded-lg p-3">
         <h3 class="text-sm font-semibold mb-2 text-muted-foreground">
             {{ t("common.speakers") }}
         </h3>

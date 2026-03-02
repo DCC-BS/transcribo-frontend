@@ -1,10 +1,19 @@
 <script setup lang="ts">
+import { ShowOnboardingCommand } from "~/types/commands";
+
 const { t } = useI18n();
+
+const { executeCommand } = useCommandBus();
+
+const { currentRoute } = useRouter();
+
+const isInEditor = computed(() => {
+    console.log("Current route:", currentRoute.value.path);
+    return currentRoute.value.path.match(/transcription\/.+/) !== null;
+});
 </script>
 
 <template>
-    <Onboarding />
-
     <div class="min-h-screen flex flex-col justify-stretch">
         <NavigationMenu>
             <template #center>
@@ -12,11 +21,7 @@ const { t } = useI18n();
                 <div class="flex items-center justify-center shrink-0 h-full">
                     <UTooltip :text="t('navigation.new')">
                         <ULink to="/">
-                            <UButton
-                                id="new-transcription-button"
-                                variant="ghost"
-                                icon="i-lucide-plus"
-                            >
+                            <UButton variant="ghost" icon="i-lucide-plus">
                                 <span class="hidden md:inline">
                                     {{ t("navigation.new") }}
                                 </span>
@@ -34,6 +39,17 @@ const { t } = useI18n();
                         </ULink>
                     </UTooltip>
                 </div>
+            </template>
+            <template #rightPreItems>
+                <UTooltip v-if="isInEditor" :text="t('onboarding.help')">
+                    <UButton
+                        id="help-button"
+                        icon="i-lucide-circle-help"
+                        variant="ghost"
+                        color="neutral"
+                        @click="executeCommand(new ShowOnboardingCommand())"
+                    />
+                </UTooltip>
             </template>
         </NavigationMenu>
 

@@ -39,8 +39,13 @@ async function handleDocxExport(): Promise<void> {
 
 <template>
     <UPopover>
-        <UButton icon="i-lucide-download" :label="t('export.export')" trailing-icon="i-lucide-chevron-down"
-            color="primary" />
+        <UButton
+            id="export-toolbar"
+            icon="i-lucide-download"
+            :label="t('export.export')"
+            trailing-icon="i-lucide-chevron-down"
+            color="primary"
+        />
 
         <template #content>
             <div class="p-4 w-80">

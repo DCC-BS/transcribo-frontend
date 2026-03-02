@@ -4,6 +4,9 @@
             <template #center>
                 <slot name="center" />
             </template>
+            <template #rightPreItems>
+                <slot name="rightPreItems" />
+            </template>
         </NavigationBar>
         <!-- <ClientOnly>
             <UNavigationMenu content-orientation="vertical" variant="link" :items="items"

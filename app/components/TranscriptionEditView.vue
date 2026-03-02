@@ -75,14 +75,21 @@ function initializeDuration(): void {
                     >
                         <template #leading>
                             <UIcon
-                                :name="autoScrollEnabled ? 'i-lucide-arrow-down-narrow-wide' : 'i-lucide-arrow-down-narrow-wide'"
+                                :name="
+                                    autoScrollEnabled
+                                        ? 'i-lucide-arrow-down-narrow-wide'
+                                        : 'i-lucide-arrow-down-narrow-wide'
+                                "
                                 :class="{ 'opacity-50': !autoScrollEnabled }"
                             />
                         </template>
-                        <span class="text-xs">{{ autoScrollEnabled ? $t('transcription.autoScrollOn') : $t('transcription.autoScrollOff') }}</span>
+                        <span class="text-xs">{{
+                            autoScrollEnabled
+                                ? $t("transcription.autoScrollOn")
+                                : $t("transcription.autoScrollOff")
+                        }}</span>
                     </UButton>
                 </div>
-
             </div>
         </div>
 
@@ -91,7 +98,8 @@ function initializeDuration(): void {
                 <div class="p-4 flex flex-col gap-4">
                     <RenameSpeakerView :transcription="props.transcription" />
                     <TranscriptionList
-                    :transcription="props.transcription"
+                        id="edit-transcription-list"
+                        :transcription="props.transcription"
                         :currentTime="currentTime"
                         :autoScrollEnabled="autoScrollEnabled"
                     />
@@ -101,8 +109,12 @@ function initializeDuration(): void {
             <template v-else>
                 <div class="flex-1 min-h-0">
                     <div class="p-4 flex flex-col gap-4">
-                        <RenameSpeakerView :transcription="props.transcription" />
+                        <RenameSpeakerView
+                            id="edit-speaker-names"
+                            :transcription="props.transcription"
+                        />
                         <TranscriptionList
+                            id="edit-transcription-list"
                             :transcription="props.transcription"
                             :currentTime="currentTime"
                             :autoScrollEnabled="autoScrollEnabled"

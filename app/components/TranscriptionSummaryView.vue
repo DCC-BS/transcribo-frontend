@@ -69,7 +69,7 @@ async function handleGenerateSummary(): Promise<void> {
 
             <div class="flex-1 flex gap-2 justify-end">
                 <UPopover v-if="!props.transcription.summary">
-                    <UButton icon="i-lucide-lightbulb" variant="soft" color="warning" size="sm"
+                    <UButton id="summary-generate-button" icon="i-lucide-lightbulb" variant="soft" color="warning" size="sm"
                         :label="t('summary.generate')" class="shadow-sm" />
 
                     <template #content>
@@ -117,7 +117,7 @@ async function handleGenerateSummary(): Promise<void> {
 
         <!-- Summary Content -->
         <div v-if="props.transcription.summary">
-            <div class="p-4 border-t border-amber-200/50 bg-white/40">
+            <div id="summary-content" class="p-4 border-t border-amber-200/50 bg-white/40">
                 <div class="prose prose-sm max-w-none overflow-y-auto prose-amber">
                     <MDC :value="props.transcription.summary" />
                 </div>

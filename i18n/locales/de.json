@@ -392,5 +392,84 @@
     "retention": {
         "title": "Verfügbarkeit der Transkriptionen",
         "description": "Transkriptionen älter als {retentionDays} Tage werden automatisch gelöscht."
+    },
+    "onboarding": {
+        "help": "Hilfe-Tour anzeigen",
+        "next": "Weiter",
+        "previous": "Zurück",
+        "done": "Fertig",
+        "progress": "{'{{current}}'} von {'{{total}}'}",
+        "welcome": {
+            "title": "Willkommen bei Transcribo!",
+            "description": "Transcribo ist ein KI-basierter Transkriptionsdienst, der Dir hilft, Audio- und Videodateien zu transkribieren. Alle Daten werden auf lokalen Servern der IT BS verarbeitet. Du kannst mit Transcribo auch besondere Personendaten und Daten, die dem Amtsgeheimnis (Erhöhter Schutzbedarf) unterliegen, verarbeiten. Ich zeige Dir jetzt die Hauptfunktionen von Transcribo."
+        },
+        "transcriptionInfo": {
+            "title": "Transkriptions-Info",
+            "description": "Klicke hier um den Namen der Transkription zu ändern oder die Original-Mediendatei herunterzuladen."
+        },
+        "exportToolbar": {
+            "title": "Exportieren",
+            "description": "Klicke hier um deine Transkription zu exportieren. Du kannst zwischen Text-, Untertitel (SRT)-, JSON- oder Word (DOCX)-Format wählen."
+        },
+        "modes": {
+            "title": "Die Vier Modi",
+            "description": "Betrachter: Transkription ansehen und lesen\n\nZusammenfassung: KI-gestützte Zusammenfassungen erstellen\n\nEditor: Text, Zeitstempel und Sprecher bearbeiten\n\nStatistik: Sprechzeit-Verteilung anzeigen"
+        },
+        "viewerIntro": {
+            "title": "Betrachter-Modus",
+            "description": "Im Betrachter-Modus kannst du deine Transkription lesen."
+        },
+        "viewerDisplayOptions": {
+            "title": "Anzeigeoptionen",
+            "description": "Nutze die Anzeigeoptionen um Sprecher, Zeitstempel anzuzeigen/auszublenden oder aufeinanderfolgende Segmente desselben Sprechers zusammenzuführen."
+        },
+        "summary": {
+            "title": "Zusammenfassungs-Modus",
+            "description": "Wechsle in den Zusammenfassungs-Modus, um eine KI-gestützte Zusammenfassung deiner Transkription zu erstellen."
+        },
+        "generateSummary": {
+            "title": "Zusammenfassung Erstellen",
+            "description": "Klicke auf diesen Button um eine Zusammenfassung zu erstellen. Wähle zwischen Kurzprotokoll, Ergebnisprotokoll oder detailliertem Verhandlungsprotokoll."
+        },
+        "statistics": {
+            "title": "Statistik-Modus",
+            "description": "Wechsle in den Statistik-Modus um die Sprechzeit-Verteilung nach Sprechern zu sehen."
+        },
+        "speakerStatistics": {
+            "title": "Sprecher-Statistik",
+            "description": "Sieh dir die gesamte Audiodauer, Sprechzeit, den Sprachanteil und wie viel jeder Sprecher beigetragen hat an."
+        },
+        "editor": {
+            "title": "Editor-Modus",
+            "description": "Wechsle in den Editor-Modus um Änderungen an deiner Transkription vorzunehmen. Hier kannst du Text, Zeitstempel und Sprechernamen bearbeiten."
+        },
+        "speakerNames": {
+            "title": "Sprecher Umbenennen",
+            "description": "Hier kannst du die Sprecher umbenennen. Gib einfach einen neuen Namen ein und er wird auf alle Segmente dieses Sprechers angewendet."
+        },
+        "editTranscriptions": {
+            "title": "Transkriptionen Bearbeiten",
+            "description": "Jedes Segment kann bearbeitet werden: Ändere den Text, aktualisiere den Sprecher oder ändere Start- und Endzeiten. Klicke auf die Zeitstempel um zu dieser Position zu springen."
+        },
+        "addTranscription": {
+            "title": "Neue Transkription Hinzufügen",
+            "description": "Klicke auf den + Button um an beliebiger Stelle neue Transkriptionssegmente hinzuzufügen."
+        },
+        "mediaPlayback": {
+            "title": "Medienwiedergabe",
+            "description": "Nutze die Medienleiste um dein Audio oder Video abzuspielen."
+        },
+        "mediaExpand": {
+            "title": "Medienansicht Erweitern",
+            "description": "Klicke auf den Erweitern-Button um das Video oder die größere Ansicht mit Untertitelvorschau zu sehen."
+        },
+        "helpButton": {
+            "title": "Hilfe-Button",
+            "description": "Klicke jederzeit auf diesen Button um diese Tour erneut zu starten."
+        },
+        "complete": {
+            "title": "Du bist startklar!",
+            "description": "Du bist bereit, Transcribo zu nutzen! Klicke jederzeit auf den Hilfe-Button, um diese Tour erneut zu starten."
+        }
     }
 }

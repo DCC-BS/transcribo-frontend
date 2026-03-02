@@ -1,4 +1,5 @@
 import type { ICommand, IReversibleCommand } from "#build/types/commands";
+import type { EditorMode } from "./editor";
 import type { TaskStatus } from "./task";
 import type {
     Segment,
@@ -20,6 +21,8 @@ export const Cmds = {
     EmptyCommand: "EmptyCommand",
     AddSegmentCommand: "AddSegmentCommand",
     RestoreSegmentCommand: "RestoreSegmentCommand",
+    ChangeEditorModeCommand: "ChangeEditorModeCommand",
+    ShowOnboardingCommand: "ShowOnboardingCommand",
 };
 
 export type ITransriboReversibleCommand = IReversibleCommand & {
@@ -281,9 +284,7 @@ export class UpdateSegmentCommand implements ITransriboReversibleCommand {
     }
 }
 
-export class TranscriptionNameChangeCommand
-    implements ITransriboReversibleCommand
-{
+export class TranscriptionNameChangeCommand implements ITransriboReversibleCommand {
     readonly $type = "TranscriptionNameChangeCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
@@ -339,5 +340,45 @@ export class RenameSpeakerCommand implements ITransriboReversibleCommand {
             oldName: this.oldName,
             newName: this.newName,
         });
+    }
+}
+
+export class ChangeEditorModeCommand implements ICommand {
+    readonly $type = "ChangeEditorModeCommand";
+
+    constructor(public readonly newMode: EditorMode) {}
+
+    /**
+     * Returns a string representation of the command
+     */
+    toString(): string {
+        return `Change Editor Mode To: ${this.newMode}`;
+    }
+
+    /**
+     * Returns a localized string representation of the command
+     * @param t - Translation function from useI18n
+     */
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.changeEditorMode", { mode: this.newMode });
+    }
+}
+
+export class ShowOnboardingCommand implements ICommand {
+    readonly $type = "ShowOnboardingCommand";
+
+    /**
+     * Returns a string representation of the command
+     */
+    toString(): string {
+        return "Start Onboarding";
+    }
+
+    /**
+     * Returns a localized string representation of the command
+     * @param t - Translation function from useI18n
+     */
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.startOnboarding");
     }
 }

@@ -129,7 +129,7 @@ async function addSegemntAtZero() {
 
 <template>
     <div ref="listContainer" class="flex flex-col">
-        <USeparator>
+        <USeparator id="add-transcription-top">
             <UButton
                 icon="i-lucide-plus"
                 variant="link"
@@ -139,31 +139,33 @@ async function addSegemntAtZero() {
         </USeparator>
 
         <AnimatePresence>
-            <motion.div
-                v-for="segment in segments"
-                :key="segment.id"
-                :initial="{ opacity: 0, scaleY: 0 }"
-                :animate="{ opacity: 1, scaleY: 1 }"
-                :exit="{ scale: 0 }"
-            >
-                <div :ref="(el) => setSegmentRef(segment.id, el)">
-                    <TranscriptionListItem
-                        :segment="segment"
-                        :speakers="speakers"
-                        :isActive="isSegmentActive(segment.id)"
-                        :currentTime="props.currentTime"
-                    />
-                </div>
+            <div id="transcription-segments">
+                <motion.div
+                    v-for="segment in segments"
+                    :key="segment.id"
+                    :initial="{ opacity: 0, scaleY: 0 }"
+                    :animate="{ opacity: 1, scaleY: 1 }"
+                    :exit="{ scale: 0 }"
+                >
+                    <div :ref="(el) => setSegmentRef(segment.id, el)">
+                        <TranscriptionListItem
+                            :segment="segment"
+                            :speakers="speakers"
+                            :isActive="isSegmentActive(segment.id)"
+                            :currentTime="props.currentTime"
+                        />
+                    </div>
 
-                <USeparator>
-                    <UButton
-                        icon="i-lucide-plus"
-                        variant="link"
-                        color="neutral"
-                        @click="() => addSegmentAfter(segment)"
-                    />
-                </USeparator>
-            </motion.div>
+                    <USeparator>
+                        <UButton
+                            icon="i-lucide-plus"
+                            variant="link"
+                            color="neutral"
+                            @click="() => addSegmentAfter(segment)"
+                        />
+                    </USeparator>
+                </motion.div>
+            </div>
         </AnimatePresence>
     </div>
 </template>

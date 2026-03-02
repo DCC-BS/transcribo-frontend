@@ -1,28 +1,37 @@
 <script lang="ts" setup>
 import { createReusableTemplate } from "@vueuse/core";
 import { motion } from "motion-v";
+import { type ChangeEditorModeCommand, Cmds } from "~/types/commands";
+import type { EditorMode } from "~/types/editor";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 const route = useRoute();
 const { t } = useI18n();
 const { getTranscription } = getTranscriptionService();
 const [DefineMainContent, UseMainContent] = createReusableTemplate();
+const { onCommand } = useCommandBus();
 
 const transcriptionId = route.params.transcriptionId as string;
+const onboardingRef = ref<InstanceType<typeof Onboarding> | null>(null);
 
 const currentTranscription = ref<StoredTranscription>();
 const isTranscriptionLoading = ref(true);
 
 useTranscriptionCommandHandler(currentTranscription);
 
-// Editor mode state - default to view mode
-type EditorMode = "view" | "summary" | "edit" | "statistics";
 const editorMode = ref<EditorMode>("view");
 
 onMounted(async () => {
     currentTranscription.value = await getTranscription(transcriptionId);
     isTranscriptionLoading.value = false;
 });
+
+onCommand<ChangeEditorModeCommand>(
+    Cmds.ChangeEditorModeCommand,
+    async (command) => {
+        editorMode.value = command.newMode;
+    },
+);
 
 // Animation variants
 const pageTransition = {
@@ -33,10 +42,12 @@ const pageTransition = {
 </script>
 
 <template>
+    <Onboarding ref="onboardingRef" />
+
     <HContainer class="grow min-h-125">
         <template #top>
             <div class="flex md:hidden items-center justify-center mb-2">
-                <EditorModeSelector v-model="editorMode" />
+                <EditorModeSelector v-model="editorMode" id-prefix="mobile-" />
             </div>
             <div
                 class="w-full flex flex-wrap justify-between items-center gap-2"
@@ -51,9 +62,12 @@ const pageTransition = {
 
                 <!-- Center: Mode selector -->
                 <div
-                    class="hidden md:flex items-center justify-center shrink-0"
+                    class="hidden md:flex items-center justify-center shrink-0 gap-2"
                 >
-                    <EditorModeSelector v-model="editorMode" />
+                    <EditorModeSelector
+                        v-model="editorMode"
+                        id-prefix="desktop-"
+                    />
                 </div>
 
                 <!-- Export Portal Target (right-aligned) -->

@@ -63,7 +63,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="grow h-full flex flex-col">
+    <div id="speaker-statistics" class="grow h-full flex flex-col">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
             <h3 class="font-medium text-sm">
                 {{ t("statistics.title", "Speaker Statistics") }}

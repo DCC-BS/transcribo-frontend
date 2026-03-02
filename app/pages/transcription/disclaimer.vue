@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import disclaimerTextRaw from "../assets/disclaimer.html?raw";
+import disclaimerTextRaw from "~/assets/disclaimer.html?raw";
 
 const disclaimerText = disclaimerTextRaw as string;
 

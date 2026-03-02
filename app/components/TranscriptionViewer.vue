@@ -3,7 +3,7 @@ import type { StoredTranscription } from "~/types/storedTranscription";
 import type { SegmentWithId } from "~/types/transcriptionResponse";
 
 interface InputProps {
-    transcription: StoredTranscription
+    transcription: StoredTranscription;
 }
 
 const props = defineProps<InputProps>();
@@ -18,9 +18,7 @@ const mergeSegments = ref(false);
  * @param segments - Array of segments to merge
  * @returns Array of merged segments
  */
-function mergeConsecutiveSegments(
-    segments: SegmentWithId[],
-): SegmentWithId[] {
+function mergeConsecutiveSegments(segments: SegmentWithId[]): SegmentWithId[] {
     if (segments.length === 0) return [];
 
     const merged: SegmentWithId[] = [];
@@ -94,32 +92,53 @@ const { t } = useI18n();
 <template>
     <div class="grow h-full flex flex-col">
         <!-- Viewer Controls -->
-        <div class="flex items-center gap-4 p-4 border-b border-gray-200 bg-gray-50">
-            <h3 class="font-medium text-sm">{{ t('viewer.displayOptions') }}</h3>
+        <div
+            id="viewer-display-options"
+            class="flex flex-wrap items-center gap-4 p-4 border-b border-gray-200 bg-gray-50"
+        >
+            <h3 class="font-medium text-sm">
+                {{ t("viewer.displayOptions") }}
+            </h3>
 
             <!-- Show Speakers Toggle -->
             <div class="flex items-center gap-2">
-                <USwitch v-model="showSpeakers" size="sm" />
-                <span class="text-sm">{{ t('viewer.showSpeakers') }}</span>
+                <USwitch
+                    id="viewer-show-speakers"
+                    v-model="showSpeakers"
+                    size="sm"
+                />
+                <span class="text-sm">{{ t("viewer.showSpeakers") }}</span>
             </div>
 
             <!-- Show Timestamps Toggle -->
             <div class="flex items-center gap-2">
-                <USwitch v-model="showTimestamps" size="sm" />
-                <span class="text-sm">{{ t('viewer.showTimestamps') }}</span>
+                <USwitch
+                    id="viewer-show-timestamps"
+                    v-model="showTimestamps"
+                    size="sm"
+                />
+                <span class="text-sm">{{ t("viewer.showTimestamps") }}</span>
             </div>
 
             <!-- Merge Segments Toggle -->
             <div class="flex items-center gap-2">
-                <USwitch v-model="mergeSegments" size="sm" />
-                <span class="text-sm">{{ t('viewer.mergeSegments') }}</span>
+                <USwitch
+                    id="viewer-merge-segments"
+                    v-model="mergeSegments"
+                    size="sm"
+                />
+                <span class="text-sm">{{ t("viewer.mergeSegments") }}</span>
             </div>
         </div>
 
         <!-- Transcript Display -->
         <div class="flex-1 p-4 overflow-hidden">
-            <textarea v-model="formattedTranscript" :placeholder="t('viewer.placeholder')" readonly
-                class="w-full h-full resize-none font-mono text-sm leading-relaxed p-3 border border-gray-300 rounded-md bg-white dark:bg-gray-800 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <textarea
+                v-model="formattedTranscript"
+                :placeholder="t('viewer.placeholder')"
+                readonly
+                class="w-full h-full resize-none font-mono text-sm leading-relaxed p-3 border border-gray-300 rounded-md bg-white dark:bg-gray-800 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
         </div>
     </div>
 </template>

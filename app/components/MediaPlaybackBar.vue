@@ -123,7 +123,7 @@ function toggleExpanded(): void {
 </script>
 
 <template>
-    <div class=" bg-default border-b border-default shadow-sm">
+    <div id="media-playback-bar" class=" bg-default border-b border-default shadow-sm">
         <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
         <div v-show="isExpanded" class="p-2">
             <div class="media-container" :class="{ 'media-container--audio': !isVideoFile }">
@@ -148,7 +148,7 @@ function toggleExpanded(): void {
             </div>
 
             <div class="controls flex gap-2 items-center mt-2">
-                <UButton size="sm" color="secondary" @click="togglePlay">
+                <UButton id="media-play-button" size="sm" color="secondary" @click="togglePlay">
                     <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
                 </UButton>
 
@@ -160,7 +160,7 @@ function toggleExpanded(): void {
                     {{ formatTime(props.duration, { milliseconds: false }) }}
                 </div>
 
-                <UButton size="sm" variant="ghost" @click="toggleExpanded">
+                <UButton id="media-expand-button" size="sm" variant="ghost" @click="toggleExpanded">
                     <UIcon name="i-lucide-chevron-up" />
                 </UButton>
             </div>
@@ -179,7 +179,7 @@ function toggleExpanded(): void {
                 {{ formatTime(props.duration, { milliseconds: false }) }}
             </div>
 
-            <UButton size="sm" variant="ghost" @click="toggleExpanded">
+            <UButton id="media-expand-button-collapsed" size="sm" variant="ghost" @click="toggleExpanded">
                 <UIcon name="i-lucide-chevron-down" />
             </UButton>
         </div>

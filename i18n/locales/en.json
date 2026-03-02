@@ -391,5 +391,84 @@
     "retention": {
         "title": "Availability of Transcriptions",
         "description": "Transcriptions older than {retentionDays} days are automatically deleted."
+    },
+    "onboarding": {
+        "help": "Show Help Tour",
+        "next": "Next",
+        "previous": "Previous",
+        "done": "Done",
+        "progress": "{'{{current}}'} von {'{{total}}'}",
+        "welcome": {
+            "title": "Welcome to Transcribo!",
+            "description": "Transcribo is an AI-powered transcription service that helps you transcribe audio and video files. All data is processed on local servers of IT BS. You can also process special personal data and data subject to official secrecy (increased protection requirements) with Transcribo. I will now show you the main features of Transcribo."
+        },
+        "transcriptionInfo": {
+            "title": "Transcription Info",
+            "description": "Click here to view and change the transcription name, or download the original media file."
+        },
+        "exportToolbar": {
+            "title": "Export",
+            "description": "Click here to export your transcription. You can choose between text, subtitle (SRT), JSON, or Word (DOCX) formats."
+        },
+        "modes": {
+            "title": "The Four Modes",
+            "description": "Viewer: View and read your transcription\n\nSummary: Generate AI-powered summaries\n\nEditor: Edit text, timestamps, and speakers\n\nStatistics: See speaking time distribution"
+        },
+        "viewerIntro": {
+            "title": "Viewer Mode",
+            "description": "In Viewer mode, you can read your transcription."
+        },
+        "viewerDisplayOptions": {
+            "title": "Display Options",
+            "description": "Use the display options to show/hide speakers, timestamps, or merge consecutive segments from the speaker."
+        },
+        "summary": {
+            "title": "Summary Mode",
+            "description": "Switch to Summary mode to generate an AI-powered summary of your transcription."
+        },
+        "generateSummary": {
+            "title": "Generate Summary",
+            "description": "Click this button to generate a summary. Choose between short protocol, results protocol, or detailed negotiation protocol."
+        },
+        "statistics": {
+            "title": "Statistics Mode",
+            "description": "Switch to Statistics mode to see the speaking time distribution by speaker."
+        },
+        "speakerStatistics": {
+            "title": "Speaker Statistics",
+            "description": "View the total audio duration, speaking time, speech ratio, and how much each speaker contributed."
+        },
+        "editor": {
+            "title": "Editor Mode",
+            "description": "Switch to Editor mode to make changes to your transcription. You can edit text, timestamps, and speaker names here."
+        },
+        "speakerNames": {
+            "title": "Rename Speakers",
+            "description": "Here you can rename the speakers. Just type a new name and it will be applied to all segments from this speaker."
+        },
+        "editTranscriptions": {
+            "title": "Edit Transcriptions",
+            "description": "Each segment can be edited: change the text, update the speaker, or modify the start and end times. Click the timestamps to jump to that position."
+        },
+        "addTranscription": {
+            "title": "Add New Transcriptions",
+            "description": "Click the + button to add new transcription segments at any position."
+        },
+        "mediaPlayback": {
+            "title": "Media Playback",
+            "description": "Use the media bar to play your audio or video."
+        },
+        "mediaExpand": {
+            "title": "Expand Media View",
+            "description": "Click the expand button to see the video/larger view with subtitle preview."
+        },
+        "helpButton": {
+            "title": "Help Button",
+            "description": "Click this button anytime to restart this tour."
+        },
+        "complete": {
+            "title": "You're All Set!",
+            "description": "You're ready to use Transcribo! Click the help button anytime to see this tour again."
+        }
     }
 }

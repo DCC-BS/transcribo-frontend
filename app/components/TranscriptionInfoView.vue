@@ -41,10 +41,20 @@ async function handleNameChange(name: string | number) {
 </script>
 
 <template>
-    <motion.div :animate="{ opacity: 1, x: 0 }" :initial="{ opacity: 0, x: -10 }"
-        :transition="{ ...pageTransition, delay: staggerDelay }">
+    <motion.div
+        id="transcription-info"
+        :animate="{ opacity: 1, x: 0 }"
+        :initial="{ opacity: 0, x: -10 }"
+        :transition="{ ...pageTransition, delay: staggerDelay }"
+    >
         <UPopover v-model:open="isInfoExpanded" :ui="{ content: 'p-0 min-w-72' }">
-            <UButton variant="ghost" color="neutral" size="sm" class="gap-2">
+            <UButton
+                id="transcription-info-button"
+                variant="ghost"
+                color="neutral"
+                size="sm"
+                class="gap-2"
+            >
                 <template #leading>
                     <div
                         class="w-6 h-6 rounded-md bg-linear-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 flex items-center justify-center">
