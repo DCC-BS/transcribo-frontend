@@ -45,6 +45,10 @@ const audioLanguageOptions: SelectMenuItem[] = [
 const isVideo = computed(() => isVideoFile(input.value.media));
 const mediaSource = computed(() => URL.createObjectURL(input.value.media));
 
+onUnmounted(() => {
+    URL.revokeObjectURL(mediaSource.value);
+});
+
 function formatFileSize(bytes: number): string {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
