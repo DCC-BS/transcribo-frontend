@@ -5,7 +5,7 @@ import { useMediaQuery } from "@vueuse/core";
 import {
     ChangeEditorModeCommand,
     Cmds,
-    ShowOnboardingCommand,
+    type ShowOnboardingCommand,
 } from "~/types/commands";
 
 const emit = defineEmits<{

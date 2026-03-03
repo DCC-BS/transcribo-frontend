@@ -155,6 +155,8 @@
         "empty": "Noch keine Zusammenfassung erstellt",
         "export": "Zusammenfassung exportieren",
         "selectType": "Zusammenfassungsart wählen",
+        "selectLanguage": "Ausgabesprache",
+        "autoDetect": "Automatisch erkennen",
         "types": {
             "kurzprotokoll": "Kurzprotokoll",
             "kurzprotokollDesc": "Kurze Zusammenfassung der wichtigsten Punkte und Entscheidungen",

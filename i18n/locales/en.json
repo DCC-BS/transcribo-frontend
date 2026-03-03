@@ -155,6 +155,8 @@
         "empty": "No summary generated yet",
         "export": "Export Summary",
         "selectType": "Select Summary Type",
+        "selectLanguage": "Output Language",
+        "autoDetect": "Auto-detect",
         "types": {
             "kurzprotokoll": "Short Protocol",
             "kurzprotokollDesc": "Brief summary of key points and decisions",

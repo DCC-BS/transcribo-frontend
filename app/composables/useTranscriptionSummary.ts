@@ -59,6 +59,7 @@ export function useTranscriptionSummary() {
     async function generateSummary(
         transcription: StoredTranscription,
         type: SummaryType,
+        language?: string,
     ): Promise<string | null> {
         // Prevent concurrent calls
         if (isSummaryGenerating.value) {
@@ -83,13 +84,20 @@ export function useTranscriptionSummary() {
             const sanitizedText =
                 validateAndSanitizeTranscriptText(transcriptText);
 
+            const requestBody: SummarizeRequest = {
+                transcript: sanitizedText,
+                summary_type: type,
+            };
+
+            // Add language if specified
+            if (language) {
+                requestBody.language = language;
+            }
+
             const summaryResponse = await apiFetch("/api/summarize/submit", {
                 schema: SummaryResponseSchema,
                 method: "POST",
-                body: {
-                    transcript: sanitizedText,
-                    summary_type: type,
-                } as SummarizeRequest,
+                body: requestBody,
             });
 
             if (isApiError(summaryResponse)) {
