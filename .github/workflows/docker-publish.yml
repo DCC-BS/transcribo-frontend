@@ -11,6 +11,7 @@ jobs:
         uses: DCC-BS/ci-workflows/.github/workflows/publish-docker.yml@v8
         secrets: inherit
         with:
+            project_type: "python" # or "node"
             registry: ghcr.io
             image_name: ghcr.io/${{ github.repository }}
             context: .
