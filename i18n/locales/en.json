@@ -33,7 +33,7 @@
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transcribe your audio and video files with AI. 96 languages and audio files up to 2 hours supported.",
+            "subtitle": "Transcribe your audio and video files with AI and automatically generate summaries. 96 languages and audio files up to 2 hours supported.",
             "uploadMedia": "Upload Media",
             "uploadDescription": "Upload your audio or video files",
             "recordAudio": "Record Audio",
@@ -290,7 +290,10 @@
         "showAbandonedRecordings": "Show abandoned recordings"
     },
     "languages": {
+        "autoDetect": "Auto-detect",
         "de": "German",
+        "en-us": "English (US)",
+        "en-gb": "English (UK)",
         "en": "English",
         "fr": "French",
         "it": "Italian",

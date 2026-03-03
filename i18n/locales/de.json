@@ -33,7 +33,7 @@
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transkribieren Sie Ihre Audio- und Videodateien mit KI. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
+            "subtitle": "Transkribieren Sie Ihre Audio- und Videodateien mit KI und erstellen Sie automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
             "uploadMedia": "Medien hochladen",
             "uploadDescription": "Laden Sie Ihre Audio- oder Videodateien hoch",
             "recordAudio": "Audio aufnehmen",
@@ -290,7 +290,10 @@
         "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen"
     },
     "languages": {
+        "autoDetect": "Automatisch erkennen",
         "de": "Deutsch",
+        "en-us": "Englisch (US)",
+        "en-gb": "Englisch (UK)",
         "en": "Englisch",
         "fr": "Französisch",
         "it": "Italienisch",

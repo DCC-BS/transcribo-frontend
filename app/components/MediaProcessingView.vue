@@ -98,11 +98,7 @@ async function uploadFile(
     }
 
     progress.progress = 90;
-    await addTask(
-        response,
-        input.value.media,
-        input.value.media.name,
-    );
+    await addTask(response, input.value.media, input.value.media.name);
 
     progress.progress = 100;
     return response;
@@ -114,7 +110,7 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
         // on progress
         ({ message, progress }) => {
             mediaProgress.message = message;
-            mediaProgress.progress = progress;
+            mediaProgress.progress = progress ?? 0 * 100;
         },
         // on complete
         async (transcription) => {
@@ -141,14 +137,28 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">
-                <MediaProgressView :media="input.media" :mediaName="input.media.name" :progressSteps="progressions" />
+                <MediaProgressView
+                    :media="input.media"
+                    :mediaName="input.media.name"
+                    :progressSteps="progressions"
+                />
             </div>
         </div>
 
         <!-- Error Message Display -->
-        <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
-            :transition="{ type: 'spring', stiffness: 200, damping: 20 }" class="mt-8 max-w-md w-full">
-            <UAlert icon="i-lucide-alert-circle" color="error" title="error" :description="errorMessage"></UAlert>
+        <motion.div
+            v-if="errorMessage"
+            :animate="{ opacity: 1, y: 0 }"
+            :initial="{ opacity: 0, y: 20 }"
+            :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
+            class="mt-8 max-w-md w-full"
+        >
+            <UAlert
+                icon="i-lucide-alert-circle"
+                color="error"
+                title="error"
+                :description="errorMessage"
+            ></UAlert>
         </motion.div>
     </div>
 </template>

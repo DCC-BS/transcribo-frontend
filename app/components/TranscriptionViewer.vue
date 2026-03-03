@@ -9,9 +9,12 @@ interface InputProps {
 const props = defineProps<InputProps>();
 
 // Viewer mode options
-const showSpeakers = ref(true);
-const showTimestamps = ref(false);
-const mergeSegments = ref(true);
+const showSpeakers = useLocalStorage<boolean>("setting:show-speaker", true);
+const showTimestamps = useLocalStorage<boolean>(
+    "setting:show-timestamps",
+    false,
+);
+const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
 
 /**
  * Merges consecutive segments from the same speaker into single segments

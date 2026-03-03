@@ -50,13 +50,6 @@ export default defineNuxtConfig({
             },
         },
     },
-    $development: {
-        vite: {
-            server: {
-                allowedHosts: ["robust-nationally-lacewing.ngrok-free.app"],
-            },
-        },
-    },
     vite: {
         optimizeDeps: {
             exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "@vueuse/core"],
@@ -70,7 +63,6 @@ export default defineNuxtConfig({
                 allow: [".."],
             },
         },
-
         worker: {
             format: "es",
         },
@@ -153,6 +145,7 @@ export default defineNuxtConfig({
         typeCheck: false,
     },
     devtools: { enabled: false },
+    // Bug: https://github.com/nuxt/ui/issues/6118
     hooks: {
         "imports:extend"(imports) {
             for (let i = imports.length - 1; i >= 0; i--) {

@@ -3,7 +3,7 @@ import type { ExportOptions } from "~/composables/export";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface InputProps {
-    transcription: StoredTranscription
+    transcription: StoredTranscription;
 }
 
 const props = defineProps<InputProps>();
@@ -12,16 +12,27 @@ const { t } = useI18n();
 const { exportAsText, exportAsSrt, exportAsJson, exportAsDocx } = useExport();
 
 // Export options state
-const exportOptions = ref<Omit<ExportOptions, "transcription">>({
-    withSpeakers: true,
-    withTimestamps: true,
-    mergeSegments: false,
-    withSummary: false,
-});
+const withSpeakers = useLocalStorage<boolean>("setting:show-speaker", true);
+const withTimestamps = useLocalStorage<boolean>(
+    "setting:show-timestamps",
+    false,
+);
+const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
+const withSummary = ref(false);
+
+const exportOptions = computed<Omit<ExportOptions, "transcription">>(() => ({
+    withSpeakers: withSpeakers.value,
+    withTimestamps: withTimestamps.value,
+    mergeSegments: mergeSegments.value,
+    withSummary: withSummary.value,
+}));
 
 // Functions to handle exports
 function handleTextExport(): void {
-    exportAsText({ ...exportOptions.value, transcription: props.transcription });
+    exportAsText({
+        ...exportOptions.value,
+        transcription: props.transcription,
+    });
 }
 
 function handleSubtitleExport(): void {
@@ -33,7 +44,10 @@ function handleJsonExport(): void {
 }
 
 async function handleDocxExport(): Promise<void> {
-    await exportAsDocx({ ...exportOptions.value, transcription: props.transcription });
+    await exportAsDocx({
+        ...exportOptions.value,
+        transcription: props.transcription,
+    });
 }
 </script>
 
@@ -51,39 +65,58 @@ async function handleDocxExport(): Promise<void> {
             <div class="p-4 w-80">
                 <!-- Export Options Section -->
                 <div class="mb-4">
-                    <h4 class="font-medium text-sm mb-3">{{ t('export.optionsTitle') }}</h4>
+                    <h4 class="font-medium text-sm mb-3">
+                        {{ t("export.optionsTitle") }}
+                    </h4>
 
                     <!-- Speaker information toggle -->
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-sm">{{ t('export.withSpeakers') }}</span>
-                        <USwitch v-model="exportOptions.withSpeakers" />
+                        <span class="text-sm">{{
+                            t("export.withSpeakers")
+                        }}</span>
+                        <USwitch v-model="withSpeakers" />
                     </div>
 
                     <!-- Timestamps toggle (text only) -->
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex flex-col">
-                            <span class="text-sm">{{ t('export.withTimestamps') }}</span>
-                            <span class="text-xs text-gray-500">{{ t('export.textOnly') }}</span>
+                            <span class="text-sm">{{
+                                t("export.withTimestamps")
+                            }}</span>
+                            <span class="text-xs text-gray-500">{{
+                                t("export.textOnly")
+                            }}</span>
                         </div>
-                        <USwitch v-model="exportOptions.withTimestamps" />
+                        <USwitch v-model="withTimestamps" />
                     </div>
 
                     <!-- Merge segments toggle (text only) -->
                     <div class="flex items-center justify-between mb-2">
                         <div class="flex flex-col">
-                            <span class="text-sm">{{ t('export.mergeSegments') }}</span>
-                            <span class="text-xs text-gray-500">{{ t('export.textOnly') }}</span>
+                            <span class="text-sm">{{
+                                t("export.mergeSegments")
+                            }}</span>
+                            <span class="text-xs text-gray-500">{{
+                                t("export.textOnly")
+                            }}</span>
                         </div>
-                        <USwitch v-model="exportOptions.mergeSegments" />
+                        <USwitch v-model="mergeSegments" />
                     </div>
 
                     <!-- Meeting summary toggle (text only) -->
-                    <div v-if="props.transcription.summary" class="flex items-center justify-between mb-3">
+                    <div
+                        v-if="props.transcription.summary"
+                        class="flex items-center justify-between mb-3"
+                    >
                         <div class="flex flex-col">
-                            <span class="text-sm">{{ t('export.withSummary') }}</span>
-                            <span class="text-xs text-gray-500">{{ t('export.textOnly') }}</span>
+                            <span class="text-sm">{{
+                                t("export.withSummary")
+                            }}</span>
+                            <span class="text-xs text-gray-500">{{
+                                t("export.textOnly")
+                            }}</span>
                         </div>
-                        <USwitch v-model="exportOptions.withSummary" />
+                        <USwitch v-model="withSummary" />
                     </div>
                 </div>
 
@@ -92,23 +125,53 @@ async function handleDocxExport(): Promise<void> {
 
                 <!-- Export Format Buttons -->
                 <div class="space-y-2">
-                    <h4 class="font-medium text-sm mb-2">{{ t('export.formats.title') }}</h4>
+                    <h4 class="font-medium text-sm mb-2">
+                        {{ t("export.formats.title") }}
+                    </h4>
 
                     <!-- Text Format -->
-                    <UButton block variant="ghost" color="primary" icon="i-lucide-file-text"
-                        :label="t('export.formats.text')" @click="handleTextExport" class="justify-start" />
+                    <UButton
+                        block
+                        variant="ghost"
+                        color="primary"
+                        icon="i-lucide-file-text"
+                        :label="t('export.formats.text')"
+                        @click="handleTextExport"
+                        class="justify-start"
+                    />
 
                     <!-- Subtitle Format -->
-                    <UButton block variant="ghost" color="primary" icon="i-lucide-message-square-text"
-                        :label="t('export.formats.subtitle')" @click="handleSubtitleExport" class="justify-start" />
+                    <UButton
+                        block
+                        variant="ghost"
+                        color="primary"
+                        icon="i-lucide-message-square-text"
+                        :label="t('export.formats.subtitle')"
+                        @click="handleSubtitleExport"
+                        class="justify-start"
+                    />
 
                     <!-- Json Format -->
-                    <UButton block variant="ghost" color="primary" icon="i-lucide-file-braces"
-                        :label="t('export.formats.json')" @click="handleJsonExport" class="justify-start" />
+                    <UButton
+                        block
+                        variant="ghost"
+                        color="primary"
+                        icon="i-lucide-file-braces"
+                        :label="t('export.formats.json')"
+                        @click="handleJsonExport"
+                        class="justify-start"
+                    />
 
                     <!-- Docx Format -->
-                    <UButton block variant="ghost" color="primary" icon="i-lucide-file-type"
-                        :label="t('export.formats.docx')" @click="handleDocxExport" class="justify-start" />
+                    <UButton
+                        block
+                        variant="ghost"
+                        color="primary"
+                        icon="i-lucide-file-type"
+                        :label="t('export.formats.docx')"
+                        @click="handleDocxExport"
+                        class="justify-start"
+                    />
                 </div>
             </div>
         </template>

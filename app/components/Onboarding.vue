@@ -98,7 +98,7 @@ function createDriver() {
             },
             {
                 element: getSelector("mode-summary"),
-                onHighlightStarted: () => switchToMode("summary"),
+                onHighlightStarted: async () => await switchToMode("summary"),
                 popover: {
                     title: t("onboarding.summary.title"),
                     description: t("onboarding.summary.description"),
@@ -107,7 +107,7 @@ function createDriver() {
                 },
             },
             {
-                element: "#summary-generate-button",
+                element: "#generate-summary-button",
                 popover: {
                     title: t("onboarding.generateSummary.title"),
                     description: t("onboarding.generateSummary.description"),
