@@ -5,12 +5,12 @@ import { formatTime } from "~/utils/time";
 
 interface MediaPlaybackBarProps {
     transcription: StoredTranscription;
-    duration: number;
 }
 
 const props = defineProps<MediaPlaybackBarProps>();
 
 const currentTime = defineModel<number>({ default: 0 });
+const duration = defineModel<number>("duration", { default: 0 });
 
 const isExpanded = ref(false);
 const mediaFile = ref<Blob | null>(null);
@@ -111,6 +111,14 @@ function onTimeUpdate(): void {
     }
 }
 
+function onLoadedMetadata(): void {
+    if (videoElement.value) {
+        duration.value = videoElement.value.duration;
+    } else if (audioElement.value) {
+        duration.value = audioElement.value.duration;
+    }
+}
+
 function onSliderChange(value: number | undefined): void {
     if (value !== undefined) {
         seekTo(value);
@@ -129,10 +137,10 @@ function toggleExpanded(): void {
             <div class="media-container" :class="{ 'media-container--audio': !isVideoFile }">
                 <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
                 <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player rounded"
-                    @timeupdate="onTimeUpdate" @click="togglePlay">
+                    @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata" @click="togglePlay">
                     <source :src="mediaSrc" :type="mediaFile.type">
                 </video>
-                <audio v-if="!isVideoFile && mediaFile" ref="audioElement" :src="mediaSrc" @timeupdate="onTimeUpdate" />
+                <audio v-if="!isVideoFile && mediaFile" ref="audioElement" :src="mediaSrc" @timeupdate="onTimeUpdate" @loadedmetadata="onLoadedMetadata" />
 
                 <div v-if="!isVideoFile && mediaFile" class="audio-visualization">
                 </div>
@@ -152,12 +160,12 @@ function toggleExpanded(): void {
                     <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
                 </UButton>
 
-                <USlider :model-value="currentTime" color="secondary" :min="0" :max="props.duration" :step="0.1"
+                <USlider :model-value="currentTime" color="secondary" :min="0" :max="duration" :step="0.1"
                     class="flex-1" @update:model-value="onSliderChange" />
 
                 <div class="text-sm text-muted-foreground min-w-[100px] text-right">
                     {{ formatTime(currentTime, { milliseconds: false }) }} /
-                    {{ formatTime(props.duration, { milliseconds: false }) }}
+                    {{ formatTime(duration, { milliseconds: false }) }}
                 </div>
 
                 <UButton id="media-expand-button" size="sm" variant="ghost" @click="toggleExpanded">
@@ -171,12 +179,12 @@ function toggleExpanded(): void {
                 <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
             </UButton>
 
-            <USlider :model-value="currentTime" color="secondary" :min="0" :max="props.duration" :step="0.1"
+            <USlider :model-value="currentTime" color="secondary" :min="0" :max="duration" :step="0.1"
                 class="flex-1" @update:model-value="onSliderChange" />
 
             <div class="text-sm text-muted-foreground min-w-[100px] text-right">
                 {{ formatTime(currentTime, { milliseconds: false }) }} /
-                {{ formatTime(props.duration, { milliseconds: false }) }}
+                {{ formatTime(duration, { milliseconds: false }) }}
             </div>
 
             <UButton id="media-expand-button-collapsed" size="sm" variant="ghost" @click="toggleExpanded">

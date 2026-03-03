@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { motion } from "motion-v";
+import { useVirtualizer } from "@tanstack/vue-virtual";
 import { v4 as uuid } from "uuid";
 import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
 import type { StoredTranscription } from "~/types/storedTranscription";
@@ -22,9 +22,11 @@ const { executeCommand } = useCommandBus();
 const listContainer = ref<HTMLElement>();
 const segmentRefs = ref<Map<string, HTMLElement>>(new Map());
 
-const segments = computed(() =>
-    props.transcription.segments.toSorted((a, b) => a.start - b.start),
-);
+// Memoize sorted segments to avoid re-sorting on every access
+const sortedSegments = computed(() => {
+    return [...props.transcription.segments].sort((a, b) => a.start - b.start);
+});
+
 const speakers = computed(() =>
     Array.from(getUniqueSpeakers(props.transcription.segments)),
 );
@@ -39,7 +41,7 @@ onUnmounted(() => {
 });
 
 const currentSegmentId = computed(() => {
-    const current = segments.value.find(
+    const current = sortedSegments.value.find(
         (segment) =>
             props.currentTime >= segment.start &&
             props.currentTime < segment.end,
@@ -48,7 +50,7 @@ const currentSegmentId = computed(() => {
 });
 
 const activeSegemntProgress = computed(() => {
-    const current = segments.value.find(
+    const current = sortedSegments.value.find(
         (segment) => segment.id === currentSegmentId.value,
     );
     if (!current) {
@@ -75,16 +77,12 @@ watch(
 
 function setSegmentRef(id: string, el: unknown): void {
     if (!el) {
+        segmentRefs.value.delete(id);
         return;
     }
 
     if (el instanceof HTMLElement) {
         segmentRefs.value.set(id, el);
-    } else {
-        console.warn(
-            `Attempted to set segment ref for ID ${id} with a non-HTMLElement`,
-            el,
-        );
     }
 }
 
@@ -92,23 +90,39 @@ function isSegmentActive(segmentId: string): boolean {
     return currentSegmentId.value === segmentId;
 }
 
-watch(currentSegmentId, (newId, oldId) => {
+// Virtualizer setup for efficient rendering
+const virtualizer = useVirtualizer({
+    count: computed(() => sortedSegments.value.length),
+    getScrollElement: () => listContainer.value,
+    estimateSize: () => 150, // Average segment height estimate
+    overscan: 5, // Render 5 extra items above and below viewport
+});
+
+const virtualItems = computed(() => virtualizer.value.getVirtualItems());
+
+// Find the index of the current segment for auto-scroll
+const currentSegmentIndex = computed(() => {
+    if (!currentSegmentId.value) {
+        return -1;
+    }
+    return sortedSegments.value.findIndex((s) => s.id === currentSegmentId.value);
+});
+
+// Auto-scroll to current segment
+watch(currentSegmentIndex, (newIndex, oldIndex) => {
     if (
         !props.autoScrollEnabled ||
-        !newId ||
-        !listContainer.value ||
-        newId === oldId
+        newIndex === -1 ||
+        newIndex === oldIndex ||
+        !listContainer.value
     ) {
         return;
     }
 
-    const segmentEl = segmentRefs.value.get(newId);
-    if (!segmentEl) {
-        console.warn(`No element found for segment ID: ${newId}`);
-        return;
-    }
-
-    segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
+    virtualizer.value.scrollToIndex(newIndex, {
+        behavior: "smooth",
+        align: "center",
+    });
 });
 
 async function addSegmentAfter(segment: SegmentWithId) {
@@ -128,7 +142,7 @@ async function addSegemntAtZero() {
 </script>
 
 <template>
-    <div ref="listContainer" class="flex flex-col">
+    <div ref="listContainer" class="flex flex-col overflow-y-auto">
         <USeparator id="add-transcription-top">
             <UButton
                 icon="i-lucide-plus"
@@ -138,34 +152,37 @@ async function addSegemntAtZero() {
             />
         </USeparator>
 
-        <AnimatePresence>
-            <div id="transcription-segments">
-                <motion.div
-                    v-for="segment in segments"
-                    :key="segment.id"
-                    :initial="{ opacity: 0, scaleY: 0 }"
-                    :animate="{ opacity: 1, scaleY: 1 }"
-                    :exit="{ scale: 0 }"
-                >
-                    <div :ref="(el) => setSegmentRef(segment.id, el)">
-                        <TranscriptionListItem
-                            :segment="segment"
-                            :speakers="speakers"
-                            :isActive="isSegmentActive(segment.id)"
-                            :currentTime="props.currentTime"
-                        />
-                    </div>
+        <div
+            id="transcription-segments"
+            class="relative w-full"
+            :style="{ height: `${virtualizer.getTotalSize()}px` }"
+        >
+            <div
+                v-for="virtualItem in virtualItems"
+                :key="sortedSegments[virtualItem.index].id"
+                :ref="(el) => setSegmentRef(sortedSegments[virtualItem.index].id, el)"
+                class="absolute top-0 left-0 w-full"
+                :style="{
+                    height: `${virtualItem.size}px`,
+                    transform: `translateY(${virtualItem.start}px)`,
+                }"
+            >
+                <TranscriptionListItem
+                    :segment="sortedSegments[virtualItem.index]"
+                    :speakers="speakers"
+                    :isActive="isSegmentActive(sortedSegments[virtualItem.index].id)"
+                    :currentTime="props.currentTime"
+                />
 
-                    <USeparator>
-                        <UButton
-                            icon="i-lucide-plus"
-                            variant="link"
-                            color="neutral"
-                            @click="() => addSegmentAfter(segment)"
-                        />
-                    </USeparator>
-                </motion.div>
+                <USeparator>
+                    <UButton
+                        icon="i-lucide-plus"
+                        variant="link"
+                        color="neutral"
+                        @click="() => addSegmentAfter(sortedSegments[virtualItem.index])"
+                    />
+                </USeparator>
             </div>
-        </AnimatePresence>
+        </div>
     </div>
 </template>

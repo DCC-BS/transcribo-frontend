@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { useMediaQuery } from "@vueuse/core";
-import { motion } from "motion-v";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface InputProps {
@@ -16,34 +15,13 @@ const currentTime = ref(0);
 const duration = ref(0);
 const autoScrollEnabled = ref(true);
 
-onMounted(() => {
-    initializeDuration();
-});
-
+// Reset currentTime when transcription changes
 watch(
     () => props.transcription,
     () => {
-        initializeDuration();
         currentTime.value = 0;
     },
 );
-
-function initializeDuration(): void {
-    if (!props.transcription?.mediaFile) {
-        duration.value = 0;
-        return;
-    }
-
-    const audioSrc = URL.createObjectURL(props.transcription.mediaFile);
-    const audio = new Audio();
-    audio.src = audioSrc;
-
-    audio.onloadedmetadata = () => {
-        duration.value = audio.duration;
-        URL.revokeObjectURL(audioSrc);
-        audio.onloadedmetadata = null;
-    };
-}
 </script>
 
 <template>
@@ -51,8 +29,8 @@ function initializeDuration(): void {
         <div class="sticky top-0 z-40 bg-default/50 backdrop-blur-sm rounded">
             <MediaPlaybackBar
                 v-model="currentTime"
+                v-model:duration="duration"
                 :transcription="props.transcription"
-                :duration="duration"
             />
 
             <div>

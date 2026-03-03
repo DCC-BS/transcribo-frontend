@@ -28,6 +28,19 @@ const { t } = useI18n();
 const progress = ref(0);
 const duration = ref(0);
 
+/**
+ * Efficient comparison of segment fields without JSON.stringify.
+ * Only compares fields that are editable in the UI.
+ */
+function hasSegmentChanged(a: SegmentWithId, b: SegmentWithId): boolean {
+    return (
+        a.text !== b.text ||
+        a.speaker !== b.speaker ||
+        a.start !== b.start ||
+        a.end !== b.end
+    );
+}
+
 watch(
     () => props.segment,
     (segment) => {
@@ -36,35 +49,46 @@ watch(
     },
 );
 
+// Optimized: use individual watchers instead of deep watch with JSON.stringify
 watch(
-    internalSegment,
+    () => [
+        internalSegment.value.text,
+        internalSegment.value.speaker,
+        internalSegment.value.start,
+        internalSegment.value.end,
+    ],
     () => {
         if (isDirty.value) {
             return;
         }
 
-        if (
-            JSON.stringify(internalSegment.value) !==
-            JSON.stringify(props.segment)
-        ) {
+        if (hasSegmentChanged(internalSegment.value, props.segment)) {
             isDirty.value = true;
         }
     },
-    { deep: true },
 );
 
-let unsubsribe: WatchHandle | undefined ;
+let unsubsribe: WatchHandle | undefined;
 
-watch(() => props.isActive, () => {
-    if (props.isActive) {
-        unsubsribe = watch(() => props.currentTime, (tNew, tOld) => {
-            progress.value = (tNew - internalSegment.value.start) / (internalSegment.value.end - internalSegment.value.start);
-            duration.value = Math.abs(tNew - tOld);
-        });
-    } else if (unsubsribe) {
-        unsubsribe();
-    }
-}, { immediate: true });
+watch(
+    () => props.isActive,
+    () => {
+        if (props.isActive) {
+            unsubsribe = watch(
+                () => props.currentTime,
+                (tNew, tOld) => {
+                    progress.value =
+                        (tNew - internalSegment.value.start) /
+                        (internalSegment.value.end - internalSegment.value.start);
+                    duration.value = Math.abs(tNew - tOld);
+                },
+            );
+        } else if (unsubsribe) {
+            unsubsribe();
+        }
+    },
+    { immediate: true },
+);
 
 function removeSegment(segment: SegmentWithId): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
@@ -141,18 +165,36 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <MotionCard layout variant="subtle" :ui="{
-        root: props.isActive
-            ? 'ring-2 ring-teal-500'
-            : ''
-    }" class="relative overflow-hidden">
-        <motion.div v-if="props.isActive" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
+    <MotionCard
+        layout
+        variant="subtle"
+        :ui="{
+            root: props.isActive ? 'ring-2 ring-teal-500' : '',
+        }"
+        class="relative overflow-hidden"
+    >
+        <motion.div
+            v-if="props.isActive"
+            :initial="{ scaleX: 0 }"
+            :animate="{ scaleX: progress }"
             :transition="{ duration: duration, ease: 'linear' }"
             class="absolute inset-0 origin-left pointer-events-none z-0"
-            style="background: linear-gradient(to right, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.25));" />
+            style="
+                background: linear-gradient(
+                    to right,
+                    rgba(20, 184, 166, 0.15),
+                    rgba(20, 184, 166, 0.25)
+                );
+            "
+        />
         <div class="relative z-10">
-            <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
-                variant="outline" :actions="[
+            <UAlert
+                v-if="isDirty"
+                title=""
+                :description="t('transcription.applySpeakerChanges')"
+                color="info"
+                variant="outline"
+                :actions="[
                     {
                         label: t('transcription.undoChanges'),
                         onClick: unDoChanges,
@@ -163,16 +205,34 @@ const endTimeFormatted = computed({
                         variant: 'subtle',
                         onClick: applyChanges,
                     },
-                ]" />
-            <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" />
+                ]"
+            />
+            <UTextarea
+                v-model="internalSegment.text"
+                class="w-full"
+                @keydown="handleKeydown"
+            />
 
-            <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
-                <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
-                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
+            <div
+                class="flex justify-between gap-2 pt-2 flex-wrap"
+                @keydown="handleKeydown"
+            >
+                <USelectMenu
+                    v-model="internalSegment.speaker"
+                    :items="props.speakers"
+                    create-item
+                    :placeholder="t('transcription.placeholderSpeakerName')"
+                    @create="handleCreateSpeaker"
+                />
 
                 <div class="flex gap-2 items-center">
-                    <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"
-                        @keydown="handleKeydown">
+                    <UInput
+                        v-model="startTimeFormatted"
+                        type="number"
+                        class="w-[100px]"
+                        :step="0.1"
+                        @keydown="handleKeydown"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
@@ -186,8 +246,13 @@ const endTimeFormatted = computed({
                             formatTime(internalSegment.end)
                         }}</a>
                     </div>
-                    <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1"
-                        @keydown="handleKeydown">
+                    <UInput
+                        v-model="endTimeFormatted"
+                        type="number"
+                        class="w-[100px]"
+                        :step="0.1"
+                        @keydown="handleKeydown"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
@@ -196,7 +261,11 @@ const endTimeFormatted = computed({
 
                 <div class="flex gap-2">
                     <UTooltip :text="t('help.segments.deleteSegment')">
-                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(internalSegment)" />
+                        <UButton
+                            color="error"
+                            icon="i-lucide-trash-2"
+                            @click="removeSegment(internalSegment)"
+                        />
                     </UTooltip>
                 </div>
             </div>
