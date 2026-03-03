@@ -48,7 +48,7 @@ export const SegmentWithIdSchema = SegmentSchema.extend({
  * Type representing a segment with an ID
  * Inferred from SegmentWithIdSchema
  */
-export type SegementWithId = z.infer<typeof SegmentWithIdSchema>;
+export type SegmentWithId = z.infer<typeof SegmentWithIdSchema>;
 
 /**
  * Zod schema for TranscriptionResponse

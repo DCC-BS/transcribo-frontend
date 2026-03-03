@@ -3,6 +3,12 @@ import pwaIcons from "./public/icons.json";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: "2024-11-01",
+    extends: [
+        ["github:DCC-BS/nuxt-layers/backend_communication", { install: true }],
+        ["github:DCC-BS/nuxt-layers/health_check", { install: true }],
+        ["github:DCC-BS/nuxt-layers/feedback-control", { install: true }],
+        ["github:DCC-BS/nuxt-layers/logger"],
+    ],
     routeRules: {
         "/api/ping": {
             cors: true,
@@ -19,10 +25,16 @@ export default defineNuxtConfig({
     runtimeConfig: {
         githubToken: process.env.GITHUB_TOKEN,
         apiUrl: process.env.API_URL,
+        useDummyData: process.env.DUMMY || "",
         public: {
             logger_bs: {
                 loglevel: process.env.LOG_LEVEL || "debug",
             },
+        },
+        feedback: {
+            repo: "Feedback",
+            repoOwner: "DCC-BS",
+            project: "Transcribo",
         },
     },
     nitro: {
@@ -35,13 +47,6 @@ export default defineNuxtConfig({
                     // Restrict embedding to same-origin resources which works for files in /public
                     "Cross-Origin-Resource-Policy": "same-origin",
                 },
-            },
-        },
-    },
-    $development: {
-        vite: {
-            server: {
-                allowedHosts: ["robust-nationally-lacewing.ngrok-free.app"],
             },
         },
     },
@@ -58,7 +63,6 @@ export default defineNuxtConfig({
                 allow: [".."],
             },
         },
-
         worker: {
             format: "es",
         },
@@ -131,25 +135,34 @@ export default defineNuxtConfig({
         "@nuxtjs/i18n",
         "@dcc-bs/common-ui.bs.js",
         "@dcc-bs/event-system.bs.js",
-        "@dcc-bs/logger.bs.js",
-        "@dcc-bs/feedback-control.bs.js",
         "@dcc-bs/audio-recorder.bs.js",
-        "@pinia/nuxt",
         "@vite-pwa/nuxt",
         "@nuxtjs/mdc",
+        "motion-v/nuxt",
     ],
     typescript: {
         strict: true,
-        typeCheck: true,
+        typeCheck: false,
     },
-    devtools: { enabled: true },
+    devtools: { enabled: false },
+    // Bug: https://github.com/nuxt/ui/issues/6118
+    hooks: {
+        "imports:extend"(imports) {
+            for (let i = imports.length - 1; i >= 0; i--) {
+                const e = imports[i];
+                if (
+                    e?.name === "options" &&
+                    typeof e.from === "string" &&
+                    e.from.includes(
+                        "@nuxt/ui/dist/runtime/composables/useResizable",
+                    )
+                ) {
+                    imports.splice(i, 1);
+                }
+            }
+        },
+    },
     css: ["~/assets/css/main.css"],
-    "feedback-control.bs.js": {
-        repo: "Feedback",
-        owner: "DCC-BS",
-        project: "Transcribo",
-        githubToken: process.env.GITHUB_TOKEN,
-    },
     // localization
     i18n: {
         locales: [
@@ -165,7 +178,7 @@ export default defineNuxtConfig({
             },
         ],
         defaultLocale: "de",
-        strategy: "prefix_except_default",
+        strategy: "no_prefix",
     },
     pwa: {
         devOptions: {

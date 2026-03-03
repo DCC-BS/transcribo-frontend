@@ -1,7 +1,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 
-export function useAudioConvertion() {
+export function useAudioConversion() {
     const ffmpeg = new FFmpeg();
 
     const loadPromise = ffmpeg.load();

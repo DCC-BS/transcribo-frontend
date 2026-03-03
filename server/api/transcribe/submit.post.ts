@@ -1,62 +1,50 @@
-import type { TaskStatus } from "~/types/task";
-import { verboseFetch } from "../../utils/verboseFetch";
+import { apiFetch } from "@dcc-bs/communication.bs.js";
+import { z } from "zod";
+import { apiHandler } from "~~/server/utils/apiHanlder";
+import {
+    createDummyTaskStatus,
+    generateDummyTaskId,
+} from "~~/server/utils/dummyData";
 
-export default defineEventHandler(async (event) => {
-    const config = useRuntimeConfig();
-
-    const clientUUID = getHeader(event, "X-Ephemeral-UUID");
-
-    const inputFormData = await readFormData(event);
-    const fileContent = inputFormData.get("file") as File;
-    const numSpeakersRaw = inputFormData.get("num_speakers") as string;
-    const audioLanguageRaw = inputFormData.get("audio_language") as string;
-
-    if (!fileContent) {
-        throw createError({
-            statusCode: 400,
-            statusMessage: "File not provided",
-        });
-    }
-
-    const formData = new FormData();
-    formData.append("audio_file", fileContent, fileContent.name);
-
-    let apiParameter = "";
-    // Handle num_speakers parameter
-    if (numSpeakersRaw && numSpeakersRaw !== "null") {
-        const numSpeakers = Number.parseInt(numSpeakersRaw, 10);
-        if (
-            !Number.isNaN(numSpeakers) &&
-            numSpeakers >= 1 &&
-            numSpeakers <= 6
-        ) {
-            apiParameter = `?num_speakers=${numSpeakers}`;
-        }
-        // If invalid value, don't include the parameter (auto detection)
-    }
-
-    // Handle audio_language parameter
-    if (audioLanguageRaw && audioLanguageRaw !== "null") {
-        if (apiParameter === "") {
-            apiParameter += "?";
-        } else {
-            apiParameter += "&";
-        }
-        apiParameter += `language=${audioLanguageRaw}`;
-    }
-
-    // Attempt to make the API request
-    const response = await verboseFetch<TaskStatus>(
-        `${config.apiUrl}/transcribe${apiParameter}`,
-        event,
-        {
-            method: "POST",
-            body: formData,
-            headers: {
-                "X-Client-Id": clientUUID || "",
-            },
-        },
-    );
-
-    return response;
+const transcribeSchema = z.object({
+    audio_file: z.file(),
+    num_speakers: z.enum(["0", "1", "2", "3", "4", "5", "6"]).optional(),
+    language: z.string().optional(),
 });
+
+export default apiHandler
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const inputFromData = await readFormData(event);
+
+        const result = transcribeSchema.safeParse(
+            Object.fromEntries(inputFromData.entries()),
+        );
+
+        if (!result.success) {
+            throw createError({
+                statusCode: 400,
+                data: {
+                    errorId: "invalid_transcribe_input",
+                    status: 400,
+                    debugMessage: result.error.message,
+                },
+            });
+        }
+
+        return inputFromData;
+    })
+    .withFetcher(async (options) => {
+        const response = await apiFetch(options.url, {
+            method: "POST",
+            body: options.body,
+        });
+
+        const logger = getEventLogger(options.event);
+
+        logger.info({ response: response }, "Transcription request submitted");
+
+        return response;
+    })
+    .withDummyFetcher(createDummyTaskStatus(generateDummyTaskId()))
+    .build("/transcribe");

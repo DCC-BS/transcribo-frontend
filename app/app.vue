@@ -10,6 +10,8 @@ const disclaimerText = disclaimerTextRaw as string;
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
 const { undo, redo, canUndo, canRedo } = useCommandHistory();
 
+const appConfig = useAppConfig();
+
 onMounted(() => {
     window.addEventListener("keydown", handleKeyDown);
 });
@@ -32,7 +34,6 @@ function handleKeyDown(event: KeyboardEvent) {
 <template>
     <NuxtPwaManifest />
     <Changelogs />
-    <FeedbackControl />
     <Disclaimer
         app-name="Transcribo"
         :postfixHTML="disclaimerText"

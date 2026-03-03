@@ -1,25 +1,32 @@
 <script lang="ts" setup>
+import { motion } from "motion-v";
+import type { WatchHandle } from "vue";
 import { UCard, UTextarea } from "#components";
 import {
-    DeleteSegementCommand,
-    InsertSegementCommand,
+    DeleteSegmentCommand,
     SeekToSecondsCommand,
-    UpdateSegementCommand,
+    UpdateSegmentCommand,
 } from "~/types/commands";
-import type { SegementWithId } from "~/types/transcriptionResponse";
+import type { SegmentWithId } from "~/types/transcriptionResponse";
 import { formatTime } from "~/utils/time";
 
 interface TranscriptionListProps {
-    segment: SegementWithId;
+    segment: SegmentWithId;
     speakers: string[];
+    isActive?: boolean;
+    currentTime: number;
 }
 
 const props = defineProps<TranscriptionListProps>();
 
+const MotionCard = motion.create(UCard);
+
 const { executeCommand } = useCommandBus();
-const internalSegment = ref<SegementWithId>({ ...props.segment });
+const internalSegment = ref<SegmentWithId>({ ...props.segment });
 const isDirty = ref(false);
 const { t } = useI18n();
+const progress = ref(0);
+const duration = ref(0);
 
 watch(
     () => props.segment,
@@ -46,16 +53,21 @@ watch(
     { deep: true },
 );
 
-function removeSegment(segment: SegementWithId): void {
-    executeCommand(new DeleteSegementCommand(segment.id));
-}
+let unsubsribe: WatchHandle | undefined ;
 
-function addSegmentAfter(segment: SegementWithId): void {
-    executeCommand(new InsertSegementCommand(segment.id, {}, "after"));
-}
+watch(() => props.isActive, () => {
+    if (props.isActive) {
+        unsubsribe = watch(() => props.currentTime, (tNew, tOld) => {
+            progress.value = (tNew - internalSegment.value.start) / (internalSegment.value.end - internalSegment.value.start);
+            duration.value = Math.abs(tNew - tOld);
+        });
+    } else if (unsubsribe) {
+        unsubsribe();
+    }
+}, { immediate: true });
 
-function addSegmentBefore(segment: SegementWithId): void {
-    executeCommand(new InsertSegementCommand(segment.id, {}, "before"));
+function removeSegment(segment: SegmentWithId): void {
+    executeCommand(new DeleteSegmentCommand(segment.id));
 }
 
 function seekTo(time: number): void {
@@ -76,11 +88,11 @@ function applyChanges(): void {
             }
             return acc;
         },
-        {} as Partial<SegementWithId>,
+        {} as Partial<SegmentWithId>,
     );
 
     executeCommand(
-        new UpdateSegementCommand(internalSegment.value.id, updates),
+        new UpdateSegmentCommand(internalSegment.value.id, updates),
     );
 }
 
@@ -129,101 +141,67 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <UCard>
-        <UAlert
-            v-if="isDirty"
-            title=""
-            :description="t('transcription.applySpeakerChanges')"
-            color="info"
-            variant="outline"
-            :actions="[
-                {
-                    label: t('transcription.undoChanges'),
-                    onClick: unDoChanges,
-                },
-                {
-                    label: t('transcription.applyChanges'),
-                    color: 'neutral',
-                    variant: 'subtle',
-                    onClick: applyChanges,
-                },
-            ]"
-        />
-        <UTextarea
-            v-model="internalSegment.text"
-            class="w-full"
-            @keydown="handleKeydown"
-        />
+    <MotionCard layout variant="subtle" :ui="{
+        root: props.isActive
+            ? 'ring-2 ring-teal-500'
+            : ''
+    }" class="relative overflow-hidden">
+        <motion.div v-if="props.isActive" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
+            :transition="{ duration: duration, ease: 'linear' }"
+            class="absolute inset-0 origin-left pointer-events-none z-0"
+            style="background: linear-gradient(to right, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.25));" />
+        <div class="relative z-10">
+            <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
+                variant="outline" :actions="[
+                    {
+                        label: t('transcription.undoChanges'),
+                        onClick: unDoChanges,
+                    },
+                    {
+                        label: t('transcription.applyChanges'),
+                        color: 'neutral',
+                        variant: 'subtle',
+                        onClick: applyChanges,
+                    },
+                ]" />
+            <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" />
 
-        <div
-            class="flex justify-between gap-2 pt-2 flex-wrap"
-            @keydown="handleKeydown"
-        >
-            <USelectMenu
-                v-model="internalSegment.speaker"
-                :items="props.speakers"
-                create-item
-                :placeholder="t('transcription.placeholderSpeakerName')"
-                @create="handleCreateSpeaker"
-            />
+            <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
+                <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
+                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
 
-            <div class="flex gap-2 items-center">
-                <UInput
-                    v-model="startTimeFormatted"
-                    type="number"
-                    class="w-[100px]"
-                    :step="0.1"
-                    @keydown="handleKeydown"
-                >
-                    <template #trailing>
-                        <span class="text-xs">s</span>
-                    </template>
-                </UInput>
-                <a @click="() => seekTo(internalSegment.start)">
-                    {{ formatTime(internalSegment.start) }}
-                </a>
-                -
-                <a @click="() => seekTo(internalSegment.end)">{{
-                    formatTime(internalSegment.end)
-                }}</a>
-                <UInput
-                    v-model="endTimeFormatted"
-                    type="number"
-                    class="w-[100px]"
-                    :step="0.1"
-                    @keydown="handleKeydown"
-                >
-                    <template #trailing>
-                        <span class="text-xs">s</span>
-                    </template>
-                </UInput>
-            </div>
+                <div class="flex gap-2 items-center">
+                    <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"
+                        @keydown="handleKeydown">
+                        <template #trailing>
+                            <span class="text-xs">s</span>
+                        </template>
+                    </UInput>
+                    <div class="text-gray-700">
+                        <a @click="() => seekTo(internalSegment.start)">
+                            {{ formatTime(internalSegment.start) }}
+                        </a>
+                        -
+                        <a @click="() => seekTo(internalSegment.end)">{{
+                            formatTime(internalSegment.end)
+                        }}</a>
+                    </div>
+                    <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1"
+                        @keydown="handleKeydown">
+                        <template #trailing>
+                            <span class="text-xs">s</span>
+                        </template>
+                    </UInput>
+                </div>
 
-            <div class="flex gap-2">
-                <UTooltip :text="t('help.segments.insertBefore')">
-                    <UButton
-                        color="primary"
-                        icon="i-lucide-move-up"
-                        @click="addSegmentBefore(internalSegment)"
-                    />
-                </UTooltip>
-                <UTooltip :text="t('help.segments.insertAfter')">
-                    <UButton
-                        color="primary"
-                        icon="i-lucide-move-down"
-                        @click="addSegmentAfter(internalSegment)"
-                    />
-                </UTooltip>
-                <UTooltip :text="t('help.segments.deleteSegment')">
-                    <UButton
-                        color="error"
-                        icon="i-lucide-trash-2"
-                        @click="removeSegment(internalSegment)"
-                    />
-                </UTooltip>
+                <div class="flex gap-2">
+                    <UTooltip :text="t('help.segments.deleteSegment')">
+                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(internalSegment)" />
+                    </UTooltip>
+                </div>
             </div>
         </div>
-    </UCard>
+    </MotionCard>
 </template>
 
 <style lang="scss" scoped>

@@ -17,7 +17,6 @@ const { isReady, abandonedRecording } =
         logger: debugLog,
     });
 
-const audioRecorder = ref<typeof AudioRecorder>();
 const shouldRecord = ref(false);
 const isRecording = ref(false);
 const audioBlob = ref<Blob | undefined>(undefined);
@@ -27,6 +26,7 @@ function onRecordingStopped(file: Blob, _: string) {
     isRecording.value = false;
     audioBlob.value = file;
     userRecording.value = true;
+    emitAudio();
 }
 
 function emitAudio(): void {
@@ -62,10 +62,6 @@ const audioSessionActions = computed(() => [
             t("pages.index.recordAudio") }}</UButton>
     </div>
     <div v-if="isReady && shouldRecord">
-        <AudioRecorder ref="audioRecorder" :logger="debugLog" auto-start :show-result="true"
-            @recording-stopped="onRecordingStopped" />
-        <div v-if="audioBlob" class="flex flex-col justify-center items-center mt-4">
-            <UButton @click="emitAudio">{{ t("audioRecorder.useRecording") }}</UButton>
-        </div>
+        <AudioRecorder :logger="debugLog" auto-start :show-result="true" @recording-stopped="onRecordingStopped" />
     </div>
 </template>

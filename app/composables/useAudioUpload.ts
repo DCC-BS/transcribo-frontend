@@ -53,7 +53,7 @@ export function useAudioUpload() {
                     color: "error",
                     icon: "i-lucide-triangle-alert",
                 });
-                return;
+                throw response;
             }
 
             executeCommand(new UploadFileCommand(originalFile, response));

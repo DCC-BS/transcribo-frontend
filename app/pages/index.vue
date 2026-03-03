@@ -1,115 +1,67 @@
 <script lang="ts" setup>
-import type { UploadMediaView } from "#components";
-import { Cmds, type UploadFileCommand } from "~/types/commands";
+import type { UploadFileCommand } from "~/types/commands";
+import { Cmds } from "~/types/commands";
+import type {
+    MediaConfigureData,
+    MediaSelectionData,
+} from "~/types/mediaStepInOut";
 
-const tasksStore = useTasksStore();
 const { t } = useI18n();
 const { onCommand } = useCommandBus();
-const { uploadFile } = useAudioUpload();
+const { addTask } = useTasks();
 
-const uploadMediaView = shallowRef<InstanceType<typeof UploadMediaView>>();
-
-interface FeaturePanel {
-    id: "upload" | "record";
-    titleKey: string;
-    descriptionKey: string;
-    icon: string;
-    label: string;
-    accentClasses: {
-        wrapper: string;
-        icon: string;
-        text: string;
-    };
-}
-
-// Lightweight config keeps the template compact while ensuring consistent styling.
-const featurePanels: FeaturePanel[] = [
-    {
-        id: "upload",
-        titleKey: "pages.index.uploadMedia",
-        descriptionKey: "pages.index.uploadDescription",
-        icon: "i-lucide-file-up",
-        label: "Upload",
-        accentClasses: {
-            wrapper: "bg-blue-100 dark:bg-blue-900/30",
-            icon: "text-blue-600 dark:text-blue-400",
-            text: "text-blue-700 dark:text-blue-300",
-        },
-    },
-    {
-        id: "record",
-        titleKey: "pages.index.recordAudio",
-        descriptionKey: "pages.index.recordDescription",
-        icon: "i-lucide-mic",
-        label: "Record",
-        accentClasses: {
-            wrapper: "bg-green-100 dark:bg-green-900/30",
-            icon: "text-green-600 dark:text-green-400",
-            text: "text-green-700 dark:text-green-300",
-        },
-    },
-];
+const step = ref(1);
+const mediaSelectionData = ref<MediaSelectionData>();
+const mediaPreviewData = ref<MediaConfigureData>();
 
 onCommand<UploadFileCommand>(Cmds.UploadFileCommand, async (command) => {
     const file = command.file;
     const status = command.status;
 
-    const storedTask = await tasksStore.addTask(status, file, file.name);
+    const storedTask = await addTask(status, file, file.name);
     navigateTo(`task/${storedTask.id}`);
 });
 
-async function handleRecordingComplete(audioBlob: Blob): Promise<void> {
-    const file = new File([audioBlob], "recording.webm", {
-        type: "audio/webm",
-    });
+function onMediaSelected(data: MediaSelectionData) {
+    mediaSelectionData.value = data;
+    step.value = 2;
+}
 
-    if (!uploadMediaView.value) {
-        throw new Error("UploadMediaView reference is not set.");
-    }
-
-    uploadFile(file, file);
+function onMediaConfigure(payload: MediaConfigureData) {
+    mediaPreviewData.value = payload;
+    step.value = 3;
 }
 </script>
 
 <template>
-    <UContainer class="py-12 space-y-12">
-        <section class="text-center space-y-4 max-w-3xl mx-auto">
-            <h1 class="text-4xl font-bold text-gray-900 dark:text-white">
-                {{ t("pages.index.title") || "Transcribo" }}
-            </h1>
-            <p class="text-lg text-gray-600 dark:text-gray-300">
-                {{ t("pages.index.subtitle") }}
-            </p>
-        </section>
+    <div class="mx-auto">
+        <p class="text-lg text-gray-600 dark:text-gray-300 m-4">
+            {{ t("pages.index.subtitle") }}
+        </p>
 
-        <div class="grid gap-8 md:grid-cols-2">
-            <section v-for="panel in featurePanels" :key="panel.id" :id="panel.id"
-                class="flex h-full flex-col gap-6 rounded-3xl border border-gray-200/60 dark:border-gray-800/70 bg-white/80 dark:bg-gray-900/60 p-6 shadow-sm backdrop-blur">
-                <div class="flex items-start gap-4">
-                    <div class="p-3 rounded-2xl" :class="panel.accentClasses.wrapper">
-                        <UIcon :name="panel.icon" class="w-6 h-6" :class="panel.accentClasses.icon" />
-                    </div>
-                    <div class="space-y-1">
-                        <span class="text-xs font-semibold uppercase tracking-wide" :class="panel.accentClasses.text">
-                            {{ panel.label }}
-                        </span>
-                        <h2 class="text-2xl font-semibold text-gray-900 dark:text-white">
-                            {{ t(panel.titleKey) }}
-                        </h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            {{ t(panel.descriptionKey) }}
-                        </p>
-                    </div>
-                </div>
-                <!-- Center the recording button vertically while keeping upload content anchored -->
-                <div :class="panel.id === 'record'
-                    ? 'flex-1 flex items-center justify-center'
-                    : 'mt-auto'
-                    ">
-                    <UploadMediaView v-if="panel.id === 'upload'" ref="uploadMediaView" />
-                    <AudioRecordingView v-else @on-recording-complete="handleRecordingComplete" />
-                </div>
-            </section>
+        <div class="flex items-center justify-center">
+            <UButton variant="link" :class="{ 'font-bold': step === 1 }" @click="step = 1">
+                1. Upload Media
+            </UButton>
+            <template v-if="step > 1">
+                <UIcon name="i-lucide-chevron-right" />
+                <UButton variant="link" :class="{ 'font-bold': step === 2 }" @click="step = 2">
+                    2. Settings
+                </UButton>
+            </template>
+            <template v-if="step > 2">
+                <UIcon name="i-lucide-chevron-right" />
+                <UButton variant="link" v-if="step > 2" :class="{ 'font-bold': step === 3 }">
+                    3. Process Media
+                </UButton>
+            </template>
         </div>
-    </UContainer>
+
+        <div class="p-2">
+            <MediaSelectionView v-if="step === 1" @onMediaSelected="onMediaSelected" />
+            <MediaPreviewView v-if="step === 2 && mediaSelectionData" v-model:input="mediaSelectionData"
+                @on-next="onMediaConfigure" />
+            <MediaProcessingView v-if="step === 3 && mediaPreviewData" v-model:input="mediaPreviewData" />
+        </div>
+    </div>
 </template>

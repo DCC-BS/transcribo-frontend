@@ -23,3 +23,5 @@ logs
 .env.*
 !.env.example
 !docker/.env.backend.example
+
+.worktreees/*

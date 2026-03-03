@@ -5,13 +5,15 @@ import type { Stage, StageConfig } from "konva/lib/Stage";
 import type { Rect, RectConfig } from "konva/lib/shapes/Rect";
 import type { Box, TransformerConfig } from "konva/lib/shapes/Transformer";
 import TimeAxisLayer from "~/components/timeline/TimeAxisLayer.vue";
-import { UpdateSegementCommand } from "~/types/commands";
+import { UpdateSegmentCommand } from "~/types/commands";
+import type { StoredTranscription } from "~/types/storedTranscription";
 
 // -----------------------------------------------------------------
 // Props and constants
 // -----------------------------------------------------------------
 
 interface TimelineViewProps {
+    transcription: StoredTranscription,
     currentTime: number;
     duration: number;
     zoomX: number;
@@ -33,7 +35,8 @@ const { executeCommand } = useCommandBus();
 const { checkSnap, createDragBoundFunc, findSnapPoints } = useTimelineSegment(
     computed(() => props.zoomX),
 );
-const { segments } = useCurrentTranscription();
+
+const segments = computed(() => props.transcription.segments ?? []);
 
 // -----------------------------------------------------------------
 // References and state
@@ -283,7 +286,7 @@ function onDragEnd(e: KonvaEventObject<MouseEvent, Rect>): void {
 
     // Update the segment with new times
     executeCommand(
-        new UpdateSegementCommand(segmentId, {
+        new UpdateSegmentCommand(segmentId, {
             start: Math.max(0, newStart),
             end: Math.max(newStart + 0.5, newEnd),
         }),
@@ -313,7 +316,7 @@ function onTransformEnd(e: KonvaEventObject<MouseEvent, Rect>): void {
 
     const segmentId = segment.id;
     executeCommand(
-        new UpdateSegementCommand(segmentId, {
+        new UpdateSegmentCommand(segmentId, {
             start: Math.max(0, newStart),
             end: Math.max(newStart + 0.5, newEnd), // Ensure minimum duration
         }),
@@ -481,82 +484,57 @@ function onPointerMove(e: KonvaEventObject<MouseEvent, Stage>): void {
 </script>
 
 <template>
-  <div ref="container" class="w-full">
-    <v-stage
-      v-if="segments.length > 0"
-      :config="configKonva"
-      @mousemove="onPointerMove"
-      @click="clearSelection"
-    >
-      <!-- Time Axis layer -->
-      <TimeAxisLayer
-        :start-time="props.startTime"
-        :end-time="props.endTime"
-        :zoom-x="props.zoomX"
-        :stage-width="stageWidth"
-      />
+    <div ref="container" class="w-full">
+        <v-stage v-if="segments.length > 0" :config="configKonva" @mousemove="onPointerMove" @click="clearSelection">
+            <!-- Time Axis layer -->
+            <TimeAxisLayer :start-time="props.startTime" :end-time="props.endTime" :zoom-x="props.zoomX"
+                :stage-width="stageWidth" />
 
-      <!-- Timeline segments layer -->
-      <v-layer :config="timelineLayerConfig">
-        <v-rect
-          v-for="(rectConfig, index) in rectConfigs"
-          :key="index"
-          :config="rectConfig"
-          @click="
-            (e: KonvaEventObject<MouseEvent, Rect>) =>
-              onSegmentClicked(e, rectConfig.id!)
-          "
-          @mouseenter="onSegmentMouseEnter($event, rectConfig.text!)"
-          @mouseleave="onSegmentMouseLeave()"
-          @dragmove="onDragMove"
-          @dragend="onDragEnd"
-          @transform="onTransform"
-          @transformend="onTransformEnd"
-        />
-      </v-layer>
+            <!-- Timeline segments layer -->
+            <v-layer :config="timelineLayerConfig">
+                <v-rect v-for="(rectConfig, index) in rectConfigs" :key="index" :config="rectConfig" @click="
+                    (e: KonvaEventObject<MouseEvent, Rect>) =>
+                        onSegmentClicked(e, rectConfig.id!)
+                " @mouseenter="onSegmentMouseEnter($event, rectConfig.text!)" @mouseleave="onSegmentMouseLeave()"
+                    @dragmove="onDragMove" @dragend="onDragEnd" @transform="onTransform"
+                    @transformend="onTransformEnd" />
+            </v-layer>
 
-      <v-layer :config="playerHeaderLayerConfig">
-        <v-line :config="playheadLineConfig" />
-      </v-layer>
+            <v-layer :config="playerHeaderLayerConfig">
+                <v-line :config="playheadLineConfig" />
+            </v-layer>
 
-      <v-layer>
-        <v-transformer :config="transformerConfig" />
-      </v-layer>
+            <v-layer>
+                <v-transformer :config="transformerConfig" />
+            </v-layer>
 
-      <!-- Tooltip layer -->
-      <v-layer>
-        <v-label
-          v-if="tooltipVisible"
-          :config="{
-            x: tooltipPosition.x,
-            y: tooltipPosition.y,
-            opacity: 0.75,
-          }"
-        >
-          <v-tag
-            :config="{
-              fill: 'black',
-              pointerDirection: 'down',
-              pointerWidth: 10,
-              pointerHeight: 10,
-              lineJoin: 'round',
-              shadowColor: 'black',
-              shadowBlur: 10,
-              shadowOffset: { x: 5, y: 5 },
-              shadowOpacity: 0.5,
-            }"
-          />
-          <v-text
-            :config="{
-              text: tooltipText,
-              fontSize: 14,
-              padding: 5,
-              fill: 'white',
-              maxWidth: 300,
-            }"
-          />
-        </v-label>
-      </v-layer>
-    </v-stage>
-  </div>
+            <!-- Tooltip layer -->
+            <v-layer>
+                <v-label v-if="tooltipVisible" :config="{
+                    x: tooltipPosition.x,
+                    y: tooltipPosition.y,
+                    opacity: 0.75,
+                }">
+                    <v-tag :config="{
+                        fill: 'black',
+                        pointerDirection: 'down',
+                        pointerWidth: 10,
+                        pointerHeight: 10,
+                        lineJoin: 'round',
+                        shadowColor: 'black',
+                        shadowBlur: 10,
+                        shadowOffset: { x: 5, y: 5 },
+                        shadowOpacity: 0.5,
+                    }" />
+                    <v-text :config="{
+                        text: tooltipText,
+                        fontSize: 14,
+                        padding: 5,
+                        fill: 'white',
+                        maxWidth: 300,
+                    }" />
+                </v-label>
+            </v-layer>
+        </v-stage>
+    </div>
 </template>

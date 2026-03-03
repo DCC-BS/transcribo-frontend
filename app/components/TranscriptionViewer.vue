@@ -1,24 +1,30 @@
 <script lang="ts" setup>
-import type { SegementWithId } from "~/types/transcriptionResponse";
+import type { StoredTranscription } from "~/types/storedTranscription";
+import type { SegmentWithId } from "~/types/transcriptionResponse";
 
-const { currentTranscription } = useCurrentTranscription();
+interface InputProps {
+    transcription: StoredTranscription;
+}
+
+const props = defineProps<InputProps>();
 
 // Viewer mode options
-const showSpeakers = ref(true);
-const showTimestamps = ref(false);
-const mergeSegments = ref(false);
+const showSpeakers = useLocalStorage<boolean>("setting:show-speaker", true);
+const showTimestamps = useLocalStorage<boolean>(
+    "setting:show-timestamps",
+    false,
+);
+const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
 
 /**
  * Merges consecutive segments from the same speaker into single segments
  * @param segments - Array of segments to merge
  * @returns Array of merged segments
  */
-function mergeConsecutiveSegments(
-    segments: SegementWithId[],
-): SegementWithId[] {
+function mergeConsecutiveSegments(segments: SegmentWithId[]): SegmentWithId[] {
     if (segments.length === 0) return [];
 
-    const merged: SegementWithId[] = [];
+    const merged: SegmentWithId[] = [];
     let currentSegment = { ...segments[0] };
 
     for (let i = 1; i < segments.length; i++) {
@@ -35,21 +41,19 @@ function mergeConsecutiveSegments(
             currentSegment.end = nextSegment.end;
         } else {
             // Different speaker, save current and start new
-            merged.push(currentSegment as SegementWithId);
+            merged.push(currentSegment as SegmentWithId);
             currentSegment = { ...nextSegment };
         }
     }
 
     // Don't forget the last segment
-    merged.push(currentSegment as SegementWithId);
+    merged.push(currentSegment as SegmentWithId);
     return merged;
 }
 
 // Computed property to generate the formatted text
 const formattedTranscript = computed(() => {
-    if (!currentTranscription.value) return "";
-
-    let segments = currentTranscription.value.segments;
+    let segments = props.transcription.segments;
 
     // Merge segments if requested
     if (mergeSegments.value) {
@@ -89,36 +93,44 @@ const { t } = useI18n();
 </script>
 
 <template>
-    <div class="h-full flex flex-col">
+    <div class="grow h-full flex flex-col">
         <!-- Viewer Controls -->
-        <div class="flex items-center gap-4 p-4 border-b border-gray-200 bg-gray-50">
-            <h3 class="font-medium text-sm">{{ t('viewer.displayOptions') }}</h3>
-            
+        <div
+            id="viewer-display-options"
+            class="flex flex-wrap items-center gap-4 p-4 border-b border-gray-200 bg-gray-50"
+        >
+            <h3 class="font-medium text-sm">
+                {{ t("viewer.displayOptions") }}
+            </h3>
+
             <!-- Show Speakers Toggle -->
             <div class="flex items-center gap-2">
-                <USwitch 
-                    v-model="showSpeakers" 
+                <USwitch
+                    id="viewer-show-speakers"
+                    v-model="showSpeakers"
                     size="sm"
                 />
-                <span class="text-sm">{{ t('viewer.showSpeakers') }}</span>
+                <span class="text-sm">{{ t("viewer.showSpeakers") }}</span>
             </div>
-            
+
             <!-- Show Timestamps Toggle -->
             <div class="flex items-center gap-2">
-                <USwitch 
-                    v-model="showTimestamps" 
+                <USwitch
+                    id="viewer-show-timestamps"
+                    v-model="showTimestamps"
                     size="sm"
                 />
-                <span class="text-sm">{{ t('viewer.showTimestamps') }}</span>
+                <span class="text-sm">{{ t("viewer.showTimestamps") }}</span>
             </div>
-            
+
             <!-- Merge Segments Toggle -->
             <div class="flex items-center gap-2">
-                <USwitch 
-                    v-model="mergeSegments" 
+                <USwitch
+                    id="viewer-merge-segments"
+                    v-model="mergeSegments"
                     size="sm"
                 />
-                <span class="text-sm">{{ t('viewer.mergeSegments') }}</span>
+                <span class="text-sm">{{ t("viewer.mergeSegments") }}</span>
             </div>
         </div>
 

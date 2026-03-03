@@ -25,12 +25,15 @@
         "tooManyRequestsTitle": "Zu viele Anfragen",
         "tooManyRequestsDescription": "Sie haben zu viele Anfragen gestellt. Bitte warten Sie einige Minuten, bevor Sie es erneut versuchen.",
         "audioLanguage": "Audio-Sprache",
-        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn Sie nicht sicher sind, wählen Sie 'Automatische Erkennung'."
+        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn Sie nicht sicher sind, wählen Sie 'Automatische Erkennung'.",
+        "settings": "Einstellungen",
+        "configureTranscription": "Konfigurieren Sie Ihre Transkription",
+        "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Sie können beide auf automatische Erkennung lassen, wenn Sie unsicher sind."
     },
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transkribieren Sie Ihre Audio- und Videodateien mit KI. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
+            "subtitle": "Transkribieren Sie Ihre Audio- und Videodateien mit KI und erstellen Sie automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
             "uploadMedia": "Medien hochladen",
             "uploadDescription": "Laden Sie Ihre Audio- oder Videodateien hoch",
             "recordAudio": "Audio aufnehmen",
@@ -71,7 +74,8 @@
         "play": "Abspielen",
         "pause": "Pause",
         "addSegment": "Segment hinzufügen",
-        "downloadMedia": "Medien herunterladen"
+        "downloadMedia": "Medien herunterladen",
+        "noMedia": "Keine Mediendatei verfügbar"
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
@@ -90,6 +94,13 @@
         "notFound": "Transkription nicht gefunden oder konnte nicht geladen werden",
         "noTranscriptionsFound": "Keine Transkriptionen gefunden",
         "untitled": "Ohne Titel",
+        "info": "Transkriptions-Info",
+        "nameLabel": "Name",
+        "namePlaceholder": "Transkriptionsname",
+        "autoScrollOn": "Auto-Scroll AN",
+        "autoScrollOff": "Auto-Scroll AUS",
+        "tab": "Transkription",
+        "timelineTab": "Zeitleiste",
         "delete": {
             "title": "Transkription löschen",
             "confirmation": "Sind Sie sicher, dass Sie diese Transkription löschen möchten?"
@@ -118,7 +129,7 @@
         "withTimestamps": "Zeitstempel hinzufügen",
         "mergeSegments": "Segmente vom selben Sprecher zusammenführen",
         "withSummary": "Meeting-Zusammenfassung hinzufügen",
-        "textOnly": "Nur Textformat",
+        "textOnly": "Nur Text- und Word-Format",
         "export": "Exportieren",
         "options": "Optionen",
         "optionsTitle": "Export-Optionen",
@@ -126,7 +137,8 @@
             "title": "Export-Formate",
             "text": "Textformat",
             "subtitle": "Untertitelformat",
-            "json": "JSON-Format"
+            "json": "JSON-Format",
+            "docx": "Word-Dokument"
         },
         "exportAsText": "Als Text exportieren",
         "exportAsSrt": "Als SRT exportieren"
@@ -139,7 +151,20 @@
         "show": "Zusammenfassung anzeigen",
         "hide": "Zusammenfassung ausblenden",
         "title": "Meeting-Zusammenfassung",
-        "error": "Fehler bei der Zusammenfassung"
+        "error": "Fehler bei der Zusammenfassung",
+        "empty": "Noch keine Zusammenfassung erstellt",
+        "export": "Zusammenfassung exportieren",
+        "selectType": "Zusammenfassungsart wählen",
+        "selectLanguage": "Ausgabesprache",
+        "autoDetect": "Automatisch erkennen",
+        "types": {
+            "kurzprotokoll": "Kurzprotokoll",
+            "kurzprotokollDesc": "Kurze Zusammenfassung der wichtigsten Punkte und Entscheidungen",
+            "ergebnisprotokoll": "Ergebnisprotokoll",
+            "ergebnisprotokollDesc": "Fokus ausschliesslich auf Ergebnisse, Entscheidungen und Aufgaben",
+            "verhandlungsprotokoll": "Verhandlungsprotokoll",
+            "verhandlungsprotokollDesc": "Detailliertes Protokoll mit Diskussionen und Begründungen"
+        }
     },
     "task": {
         "errors": {
@@ -147,7 +172,8 @@
             "failedToLoad": "Fehler beim Laden der Aufgabe",
             "transcriptionFailed": "Transkription fehlgeschlagen. Bitte versuchen Sie es erneut.",
             "failedToCreateTranscription": "Fehler beim Erstellen der Transkription aus den Ergebnissen",
-            "noResult": "Kein Transkriptionsergebnis verfügbar"
+            "noResult": "Kein Transkriptionsergebnis verfügbar",
+            "TaskNotFound": "Aufgabe nicht gefunden"
         }
     },
     "commands": {
@@ -175,8 +201,19 @@
     },
     "mode": {
         "viewer": "Betrachter",
+        "summary": "Zusammenfassung",
         "editor": "Editor",
+        "statistics": "Statistik",
         "switch": "Modus wechseln"
+    },
+    "statistics": {
+        "title": "Sprecher-Statistik",
+        "description": "Sprechzeit-Verteilung nach Sprecher",
+        "noData": "Keine Sprecherdaten verfügbar",
+        "audioDuration": "Audiodauer",
+        "speakingTime": "Sprechzeit",
+        "speakingPercentage": "Sprachanteil",
+        "bySpeaker": "Nach Sprecher"
     },
     "help": {
         "help": "Hilfe",
@@ -253,7 +290,10 @@
         "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen"
     },
     "languages": {
+        "autoDetect": "Automatisch erkennen",
         "de": "Deutsch",
+        "en-us": "Englisch (US)",
+        "en-gb": "Englisch (UK)",
         "en": "Englisch",
         "fr": "Französisch",
         "it": "Italienisch",
@@ -357,5 +397,84 @@
     "retention": {
         "title": "Verfügbarkeit der Transkriptionen",
         "description": "Transkriptionen älter als {retentionDays} Tage werden automatisch gelöscht."
+    },
+    "onboarding": {
+        "help": "Hilfe-Tour anzeigen",
+        "next": "Weiter",
+        "previous": "Zurück",
+        "done": "Fertig",
+        "progress": "{'{{current}}'} von {'{{total}}'}",
+        "welcome": {
+            "title": "Willkommen bei Transcribo!",
+            "description": "Transcribo ist ein KI-basierter Transkriptionsdienst, der Dir hilft, Audio- und Videodateien zu transkribieren. Alle Daten werden auf lokalen Servern der IT BS verarbeitet. Du kannst mit Transcribo auch besondere Personendaten und Daten, die dem Amtsgeheimnis (Erhöhter Schutzbedarf) unterliegen, verarbeiten. Ich zeige Dir jetzt die Hauptfunktionen von Transcribo."
+        },
+        "transcriptionInfo": {
+            "title": "Transkriptions-Info",
+            "description": "Klicke hier um den Namen der Transkription zu ändern oder die Original-Mediendatei herunterzuladen."
+        },
+        "exportToolbar": {
+            "title": "Exportieren",
+            "description": "Klicke hier um deine Transkription zu exportieren. Du kannst zwischen Text-, Untertitel (SRT)-, JSON- oder Word (DOCX)-Format wählen."
+        },
+        "modes": {
+            "title": "Die Vier Modi",
+            "description": "Betrachter: Transkription ansehen und lesen\n\nZusammenfassung: KI-gestützte Zusammenfassungen erstellen\n\nEditor: Text, Zeitstempel und Sprecher bearbeiten\n\nStatistik: Sprechzeit-Verteilung anzeigen"
+        },
+        "viewerIntro": {
+            "title": "Betrachter-Modus",
+            "description": "Im Betrachter-Modus kannst du deine Transkription lesen."
+        },
+        "viewerDisplayOptions": {
+            "title": "Anzeigeoptionen",
+            "description": "Nutze die Anzeigeoptionen um Sprecher, Zeitstempel anzuzeigen/auszublenden oder aufeinanderfolgende Segmente desselben Sprechers zusammenzuführen."
+        },
+        "summary": {
+            "title": "Zusammenfassungs-Modus",
+            "description": "Wechsle in den Zusammenfassungs-Modus, um eine KI-gestützte Zusammenfassung deiner Transkription zu erstellen."
+        },
+        "generateSummary": {
+            "title": "Zusammenfassung Erstellen",
+            "description": "Klicke auf diesen Button um eine Zusammenfassung zu erstellen. Wähle zwischen Kurzprotokoll, Ergebnisprotokoll oder detailliertem Verhandlungsprotokoll."
+        },
+        "statistics": {
+            "title": "Statistik-Modus",
+            "description": "Wechsle in den Statistik-Modus um die Sprechzeit-Verteilung nach Sprechern zu sehen."
+        },
+        "speakerStatistics": {
+            "title": "Sprecher-Statistik",
+            "description": "Sieh dir die gesamte Audiodauer, Sprechzeit, den Sprachanteil und wie viel jeder Sprecher beigetragen hat an."
+        },
+        "editor": {
+            "title": "Editor-Modus",
+            "description": "Wechsle in den Editor-Modus um Änderungen an deiner Transkription vorzunehmen. Hier kannst du Text, Zeitstempel und Sprechernamen bearbeiten."
+        },
+        "speakerNames": {
+            "title": "Sprecher Umbenennen",
+            "description": "Hier kannst du die Sprecher umbenennen. Gib einfach einen neuen Namen ein und er wird auf alle Segmente dieses Sprechers angewendet."
+        },
+        "editTranscriptions": {
+            "title": "Transkriptionen Bearbeiten",
+            "description": "Jedes Segment kann bearbeitet werden: Ändere den Text, aktualisiere den Sprecher oder ändere Start- und Endzeiten. Klicke auf die Zeitstempel um zu dieser Position zu springen."
+        },
+        "addTranscription": {
+            "title": "Neue Transkription Hinzufügen",
+            "description": "Klicke auf den + Button um an beliebiger Stelle neue Transkriptionssegmente hinzuzufügen."
+        },
+        "mediaPlayback": {
+            "title": "Medienwiedergabe",
+            "description": "Nutze die Medienleiste um dein Audio oder Video abzuspielen."
+        },
+        "mediaExpand": {
+            "title": "Medienansicht Erweitern",
+            "description": "Klicke auf den Erweitern-Button um das Video oder die größere Ansicht mit Untertitelvorschau zu sehen."
+        },
+        "helpButton": {
+            "title": "Hilfe-Button",
+            "description": "Klicke jederzeit auf diesen Button um diese Tour erneut zu starten."
+        },
+        "complete": {
+            "title": "Du bist startklar!",
+            "description": "Du bist bereit, Transcribo zu nutzen! Klicke jederzeit auf den Hilfe-Button, um diese Tour erneut zu starten."
+        }
     }
 }

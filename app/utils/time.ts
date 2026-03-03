@@ -5,7 +5,7 @@ type formatOptions = {
     milliseconds?: boolean;
 };
 
-const defaultOptions: formatOptions = {
+const defaultFormatOptions: formatOptions = {
     milliseconds: true,
 };
 
@@ -14,20 +14,23 @@ const defaultOptions: formatOptions = {
  * @param {number} time - Time in seconds
  * @returns {string} Formatted time string
  */
-export const formatTime = (time: number, options?: formatOptions): string => {
-    const { milliseconds: useMiliseconds } = { ...defaultOptions, ...options };
+export function formatTime(time: number, options?: formatOptions): string {
+    const { milliseconds: useMilliseconds } = {
+        ...defaultFormatOptions,
+        ...options,
+    };
 
     const minutes: number = Math.floor(time / 60);
     const seconds: number = Math.floor(time % 60);
     const milliseconds: number = Math.floor((time % 1) * 1000);
 
     const secondsString = seconds.toString().padStart(2, "0");
-    const millisecondsString = useMiliseconds
+    const millisecondsString = useMilliseconds
         ? milliseconds.toString().padStart(3, "0")
         : "";
 
     return `${minutes}:${secondsString}${millisecondsString ? `.${millisecondsString}` : ""}`;
-};
+}
 
 /**
  * Parses time string in MM: SS format to seconds
@@ -36,7 +39,7 @@ export const formatTime = (time: number, options?: formatOptions): string => {
  *
  * @throws {Error} If time string is invalid
  */
-export const parseTime = (time: string): number => {
+export function parseTime(time: string): number {
     const parts = time.split(":") as [string, string];
 
     if (parts.length !== 2) {
@@ -51,4 +54,4 @@ export const parseTime = (time: string): number => {
     }
 
     return minutes * 60 + seconds;
-};
+}
