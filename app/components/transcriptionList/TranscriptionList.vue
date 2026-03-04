@@ -1,11 +1,11 @@
 <script lang="ts" setup>
+import { useWindowScroll, useWindowSize } from "@vueuse/core";
 import { motion } from "motion-v";
 import { v4 as uuid } from "uuid";
 import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import { type SegmentWithId } from "~/types/transcriptionResponse";
+import type { SegmentWithId } from "~/types/transcriptionResponse";
 import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
-import { useWindowScroll, useWindowSize } from "@vueuse/core";
 
 interface InputProps {
     transcription: StoredTranscription;
