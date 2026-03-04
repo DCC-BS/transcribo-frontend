@@ -46,7 +46,7 @@ const pageTransition = {
 
     <HContainer class="grow min-h-125">
         <template #top>
-            <div class="flex md:hidden items-center justify-center mb-2">
+            <div class="flex lg:hidden items-center justify-center mb-2">
                 <EditorModeSelector v-model="editorMode" id-prefix="mobile-" />
             </div>
             <div
@@ -62,7 +62,7 @@ const pageTransition = {
 
                 <!-- Center: Mode selector -->
                 <div
-                    class="hidden md:flex items-center justify-center shrink-0 gap-2"
+                    class="hidden lg:flex items-center justify-center shrink-0 gap-2"
                 >
                     <EditorModeSelector
                         v-model="editorMode"

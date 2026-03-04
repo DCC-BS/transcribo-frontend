@@ -42,7 +42,7 @@ const modes: { value: EditorMode; icon: string; label: string }[] = [
                 :id="`${props.idPrefix}mode-${m.value}`"
             >
                 <UIcon :name="m.icon" class="w-4 h-4" />
-                <span>{{ t(`mode.${m.label}`) }}</span>
+                <span class="hidden md:inline">{{ t(`mode.${m.label}`) }}</span>
             </UButtonMotion>
         </UFieldGroup>
     </div>
