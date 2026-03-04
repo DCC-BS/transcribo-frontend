@@ -114,7 +114,7 @@ function onNext() {
                         </div>
                         <!-- Video Player -->
                         <div
-                            class="aspect-video w-full overflow-hidden shadow-lg rounded-b-2xl"
+                            class="w-full overflow-hidden shadow-lg rounded-b-2xl"
                         >
                             <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
                             <video
