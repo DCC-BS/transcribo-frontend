@@ -3,9 +3,9 @@ import { motion } from "motion-v";
 import { v4 as uuid } from "uuid";
 import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import { SegmentSchema, type SegmentWithId } from "~/types/transcriptionResponse";
+import { type SegmentWithId } from "~/types/transcriptionResponse";
 import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
-import { useWindowFocus, useWindowScroll, useWindowSize } from "@vueuse/core";
+import { useWindowScroll, useWindowSize } from "@vueuse/core";
 
 interface InputProps {
     transcription: StoredTranscription;
@@ -20,7 +20,6 @@ const props = withDefaults(defineProps<InputProps>(), {
 
 const { executeCommand } = useCommandBus();
 
-const listContainer = ref<HTMLElement>();
 const segmentRefs = ref<Map<string, HTMLElement>>(new Map());
 const { height: windowHeight } = useWindowSize();
 const segmentSize = 192;
