@@ -66,7 +66,7 @@ const audioSessionActions = computed(() => [
             </p>
             <UDrawer
                 title="Audio Recordings"
-                description="Abondend audio recodings"
+                description="Abandoned audio recordings"
                 v-model:open="showAbandonedRecordings"
             >
                 <UButton

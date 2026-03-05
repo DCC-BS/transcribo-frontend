@@ -2,8 +2,15 @@
 import { isApiError } from "@dcc-bs/communication.bs.js";
 import { match, P } from "ts-pattern";
 import { TranscriptionFinishedCommand } from "~/types/commands";
-import { type TaskStatus, TaskStatusEnum, TaskStatusSchema } from "~/types/task";
-import { type TranscriptionResponse, TranscriptionResponseSchema } from "~/types/transcriptionResponse";
+import {
+    type TaskStatus,
+    TaskStatusEnum,
+    TaskStatusSchema,
+} from "~/types/task";
+import {
+    type TranscriptionResponse,
+    TranscriptionResponseSchema,
+} from "~/types/transcriptionResponse";
 
 const $router = useRouter();
 const { apiFetch } = useApi();
@@ -48,8 +55,6 @@ onMounted(() => {
     status.value = {
         status: TaskStatusEnum.IN_PROGRESS,
         task_id: props.taskId,
-        created_at: "",
-        executed_at: "",
         progress: 0,
     };
     fetchTaskStatus();
@@ -118,20 +123,15 @@ const fetchTaskStatus = async (): Promise<void> => {
 };
 
 const loadTaskStatus = async (taskId: string): Promise<void> => {
-    const newStatus = await apiFetch(
-        `/api/transcribe/${taskId}/status`,
-        {
-            schema: TaskStatusSchema,
-        }
-    );
+    const newStatus = await apiFetch(`/api/transcribe/${taskId}/status`, {
+        schema: TaskStatusSchema,
+    });
 
     if (isApiError(newStatus)) {
         showError(newStatus);
         status.value = {
             status: TaskStatusEnum.FAILED,
             task_id: taskId,
-            created_at: "",
-            executed_at: "",
             progress: 0,
         };
         return;
@@ -146,7 +146,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
         <!-- Show loading animation when in progress -->
         <div v-if="isInProgress" class="loading-container">
             <UIcon name="i-lucide-loader-circle" class="loading-spinner" />
-            <p class="loading-text">{{ t('taskStatus.processing') }}</p>
+            <p class="loading-text">{{ t("taskStatus.processing") }}</p>
         </div>
 
         <!-- Success animation shown when status is COMPLETED -->
@@ -154,7 +154,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
             <div class="success-circle">
                 <UIcon name="i-lucide-check" class="success-icon" />
             </div>
-            <p class="success-text">{{ t('taskStatus.completed') }}</p>
+            <p class="success-text">{{ t("taskStatus.completed") }}</p>
         </div>
 
         <!-- Error animation shown when status is FAILED or CANCELLED -->
@@ -162,10 +162,18 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
             <div class="error-circle">
                 <UIcon name="i-lucide-x" class="error-icon" />
             </div>
-            <p class="error-text">{{ t('taskStatus.failed') }}</p>
-            <p class="error-description">{{ t('taskStatus.failedDescription') }}</p>
-            <UButton @click="$router.push('/')" variant="outline" color="error" size="sm" class="mt-4">
-                {{ t('taskStatus.goBack') }}
+            <p class="error-text">{{ t("taskStatus.failed") }}</p>
+            <p class="error-description">
+                {{ t("taskStatus.failedDescription") }}
+            </p>
+            <UButton
+                @click="$router.push('/')"
+                variant="outline"
+                color="error"
+                size="sm"
+                class="mt-4"
+            >
+                {{ t("taskStatus.goBack") }}
             </UButton>
         </div>
 
