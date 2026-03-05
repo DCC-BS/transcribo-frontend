@@ -133,7 +133,9 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
 </script>
 
 <template>
-    <div class="flex flex-col items-center justify-center py-12 px-6">
+    <div
+        class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]"
+    >
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">

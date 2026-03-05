@@ -15,8 +15,6 @@ const { t } = useI18n();
 const language = ref<string>("de");
 const numSpeaker = ref<string>("auto");
 
-console.log("MediaPreviewView input:", input.value.media.type);
-
 // Speaker options for the select input
 const speakerOptions = [
     { label: t("upload.autoDetection"), value: "auto" },
@@ -68,7 +66,7 @@ function onNext() {
 </script>
 
 <template>
-    <div class="w-full">
+    <div class="w-full max-w-[95vw] mx-auto">
         <div
             class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start justify-center max-w-7xl mx-auto p-4 lg:p-6"
         >
@@ -114,12 +112,12 @@ function onNext() {
                         </div>
                         <!-- Video Player -->
                         <div
-                            class="w-full overflow-hidden shadow-lg rounded-b-2xl"
+                            class="w-full overflow-hidden shadow-lg rounded-b-2xl bg-black"
                         >
                             <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
                             <video
                                 controls
-                                class="w-full h-full object-contain"
+                                class="w-full h-auto object-contain"
                                 :src="mediaSource"
                                 :type="input.media.type"
                             >

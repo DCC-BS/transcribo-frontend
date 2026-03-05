@@ -167,7 +167,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="m-auto">
+    <div class="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <UAlert
             icon="i-lucide-info"
             color="info"
@@ -178,17 +178,21 @@ onUnmounted(() => {
             "
         />
 
-        <ProcessingTasksTable
-            :tasks="inProgressTasks"
-            :loading="isProcessingLoading"
-            :error="processingError"
-            @refresh="refreshStatuses"
-            @dismiss-error="processingError = undefined"
-        />
+        <div class="mt-4 sm:mt-6 lg:mt-8">
+            <ProcessingTasksTable
+                :tasks="inProgressTasks"
+                :loading="isProcessingLoading"
+                :error="processingError"
+                @refresh="refreshStatuses"
+                @dismiss-error="processingError = undefined"
+            />
+        </div>
 
-        <TranscriptionTable
-            :transcriptions="transcriptions"
-            @delete="deleteTranscription"
-        />
+        <div class="mt-4 sm:mt-6 lg:mt-8">
+            <TranscriptionTable
+                :transcriptions="transcriptions"
+                @delete="deleteTranscription"
+            />
+        </div>
     </div>
 </template>

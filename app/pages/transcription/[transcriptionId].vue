@@ -12,7 +12,6 @@ const [DefineMainContent, UseMainContent] = createReusableTemplate();
 const { onCommand } = useCommandBus();
 
 const transcriptionId = route.params.transcriptionId as string;
-const onboardingRef = ref<InstanceType<typeof Onboarding> | null>(null);
 
 const currentTranscription = ref<StoredTranscription>();
 const isTranscriptionLoading = ref(true);
@@ -42,11 +41,11 @@ const pageTransition = {
 </script>
 
 <template>
-    <Onboarding ref="onboardingRef" />
+    <Onboarding />
 
     <HContainer class="grow min-h-125">
         <template #top>
-            <div class="flex lg:hidden items-center justify-center mb-2">
+            <div class="lg:hidden mb-2 w-full">
                 <EditorModeSelector v-model="editorMode" id-prefix="mobile-" />
             </div>
             <div

@@ -15,7 +15,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const { formatDate } = useDateFormatter();
-const { getStatusDisplay, getStatusColor, computeTaskProgress } = useTaskStatus();
+const { getStatusDisplay, getStatusColor, computeTaskProgress } =
+    useTaskStatus();
 
 const columns = [
     {
@@ -49,18 +50,22 @@ const columns = [
 </script>
 
 <template>
-    <div v-if="props.tasks.length > 0" class="space-y-6 mb-8">
-        <div class="flex justify-between items-center">
+    <div v-if="props.tasks.length > 0" class="space-y-4 sm:space-y-6 mb-8">
+        <div
+            class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
+        >
             <div>
-                <h2 class="text-xl font-bold">
+                <h2 class="text-lg sm:text-xl font-bold">
                     {{ t("processing.title") }}
                 </h2>
-                <p class="text-gray-600 mt-1">
+                <p
+                    class="text-gray-600 dark:text-gray-400 mt-1 text-sm sm:text-base"
+                >
                     {{ t("processing.description") }}
                 </p>
             </div>
             <UButton
-                icon="i-lucide-loader-circle"
+                icon="i-lucide-cloud-sync"
                 :loading="props.loading"
                 @click="emit('refresh')"
             >
@@ -78,7 +83,51 @@ const columns = [
             @dismiss="emit('dismiss-error')"
         />
 
+        <!-- Mobile Card View -->
+        <div class="space-y-3 md:hidden">
+            <div
+                v-for="task in props.tasks"
+                :key="task.id"
+                class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3"
+            >
+                <div class="font-medium text-wrap">
+                    {{ task.mediaFileName || t("processing.unknownFile") }}
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    <div class="flex justify-between">
+                        <span>{{ t("processing.table.createdAt") }}:</span>
+                        <span>{{ formatDate(task.createdAt) }}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <UBadge
+                        :color="getStatusColor(task.status.status)"
+                        variant="subtle"
+                    >
+                        {{ getStatusDisplay(task.status.status) }}
+                    </UBadge>
+                    <template
+                        v-if="task.status.status === TaskStatusEnum.IN_PROGRESS"
+                    >
+                        <UIcon
+                            name="i-lucide-cog"
+                            class="animate-spin text-blue-600"
+                        />
+                        <span class="text-sm text-blue-600">
+                            ({{
+                                Math.round(
+                                    computeTaskProgress(task.status) * 100,
+                                )
+                            }}%)
+                        </span>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Table View -->
         <UTable
+            class="hidden md:block"
             :columns="columns"
             :data="props.tasks"
             sticky
@@ -118,7 +167,12 @@ const columns = [
                             class="animate-spin text-blue-600"
                         />
                         <span class="text-sm text-blue-600">
-                            ({{ Math.round(computeTaskProgress(row.original.status) * 100) }}%)
+                            ({{
+                                Math.round(
+                                    computeTaskProgress(row.original.status) *
+                                        100,
+                                )
+                            }}%)
                         </span>
                     </template>
                 </div>
