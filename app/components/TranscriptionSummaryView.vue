@@ -114,7 +114,7 @@ async function handleGenerateSummary(): Promise<void> {
                             color="warning"
                             size="sm"
                             :label="
-                                props.transcription.segments
+                                props.transcription.summary
                                     ? t('summary.regenerate')
                                     : t('summary.generate')
                             "

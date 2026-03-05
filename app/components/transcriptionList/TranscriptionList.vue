@@ -27,11 +27,16 @@ const { y } = useWindowScroll();
 
 const maxSegment = ref(0);
 
-watch(() => [windowHeight.value, y.value], () => {
-    const max = Math.floor((windowHeight.value + y.value) / segmentSize) + 1;
+watch(
+    () => [windowHeight.value, y.value],
+    () => {
+        const max =
+            Math.floor((windowHeight.value + y.value) / segmentSize) + 1;
 
-    maxSegment.value = Math.max(maxSegment.value, max);
-}, { immediate: true });
+        maxSegment.value = Math.max(maxSegment.value, max);
+    },
+    { immediate: true },
+);
 
 const segments = computed(() =>
     props.transcription.segments.toSorted((a, b) => a.start - b.start),
@@ -43,7 +48,6 @@ const speakers = computed(() =>
 
 const throttledProgress = ref(0);
 let progressTimeout: ReturnType<typeof setTimeout> | undefined;
-
 
 onUnmounted(() => {
     if (progressTimeout) {
@@ -106,11 +110,7 @@ function isSegmentActive(segmentId: string): boolean {
 }
 
 watch(currentSegmentId, async (newId, oldId) => {
-    if (
-        !props.autoScrollEnabled ||
-        !newId ||
-        newId === oldId
-    ) {
+    if (!props.autoScrollEnabled || !newId || newId === oldId) {
         return;
     }
 
@@ -146,23 +146,41 @@ async function addSegemntAtZero() {
 </script>
 
 <template>
-    <div ref="listContainer" class="flex flex-col">
+    <div class="flex flex-col">
         <USeparator id="add-transcription-top">
-            <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegemntAtZero()" />
+            <UButton
+                icon="i-lucide-plus"
+                variant="link"
+                color="neutral"
+                @click="() => addSegemntAtZero()"
+            />
         </USeparator>
 
         <AnimatePresence>
             <div id="transcription-segments">
-                <motion.div v-for="segment in segments.slice(0, maxSegment)" :key="segment.id"
-                    :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
+                <motion.div
+                    v-for="segment in segments.slice(0, maxSegment)"
+                    :key="segment.id"
+                    :initial="{ opacity: 0, scaleY: 0 }"
+                    :animate="{ opacity: 1, scaleY: 1 }"
+                    :exit="{ scale: 0 }"
+                >
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
-                        <TranscriptionListItem :segment="segment" :speakers="speakers"
-                            :isActive="isSegmentActive(segment.id)" :currentTime="props.currentTime" />
+                        <TranscriptionListItem
+                            :segment="segment"
+                            :speakers="speakers"
+                            :isActive="isSegmentActive(segment.id)"
+                            :currentTime="props.currentTime"
+                        />
                     </div>
 
                     <USeparator>
-                        <UButton icon="i-lucide-plus" variant="link" color="neutral"
-                            @click="() => addSegmentAfter(segment)" />
+                        <UButton
+                            icon="i-lucide-plus"
+                            variant="link"
+                            color="neutral"
+                            @click="() => addSegmentAfter(segment)"
+                        />
                     </USeparator>
                 </motion.div>
             </div>

@@ -34,7 +34,7 @@ function onMediaConfigure(payload: MediaConfigureData) {
 </script>
 
 <template>
-    <div class="mx-auto w-max-[95vw]">
+    <div class="mx-auto max-w-[95vw]">
         <p class="hidden md:block text-lg text-gray-600 dark:text-gray-300 m-4">
             {{ t("pages.index.subtitle") }}
         </p>

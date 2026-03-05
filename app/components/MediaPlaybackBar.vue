@@ -84,6 +84,7 @@ function loadMedia(): void {
     mediaSrc.value = URL.createObjectURL(mediaFile.value);
     isVideoFile.value = mediaFile.value.type.startsWith("video/");
     isPlaying.value = false;
+    nextTick(() => updatePlaybackRate(playbackRate.value));
 }
 
 function togglePlay(): void {
