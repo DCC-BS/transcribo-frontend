@@ -1,6 +1,8 @@
+type StatusType = "in_progress" | "completed" | "failed" | "cancelled";
+
 export interface DummyTaskStatus {
     task_id: string;
-    status: "in_progress" | "completed" | "failed" | "cancelled";
+    status: StatusType;
     created_at: string | null;
     executed_at: string | null;
     progress: number | null;
@@ -99,10 +101,10 @@ const SAMPLE_TRANSCRIPT_SEGMENTS: DummySegment[] = [
 const SAMPLE_SUMMARY =
     "The meeting covered the upcoming product launch, with discussions on timelines, marketing materials, technical development progress, and budget allocation. The engineering team has completed core features and is now in testing phase. Marketing materials are ready for review. Budget is on track with allocation for both digital and traditional channels. A follow-up meeting was scheduled for next Tuesday to finalize the launch strategy.";
 
-export function createDummyTaskStatus(taskId: string): DummyTaskStatus {
+export function createDummyTaskStatus(taskId: string, status: StatusType = "completed"): DummyTaskStatus {
     return {
         task_id: taskId,
-        status: "completed",
+        status: status,
         created_at: new Date(Date.now() - 300000).toISOString(),
         executed_at: new Date(Date.now() - 60000).toISOString(),
         progress: 1.0,
@@ -129,6 +131,7 @@ export function dummyTaskStatusFetcher(options: {
     url: string;
 }): DummyTaskStatus {
     const taskId = options.url.split("/").pop() || generateDummyTaskId();
+
     return createDummyTaskStatus(taskId);
 }
 

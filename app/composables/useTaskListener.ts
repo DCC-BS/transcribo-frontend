@@ -13,7 +13,7 @@ import {
 } from "~/types/transcriptionResponse";
 
 export function useTaskListener() {
-    const { deleteTask } = useTasks();
+    const { deleteTask, getTasksByStatus } = useTasks();
     const { addTranscription } = getTranscriptionService();
     const { showError } = useUserFeedback();
     const { t } = useI18n();

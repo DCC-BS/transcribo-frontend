@@ -10,7 +10,7 @@ const input = defineModel<MediaConfigureData>("input", { required: true });
 
 const errorMessage = ref<string>();
 
-const progressions = ref<[MediaProgress, MediaProgress, MediaProgress]>([
+const start_progression: [MediaProgress, MediaProgress, MediaProgress] = [
     {
         icon: "i-lucide-file",
         message: "...",
@@ -26,7 +26,9 @@ const progressions = ref<[MediaProgress, MediaProgress, MediaProgress]>([
         message: "...",
         progress: 0,
     },
-]);
+];
+
+const progressions = ref<[MediaProgress, MediaProgress, MediaProgress]>(start_progression);
 
 const { extractAudioFromVideo } = useAudioExtract();
 const { t } = useI18n();
@@ -39,9 +41,20 @@ onMounted(() => {
 });
 
 async function processMedia() {
-    const processedFile = await preprocessMedia(progressions.value[0]);
-    const task = await uploadFile(processedFile, progressions.value[1]);
-    await waitForTask(task, progressions.value[2]);
+    try {
+        errorMessage.value = undefined;
+        progressions.value = start_progression;
+        const processedFile = await preprocessMedia(progressions.value[0]);
+        const task = await uploadFile(processedFile, progressions.value[1]);
+        await waitForTask(task, progressions.value[2]);
+    } catch (e) {
+        logger.error(e, "Failed to finish the task");
+        if (!errorMessage.value) {
+            errorMessage.value = `${t(
+                "task.errors.failedToCreateTranscription",
+            )} ${e}`;
+        }
+    }
 }
 
 // extract the audio form when video file; else do nothing
@@ -122,7 +135,7 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
                     input.value.media.name,
                 );
             } catch (e) {
-                logger.error(e, "Failed to finihs the task");
+                logger.error(e, "Failed to finish the task");
                 errorMessage.value = t(
                     "task.errors.failedToCreateTranscription",
                 );
@@ -133,34 +146,22 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
 </script>
 
 <template>
-    <div
-        class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]"
-    >
+    <div class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]">
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">
-                <MediaProgressView
-                    :media="input.media"
-                    :mediaName="input.media.name"
-                    :progressSteps="progressions"
-                />
+                <MediaProgressView :media="input.media" :mediaName="input.media.name" :progressSteps="progressions" />
             </div>
         </div>
 
         <!-- Error Message Display -->
-        <motion.div
-            v-if="errorMessage"
-            :animate="{ opacity: 1, y: 0 }"
-            :initial="{ opacity: 0, y: 20 }"
+        <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
             :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
-            class="mt-8 max-w-md w-full"
-        >
-            <UAlert
-                icon="i-lucide-alert-circle"
-                color="error"
-                title="error"
-                :description="errorMessage"
-            ></UAlert>
+            class="mt-8 max-w-md w-full flex flex-col gap-2 justify-center">
+            <UAlert icon="i-lucide-alert-circle" color="error" title="error" :description="errorMessage"></UAlert>
+
+            <UButton @click="processMedia()" icon="i-lucide-rotate-ccw" color="secondary" variant="subtle">retry
+            </UButton>
         </motion.div>
     </div>
 </template>
