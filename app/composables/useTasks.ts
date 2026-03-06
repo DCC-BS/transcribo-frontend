@@ -17,6 +17,10 @@ export function useTasks() {
         return db.tasks.where("id").equals(id).first();
     }
 
+    function getTasksByStatus(status: TaskStatusEnum) {
+        return db.tasks.where("status").equals(status).toArray();
+    }
+
     async function addTask(
         status: TaskStatus,
         mediaFile?: File | Blob,
@@ -73,6 +77,7 @@ export function useTasks() {
 
     return {
         getTasks,
+        getTasksByStatus,
         getTask,
         addTask,
         deleteTask,

@@ -46,5 +46,5 @@ export default apiHandler
 
         return response;
     })
-    .withDummyFetcher(createDummyTaskStatus(generateDummyTaskId()))
+    .withDummyFetcher(createDummyTaskStatus(generateDummyTaskId(), "completed"))
     .build("/transcribe");

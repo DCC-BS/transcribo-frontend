@@ -1,5 +1,9 @@
 export function useDateFormatter() {
-    function formatDate(timestamp: Date | number): string {
+    function formatDate(timestamp: Date | number | undefined): string {
+        if (!timestamp) {
+            return "";
+        }
+
         const date =
             timestamp instanceof Date ? timestamp : new Date(timestamp);
         return date.toLocaleString("de-CH", {

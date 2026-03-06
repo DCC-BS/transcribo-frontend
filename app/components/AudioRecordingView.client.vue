@@ -10,17 +10,17 @@ const debugLog = (msg: string): void => {
     appLogger.debug(msg);
 };
 
-const { isReady, abandonedRecording } =
-    useAudioSessions({
-        deleteOldSessionsDaysInterval: 30,
-        maxSessionsToKeep: 10,
-        logger: debugLog,
-    });
+const { isReady, abandonedRecording } = useAudioSessions({
+    deleteOldSessionsDaysInterval: 30,
+    maxSessionsToKeep: 10,
+    logger: debugLog,
+});
 
 const shouldRecord = ref(false);
 const isRecording = ref(false);
 const audioBlob = ref<Blob | undefined>(undefined);
 const userRecording = ref(false);
+const showAbandonedRecordings = ref(false);
 
 function onRecordingStopped(file: Blob, _: string) {
     isRecording.value = false;
@@ -40,6 +40,7 @@ const audioSessionActions = computed(() => [
         label: "Process",
         icon: "i-lucide-play",
         handler: async (_: string, mp3Blob: Blob, __: () => Promise<void>) => {
+            showAbandonedRecordings.value = false;
             emit("onRecordingComplete", mp3Blob);
         },
     },
@@ -48,20 +49,55 @@ const audioSessionActions = computed(() => [
 
 <template>
     <div class="flex flex-col justify-center items-center">
-        <div v-if="abandonedRecording && abandonedRecording.length > 0 && !shouldRecord" class="mb-4">
-            <p class="mb-2">{{ t("audio.abandonedRecordings", { count: abandonedRecording.length }) }}</p>
-            <UDrawer title="Audio Recordings" description="Abondend audio recodings">
-                <UButton :label="t('audio.showAbandonedRecordings')" color="neutral" variant="subtle"
-                    icon="i-lucide-history" />
+        <div
+            v-if="
+                abandonedRecording &&
+                abandonedRecording.length > 0 &&
+                !shouldRecord
+            "
+            class="mb-4"
+        >
+            <p class="mb-2">
+                {{
+                    t("audio.abandonedRecordings", {
+                        count: abandonedRecording.length,
+                    })
+                }}
+            </p>
+            <UDrawer
+                title="Audio Recordings"
+                description="Abandoned audio recordings"
+                v-model:open="showAbandonedRecordings"
+            >
+                <UButton
+                    :label="t('audio.showAbandonedRecordings')"
+                    color="neutral"
+                    variant="subtle"
+                    icon="i-lucide-history"
+                />
                 <template #content>
-                    <AudioSessionExplorer ref="audioSessionExplorer" :custom-actions="audioSessionActions" />
+                    <div class="overflow-y-auto max-h-[90vh]">
+                        <AudioSessionExplorer
+                            ref="audioSessionExplorer"
+                            :custom-actions="audioSessionActions"
+                        />
+                    </div>
                 </template>
             </UDrawer>
         </div>
-        <UButton v-if="!shouldRecord" icon="i-lucide-mic" @click="shouldRecord = true">{{
-            t("pages.index.recordAudio") }}</UButton>
+        <UButton
+            v-if="!shouldRecord"
+            icon="i-lucide-mic"
+            @click="shouldRecord = true"
+            >{{ t("pages.index.recordAudio") }}</UButton
+        >
     </div>
     <div v-if="isReady && shouldRecord">
-        <AudioRecorder :logger="debugLog" auto-start :show-result="true" @recording-stopped="onRecordingStopped" />
+        <AudioRecorder
+            :logger="debugLog"
+            auto-start
+            :show-result="true"
+            @recording-stopped="onRecordingStopped"
+        />
     </div>
 </template>

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useWindowScroll, useWindowSize } from "@vueuse/core";
 import { motion } from "motion-v";
 import { v4 as uuid } from "uuid";
 import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
@@ -19,12 +20,28 @@ const props = withDefaults(defineProps<InputProps>(), {
 
 const { executeCommand } = useCommandBus();
 
-const listContainer = ref<HTMLElement>();
 const segmentRefs = ref<Map<string, HTMLElement>>(new Map());
+const { height: windowHeight } = useWindowSize();
+const segmentSize = 192;
+const { y } = useWindowScroll();
+
+const maxSegment = ref(0);
+
+watch(
+    () => [windowHeight.value, y.value],
+    () => {
+        const max =
+            Math.floor((windowHeight.value + y.value) / segmentSize) + 1;
+
+        maxSegment.value = Math.max(maxSegment.value, max);
+    },
+    { immediate: true },
+);
 
 const segments = computed(() =>
     props.transcription.segments.toSorted((a, b) => a.start - b.start),
 );
+
 const speakers = computed(() =>
     Array.from(getUniqueSpeakers(props.transcription.segments)),
 );
@@ -92,15 +109,16 @@ function isSegmentActive(segmentId: string): boolean {
     return currentSegmentId.value === segmentId;
 }
 
-watch(currentSegmentId, (newId, oldId) => {
-    if (
-        !props.autoScrollEnabled ||
-        !newId ||
-        !listContainer.value ||
-        newId === oldId
-    ) {
+watch(currentSegmentId, async (newId, oldId) => {
+    if (!props.autoScrollEnabled || !newId || newId === oldId) {
         return;
     }
+
+    const index = segments.value.findIndex((s) => s.id === newId);
+    maxSegment.value = Math.max(index + 2, maxSegment.value);
+
+    // wait for the element to load
+    await nextTick();
 
     const segmentEl = segmentRefs.value.get(newId);
     if (!segmentEl) {
@@ -128,7 +146,7 @@ async function addSegemntAtZero() {
 </script>
 
 <template>
-    <div ref="listContainer" class="flex flex-col">
+    <div class="flex flex-col">
         <USeparator id="add-transcription-top">
             <UButton
                 icon="i-lucide-plus"
@@ -141,7 +159,7 @@ async function addSegemntAtZero() {
         <AnimatePresence>
             <div id="transcription-segments">
                 <motion.div
-                    v-for="segment in segments"
+                    v-for="segment in segments.slice(0, maxSegment)"
                     :key="segment.id"
                     :initial="{ opacity: 0, scaleY: 0 }"
                     :animate="{ opacity: 1, scaleY: 1 }"
