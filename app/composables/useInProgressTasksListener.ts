@@ -1,7 +1,11 @@
 import { isApiError } from "@dcc-bs/communication.bs.js";
 import { liveQuery, type Subscription } from "dexie";
 import { db } from "~/stores/db";
-import { type StoredTask, TaskStatusEnum, TaskStatusSchema } from "~/types/task";
+import {
+    type StoredTask,
+    TaskStatusEnum,
+    TaskStatusSchema,
+} from "~/types/task";
 import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
 
 export function useInProgressTasksListener() {
@@ -16,7 +20,9 @@ export function useInProgressTasksListener() {
     let subscription: Subscription | undefined;
 
     const observable = liveQuery(() =>
-        db.tasks.filter((t) => t.status.status === TaskStatusEnum.IN_PROGRESS).toArray(),
+        db.tasks
+            .filter((t) => t.status.status === TaskStatusEnum.IN_PROGRESS)
+            .toArray(),
     );
 
     let pollInterval: number | unknown | undefined;
@@ -32,7 +38,7 @@ export function useInProgressTasksListener() {
 
         pollInterval = setInterval(() => {
             updateTasks();
-        }, 10000)
+        }, 10000);
     });
 
     onUnmounted(() => {
@@ -65,6 +71,10 @@ export function useInProgressTasksListener() {
                 } else {
                     taskErrors.value.push(new Error(String(e)));
                 }
+
+                if (taskErrors.value.length > 5) {
+                    taskErrors.value = taskErrors.value.slice(-5);
+                }
             }
         }
     }
@@ -84,13 +94,20 @@ export function useInProgressTasksListener() {
             throw new Error(t(`errors.${transcriptionResponse.errorId}`));
         }
 
-        const mediaFileName = fullTask.mediaFileName ?? `transcription-${task.createdAt?.toISOString() ?? task.id}`;
-        await applyTaskResult(task.id, transcriptionResponse, fullTask.mediaFile, mediaFileName);
+        const mediaFileName =
+            fullTask.mediaFileName ??
+            `transcription-${task.createdAt?.toISOString() ?? task.id}`;
+        await applyTaskResult(
+            task.id,
+            transcriptionResponse,
+            fullTask.mediaFile,
+            mediaFileName,
+        );
         await deleteTask(task.id);
     }
 
     return {
         unfinishedTasks,
         taskErrors,
-    }
+    };
 }

@@ -16,6 +16,7 @@ const { t } = useI18n();
 const { formatDate } = useDateFormatter();
 const { getStatusDisplay, getStatusColor, computeTaskProgress } =
     useTaskStatus();
+const { deleteTask } = useTasks();
 
 const columns = [
     {
@@ -91,6 +92,9 @@ const columns = [
                             }}%)
                         </span>
                     </template>
+                    <UButton color="error" variant="outline" size="xs" @click="deleteTask(task.id)">
+                        {{ t("processing.delete") }}
+                    </UButton>
                 </div>
             </div>
         </div>
