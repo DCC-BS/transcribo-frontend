@@ -28,12 +28,13 @@ const start_progression: [MediaProgress, MediaProgress, MediaProgress] = [
     },
 ];
 
-const progressions = ref<[MediaProgress, MediaProgress, MediaProgress]>(start_progression);
+const progressions =
+    ref<[MediaProgress, MediaProgress, MediaProgress]>(start_progression);
 
 const { extractAudioFromVideo } = useAudioExtract();
 const { t } = useI18n();
 const logger = useLogger();
-const { addTask } = useTasks();
+const { addTask, deleteTask } = useTasks();
 const { pollTaskStatus, applyTaskResult } = useTaskListener();
 
 onMounted(() => {
@@ -76,6 +77,7 @@ async function preprocessMedia(progress: MediaProgress) {
 
     progress.message = "audio preprocessed";
     progress.progress = 100;
+
     // on audio do nothin
     return input.value.media;
 }
@@ -88,6 +90,7 @@ async function uploadFile(
     progress.progress = null;
 
     const formData = new FormData();
+
     formData.append("audio_file", processedFile);
 
     if (input.value.language !== "auto") {
@@ -111,7 +114,9 @@ async function uploadFile(
     }
 
     progress.progress = 90;
-    await addTask(response, input.value.media, input.value.media.name);
+
+    deleteTask(input.value.task.id);
+    addTask(response, input.value.media, input.value.media.name);
 
     progress.progress = 100;
     return response;
@@ -146,21 +151,41 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
 </script>
 
 <template>
-    <div class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]">
+    <div
+        class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]"
+    >
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">
-                <MediaProgressView :media="input.media" :mediaName="input.media.name" :progressSteps="progressions" />
+                <MediaProgressView
+                    :media="input.media"
+                    :mediaName="input.media.name"
+                    :progressSteps="progressions"
+                />
             </div>
         </div>
 
         <!-- Error Message Display -->
-        <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
+        <motion.div
+            v-if="errorMessage"
+            :animate="{ opacity: 1, y: 0 }"
+            :initial="{ opacity: 0, y: 20 }"
             :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
-            class="mt-8 max-w-md w-full flex flex-col gap-2 justify-center">
-            <UAlert icon="i-lucide-alert-circle" color="error" title="error" :description="errorMessage"></UAlert>
+            class="mt-8 max-w-md w-full flex flex-col gap-2 justify-center"
+        >
+            <UAlert
+                icon="i-lucide-alert-circle"
+                color="error"
+                title="error"
+                :description="errorMessage"
+            ></UAlert>
 
-            <UButton @click="processMedia()" icon="i-lucide-rotate-ccw" color="secondary" variant="subtle">retry
+            <UButton
+                @click="processMedia()"
+                icon="i-lucide-rotate-ccw"
+                color="secondary"
+                variant="subtle"
+                >retry
             </UButton>
         </motion.div>
     </div>

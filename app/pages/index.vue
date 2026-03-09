@@ -1,26 +1,36 @@
 <script lang="ts" setup>
-import type { UploadFileCommand } from "~/types/commands";
-import { Cmds } from "~/types/commands";
 import type {
     MediaConfigureData,
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
 
 const { t } = useI18n();
-const { onCommand } = useCommandBus();
-const { addTask } = useTasks();
+const { getTask, deleteTask } = useTasks();
+const route = useRoute();
+const { showError } = useUserFeedback();
+const logger = useLogger();
+
+const taskId = route.query.taskId as string | undefined;
 
 const step = ref(1);
 const mediaSelectionData = ref<MediaSelectionData>();
 const mediaPreviewData = ref<MediaConfigureData>();
 
-onCommand<UploadFileCommand>(Cmds.UploadFileCommand, async (command) => {
-    const file = command.file;
-    const status = command.status;
+if (taskId) {
+    const task = await getTask(taskId);
 
-    const storedTask = await addTask(status, file, file.name);
-    navigateTo(`task/${storedTask.id}`);
-});
+    if (!task?.mediaFile || !task.mediaFileName) {
+        const error = new Error("Task not found or has no media file");
+        showError(error);
+        logger.error(error, `Failed to load task with id ${taskId}`);
+    } else {
+        deleteTask(taskId);
+        mediaSelectionData.value = {
+            media: new File([task.mediaFile], task.mediaFileName),
+        };
+        step.value = 2;
+    }
+}
 
 function onMediaSelected(data: MediaSelectionData) {
     mediaSelectionData.value = data;

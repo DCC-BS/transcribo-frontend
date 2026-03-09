@@ -21,7 +21,7 @@ export function useInProgressTasksListener() {
 
     const observable = liveQuery(() =>
         db.tasks
-            .filter((t) => t.status.status === TaskStatusEnum.IN_PROGRESS)
+            .filter((t) => t.status.status !== TaskStatusEnum.COMPLETED)
             .toArray(),
     );
 
@@ -49,7 +49,9 @@ export function useInProgressTasksListener() {
     });
 
     async function updateTasks() {
-        for (const task of unfinishedTasks.value) {
+        for (const task of unfinishedTasks.value.filter(
+            (t) => t.status.status === TaskStatusEnum.IN_PROGRESS,
+        )) {
             try {
                 const statusResponse = await apiFetch(
                     `/api/transcribe/${task.id}/status`,

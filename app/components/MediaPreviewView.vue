@@ -5,10 +5,12 @@ import type {
     MediaConfigureData,
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
+import type { StoredTask, TaskStatus } from "~/types/task";
+import { v4 as uuidv4 } from "uuid";
 
 const emit = defineEmits<(e: "onNext", payload: MediaConfigureData) => void>();
-
 const input = defineModel<MediaSelectionData>("input", { required: true });
+const { addTask, deleteTask } = useTasks();
 
 const { t } = useI18n();
 
@@ -42,6 +44,30 @@ const audioLanguageOptions: SelectMenuItem[] = [
 
 const isVideo = computed(() => isVideoFile(input.value.media));
 const mediaSource = computed(() => URL.createObjectURL(input.value.media));
+const task = ref<StoredTask>();
+
+watch(
+    input,
+    async () => {
+        if (task.value) {
+            await deleteTask(task.value.id);
+        }
+
+        const newId = uuidv4();
+        const newStatus = {
+            progress: 0,
+            status: "pending",
+            task_id: newId,
+            created_at: new Date(),
+        } as TaskStatus;
+        task.value = await addTask(
+            newStatus,
+            input.value.media,
+            input.value.media.name,
+        );
+    },
+    { immediate: true },
+);
 
 onUnmounted(() => {
     URL.revokeObjectURL(mediaSource.value);
@@ -56,7 +82,12 @@ function formatFileSize(bytes: number): string {
 }
 
 function onNext() {
+    if (!task.value) {
+        return;
+    }
+
     const outputData: MediaConfigureData = {
+        task: task.value,
         media: input.value.media,
         numSpeaker: numSpeaker.value,
         language: language.value,

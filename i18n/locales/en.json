@@ -268,6 +268,10 @@
         "description": "Monitor the status of your transcription tasks",
         "refresh": "Refresh",
         "unknownFile": "Unknown file",
+        "transcribe": "Transcribe",
+        "delete": "Delete",
+        "noTasksFound": "No tasks found",
+        "noTasksDescription": "There are no transcriptions currently in progress",
         "table": {
             "fileName": "File Name",
             "createdAt": "Created At",

@@ -65,16 +65,6 @@ export function useTasks() {
             .delete();
     }
 
-    async function cleanupFailedAndCanceledTasks() {
-        await db.tasks
-            .filter(
-                (t) =>
-                    t.status.status === TaskStatusEnum.FAILED ||
-                    t.status.status === TaskStatusEnum.COMPLETED,
-            )
-            .delete();
-    }
-
     return {
         getTasks,
         getTasksByStatus,
@@ -83,6 +73,5 @@ export function useTasks() {
         deleteTask,
         updateTaskStatus,
         cleanupOldTask,
-        cleanupFailedAndCanceledTasks,
     };
 }

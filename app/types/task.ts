@@ -6,6 +6,7 @@ import { z } from "zod";
  * Corresponds to the Python TaskStatusEnum
  */
 export const TaskStatusEnumSchema = z.enum([
+    "pending",
     "in_progress",
     "completed",
     "failed",

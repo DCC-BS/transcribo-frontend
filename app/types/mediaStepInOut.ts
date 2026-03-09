@@ -1,8 +1,11 @@
+import type { StoredTask } from "./task";
+
 export type MediaSelectionData = {
     media: File;
 };
 
 export type MediaConfigureData = {
+    task: StoredTask;
     media: File;
     numSpeaker: string;
     language: string;
