@@ -28,7 +28,7 @@ export const SegmentSchema = z.object({
     start: z.number(),
     end: z.number(),
     text: z.string(),
-    speaker: z.string().optional(),
+    speaker: z.string().nullable().optional(),
 });
 
 /**
