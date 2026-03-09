@@ -400,6 +400,10 @@
         "su": "Sundanese",
         "yue": "Chinese (traditional)"
     },
+    "transcriptionList": {
+        "title": "Your Transcriptions",
+        "description": "Here you can see all your transcribed files"
+    },
     "retention": {
         "title": "Availability of Transcriptions",
         "description": "Transcriptions older than {retentionDays} days are automatically deleted."

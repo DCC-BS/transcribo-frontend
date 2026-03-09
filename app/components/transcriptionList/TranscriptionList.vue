@@ -26,6 +26,7 @@ const segmentSize = 192;
 const { y } = useWindowScroll();
 
 const maxSegment = ref(0);
+const useProgress = computed(() => segments.value.length < 500);
 
 watch(
     () => [windowHeight.value, y.value],
@@ -46,15 +47,6 @@ const speakers = computed(() =>
     Array.from(getUniqueSpeakers(props.transcription.segments)),
 );
 
-const throttledProgress = ref(0);
-let progressTimeout: ReturnType<typeof setTimeout> | undefined;
-
-onUnmounted(() => {
-    if (progressTimeout) {
-        clearTimeout(progressTimeout);
-    }
-});
-
 const currentSegmentId = computed(() => {
     const current = segments.value.find(
         (segment) =>
@@ -63,32 +55,6 @@ const currentSegmentId = computed(() => {
     );
     return current?.id;
 });
-
-const activeSegemntProgress = computed(() => {
-    const current = segments.value.find(
-        (segment) => segment.id === currentSegmentId.value,
-    );
-    if (!current) {
-        return 0;
-    }
-
-    return (props.currentTime - current.start) / (current.end - current.start);
-});
-
-watch(
-    activeSegemntProgress,
-    (newProgress) => {
-        if (progressTimeout) {
-            return;
-        }
-
-        throttledProgress.value = newProgress;
-        progressTimeout = setTimeout(() => {
-            progressTimeout = undefined;
-        }, 300);
-    },
-    { immediate: true },
-);
 
 function setSegmentRef(id: string, el: unknown): void {
     if (!el) {
@@ -171,6 +137,7 @@ async function addSegemntAtZero() {
                             :speakers="speakers"
                             :isActive="isSegmentActive(segment.id)"
                             :currentTime="props.currentTime"
+                            :showProgress="useProgress"
                         />
                     </div>
 

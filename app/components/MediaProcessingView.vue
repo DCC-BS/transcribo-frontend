@@ -128,7 +128,9 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
         // on progress
         ({ message, progress }) => {
             mediaProgress.message = message;
+            console.log("Progress update:", message, progress);
             mediaProgress.progress = progress ?? 0 * 100;
+            console.log("Updated media progress:", mediaProgress.progress);
         },
         // on complete
         async (transcription) => {
