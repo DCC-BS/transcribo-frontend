@@ -53,6 +53,7 @@ export const StoredTaskSchema = z.object({
     status: TaskStatusSchema,
     mediaFile: z.instanceof(Blob).optional(),
     mediaFileName: z.string().optional(),
+    mediaType: z.string().optional(),
     createdAt: z.date().optional(),
 });
 

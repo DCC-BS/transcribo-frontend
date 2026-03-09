@@ -16,21 +16,25 @@ const step = ref(1);
 const mediaSelectionData = ref<MediaSelectionData>();
 const mediaPreviewData = ref<MediaConfigureData>();
 
-if (taskId) {
-    const task = await getTask(taskId);
-
-    if (!task?.mediaFile || !task.mediaFileName) {
-        const error = new Error("Task not found or has no media file");
-        showError(error);
-        logger.error(error, `Failed to load task with id ${taskId}`);
-    } else {
-        deleteTask(taskId);
-        mediaSelectionData.value = {
-            media: new File([task.mediaFile], task.mediaFileName),
-        };
-        step.value = 2;
+onMounted(async () => {
+    if (taskId) {
+        const task = await getTask(taskId.trim());
+        if (!task?.mediaFile || !task.mediaFileName) {
+            const error = new Error("Task not found or has no media file");
+            showError(error);
+            logger.error(error, `Failed to load task with id ${taskId}`);
+        } else {
+            deleteTask(taskId);
+            mediaSelectionData.value = {
+                media: new File([task.mediaFile], task.mediaFileName, {
+                    type: task.mediaFile.type,
+                }),
+                taskId: taskId,
+            };
+            step.value = 2;
+        }
     }
-}
+});
 
 function onMediaSelected(data: MediaSelectionData) {
     mediaSelectionData.value = data;

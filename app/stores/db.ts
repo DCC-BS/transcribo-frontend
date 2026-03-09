@@ -9,6 +9,5 @@ export const db = new Dexie("transcribo-db") as Dexie & {
 
 db.version(3).stores({
     tasks: "id, status, createdAt",
-    transcriptions:
-        "id, segments, name, createdAt, updatedAt, audioFiledId",
+    transcriptions: "id, segments, name, createdAt, updatedAt, audioFiledId",
 });

@@ -101,7 +101,10 @@ const SAMPLE_TRANSCRIPT_SEGMENTS: DummySegment[] = [
 const SAMPLE_SUMMARY =
     "The meeting covered the upcoming product launch, with discussions on timelines, marketing materials, technical development progress, and budget allocation. The engineering team has completed core features and is now in testing phase. Marketing materials are ready for review. Budget is on track with allocation for both digital and traditional channels. A follow-up meeting was scheduled for next Tuesday to finalize the launch strategy.";
 
-export function createDummyTaskStatus(taskId: string, status: StatusType = "completed"): DummyTaskStatus {
+export function createDummyTaskStatus(
+    taskId: string,
+    status: StatusType = "completed",
+): DummyTaskStatus {
     return {
         task_id: taskId,
         status: status,

@@ -1,6 +1,7 @@
 {
     "common": {
-        "speakers": "Sprecherinnen und Sprecher"
+        "speakers": "Sprecherinnen und Sprecher",
+        "retry": "Erneut versuchen"
     },
     "upload": {
         "convertingMedia": "Konvertiere Medien in WAV-Format...",
@@ -170,6 +171,16 @@
         }
     },
     "task": {
+        "status": {
+            "in_progress": "In Bearbeitung",
+            "completed": "Abgeschlossen",
+            "failed": "Fehlgeschlagen",
+            "cancelled": "Abgebrochen"
+        },
+        "preprocessing": {
+            "extractedAudio": "Audio aus Video extrahiert",
+            "audioPreprocessed": "Audio vorbereitet"
+        },
         "errors": {
             "noMediaFile": "Keine Mediendatei für diese Aufgabe gefunden",
             "failedToLoad": "Fehler beim Laden der Aufgabe",

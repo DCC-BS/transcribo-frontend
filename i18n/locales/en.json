@@ -1,6 +1,7 @@
 {
     "common": {
-        "speakers": "Speakers"
+        "speakers": "Speakers",
+        "retry": "Retry"
     },
     "upload": {
         "convertingMedia": "Converting media to WAV format...",
@@ -170,6 +171,16 @@
         }
     },
     "task": {
+        "status": {
+            "in_progress": "In progress",
+            "completed": "Completed",
+            "failed": "Failed",
+            "cancelled": "Cancelled"
+        },
+        "preprocessing": {
+            "extractedAudio": "Extracted audio from video",
+            "audioPreprocessed": "Audio preprocessed"
+        },
         "errors": {
             "noMediaFile": "No media file found for task",
             "failedToLoad": "Failed to get task",

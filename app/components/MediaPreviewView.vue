@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import type { SelectMenuItem } from "@nuxt/ui";
 import { motion } from "motion-v";
+import { v4 as uuidv4 } from "uuid";
 import type {
     MediaConfigureData,
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
 import type { StoredTask, TaskStatus } from "~/types/task";
-import { v4 as uuidv4 } from "uuid";
 
 const emit = defineEmits<(e: "onNext", payload: MediaConfigureData) => void>();
 const input = defineModel<MediaSelectionData>("input", { required: true });
@@ -57,13 +57,14 @@ watch(
         const newStatus = {
             progress: 0,
             status: "pending",
-            task_id: newId,
+            task_id: input.value.taskId ?? newId,
             created_at: new Date(),
         } as TaskStatus;
         task.value = await addTask(
             newStatus,
             input.value.media,
             input.value.media.name,
+            input.value.media.type,
         );
     },
     { immediate: true },

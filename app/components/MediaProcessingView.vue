@@ -69,13 +69,13 @@ async function preprocessMedia(progress: MediaProgress) {
             type: audioBlob.type,
         });
 
-        progress.message = "Extracted Audio form Video";
+        progress.message = t("task.preprocessing.extractedAudio");
         progress.progress = 100;
 
         return audioFile;
     }
 
-    progress.message = "audio preprocessed";
+    progress.message = t("task.preprocessing.audioPreprocessed");
     progress.progress = 100;
 
     // on audio do nothin
@@ -116,7 +116,12 @@ async function uploadFile(
     progress.progress = 90;
 
     deleteTask(input.value.task.id);
-    addTask(response, input.value.media, input.value.media.name);
+    addTask(
+        response,
+        input.value.media,
+        input.value.media.name,
+        input.value.media.type,
+    );
 
     progress.progress = 100;
     return response;
@@ -127,10 +132,8 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
         task.task_id,
         // on progress
         ({ message, progress }) => {
-            mediaProgress.message = message;
-            console.log("Progress update:", message, progress);
-            mediaProgress.progress = progress ?? 0 * 100;
-            console.log("Updated media progress:", mediaProgress.progress);
+            mediaProgress.message = t(`task.status.${message}`);
+            mediaProgress.progress = progress;
         },
         // on complete
         async (transcription) => {
@@ -178,7 +181,7 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
             <UAlert
                 icon="i-lucide-alert-circle"
                 color="error"
-                title="error"
+                :title="t('upload.error')"
                 :description="errorMessage"
             ></UAlert>
 
@@ -187,7 +190,7 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
                 icon="i-lucide-rotate-ccw"
                 color="secondary"
                 variant="subtle"
-                >retry
+                >{{ t("common.retry") }}
             </UButton>
         </motion.div>
     </div>

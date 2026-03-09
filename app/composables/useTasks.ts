@@ -3,7 +3,7 @@ import {
     type StoredTask,
     StoredTaskSchema,
     type TaskStatus,
-    TaskStatusEnum,
+    type TaskStatusEnum,
 } from "~/types/task";
 
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
@@ -25,6 +25,7 @@ export function useTasks() {
         status: TaskStatus,
         mediaFile?: File | Blob,
         mediaFileName?: string,
+        mediaFileType?: string,
     ): Promise<StoredTask> {
         const newTask = StoredTaskSchema.parse({
             id: status.task_id,
@@ -35,6 +36,7 @@ export function useTasks() {
         if (mediaFile) {
             newTask.mediaFile = mediaFile;
             newTask.mediaFileName = mediaFileName ?? "media-file";
+            newTask.mediaType = mediaFileType ?? mediaFile.type;
         }
 
         await db.tasks.add(newTask);
