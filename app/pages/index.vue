@@ -38,10 +38,6 @@ onMounted(async () => {
     } else {
         const pendingTasks = await getTasksByStatus(TaskStatusEnum.PENDING);
         hasPendingTasks.value = pendingTasks.length > 0;
-        console.log(
-            `User has ${pendingTasks.length} pending tasks`,
-            "Checked for pending tasks on home page",
-        );
     }
 });
 
@@ -83,12 +79,12 @@ function onMediaConfigure(payload: MediaConfigureData) {
 
         <div class="flex items-center justify-center">
             <UButton
-                    icon="i-lucide-file-up"
-                    variant="link"
-                    :aria-label="t('pages.index.step1')"
-                    :class="{ 'font-bold': step === 1 }"
-                    @click="step = 1"
-                >
+                icon="i-lucide-file-up"
+                variant="link"
+                :aria-label="t('pages.index.step1')"
+                :class="{ 'font-bold': step === 1 }"
+                @click="step = 1"
+            >
                 <span class="hidden md:inline">
                     1. {{ t("pages.index.step1") }}
                 </span>

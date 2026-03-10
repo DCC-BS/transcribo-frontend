@@ -16,6 +16,12 @@ export function useTasks() {
         return db.tasks.where("id").equals(id).first();
     }
 
+    function getTasksByStatus(status: TaskStatusEnum): Promise<StoredTask[]> {
+        return db.tasks
+            .filter((task) => task.status.status === status)
+            .toArray();
+    }
+
     async function addTask(
         status: TaskStatus,
         mediaFile?: File | Blob,
@@ -65,6 +71,7 @@ export function useTasks() {
     return {
         getTasks,
         getTask,
+        getTasksByStatus,
         addTask,
         deleteTask,
         updateTaskStatus,
