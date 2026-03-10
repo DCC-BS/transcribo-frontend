@@ -1,6 +1,15 @@
+<script setup lang="ts">
+const { t } = useI18n();
+</script>
+
 <template>
     <div>
         <NavigationBar>
+            <template #left>
+                <div class="hidden md:block text-xl font-bold mt-4 ml-4">
+                    {{ t("navigation.app") }}
+                </div>
+            </template>
             <template #center>
                 <slot name="center" />
             </template>

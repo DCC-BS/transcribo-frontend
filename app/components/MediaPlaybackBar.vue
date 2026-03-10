@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-import { Cmds, type SeekToSecondsCommand, type TogglePlayCommand } from "~/types/commands";
+import {
+    Cmds,
+    type SeekToSecondsCommand,
+    type TogglePlayCommand,
+} from "~/types/commands";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { formatTime } from "~/utils/time";
 
@@ -19,6 +23,7 @@ const videoElement = ref<HTMLVideoElement | null>(null);
 const audioElement = ref<HTMLAudioElement | null>(null);
 const isPlaying = ref<boolean>(false);
 const isVideoFile = ref<boolean>(false);
+const playbackRate = ref<number>(1);
 
 const segments = computed(() => props.transcription.segments ?? []);
 
@@ -62,6 +67,10 @@ watch(
     { immediate: true },
 );
 
+watch(playbackRate, (rate) => {
+    updatePlaybackRate(rate);
+});
+
 function loadMedia(): void {
     if (!props.transcription?.mediaFile) {
         return;
@@ -75,6 +84,7 @@ function loadMedia(): void {
     mediaSrc.value = URL.createObjectURL(mediaFile.value);
     isVideoFile.value = mediaFile.value.type.startsWith("video/");
     isPlaying.value = false;
+    nextTick(() => updatePlaybackRate(playbackRate.value));
 }
 
 function togglePlay(): void {
@@ -117,73 +127,144 @@ function onSliderChange(value: number | undefined): void {
     }
 }
 
+function updatePlaybackRate(rate: number): void {
+    if (videoElement.value) {
+        videoElement.value.playbackRate = rate;
+    } else if (audioElement.value) {
+        audioElement.value.playbackRate = rate;
+    }
+}
+
 function toggleExpanded(): void {
     isExpanded.value = !isExpanded.value;
 }
 </script>
 
 <template>
-    <div id="media-playback-bar" class=" bg-default border-b border-default shadow-sm">
+    <div
+        id="media-playback-bar"
+        class="bg-default border-b border-default shadow-sm"
+    >
         <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
-        <div v-show="isExpanded" class="p-2">
-            <div class="media-container" :class="{ 'media-container--audio': !isVideoFile }">
+        <div class="p-2">
+            <div
+                v-show="isExpanded"
+                class="media-container"
+                :class="{ 'media-container--audio': !isVideoFile }"
+            >
                 <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
-                <video v-if="isVideoFile && mediaFile" ref="videoElement" class="media-player rounded"
-                    @timeupdate="onTimeUpdate" @click="togglePlay">
-                    <source :src="mediaSrc" :type="mediaFile.type">
+                <video
+                    v-if="isVideoFile && mediaFile"
+                    ref="videoElement"
+                    class="media-player rounded"
+                    @timeupdate="onTimeUpdate"
+                    @click="togglePlay"
+                    playsinline
+                    webkit-playsinline
+                >
+                    <source :src="mediaSrc" :type="mediaFile.type" />
                 </video>
-                <audio v-if="!isVideoFile && mediaFile" ref="audioElement" :src="mediaSrc" @timeupdate="onTimeUpdate" />
+                <audio
+                    v-if="!isVideoFile && mediaFile"
+                    ref="audioElement"
+                    :src="mediaSrc"
+                    @timeupdate="onTimeUpdate"
+                />
 
-                <div v-if="!isVideoFile && mediaFile" class="audio-visualization">
-                </div>
+                <div
+                    v-if="!isVideoFile && mediaFile"
+                    class="audio-visualization"
+                ></div>
 
                 <div class="subtitles-container">
-                    <div v-for="segment in currentSegments" :key="segment.id" class="subtitle-segment" :style="{
-                        '--text-color': getSpeakerColor(segment.speaker ?? 'unknown').toString(),
-                    }">
+                    <div
+                        v-for="segment in currentSegments"
+                        :key="segment.id"
+                        class="subtitle-segment"
+                        :style="{
+                            '--text-color': getSpeakerColor(
+                                segment.speaker ?? 'unknown',
+                            ).toString(),
+                        }"
+                    >
                         <span class="font-bold">{{ segment.speaker }}: </span>
                         <span>{{ segment.text }}</span>
                     </div>
                 </div>
             </div>
 
-            <div class="controls flex gap-2 items-center mt-2">
-                <UButton id="media-play-button" size="sm" color="secondary" @click="togglePlay">
-                    <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
+            <div class="flex items-center gap-2 p-2">
+                <UButton
+                    size="sm"
+                    color="secondary"
+                    variant="ghost"
+                    :aria-label="isPlaying ? 'Pause' : 'Play'"
+                    @click="togglePlay"
+                >
+                    <UIcon
+                        :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'"
+                    />
                 </UButton>
 
-                <USlider :model-value="currentTime" color="secondary" :min="0" :max="props.duration" :step="0.1"
-                    class="flex-1" @update:model-value="onSliderChange" />
+                <USlider
+                    :model-value="currentTime"
+                    color="secondary"
+                    :min="0"
+                    :max="props.duration"
+                    :step="0.1"
+                    class="flex-1"
+                    @update:model-value="onSliderChange"
+                />
 
-                <div class="text-sm text-muted-foreground min-w-[100px] text-right">
+                <UPopover>
+                    <UButton class="w-10" variant="ghost" color="secondary"
+                        >{{ playbackRate }}x</UButton
+                    >
+                    <template #content>
+                        <div class="p-2 bg-default/50 backdrop-blur-sm rounded">
+                            <USlider
+                                v-model="playbackRate"
+                                :min="0.1"
+                                :max="3"
+                                :step="0.1"
+                            ></USlider>
+                            <div class="flex gap-1 p-2">
+                                <UButton
+                                    v-for="i in [0.25, 0.5, 1, 1.5, 2, 3]"
+                                    variant="outline"
+                                    color="secondary"
+                                    @click="playbackRate = i"
+                                    >{{ i }}x</UButton
+                                >
+                            </div>
+                        </div>
+                    </template>
+                </UPopover>
+
+                <div
+                    class="text-sm text-muted-foreground min-w-[80px] text-right"
+                >
                     {{ formatTime(currentTime, { milliseconds: false }) }} /
                     {{ formatTime(props.duration, { milliseconds: false }) }}
                 </div>
 
-                <UButton id="media-expand-button" size="sm" variant="ghost" @click="toggleExpanded">
-                    <UIcon name="i-lucide-chevron-up" />
+                <UButton
+                    id="media-expand-button"
+                    size="sm"
+                    variant="ghost"
+                    @click="toggleExpanded"
+                    :aria-label="isExpanded ? 'Collapse' : 'Expand'"
+                >
+                    <UIcon
+                        :name="
+                            isExpanded
+                                ? 'i-lucide-chevron-up'
+                                : 'i-lucide-chevron-down'
+                        "
+                    />
                 </UButton>
             </div>
         </div>
-
-        <div v-show="!isExpanded" class="flex items-center gap-2 p-2">
-            <UButton size="sm" color="secondary" variant="ghost" @click="togglePlay">
-                <UIcon :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'" />
-            </UButton>
-
-            <USlider :model-value="currentTime" color="secondary" :min="0" :max="props.duration" :step="0.1"
-                class="flex-1" @update:model-value="onSliderChange" />
-
-            <div class="text-sm text-muted-foreground min-w-[100px] text-right">
-                {{ formatTime(currentTime, { milliseconds: false }) }} /
-                {{ formatTime(props.duration, { milliseconds: false }) }}
-            </div>
-
-            <UButton id="media-expand-button-collapsed" size="sm" variant="ghost" @click="toggleExpanded">
-                <UIcon name="i-lucide-chevron-down" />
-            </UButton>
-        </div>
-
     </div>
 </template>
 

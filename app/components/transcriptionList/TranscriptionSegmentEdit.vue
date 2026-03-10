@@ -15,9 +15,13 @@ interface TranscriptionListProps {
     speakers: string[];
     isActive?: boolean;
     currentTime: number;
+    showProgress?: boolean;
 }
 
-const props = defineProps<TranscriptionListProps>();
+const props = withDefaults(defineProps<TranscriptionListProps>(), {
+    isActive: false,
+    showProgress: true,
+});
 
 const MotionCard = motion.create(UCard);
 
@@ -31,40 +35,37 @@ const duration = ref(0);
 watch(
     () => props.segment,
     (segment) => {
-        internalSegment.value = { ...segment };
-        isDirty.value = false;
+        if (!isDirty.value) {
+            internalSegment.value = { ...segment };
+        }
     },
 );
+
+function markDirty(): void {
+    isDirty.value = true;
+}
+
+let unsubscribe: WatchHandle | undefined;
 
 watch(
-    internalSegment,
-    () => {
-        if (isDirty.value) {
-            return;
-        }
-
-        if (
-            JSON.stringify(internalSegment.value) !==
-            JSON.stringify(props.segment)
-        ) {
-            isDirty.value = true;
+    () => props.isActive,
+    (isActive) => {
+        if (isActive && props.showProgress) {
+            unsubscribe = watch(
+                () => props.currentTime,
+                (tNew, tOld) => {
+                    const { start, end } = internalSegment.value;
+                    progress.value = (tNew - start) / (end - start);
+                    duration.value = Math.abs(tNew - tOld);
+                },
+            );
+        } else if (unsubscribe) {
+            unsubscribe();
+            progress.value = 0;
         }
     },
-    { deep: true },
+    { immediate: true },
 );
-
-let unsubsribe: WatchHandle | undefined ;
-
-watch(() => props.isActive, () => {
-    if (props.isActive) {
-        unsubsribe = watch(() => props.currentTime, (tNew, tOld) => {
-            progress.value = (tNew - internalSegment.value.start) / (internalSegment.value.end - internalSegment.value.start);
-            duration.value = Math.abs(tNew - tOld);
-        });
-    } else if (unsubsribe) {
-        unsubsribe();
-    }
-}, { immediate: true });
 
 function removeSegment(segment: SegmentWithId): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
@@ -80,7 +81,6 @@ function applyChanges(): void {
     const newSegment = internalSegment.value as Record<string, unknown>;
     const oldSegment = props.segment as unknown as Record<string, unknown>;
 
-    // difference between the original segment and the new segment
     const updates = Object.keys(newSegment).reduce(
         (acc: Record<string, unknown>, key) => {
             if (newSegment[key] !== oldSegment[key]) {
@@ -101,13 +101,9 @@ function unDoChanges(): void {
     internalSegment.value = { ...props.segment };
 }
 
-// Function to handle keydown events in the textarea
 function handleKeydown(event: KeyboardEvent): void {
-    // Check if Enter is pressed without Shift (Shift+Enter creates a new line)
     if (event.key === "Enter" && !event.shiftKey) {
-        // Prevent the default newline insertion
         event.preventDefault();
-        // Apply changes if there are any
         if (isDirty.value) {
             applyChanges();
         }
@@ -115,20 +111,18 @@ function handleKeydown(event: KeyboardEvent): void {
 }
 
 function handleCreateSpeaker(speaker: string): void {
-    // Set the new speaker as the current speaker
     internalSegment.value.speaker = speaker;
 }
 
-// Round a number to two decimal places
 function roundToTwoDecimals(value: number): number {
     return Math.round(value * 100) / 100;
 }
 
-// Computed properties for rounded input values
 const startTimeFormatted = computed({
     get: () => roundToTwoDecimals(internalSegment.value.start),
     set: (value: number) => {
         internalSegment.value.start = value;
+        markDirty();
     },
 });
 
@@ -136,6 +130,7 @@ const endTimeFormatted = computed({
     get: () => roundToTwoDecimals(internalSegment.value.end),
     set: (value: number) => {
         internalSegment.value.end = value;
+        markDirty();
     },
 });
 </script>
@@ -146,7 +141,7 @@ const endTimeFormatted = computed({
             ? 'ring-2 ring-teal-500'
             : ''
     }" class="relative overflow-hidden">
-        <motion.div v-if="props.isActive" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
+        <motion.div v-if="props.isActive && props.showProgress" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
             :transition="{ duration: duration, ease: 'linear' }"
             class="absolute inset-0 origin-left pointer-events-none z-0"
             style="background: linear-gradient(to right, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.25));" />
@@ -164,11 +159,11 @@ const endTimeFormatted = computed({
                         onClick: applyChanges,
                     },
                 ]" />
-            <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" />
+            <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" @input="markDirty" />
 
             <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
                 <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
-                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
+                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" @update:model-value="markDirty()" />
 
                 <div class="flex gap-2 items-center">
                     <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"

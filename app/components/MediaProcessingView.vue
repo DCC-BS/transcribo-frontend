@@ -10,7 +10,7 @@ const input = defineModel<MediaConfigureData>("input", { required: true });
 
 const errorMessage = ref<string>();
 
-const progressions = ref<[MediaProgress, MediaProgress, MediaProgress]>([
+const start_progression: [MediaProgress, MediaProgress, MediaProgress] = [
     {
         icon: "i-lucide-file",
         message: "...",
@@ -26,12 +26,15 @@ const progressions = ref<[MediaProgress, MediaProgress, MediaProgress]>([
         message: "...",
         progress: 0,
     },
-]);
+];
+
+const progressions =
+    ref<[MediaProgress, MediaProgress, MediaProgress]>(start_progression);
 
 const { extractAudioFromVideo } = useAudioExtract();
 const { t } = useI18n();
 const logger = useLogger();
-const { addTask } = useTasks();
+const { addTask, deleteTask } = useTasks();
 const { pollTaskStatus, applyTaskResult } = useTaskListener();
 
 onMounted(() => {
@@ -39,9 +42,20 @@ onMounted(() => {
 });
 
 async function processMedia() {
-    const processedFile = await preprocessMedia(progressions.value[0]);
-    const task = await uploadFile(processedFile, progressions.value[1]);
-    await waitForTask(task, progressions.value[2]);
+    try {
+        errorMessage.value = undefined;
+        progressions.value = start_progression;
+        const processedFile = await preprocessMedia(progressions.value[0]);
+        const task = await uploadFile(processedFile, progressions.value[1]);
+        await waitForTask(task, progressions.value[2]);
+    } catch (e) {
+        logger.error(e, "Failed to finish the task");
+        if (!errorMessage.value) {
+            errorMessage.value = `${t(
+                "task.errors.failedToCreateTranscription",
+            )} ${e}`;
+        }
+    }
 }
 
 // extract the audio form when video file; else do nothing
@@ -55,14 +69,15 @@ async function preprocessMedia(progress: MediaProgress) {
             type: audioBlob.type,
         });
 
-        progress.message = "Extracted Audio form Video";
+        progress.message = t("task.preprocessing.extractedAudio");
         progress.progress = 100;
 
         return audioFile;
     }
 
-    progress.message = "audio preprocessed";
+    progress.message = t("task.preprocessing.audioPreprocessed");
     progress.progress = 100;
+
     // on audio do nothin
     return input.value.media;
 }
@@ -75,6 +90,7 @@ async function uploadFile(
     progress.progress = null;
 
     const formData = new FormData();
+
     formData.append("audio_file", processedFile);
 
     if (input.value.language !== "auto") {
@@ -98,7 +114,14 @@ async function uploadFile(
     }
 
     progress.progress = 90;
-    await addTask(response, input.value.media, input.value.media.name);
+
+    deleteTask(input.value.task.id);
+    addTask(
+        response,
+        input.value.media,
+        input.value.media.name,
+        input.value.media.type,
+    );
 
     progress.progress = 100;
     return response;
@@ -109,8 +132,8 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
         task.task_id,
         // on progress
         ({ message, progress }) => {
-            mediaProgress.message = message;
-            mediaProgress.progress = progress ?? 0 * 100;
+            mediaProgress.message = t(`task.status.${message}`);
+            mediaProgress.progress = progress;
         },
         // on complete
         async (transcription) => {
@@ -122,7 +145,7 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
                     input.value.media.name,
                 );
             } catch (e) {
-                logger.error(e, "Failed to finihs the task");
+                logger.error(e, "Failed to finish the task");
                 errorMessage.value = t(
                     "task.errors.failedToCreateTranscription",
                 );
@@ -133,7 +156,9 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
 </script>
 
 <template>
-    <div class="flex flex-col items-center justify-center py-12 px-6">
+    <div
+        class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]"
+    >
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">
@@ -151,14 +176,22 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
             :animate="{ opacity: 1, y: 0 }"
             :initial="{ opacity: 0, y: 20 }"
             :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
-            class="mt-8 max-w-md w-full"
+            class="mt-8 max-w-md w-full flex flex-col gap-2 justify-center"
         >
             <UAlert
                 icon="i-lucide-alert-circle"
                 color="error"
-                title="error"
+                :title="t('upload.error')"
                 :description="errorMessage"
             ></UAlert>
+
+            <UButton
+                @click="processMedia()"
+                icon="i-lucide-rotate-ccw"
+                color="secondary"
+                variant="subtle"
+                >{{ t("common.retry") }}
+            </UButton>
         </motion.div>
     </div>
 </template>

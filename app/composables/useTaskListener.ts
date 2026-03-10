@@ -30,9 +30,12 @@ export function useTaskListener() {
     function calculateProgress(taskStatus: TaskStatus) {
         return match(taskStatus.status)
             .returnType<number>()
-            .with(TaskStatusEnum.IN_PROGRESS, () => taskStatus.progress ?? 0)
-            .with(TaskStatusEnum.COMPLETED, () => 1)
-            .with(TaskStatusEnum.FAILED, () => 1)
+            .with(
+                TaskStatusEnum.IN_PROGRESS,
+                () => (taskStatus.progress ?? 0) * 100,
+            )
+            .with(TaskStatusEnum.COMPLETED, () => 100)
+            .with(TaskStatusEnum.FAILED, () => 100)
             .with(TaskStatusEnum.CANCELLED, () => 0)
             .otherwise(() => 0);
     }

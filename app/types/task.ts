@@ -6,6 +6,7 @@ import { z } from "zod";
  * Corresponds to the Python TaskStatusEnum
  */
 export const TaskStatusEnumSchema = z.enum([
+    "pending",
     "in_progress",
     "completed",
     "failed",
@@ -26,6 +27,7 @@ export const TaskStatusEnum = {
     COMPLETED: "completed" as const,
     FAILED: "failed" as const,
     CANCELLED: "cancelled" as const,
+    PENDING: "pending" as const,
 } as const;
 
 /**
@@ -52,6 +54,7 @@ export const StoredTaskSchema = z.object({
     status: TaskStatusSchema,
     mediaFile: z.instanceof(Blob).optional(),
     mediaFileName: z.string().optional(),
+    mediaType: z.string().optional(),
     createdAt: z.date().optional(),
 });
 

@@ -1,21 +1,21 @@
 <script lang="ts" setup>
 import type { SelectMenuItem } from "@nuxt/ui";
 import { motion } from "motion-v";
+import { v4 as uuidv4 } from "uuid";
 import type {
     MediaConfigureData,
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
+import type { StoredTask, TaskStatus } from "~/types/task";
 
 const emit = defineEmits<(e: "onNext", payload: MediaConfigureData) => void>();
-
 const input = defineModel<MediaSelectionData>("input", { required: true });
+const { addTask, deleteTask } = useTasks();
 
 const { t } = useI18n();
 
 const language = ref<string>("de");
 const numSpeaker = ref<string>("auto");
-
-console.log("MediaPreviewView input:", input.value.media.type);
 
 // Speaker options for the select input
 const speakerOptions = [
@@ -44,6 +44,31 @@ const audioLanguageOptions: SelectMenuItem[] = [
 
 const isVideo = computed(() => isVideoFile(input.value.media));
 const mediaSource = computed(() => URL.createObjectURL(input.value.media));
+const task = ref<StoredTask>();
+
+watch(
+    input,
+    async () => {
+        if (task.value) {
+            await deleteTask(task.value.id);
+        }
+
+        const newId = uuidv4();
+        const newStatus = {
+            progress: 0,
+            status: "pending",
+            task_id: input.value.taskId ?? newId,
+            created_at: new Date(),
+        } as TaskStatus;
+        task.value = await addTask(
+            newStatus,
+            input.value.media,
+            input.value.media.name,
+            input.value.media.type,
+        );
+    },
+    { immediate: true },
+);
 
 onUnmounted(() => {
     URL.revokeObjectURL(mediaSource.value);
@@ -58,7 +83,12 @@ function formatFileSize(bytes: number): string {
 }
 
 function onNext() {
+    if (!task.value) {
+        return;
+    }
+
     const outputData: MediaConfigureData = {
+        task: task.value,
         media: input.value.media,
         numSpeaker: numSpeaker.value,
         language: language.value,
@@ -68,7 +98,7 @@ function onNext() {
 </script>
 
 <template>
-    <div class="w-full">
+    <div class="w-full max-w-[95vw] mx-auto">
         <div
             class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start justify-center max-w-7xl mx-auto p-4 lg:p-6"
         >
@@ -114,12 +144,12 @@ function onNext() {
                         </div>
                         <!-- Video Player -->
                         <div
-                            class="aspect-video w-full overflow-hidden shadow-lg rounded-b-2xl"
+                            class="w-full overflow-hidden shadow-lg rounded-b-2xl bg-black"
                         >
                             <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
                             <video
                                 controls
-                                class="w-full h-full object-contain"
+                                class="w-full h-auto object-contain"
                                 :src="mediaSource"
                                 :type="input.media.type"
                             >

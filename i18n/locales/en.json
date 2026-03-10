@@ -1,6 +1,7 @@
 {
     "common": {
-        "speakers": "Speakers"
+        "speakers": "Speakers",
+        "retry": "Retry"
     },
     "upload": {
         "convertingMedia": "Converting media to WAV format...",
@@ -46,7 +47,13 @@
             "feature3Title": "Secure & Private",
             "feature3Description": "Your data is processed securely and privately",
             "experimentalTitle": "Experimental",
-            "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for recordings longer than 5 minutes. For longer recordings we recommend using the file upload."
+            "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for recordings longer than 5 minutes. For longer recordings we recommend using the file upload.",
+            "step1": "Upload Media",
+            "step2": "Settings",
+            "step3": "Process Media",
+            "pendingTitle": "Unfinished Transcriptions",
+            "pendingDescription": "You have unfinished transcriptions",
+            "goToTranscriptions": "Go to Transcriptions"
         }
     },
     "navigation": {
@@ -167,6 +174,16 @@
         }
     },
     "task": {
+        "status": {
+            "in_progress": "In progress",
+            "completed": "Completed",
+            "failed": "Failed",
+            "cancelled": "Cancelled"
+        },
+        "preprocessing": {
+            "extractedAudio": "Extracted audio from video",
+            "audioPreprocessed": "Audio preprocessed"
+        },
         "errors": {
             "noMediaFile": "No media file found for task",
             "failedToLoad": "Failed to get task",
@@ -265,6 +282,10 @@
         "description": "Monitor the status of your transcription tasks",
         "refresh": "Refresh",
         "unknownFile": "Unknown file",
+        "transcribe": "Transcribe",
+        "delete": "Delete",
+        "noTasksFound": "No tasks found",
+        "noTasksDescription": "There are no transcriptions currently in progress",
         "table": {
             "fileName": "File Name",
             "createdAt": "Created At",
@@ -275,7 +296,8 @@
             "completed": "Completed",
             "failed": "Failed",
             "cancelled": "Cancelled",
-            "processing": "Processing..."
+            "processing": "Processing...",
+            "pending": "Draft"
         },
         "errors": {
             "title": "Error",
@@ -392,6 +414,10 @@
         "jw": "Javanese",
         "su": "Sundanese",
         "yue": "Chinese (traditional)"
+    },
+    "transcriptionList": {
+        "title": "Your Transcriptions",
+        "description": "Here you can see all your transcribed files"
     },
     "retention": {
         "title": "Availability of Transcriptions",

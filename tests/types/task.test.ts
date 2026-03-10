@@ -9,15 +9,22 @@ import { StoredTranscriptionSchema } from "../../../app/types/storedTranscriptio
 describe("Task Types", () => {
     describe("TaskStatusEnumSchema", () => {
         it("should validate valid status values", () => {
-            expect(TaskStatusEnumSchema.safeParse("in_progress").success).toBe(true);
-            expect(TaskStatusEnumSchema.safeParse("completed").success).toBe(true);
+            expect(TaskStatusEnumSchema.safeParse("in_progress").success).toBe(
+                true,
+            );
+            expect(TaskStatusEnumSchema.safeParse("completed").success).toBe(
+                true,
+            );
             expect(TaskStatusEnumSchema.safeParse("failed").success).toBe(true);
-            expect(TaskStatusEnumSchema.safeParse("cancelled").success).toBe(true);
+            expect(TaskStatusEnumSchema.safeParse("cancelled").success).toBe(
+                true,
+            );
         });
 
         it("should fail for invalid status values", () => {
-            expect(TaskStatusEnumSchema.safeParse("pending").success).toBe(false);
-            expect(TaskStatusEnumSchema.safeParse("running").success).toBe(false);
+            expect(TaskStatusEnumSchema.safeParse("running").success).toBe(
+                false,
+            );
             expect(TaskStatusEnumSchema.safeParse("").success).toBe(false);
         });
     });
@@ -73,9 +80,7 @@ describe("StoredTranscriptionSchema", () => {
     it("should validate valid stored transcription", () => {
         const transcription = {
             id: "trans-123",
-            segments: [
-                { id: "seg-1", start: 0, end: 5, text: "Hello" },
-            ],
+            segments: [{ id: "seg-1", start: 0, end: 5, text: "Hello" }],
             name: "Test Transcription",
             createdAt: "2024-01-01T00:00:00Z",
             updatedAt: "2024-01-01T00:00:00Z",
