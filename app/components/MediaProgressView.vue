@@ -9,6 +9,8 @@ interface InputProps {
 }
 
 const props = defineProps<InputProps>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -49,7 +51,7 @@ const props = defineProps<InputProps>();
                             {{ props.mediaName }}
                         </p>
                         <p class="text-white/80 text-xs">
-                            {{ isVideoFile(props.media) ? "Video" : "Audio" }}
+                            {{ isVideoFile(props.media) ? t("upload.videoFile") : t("upload.audioFile") }}
                             •
                             {{ props.media.type.split("/")[1]?.toUpperCase() }}
                         </p>
@@ -74,6 +76,7 @@ const props = defineProps<InputProps>();
                 <div class="mt-6 space-y-4">
                     <motion.div
                         v-for="progress in props.progressSteps"
+                        :key="progress.message"
                         :animate="{ opacity: 1, x: 0 }"
                         :initial="{ opacity: 0, x: -20 }"
                         :transition="{ delay: 0.2, duration: 0.5 }"

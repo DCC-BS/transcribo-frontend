@@ -83,11 +83,12 @@ function onMediaConfigure(payload: MediaConfigureData) {
 
         <div class="flex items-center justify-center">
             <UButton
-                icon="i-lucide-file-up"
-                variant="link"
-                :class="{ 'font-bold': step === 1 }"
-                @click="step = 1"
-            >
+                    icon="i-lucide-file-up"
+                    variant="link"
+                    :aria-label="t('pages.index.step1')"
+                    :class="{ 'font-bold': step === 1 }"
+                    @click="step = 1"
+                >
                 <span class="hidden md:inline">
                     1. {{ t("pages.index.step1") }}
                 </span>
@@ -97,6 +98,7 @@ function onMediaConfigure(payload: MediaConfigureData) {
                 <UButton
                     icon="i-lucide-settings"
                     variant="link"
+                    :aria-label="t('pages.index.step2')"
                     :class="{ 'font-bold': step === 2 }"
                     @click="step = 2"
                 >
@@ -110,7 +112,7 @@ function onMediaConfigure(payload: MediaConfigureData) {
                 <UButton
                     icon="i-lucide-cpu"
                     variant="link"
-                    v-if="step > 2"
+                    :aria-label="t('pages.index.step3')"
                     :class="{ 'font-bold': step === 3 }"
                 >
                     <span class="hidden md:inline">

@@ -81,7 +81,9 @@ watch(currentSegmentId, async (newId, oldId) => {
     }
 
     const index = segments.value.findIndex((s) => s.id === newId);
-    maxSegment.value = Math.max(index + 2, maxSegment.value);
+    if (index >= 0) {
+        maxSegment.value = Math.max(index + 2, maxSegment.value);
+    }
 
     // wait for the element to load
     await nextTick();
@@ -99,7 +101,7 @@ async function addSegmentAfter(segment: SegmentWithId) {
     executeCommand(new InsertSegmentCommand(segment.id, {}, "after"));
 }
 
-async function addSegemntAtZero() {
+async function addSegmentAtZero() {
     const segment: SegmentWithId = {
         id: uuid(),
         text: "",
@@ -118,7 +120,7 @@ async function addSegemntAtZero() {
                 icon="i-lucide-plus"
                 variant="link"
                 color="neutral"
-                @click="() => addSegemntAtZero()"
+                @click="() => addSegmentAtZero()"
             />
         </USeparator>
 
