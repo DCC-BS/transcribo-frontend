@@ -2,7 +2,7 @@ import type { StoredTask } from "./task";
 
 export type MediaSelectionData = {
     media: File;
-    taskId: string;
+    taskId?: string;
 };
 
 export type MediaConfigureData = {
