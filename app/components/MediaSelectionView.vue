@@ -59,7 +59,33 @@ function onRecodingComplete(audio: Blob) {
                             class="flex-1 backdrop-blur-sm rounded-2xl flex items-center justify-center min-h-[200px]"
                         >
                             <UFileUpload
-                                accept="audio/*, video/*"
+                                accept="
+                                audio/*,
+                                video/*,
+                                audio/aac,
+                                audio/aacp,
+                                audio/aiff,
+                                audio/flac,
+                                audio/mp4,
+                                audio/mpeg,
+                                audio/ogg,
+                                audio/opus,
+                                audio/wav,
+                                audio/webm,
+                                audio/x-aiff,
+                                audio/x-m4a,
+                                audio/x-wav,
+                                video/3gpp,
+                                video/3gpp2,
+                                video/mp4,
+                                video/mpeg,
+                                video/ogg,
+                                video/quicktime,
+                                video/webm,
+                                video/x-flv,
+                                video/x-m4v,
+                                video/x-matroska,
+                                video/x-msvideo"
                                 icon="i-lucide-file-up"
                                 v-model="uploadFile"
                                 class="w-full h-full rounded"
