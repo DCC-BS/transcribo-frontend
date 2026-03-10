@@ -3,7 +3,6 @@ import {
     type StoredTask,
     StoredTaskSchema,
     type TaskStatus,
-    type TaskStatusEnum,
 } from "~/types/task";
 
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
@@ -15,10 +14,6 @@ export function useTasks() {
 
     function getTask(id: string): Promise<StoredTask | undefined> {
         return db.tasks.where("id").equals(id).first();
-    }
-
-    function getTasksByStatus(status: TaskStatusEnum) {
-        return db.tasks.where("status").equals(status).toArray();
     }
 
     async function addTask(
@@ -69,7 +64,6 @@ export function useTasks() {
 
     return {
         getTasks,
-        getTasksByStatus,
         getTask,
         addTask,
         deleteTask,

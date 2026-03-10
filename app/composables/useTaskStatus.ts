@@ -22,6 +22,8 @@ export function useTaskStatus() {
                 return t("processing.status.failed");
             case TaskStatusEnum.CANCELLED:
                 return t("processing.status.cancelled");
+            case TaskStatusEnum.PENDING:
+                return t("processing.status.pending");
             default:
                 return status;
         }

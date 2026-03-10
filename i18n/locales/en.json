@@ -50,7 +50,10 @@
             "experimental": "The recording feature is experimental and only tested with short recordings. It may not work for recordings longer than 5 minutes. For longer recordings we recommend using the file upload.",
             "step1": "Upload Media",
             "step2": "Settings",
-            "step3": "Process Media"
+            "step3": "Process Media",
+            "pendingTitle": "Unfinished Transcriptions",
+            "pendingDescription": "You have unfinished transcriptions",
+            "goToTranscriptions": "Go to Transcriptions"
         }
     },
     "navigation": {
@@ -293,7 +296,8 @@
             "completed": "Completed",
             "failed": "Failed",
             "cancelled": "Cancelled",
-            "processing": "Processing..."
+            "processing": "Processing...",
+            "pending": "Draft"
         },
         "errors": {
             "title": "Error",

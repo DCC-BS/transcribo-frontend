@@ -27,6 +27,7 @@ export const TaskStatusEnum = {
     COMPLETED: "completed" as const,
     FAILED: "failed" as const,
     CANCELLED: "cancelled" as const,
+    PENDING: "pending" as const,
 } as const;
 
 /**

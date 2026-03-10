@@ -198,6 +198,7 @@ function toggleExpanded(): void {
                     size="sm"
                     color="secondary"
                     variant="ghost"
+                    :aria-label="isPlaying ? 'Pause' : 'Play'"
                     @click="togglePlay"
                 >
                     <UIcon
@@ -252,6 +253,7 @@ function toggleExpanded(): void {
                     size="sm"
                     variant="ghost"
                     @click="toggleExpanded"
+                    :aria-label="isExpanded ? 'Collapse' : 'Expand'"
                 >
                     <UIcon
                         :name="

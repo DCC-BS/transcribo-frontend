@@ -30,7 +30,6 @@ export function useInProgressTasksListener() {
     onMounted(async () => {
         subscription = observable.subscribe({
             next: (result) => {
-                console.log(result);
                 unfinishedTasks.value = result;
             },
             error: (error) => showError(error),

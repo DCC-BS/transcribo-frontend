@@ -3,9 +3,10 @@ import type {
     MediaConfigureData,
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
+import { TaskStatusEnum } from "~/types/task";
 
 const { t } = useI18n();
-const { getTask, deleteTask } = useTasks();
+const { getTask, deleteTask, getTasksByStatus } = useTasks();
 const route = useRoute();
 const { showError } = useUserFeedback();
 const logger = useLogger();
@@ -15,6 +16,7 @@ const taskId = route.query.taskId as string | undefined;
 const step = ref(1);
 const mediaSelectionData = ref<MediaSelectionData>();
 const mediaPreviewData = ref<MediaConfigureData>();
+const hasPendingTasks = ref(false);
 
 onMounted(async () => {
     if (taskId) {
@@ -33,6 +35,13 @@ onMounted(async () => {
             };
             step.value = 2;
         }
+    } else {
+        const pendingTasks = await getTasksByStatus(TaskStatusEnum.PENDING);
+        hasPendingTasks.value = pendingTasks.length > 0;
+        console.log(
+            `User has ${pendingTasks.length} pending tasks`,
+            "Checked for pending tasks on home page",
+        );
     }
 });
 
@@ -52,6 +61,25 @@ function onMediaConfigure(payload: MediaConfigureData) {
         <p class="hidden md:block text-lg text-gray-600 dark:text-gray-300 m-4">
             {{ t("pages.index.subtitle") }}
         </p>
+
+        <UAlert
+            v-if="hasPendingTasks"
+            @update:open="(o) => (hasPendingTasks = o)"
+            color="info"
+            icon="i-lucide-info"
+            variant="soft"
+            :title="t('pages.index.pendingTitle')"
+            :description="t('pages.index.pendingDescription')"
+            :actions="[
+                {
+                    label: t('pages.index.goToTranscriptions'),
+                    href: '/transcription',
+                    color: 'secondary',
+                },
+            ]"
+            close
+        >
+        </UAlert>
 
         <div class="flex items-center justify-center">
             <UButton

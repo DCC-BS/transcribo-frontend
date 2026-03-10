@@ -50,7 +50,10 @@
             "experimental": "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Aufnahmen länger als 5 Minuten können zu Fehlern und Datenverlust führen. Für lange Gespräche empfehlen wir den Dateiupload.",
             "step1": "Medien hochladen",
             "step2": "Einstellungen",
-            "step3": "Medien verarbeiten"
+            "step3": "Medien verarbeiten",
+            "pendingTitle": "Unfertige Transkriptionen",
+            "pendingDescription": "Sie haben unfertige Transkriptionen",
+            "goToTranscriptions": "Zu den Transkriptionen"
         }
     },
     "navigation": {
@@ -293,7 +296,7 @@
             "completed": "Abgeschlossen",
             "failed": "Fehlgeschlagen",
             "cancelled": "Abgebrochen",
-            "processing": "Verarbeitung..."
+            "pending": "Entwurf"
         },
         "errors": {
             "title": "Fehler",
