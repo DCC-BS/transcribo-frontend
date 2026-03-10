@@ -3,12 +3,15 @@ import { useWindowScroll, useWindowSize } from "@vueuse/core";
 import { motion } from "motion-v";
 import { v4 as uuid } from "uuid";
 import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
-import type { StoredTranscription } from "~/types/storedTranscription";
-import type { SegmentWithId } from "~/types/transcriptionResponse";
+import {
+    type StoredSegment,
+    StoredSegmentSchema,
+} from "~/types/storedSegments";
 import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
 
 interface InputProps {
-    transcription: StoredTranscription;
+    transcriptionId: string;
+    segments: StoredSegment[];
     currentTime?: number;
     autoScrollEnabled?: boolean;
 }
@@ -40,12 +43,10 @@ watch(
 );
 
 const segments = computed(() =>
-    props.transcription.segments.toSorted((a, b) => a.start - b.start),
+    props.segments.toSorted((a, b) => a.start - b.start),
 );
 
-const speakers = computed(() =>
-    Array.from(getUniqueSpeakers(props.transcription.segments)),
-);
+const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
 
 const currentSegmentId = computed(() => {
     const current = segments.value.find(
@@ -97,18 +98,26 @@ watch(currentSegmentId, async (newId, oldId) => {
     segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
-async function addSegmentAfter(segment: SegmentWithId) {
-    executeCommand(new InsertSegmentCommand(segment.id, {}, "after"));
+async function addSegmentAfter(segment: StoredSegment) {
+    executeCommand(
+        new InsertSegmentCommand(
+            segment.transcriptionId,
+            segment.id,
+            {},
+            "after",
+        ),
+    );
 }
 
 async function addSegmentAtZero() {
-    const segment: SegmentWithId = {
+    const segment = StoredSegmentSchema.parse({
         id: uuid(),
         text: "",
         start: 0,
         end: 2,
         speaker: speakers.value[0],
-    };
+        transcriptionId: props.transcriptionId,
+    } as StoredSegment);
     executeCommand(new AddSegmentCommand(segment));
 }
 </script>

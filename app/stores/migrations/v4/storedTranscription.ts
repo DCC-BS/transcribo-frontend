@@ -1,7 +1,9 @@
 import { z } from "zod";
+import { StoredSegmentSchema } from "./storedSegments";
 
 export const StoredTranscriptionSchema = z.object({
     id: z.string(),
+    segments: StoredSegmentSchema.array(),
     name: z.string(),
     createdAt: z.coerce.date(),
     updatedAt: z.coerce.date(),

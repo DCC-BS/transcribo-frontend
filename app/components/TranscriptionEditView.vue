@@ -1,16 +1,18 @@
 <script lang="ts" setup>
 import { useMediaQuery } from "@vueuse/core";
-import { motion } from "motion-v";
+import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface InputProps {
     transcription: StoredTranscription;
+    segments: StoredSegment[];
 }
 
 const props = defineProps<InputProps>();
 
 const isMobile = useMediaQuery("(max-width: 800px)");
 const { canUndo, canRedo, undo, redo } = useCommandHistory();
+const { t } = useI18n();
 
 const currentTime = ref(0);
 const duration = ref(0);
@@ -52,6 +54,7 @@ function initializeDuration(): void {
             <MediaPlaybackBar
                 v-model="currentTime"
                 :transcription="props.transcription"
+                :segments="props.segments"
                 :duration="duration"
             />
 
@@ -85,8 +88,8 @@ function initializeDuration(): void {
                         </template>
                         <span class="text-xs">{{
                             autoScrollEnabled
-                                ? $t("transcription.autoScrollOn")
-                                : $t("transcription.autoScrollOff")
+                                ? t("transcription.autoScrollOn")
+                                : t("transcription.autoScrollOff")
                         }}</span>
                     </UButton>
                 </div>
@@ -96,10 +99,14 @@ function initializeDuration(): void {
         <div class="flex-1 min-h-0 flex flex-col">
             <template v-if="!isMobile">
                 <div class="p-4 flex flex-col gap-4">
-                    <RenameSpeakerView :transcription="props.transcription" />
+                    <RenameSpeakerView
+                        :transcriptionId="props.transcription.id"
+                        :segments="segments"
+                    />
                     <TranscriptionList
                         id="edit-transcription-list"
-                        :transcription="props.transcription"
+                        :transcriptionId="props.transcription.id"
+                        :segments="segments"
                         :currentTime="currentTime"
                         :autoScrollEnabled="autoScrollEnabled"
                     />
@@ -111,11 +118,13 @@ function initializeDuration(): void {
                     <div class="p-4 flex flex-col gap-4">
                         <RenameSpeakerView
                             id="edit-speaker-names"
-                            :transcription="props.transcription"
+                            :transcriptionId="props.transcription.id"
+                            :segments="segments"
                         />
                         <TranscriptionList
                             id="edit-transcription-list"
-                            :transcription="props.transcription"
+                            :transcriptionId="props.transcription.id"
+                            :segments="segments"
                             :currentTime="currentTime"
                             :autoScrollEnabled="autoScrollEnabled"
                         />

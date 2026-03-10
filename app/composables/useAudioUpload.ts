@@ -1,6 +1,6 @@
 import { isApiError } from "@dcc-bs/communication.bs.js";
 import { UploadFileCommand } from "~/types/commands";
-import type { TaskStatus } from "~/types/task";
+import type { TaskStatus } from "~/types/storedTasks";
 
 export function useAudioUpload() {
     const showProgress = useState<boolean>("showProgress", () => false);

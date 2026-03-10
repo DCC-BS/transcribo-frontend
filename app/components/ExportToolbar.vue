@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import type { ExportOptions } from "~/composables/export";
+import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface InputProps {
     transcription: StoredTranscription;
+    segments: StoredSegment[];
 }
 
 const props = defineProps<InputProps>();
@@ -20,7 +22,9 @@ const withTimestamps = useLocalStorage<boolean>(
 const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
 const withSummary = ref(false);
 
-const exportOptions = computed<Omit<ExportOptions, "transcription">>(() => ({
+const exportOptions = computed<ExportOptions>(() => ({
+    transcription: props.transcription,
+    segments: props.segments,
     withSpeakers: withSpeakers.value,
     withTimestamps: withTimestamps.value,
     mergeSegments: mergeSegments.value,
@@ -36,18 +40,19 @@ function handleTextExport(): void {
 }
 
 function handleSubtitleExport(): void {
-    exportAsSrt(props.transcription, exportOptions.value.withSpeakers);
+    exportAsSrt(
+        props.transcription,
+        props.segments,
+        exportOptions.value.withSpeakers,
+    );
 }
 
 function handleJsonExport(): void {
-    exportAsJson(props.transcription);
+    exportAsJson(props.transcription, props.segments);
 }
 
 async function handleDocxExport(): Promise<void> {
-    await exportAsDocx({
-        ...exportOptions.value,
-        transcription: props.transcription,
-    });
+    await exportAsDocx(exportOptions.value);
 }
 </script>
 

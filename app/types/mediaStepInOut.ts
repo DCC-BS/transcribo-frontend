@@ -1,4 +1,4 @@
-import type { StoredTask } from "./task";
+import type { StoredTask } from "./storedTasks";
 
 export type MediaSelectionData = {
     media: File;

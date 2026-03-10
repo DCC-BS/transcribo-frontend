@@ -6,7 +6,7 @@ import {
     type TaskStatus,
     TaskStatusEnum,
     TaskStatusSchema,
-} from "~/types/task";
+} from "~/types/storedTasks";
 import {
     type TranscriptionResponse,
     TranscriptionResponseSchema,
@@ -15,6 +15,7 @@ import {
 export function useTaskListener() {
     const { deleteTask } = useTasks();
     const { addTranscription } = getTranscriptionService();
+    const { addSegments } = getSegmentService();
     const { showError } = useUserFeedback();
     const { t } = useI18n();
     const logger = useLogger();
@@ -125,18 +126,22 @@ export function useTaskListener() {
         mediaName: string,
     ): Promise<void> {
         const transcription = await addTranscription({
-            segments: result.segments.map((x) => ({
+            mediaFile: mediaFile,
+            mediaFileName: mediaName,
+            name: mediaName ?? t("transcription.untitled"),
+        });
+
+        await addSegments(
+            result.segments.map((x) => ({
                 ...x,
+                transcriptionId: transcription.id,
                 text: x.text?.trim() ?? "",
                 speaker:
                     x.speaker?.trim().toUpperCase() ??
                     t("transcription.noSpeaker"),
                 id: uuidv4(),
             })),
-            mediaFile: mediaFile,
-            mediaFileName: mediaName,
-            name: mediaName ?? t("transcription.untitled"),
-        });
+        );
 
         await deleteTask(taskId);
         await navigateTo(`/transcription/${transcription.id}`);

@@ -3,7 +3,7 @@ import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
 import { motion } from "motion-v";
 import type { MediaProgress } from "~/types/mediaProgress";
 import type { MediaConfigureData } from "~/types/mediaStepInOut";
-import { type TaskStatus, TaskStatusSchema } from "~/types/task";
+import { type TaskStatus, TaskStatusSchema } from "~/types/storedTasks";
 import { isVideoFile } from "~/utils/videoUtils";
 
 const input = defineModel<MediaConfigureData>("input", { required: true });

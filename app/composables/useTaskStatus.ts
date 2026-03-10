@@ -1,4 +1,4 @@
-import { type TaskStatus, TaskStatusEnum } from "~/types/task";
+import { type TaskStatus, TaskStatusEnum } from "~/types/storedTasks";
 
 type BadgeColor =
     | "error"

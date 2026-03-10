@@ -5,7 +5,7 @@ import {
     type StoredTask,
     TaskStatusEnum,
     TaskStatusSchema,
-} from "~/types/task";
+} from "~/types/storedTasks";
 import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
 
 export function useInProgressTasksListener() {

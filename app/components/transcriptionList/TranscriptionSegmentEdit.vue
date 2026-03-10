@@ -2,16 +2,16 @@
 import { motion } from "motion-v";
 import type { WatchHandle } from "vue";
 import { UCard, UTextarea } from "#components";
+import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
 import {
     DeleteSegmentCommand,
     SeekToSecondsCommand,
     UpdateSegmentCommand,
 } from "~/types/commands";
-import type { SegmentWithId } from "~/types/transcriptionResponse";
 import { formatTime } from "~/utils/time";
 
 interface TranscriptionListProps {
-    segment: SegmentWithId;
+    segment: StoredSegment;
     speakers: string[];
     isActive?: boolean;
     currentTime: number;
@@ -26,7 +26,10 @@ const props = withDefaults(defineProps<TranscriptionListProps>(), {
 const MotionCard = motion.create(UCard);
 
 const { executeCommand } = useCommandBus();
-const internalSegment = ref<SegmentWithId>({ ...props.segment });
+const internalSegment = ref<StoredSegment & { speaker: string }>({
+    ...props.segment,
+    speaker: props.segment.speaker ?? "NA",
+});
 const isDirty = ref(false);
 const { t } = useI18n();
 const progress = ref(0);
@@ -36,7 +39,10 @@ watch(
     () => props.segment,
     (segment) => {
         if (!isDirty.value) {
-            internalSegment.value = { ...segment };
+            internalSegment.value = {
+                ...segment,
+                speaker: segment.speaker ?? "NA",
+            };
         }
     },
 );
@@ -67,7 +73,7 @@ watch(
     { immediate: true },
 );
 
-function removeSegment(segment: SegmentWithId): void {
+function removeSegment(segment: StoredSegment): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
 }
 
@@ -88,17 +94,18 @@ function applyChanges(): void {
             }
             return acc;
         },
-        {} as Partial<SegmentWithId>,
+        {} as Partial<StoredSegment>,
     );
 
-    executeCommand(
-        new UpdateSegmentCommand(internalSegment.value.id, updates),
-    );
+    executeCommand(new UpdateSegmentCommand(internalSegment.value.id, updates));
 }
 
 function unDoChanges(): void {
     isDirty.value = false;
-    internalSegment.value = { ...props.segment };
+    internalSegment.value = {
+        ...props.segment,
+        speaker: props.segment.speaker ?? "NA",
+    };
 }
 
 function handleKeydown(event: KeyboardEvent): void {
@@ -136,18 +143,36 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <MotionCard layout variant="subtle" :ui="{
-        root: props.isActive
-            ? 'ring-2 ring-teal-500'
-            : ''
-    }" class="relative overflow-hidden">
-        <motion.div v-if="props.isActive && props.showProgress" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
+    <MotionCard
+        layout
+        variant="subtle"
+        :ui="{
+            root: props.isActive ? 'ring-2 ring-teal-500' : '',
+        }"
+        class="relative overflow-hidden"
+    >
+        <motion.div
+            v-if="props.isActive && props.showProgress"
+            :initial="{ scaleX: 0 }"
+            :animate="{ scaleX: progress }"
             :transition="{ duration: duration, ease: 'linear' }"
             class="absolute inset-0 origin-left pointer-events-none z-0"
-            style="background: linear-gradient(to right, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.25));" />
+            style="
+                background: linear-gradient(
+                    to right,
+                    rgba(20, 184, 166, 0.15),
+                    rgba(20, 184, 166, 0.25)
+                );
+            "
+        />
         <div class="relative z-10">
-            <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
-                variant="outline" :actions="[
+            <UAlert
+                v-if="isDirty"
+                title=""
+                :description="t('transcription.applySpeakerChanges')"
+                color="info"
+                variant="outline"
+                :actions="[
                     {
                         label: t('transcription.undoChanges'),
                         onClick: unDoChanges,
@@ -158,16 +183,36 @@ const endTimeFormatted = computed({
                         variant: 'subtle',
                         onClick: applyChanges,
                     },
-                ]" />
-            <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" @input="markDirty" />
+                ]"
+            />
+            <UTextarea
+                v-model="internalSegment.text"
+                class="w-full"
+                @keydown="handleKeydown"
+                @input="markDirty"
+            />
 
-            <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
-                <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
-                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" @update:model-value="markDirty()" />
+            <div
+                class="flex justify-between gap-2 pt-2 flex-wrap"
+                @keydown="handleKeydown"
+            >
+                <USelectMenu
+                    v-model="internalSegment.speaker"
+                    :items="props.speakers"
+                    create-item
+                    :placeholder="t('transcription.placeholderSpeakerName')"
+                    @create="handleCreateSpeaker"
+                    @update:model-value="markDirty()"
+                />
 
                 <div class="flex gap-2 items-center">
-                    <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"
-                        @keydown="handleKeydown">
+                    <UInput
+                        v-model="startTimeFormatted"
+                        type="number"
+                        class="w-[100px]"
+                        :step="0.1"
+                        @keydown="handleKeydown"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
@@ -181,8 +226,13 @@ const endTimeFormatted = computed({
                             formatTime(internalSegment.end)
                         }}</a>
                     </div>
-                    <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1"
-                        @keydown="handleKeydown">
+                    <UInput
+                        v-model="endTimeFormatted"
+                        type="number"
+                        class="w-[100px]"
+                        :step="0.1"
+                        @keydown="handleKeydown"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
@@ -191,7 +241,11 @@ const endTimeFormatted = computed({
 
                 <div class="flex gap-2">
                     <UTooltip :text="t('help.segments.deleteSegment')">
-                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(internalSegment)" />
+                        <UButton
+                            color="error"
+                            icon="i-lucide-trash-2"
+                            @click="removeSegment(internalSegment)"
+                        />
                     </UTooltip>
                 </div>
             </div>

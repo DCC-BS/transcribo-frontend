@@ -1,17 +1,16 @@
 <script lang="ts" setup>
 import { UInput } from "#components";
+import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
 import { RenameSpeakerCommand } from "~/types/commands";
-import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface InputProps {
-    transcription: StoredTranscription;
+    transcriptionId: string;
+    segments: StoredSegment[];
 }
 
 const props = defineProps<InputProps>();
 
-const speakers = computed(() =>
-    Array.from(getUniqueSpeakers(props.transcription.segments)),
-);
+const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
 const { executeCommand } = useCommandBus();
 const { getSpeakerColor } = useSpeakerColor(speakers);
 
@@ -35,7 +34,10 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
         return;
     }
 
-    executeCommand(new RenameSpeakerCommand(originalName, newName));
+    console.log(`Renaming speaker from "${originalName}" to "${newName}"`);
+    executeCommand(
+        new RenameSpeakerCommand(props.transcriptionId, originalName, newName),
+    );
 }
 </script>
 
@@ -45,17 +47,19 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
             {{ t("common.speakers") }}
         </h3>
         <div class="flex gap-2 flex-wrap">
-            <div
-                v-for="(speakerMap, index) in speakerMappings"
-                :key="index"
-            >
+            <div v-for="(speakerMap, index) in speakerMappings" :key="index">
                 <UInput
                     v-model="speakerMap.new"
                     size="sm"
                     :style="{ color: getSpeakerColor(speakerMap.original) }"
                     :placeholder="t('transcription.placeholderSpeakerName')"
                     class="w-32"
-                    @change="handleSpeakerNameChange(speakerMap.original, speakerMap.new)"
+                    @change="
+                        handleSpeakerNameChange(
+                            speakerMap.original,
+                            speakerMap.new,
+                        )
+                    "
                 />
             </div>
         </div>

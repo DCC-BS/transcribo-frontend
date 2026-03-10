@@ -6,7 +6,7 @@ import type {
     MediaConfigureData,
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
-import type { StoredTask, TaskStatus } from "~/types/task";
+import type { StoredTask, TaskStatus } from "~/types/storedTasks";
 
 const emit = defineEmits<(e: "onNext", payload: MediaConfigureData) => void>();
 const input = defineModel<MediaSelectionData>("input", { required: true });
