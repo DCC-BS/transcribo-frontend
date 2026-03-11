@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import { db } from "~/stores/db";
 import {
     type AddSegmentCommand,
@@ -70,14 +69,8 @@ export const useTranscriptionCommandHandler = () => {
     );
 
     onCommand<AddSegmentCommand>(Cmds.AddSegmentCommand, async (command) => {
-        const newSegment = {
-            id: uuid(),
-            ...command.newSegment,
-        } as StoredSegment;
-
+        const newSegment = await addSegment(command.newSegment);
         command.setUndoCommand(new DeleteSegmentCommand(newSegment.id));
-
-        await addSegment(newSegment);
     });
 
     onCommand<UpdateSegmentCommand>(
@@ -109,7 +102,7 @@ export const useTranscriptionCommandHandler = () => {
                 ),
             );
 
-            updateTranscription(command.transcriptionId, {
+            await updateTranscription(command.transcriptionId, {
                 name: command.newName,
             });
         },

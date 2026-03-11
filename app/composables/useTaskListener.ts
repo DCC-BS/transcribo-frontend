@@ -128,7 +128,7 @@ export function useTaskListener() {
     ): Promise<void> {
         const transcription = await db.transaction(
             "rw",
-            [db.transcriptions, db.segments],
+            [db.transcriptions, db.segments, db.tasks],
             async () => {
                 const newTranscription = await addTranscription({
                     mediaFile: mediaFile,

@@ -157,7 +157,7 @@ export class AddSegmentCommand implements ITransriboReversibleCommand {
     readonly $type = "AddSegmentCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
-    constructor(public readonly newSegment: Segment) {}
+    constructor(public readonly newSegment: Omit<StoredSegment, "id">) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;

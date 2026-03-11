@@ -113,13 +113,12 @@ async function addSegmentAtZero() {
     const speaker = speakers.value[0] ?? "SPEAKER_1";
 
     const segment = StoredSegmentSchema.parse({
-        id: uuid(),
         text: "",
         start: 0,
         end: 2,
         speaker: speaker,
         transcriptionId: props.transcriptionId,
-    } as StoredSegment);
+    } as Omit<StoredSegment, "id">);
     await executeCommand(new AddSegmentCommand(segment));
 }
 </script>
