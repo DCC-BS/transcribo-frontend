@@ -3,6 +3,17 @@
         "speakers": "Sprecherinnen und Sprecher",
         "retry": "Erneut versuchen"
     },
+    "errors": {
+        "invalid_json_response": "Serverfehler: Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut. Wenn das Problem weiterhin besteht, kontaktieren Sie dcc{'@'}bs.ch",
+        "unexpected_error": "Ein unerwarteter Fehler ist aufgetreten",
+        "service_unavailable": "Dienst vorübergehend nicht verfügbar",
+        "invalid_request": "Ungültige Anfrage",
+        "authentication_failed": "Authentifizierung fehlgeschlagen",
+        "permission_denied": "Zugriff verweigert",
+        "resource_not_found": "Ressource nicht gefunden",
+        "rate_limit_exceeded": "Zu viele Anfragen. Bitte versuchen Sie es später erneut",
+        "validation_error": "Validierungsfehler"
+    },
     "upload": {
         "convertingMedia": "Konvertiere Medien in WAV-Format...",
         "uploadingMedia": "Lade die Mediendatei hoch...",

@@ -34,17 +34,5 @@ export default apiHandler
 
         return inputFromData;
     })
-    .withFetcher(async (options) => {
-        const response = await apiFetch(options.url, {
-            method: "POST",
-            body: options.body,
-        });
-
-        const logger = getEventLogger(options.event);
-
-        logger.info({ response: response }, "Transcription request submitted");
-
-        return response;
-    })
     .withDummyFetcher(createDummyTaskStatus(generateDummyTaskId(), "completed"))
     .build("/transcribe");

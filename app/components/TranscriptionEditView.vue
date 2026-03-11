@@ -26,7 +26,10 @@ watch(
     () => props.transcription,
     () => {
         initializeDuration();
-        currentTime.value = 0;
+
+        if (currentTime.value > duration.value) {
+            currentTime.value = 0;
+        }
     },
 );
 
@@ -55,10 +58,6 @@ function initializeDuration(): void {
                 :duration="duration" />
 
             <div>
-                <!-- <TimelineEditor
-                    :transcription="props.transcription"
-                    :currentTime="currentTime"
-                /> -->
                 <div class="flex justify-between">
                     <UndoRedoButtons :canRedo="canRedo" :canUndo="canUndo" @redo="redo" @undo="undo" />
                     <UButton size="xs" variant="link" :color="autoScrollEnabled ? 'primary' : 'neutral'"
