@@ -156,41 +156,23 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
 </script>
 
 <template>
-    <div
-        class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]"
-    >
+    <div class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]">
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">
-                <MediaProgressView
-                    :media="input.media"
-                    :mediaName="input.media.name"
-                    :progressSteps="progressions"
-                />
+                <MediaProgressView :media="input.media" :mediaName="input.media.name" :progressSteps="progressions" />
             </div>
         </div>
 
         <!-- Error Message Display -->
-        <motion.div
-            v-if="errorMessage"
-            :animate="{ opacity: 1, y: 0 }"
-            :initial="{ opacity: 0, y: 20 }"
+        <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
             :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
-            class="mt-8 max-w-md w-full flex flex-col gap-2 justify-center"
-        >
-            <UAlert
-                icon="i-lucide-alert-circle"
-                color="error"
-                :title="t('upload.error')"
-                :description="errorMessage"
-            ></UAlert>
+            class="mt-8 max-w-md w-full flex flex-col gap-2 justify-center">
+            <UAlert icon="i-lucide-alert-circle" color="error" :title="t('upload.error')" :description="errorMessage">
+            </UAlert>
 
-            <UButton
-                @click="processMedia()"
-                icon="i-lucide-rotate-ccw"
-                color="secondary"
-                variant="subtle"
-                >{{ t("common.retry") }}
+            <UButton @click="processMedia()" icon="i-lucide-rotate-ccw" color="secondary" variant="subtle">{{
+                t("common.retry") }}
             </UButton>
         </motion.div>
     </div>

@@ -3,6 +3,17 @@
         "speakers": "Speakers",
         "retry": "Retry"
     },
+    "errors": {
+        "invalid_json_response": "Server error: Something went wrong. Please try again. If the problem persists, contact dcc{'@'}bs.ch",
+        "unexpected_error": "An unexpected error occurred",
+        "service_unavailable": "Service temporarily unavailable",
+        "invalid_request": "Invalid request",
+        "authentication_failed": "Authentication failed",
+        "permission_denied": "Permission denied",
+        "resource_not_found": "Resource not found",
+        "rate_limit_exceeded": "Too many requests. Please try again later",
+        "validation_error": "Validation error"
+    },
     "upload": {
         "convertingMedia": "Converting media to WAV format...",
         "uploadingMedia": "Uploading the media file...",
