@@ -39,9 +39,6 @@ const mediaName = computed(() => {
 async function handleNameChange() {
     console.log("Name change detected, new name:", newName.value);
     if (newName.value !== props.transcription.name) {
-        console.log(
-            `Changing transcription name from "${props.transcription.name}" to "${newName.value}"`,
-        );
         await executeCommand(
             new TranscriptionNameChangeCommand(
                 props.transcription.id,
@@ -66,7 +63,7 @@ async function handleNameChange() {
                 </template>
                 <span class="truncate max-w-32 sm:max-w-48">{{
                     props.transcription.name || t("transcription.info")
-                }}</span>
+                    }}</span>
                 <template #trailing>
                     <UIcon name="i-lucide-chevron-down" class="w-4 h-4 transition-transform duration-200"
                         :class="{ 'rotate-180': isInfoExpanded }" />
