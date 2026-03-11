@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import type { StoredTranscription } from "~/types/storedTranscription";
-import type { SegmentWithId } from "~/types/transcriptionResponse";
+import type { StoredSegment } from "~/types/storedSegments";
 
 interface InputProps {
-    transcription: StoredTranscription;
+    segments: StoredSegment[];
 }
 
 const props = defineProps<InputProps>();
@@ -21,10 +20,10 @@ const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
  * @param segments - Array of segments to merge
  * @returns Array of merged segments
  */
-function mergeConsecutiveSegments(segments: SegmentWithId[]): SegmentWithId[] {
+function mergeConsecutiveSegments(segments: StoredSegment[]): StoredSegment[] {
     if (segments.length === 0) return [];
 
-    const merged: SegmentWithId[] = [];
+    const merged: StoredSegment[] = [];
     let currentSegment = { ...segments[0] };
 
     for (let i = 1; i < segments.length; i++) {
@@ -41,19 +40,19 @@ function mergeConsecutiveSegments(segments: SegmentWithId[]): SegmentWithId[] {
             currentSegment.end = nextSegment.end;
         } else {
             // Different speaker, save current and start new
-            merged.push(currentSegment as SegmentWithId);
+            merged.push(currentSegment as StoredSegment);
             currentSegment = { ...nextSegment };
         }
     }
 
     // Don't forget the last segment
-    merged.push(currentSegment as SegmentWithId);
+    merged.push(currentSegment as StoredSegment);
     return merged;
 }
 
 // Computed property to generate the formatted text
 const formattedTranscript = computed(() => {
-    let segments = props.transcription.segments;
+    let segments = props.segments;
 
     // Merge segments if requested
     if (mergeSegments.value) {

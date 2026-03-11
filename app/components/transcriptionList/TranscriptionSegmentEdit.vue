@@ -7,11 +7,11 @@ import {
     SeekToSecondsCommand,
     UpdateSegmentCommand,
 } from "~/types/commands";
-import type { SegmentWithId } from "~/types/transcriptionResponse";
+import type { StoredSegment } from "~/types/storedSegments";
 import { formatTime } from "~/utils/time";
 
 interface TranscriptionListProps {
-    segment: SegmentWithId;
+    segment: StoredSegment;
     speakers: string[];
     isActive?: boolean;
     currentTime: number;
@@ -26,7 +26,10 @@ const props = withDefaults(defineProps<TranscriptionListProps>(), {
 const MotionCard = motion.create(UCard);
 
 const { executeCommand } = useCommandBus();
-const internalSegment = ref<SegmentWithId>({ ...props.segment });
+const internalSegment = ref<StoredSegment & { speaker: string }>({
+    ...props.segment,
+    speaker: props.segment.speaker ?? "NA",
+});
 const isDirty = ref(false);
 const { t } = useI18n();
 const progress = ref(0);
@@ -36,7 +39,10 @@ watch(
     () => props.segment,
     (segment) => {
         if (!isDirty.value) {
-            internalSegment.value = { ...segment };
+            internalSegment.value = {
+                ...segment,
+                speaker: segment.speaker ?? "NA",
+            };
         }
     },
 );
@@ -67,7 +73,7 @@ watch(
     { immediate: true },
 );
 
-function removeSegment(segment: SegmentWithId): void {
+function removeSegment(segment: StoredSegment): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
 }
 
@@ -88,17 +94,18 @@ function applyChanges(): void {
             }
             return acc;
         },
-        {} as Partial<SegmentWithId>,
+        {} as Partial<StoredSegment>,
     );
 
-    executeCommand(
-        new UpdateSegmentCommand(internalSegment.value.id, updates),
-    );
+    executeCommand(new UpdateSegmentCommand(internalSegment.value.id, updates));
 }
 
 function unDoChanges(): void {
     isDirty.value = false;
-    internalSegment.value = { ...props.segment };
+    internalSegment.value = {
+        ...props.segment,
+        speaker: props.segment.speaker ?? "NA",
+    };
 }
 
 function handleKeydown(event: KeyboardEvent): void {
@@ -137,14 +144,17 @@ const endTimeFormatted = computed({
 
 <template>
     <MotionCard layout variant="subtle" :ui="{
-        root: props.isActive
-            ? 'ring-2 ring-teal-500'
-            : ''
+        root: props.isActive ? 'ring-2 ring-teal-500' : '',
     }" class="relative overflow-hidden">
         <motion.div v-if="props.isActive && props.showProgress" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
             :transition="{ duration: duration, ease: 'linear' }"
-            class="absolute inset-0 origin-left pointer-events-none z-0"
-            style="background: linear-gradient(to right, rgba(20, 184, 166, 0.15), rgba(20, 184, 166, 0.25));" />
+            class="absolute inset-0 origin-left pointer-events-none z-0" style="
+                background: linear-gradient(
+                    to right,
+                    rgba(20, 184, 166, 0.15),
+                    rgba(20, 184, 166, 0.25)
+                );
+            " />
         <div class="relative z-10">
             <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
                 variant="outline" :actions="[
@@ -163,7 +173,8 @@ const endTimeFormatted = computed({
 
             <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
                 <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
-                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" @update:model-value="markDirty()" />
+                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker"
+                    @update:model-value="markDirty()" />
 
                 <div class="flex gap-2 items-center">
                     <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"

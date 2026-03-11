@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
 import {
     Cmds,
     type SeekToSecondsCommand,
@@ -9,6 +10,7 @@ import { formatTime } from "~/utils/time";
 
 interface MediaPlaybackBarProps {
     transcription: StoredTranscription;
+    segments: StoredSegment[];
     duration: number;
 }
 
@@ -25,16 +27,14 @@ const isPlaying = ref<boolean>(false);
 const isVideoFile = ref<boolean>(false);
 const playbackRate = ref<number>(1);
 
-const segments = computed(() => props.transcription.segments ?? []);
-
 const { getSpeakerColor } = useSpeakerColor(
-    computed(() => Array.from(getUniqueSpeakers(segments.value))),
+    computed(() => Array.from(getUniqueSpeakers(props.segments))),
 );
 
 const { onCommand } = useCommandBus();
 
 const currentSegments = computed(() => {
-    return segments.value.filter(
+    return props.segments.filter(
         (segment) =>
             currentTime.value >= segment.start &&
             currentTime.value < segment.end,

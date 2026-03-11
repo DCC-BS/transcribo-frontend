@@ -6,7 +6,7 @@ import {
     type TaskStatus,
     TaskStatusEnum,
     TaskStatusSchema,
-} from "~/types/task";
+} from "~/types/storedTasks";
 import {
     type TranscriptionResponse,
     TranscriptionResponseSchema,

@@ -18,14 +18,16 @@ describe("indexDbService constants and helpers", () => {
         it("should use correct store names", () => {
             const TRANSCIPTION_STORE_NAME = "transcriptions";
             const TASK_STORE_NAME = "tasks";
-            
+            const SEGMENT_STORE_NAME = "segments";
+
             expect(TRANSCIPTION_STORE_NAME).toBe("transcriptions");
             expect(TASK_STORE_NAME).toBe("tasks");
+            expect(SEGMENT_STORE_NAME).toBe("segments");
         });
 
         it("should use correct database version", () => {
-            const DB_VERSION = 3;
-            expect(DB_VERSION).toBe(3);
+            const DB_VERSION = 42;
+            expect(DB_VERSION).toBe(42);
         });
     });
 

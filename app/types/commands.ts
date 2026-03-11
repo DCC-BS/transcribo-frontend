@@ -1,11 +1,8 @@
 import type { ICommand, IReversibleCommand } from "#build/types/commands";
 import type { EditorMode } from "./editor";
-import type { TaskStatus } from "./task";
-import type {
-    Segment,
-    SegmentWithId,
-    TranscriptionResponse,
-} from "./transcriptionResponse";
+import type { StoredSegment } from "./storedSegments";
+import type { TaskStatus } from "./storedTasks";
+import type { Segment, TranscriptionResponse } from "./transcriptionResponse";
 
 export const Cmds = {
     UploadFileCommand: "UploadFileCommand",
@@ -160,7 +157,7 @@ export class AddSegmentCommand implements ITransriboReversibleCommand {
     readonly $type = "AddSegmentCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
-    constructor(public readonly newSegment: Segment) {}
+    constructor(public readonly newSegment: Omit<StoredSegment, "id">) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;
@@ -172,6 +169,7 @@ export class InsertSegmentCommand implements ITransriboReversibleCommand {
     $undoCommand: ICommand = new EmptyCommand();
 
     constructor(
+        public readonly transcriptionId: string,
         public readonly targetSegmentId: string,
         public readonly newSegment: Partial<Segment>,
         public readonly direction: "before" | "after",
@@ -200,7 +198,7 @@ export class InsertSegmentCommand implements ITransriboReversibleCommand {
 export class RestoreSegmentCommand implements ICommand {
     readonly $type = "RestoreSegmentCommand";
 
-    constructor(public readonly segmentData: SegmentWithId) {}
+    constructor(public readonly segmentData: StoredSegment) {}
 
     /**
      * Returns a string representation of the command
@@ -290,7 +288,11 @@ export class TranscriptionNameChangeCommand
     readonly $type = "TranscriptionNameChangeCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
-    constructor(public readonly newName: string) {}
+    constructor(
+        public readonly transcriptionId: string,
+        public readonly oldName: string,
+        public readonly newName: string,
+    ) {}
 
     public setUndoCommand(undoCommand: ICommand) {
         this.$undoCommand = undoCommand;
@@ -317,13 +319,15 @@ export class RenameSpeakerCommand implements ITransriboReversibleCommand {
     readonly $undoCommand: ICommand;
 
     constructor(
+        public readonly transcriptionId: string,
         public readonly oldName: string,
         public readonly newName: string,
         undoCommand?: ICommand,
     ) {
         // to avoid circular dependency, we set the undo command in the constructor
         this.$undoCommand =
-            undoCommand || new RenameSpeakerCommand(newName, oldName, this);
+            undoCommand ||
+            new RenameSpeakerCommand(transcriptionId, newName, oldName, this);
     }
 
     /**

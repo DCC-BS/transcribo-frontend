@@ -6,7 +6,7 @@ vi.mock("#imports", () => ({
     }),
 }));
 
-import { TaskStatusEnum, type TaskStatus } from "../../../app/types/task";
+import { TaskStatusEnum, type TaskStatus } from "../../app/types/storedTasks";
 
 function getStatusDisplay(status: string): string {
     switch (status) {

@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import type { TableColumn } from "@nuxt/ui";
-import type { StoredTask } from "~/types/task";
-import { TaskStatusEnum } from "~/types/task";
+import { navigateTo } from "#app";
+import type { StoredTask } from "~/types/storedTasks";
+import { TaskStatusEnum } from "~/types/storedTasks";
 
 const props = defineProps<{
     tasks: StoredTask[];

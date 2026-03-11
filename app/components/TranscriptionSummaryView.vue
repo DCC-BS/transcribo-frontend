@@ -3,11 +3,13 @@ import type { SelectMenuItem } from "@nuxt/ui";
 import { useStorage } from "@vueuse/core";
 import { match } from "ts-pattern";
 import type { SummaryType } from "#shared/types/summary";
+import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { languages } from "~/utils/languages";
 
 interface Props {
     transcription: StoredTranscription;
+    segments: StoredSegment[];
 }
 
 const props = defineProps<Props>();
@@ -71,7 +73,12 @@ async function handleGenerateSummary(): Promise<void> {
         .otherwise((lang) => lang);
 
     try {
-        await generateSummary(props.transcription, summaryType.value, language);
+        await generateSummary(
+            props.transcription,
+            props.segments,
+            summaryType.value,
+            language,
+        );
     } catch (error) {
         summaryError.value =
             error instanceof Error

@@ -48,11 +48,14 @@ export function getTranscriptionService() {
     ) {
         const updatesParsed = StoredTranscriptionSchema.partial().parse({
             ...updates,
+            updatedAt: new Date(),
         });
+
         await db.transcriptions.update(id, updatesParsed);
     }
 
     async function deleteTranscription(id: string) {
+        await db.segments.where("transcriptionId").equals(id).delete();
         await db.transcriptions.delete(id);
     }
 
@@ -61,10 +64,31 @@ export function getTranscriptionService() {
             Date.now() - TRANSCRIPTION_RETENTION_PERIOD_MS,
         );
 
-        return await db.transcriptions
-            .where("createdAt")
-            .below(thresholdDate)
-            .delete();
+        return await db.transaction(
+            "rw",
+            [db.transcriptions, db.segments],
+            async () => {
+                await db.transcriptions
+                    .where("updatedAt")
+                    .below(thresholdDate)
+                    .toArray()
+                    .then((oldTranscriptions) => {
+                        const oldTranscriptionIds = oldTranscriptions.map(
+                            (t) => t.id,
+                        );
+
+                        return db.segments
+                            .where("transcriptionId")
+                            .anyOf(oldTranscriptionIds)
+                            .delete();
+                    });
+
+                return await db.transcriptions
+                    .where("updatedAt")
+                    .below(thresholdDate)
+                    .delete();
+            },
+        );
     }
 
     return {

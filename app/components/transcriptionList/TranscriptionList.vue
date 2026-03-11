@@ -3,12 +3,15 @@ import { useWindowScroll, useWindowSize } from "@vueuse/core";
 import { motion } from "motion-v";
 import { v4 as uuid } from "uuid";
 import { AddSegmentCommand, InsertSegmentCommand } from "~/types/commands";
-import type { StoredTranscription } from "~/types/storedTranscription";
-import type { SegmentWithId } from "~/types/transcriptionResponse";
+import {
+    type StoredSegment,
+    StoredSegmentSchema,
+} from "~/types/storedSegments";
 import TranscriptionListItem from "./TranscriptionSegmentEdit.vue";
 
 interface InputProps {
-    transcription: StoredTranscription;
+    transcriptionId: string;
+    segments: StoredSegment[];
     currentTime?: number;
     autoScrollEnabled?: boolean;
 }
@@ -40,12 +43,10 @@ watch(
 );
 
 const segments = computed(() =>
-    props.transcription.segments.toSorted((a, b) => a.start - b.start),
+    props.segments.toSorted((a, b) => a.start - b.start),
 );
 
-const speakers = computed(() =>
-    Array.from(getUniqueSpeakers(props.transcription.segments)),
-);
+const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
 
 const currentSegmentId = computed(() => {
     const current = segments.value.find(
@@ -97,59 +98,50 @@ watch(currentSegmentId, async (newId, oldId) => {
     segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
-async function addSegmentAfter(segment: SegmentWithId) {
-    executeCommand(new InsertSegmentCommand(segment.id, {}, "after"));
+async function addSegmentAfter(segment: StoredSegment) {
+    await executeCommand(
+        new InsertSegmentCommand(
+            segment.transcriptionId,
+            segment.id,
+            {},
+            "after",
+        ),
+    );
 }
 
 async function addSegmentAtZero() {
-    const segment: SegmentWithId = {
-        id: uuid(),
+    const speaker = speakers.value[0] ?? "SPEAKER_1";
+
+    const segment = StoredSegmentSchema.parse({
         text: "",
         start: 0,
         end: 2,
-        speaker: speakers.value[0],
-    };
-    executeCommand(new AddSegmentCommand(segment));
+        speaker: speaker,
+        transcriptionId: props.transcriptionId,
+    } as Omit<StoredSegment, "id">);
+    await executeCommand(new AddSegmentCommand(segment));
 }
 </script>
 
 <template>
     <div class="flex flex-col">
         <USeparator id="add-transcription-top">
-            <UButton
-                icon="i-lucide-plus"
-                variant="link"
-                color="neutral"
-                @click="() => addSegmentAtZero()"
-            />
+            <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegmentAtZero()" />
         </USeparator>
 
         <AnimatePresence>
             <div id="transcription-segments">
-                <motion.div
-                    v-for="segment in segments.slice(0, maxSegment)"
-                    :key="segment.id"
-                    :initial="{ opacity: 0, scaleY: 0 }"
-                    :animate="{ opacity: 1, scaleY: 1 }"
-                    :exit="{ scale: 0 }"
-                >
+                <motion.div v-for="segment in segments.slice(0, maxSegment)" :key="segment.id"
+                    :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
-                        <TranscriptionListItem
-                            :segment="segment"
-                            :speakers="speakers"
-                            :isActive="isSegmentActive(segment.id)"
-                            :currentTime="props.currentTime"
-                            :showProgress="useProgress"
-                        />
+                        <TranscriptionListItem :segment="segment" :speakers="speakers"
+                            :isActive="isSegmentActive(segment.id)" :currentTime="props.currentTime"
+                            :showProgress="useProgress" />
                     </div>
 
                     <USeparator>
-                        <UButton
-                            icon="i-lucide-plus"
-                            variant="link"
-                            color="neutral"
-                            @click="() => addSegmentAfter(segment)"
-                        />
+                        <UButton icon="i-lucide-plus" variant="link" color="neutral"
+                            @click="() => addSegmentAfter(segment)" />
                     </USeparator>
                 </motion.div>
             </div>

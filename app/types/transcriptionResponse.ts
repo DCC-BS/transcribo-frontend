@@ -38,19 +38,6 @@ export const SegmentSchema = z.object({
 export type Segment = z.infer<typeof SegmentSchema>;
 
 /**
- * Zod schema for SegmentWithId
- */
-export const SegmentWithIdSchema = SegmentSchema.extend({
-    id: z.string(),
-});
-
-/**
- * Type representing a segment with an ID
- * Inferred from SegmentWithIdSchema
- */
-export type SegmentWithId = z.infer<typeof SegmentWithIdSchema>;
-
-/**
  * Zod schema for TranscriptionResponse
  * Represents a transcription response
  * Corresponds to the Python TranscriptionResponse model

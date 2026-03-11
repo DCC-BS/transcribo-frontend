@@ -3,7 +3,8 @@ import {
     type StoredTask,
     StoredTaskSchema,
     type TaskStatus,
-} from "~/types/task";
+    type TaskStatusEnum,
+} from "~/types/storedTasks";
 
 const RETENTION_PERIOD_MS = 24 * 60 * 60 * 1000;
 

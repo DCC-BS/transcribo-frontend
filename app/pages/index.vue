@@ -3,7 +3,7 @@ import type {
     MediaConfigureData,
     MediaSelectionData,
 } from "~/types/mediaStepInOut";
-import { TaskStatusEnum } from "~/types/task";
+import { TaskStatusEnum } from "~/types/storedTasks";
 
 const { t } = useI18n();
 const { getTask, deleteTask, getTasksByStatus } = useTasks();

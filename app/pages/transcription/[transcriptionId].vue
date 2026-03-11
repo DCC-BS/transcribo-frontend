@@ -1,29 +1,27 @@
 <script lang="ts" setup>
 import { createReusableTemplate } from "@vueuse/core";
 import { motion } from "motion-v";
+import { useSegments } from "~/composables/useSegments";
 import { type ChangeEditorModeCommand, Cmds } from "~/types/commands";
 import type { EditorMode } from "~/types/editor";
-import type { StoredTranscription } from "~/types/storedTranscription";
 
 const route = useRoute();
 const { t } = useI18n();
-const { getTranscription } = getTranscriptionService();
 const [DefineMainContent, UseMainContent] = createReusableTemplate();
 const { onCommand } = useCommandBus();
 
 const transcriptionId = route.params.transcriptionId as string;
 
-const currentTranscription = ref<StoredTranscription>();
-const isTranscriptionLoading = ref(true);
+const { transcription } = useTranscription(transcriptionId);
+const { segments } = useSegments(transcriptionId);
 
-useTranscriptionCommandHandler(currentTranscription);
+const isTranscriptionLoading = computed(
+    () => !transcription.value && !segments.value,
+);
+
+useTranscriptionCommandHandler();
 
 const editorMode = ref<EditorMode>("view");
-
-onMounted(async () => {
-    currentTranscription.value = await getTranscription(transcriptionId);
-    isTranscriptionLoading.value = false;
-});
 
 onCommand<ChangeEditorModeCommand>(
     Cmds.ChangeEditorModeCommand,
@@ -54,8 +52,8 @@ const pageTransition = {
                 <!-- Transcription Info Portal Target (left-aligned) -->
                 <div class="flex-1 min-w-0">
                     <TranscriptionInfoView
-                        v-if="currentTranscription"
-                        :transcription="currentTranscription"
+                        v-if="transcription"
+                        :transcription="transcription"
                     />
                 </div>
 
@@ -72,8 +70,9 @@ const pageTransition = {
                 <!-- Export Portal Target (right-aligned) -->
                 <div class="flex-1 min-w-0 flex justify-end">
                     <ExportToolbar
-                        v-if="currentTranscription"
-                        :transcription="currentTranscription"
+                        v-if="transcription && segments"
+                        :transcription="transcription"
+                        :segments="segments"
                     />
                 </div>
             </div>
@@ -82,7 +81,7 @@ const pageTransition = {
             <template v-if="isTranscriptionLoading">
                 <LoadingView :loadingText="t('transcription.loading')" />
             </template>
-            <template v-else-if="currentTranscription">
+            <template v-else-if="transcription && segments">
                 <UseMainContent />
             </template>
             <template v-else>
@@ -114,7 +113,7 @@ const pageTransition = {
     </HContainer>
 
     <DefineMainContent id="does-this-work">
-        <template v-if="currentTranscription">
+        <template v-if="transcription && segments">
             <motion.div
                 id="main-content"
                 :animate="{ opacity: 1, y: 0 }"
@@ -132,28 +131,29 @@ const pageTransition = {
                 >
                     <!-- Viewer Mode -->
                     <template v-if="editorMode === 'view'">
-                        <TranscriptionViewer
-                            :transcription="currentTranscription"
-                        />
+                        <TranscriptionViewer :segments="segments" />
                     </template>
 
                     <template v-else-if="editorMode === 'summary'">
                         <TranscriptionSummaryView
-                            :transcription="currentTranscription"
+                            :transcription="transcription"
+                            :segments="segments"
                         />
                     </template>
 
                     <!-- Editor Mode -->
                     <template v-else-if="editorMode === 'edit'">
                         <TranscriptionEditView
-                            :transcription="currentTranscription"
+                            :transcription="transcription"
+                            :segments="segments"
                         />
                     </template>
 
                     <!-- Statistics Mode -->
                     <template v-else-if="editorMode === 'statistics'">
                         <SpeakerStatisticsView
-                            :transcription="currentTranscription"
+                            :transcription="transcription"
+                            :segments="segments"
                         />
                     </template>
                 </motion.div>

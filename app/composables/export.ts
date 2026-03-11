@@ -1,9 +1,10 @@
 // Import the StoredTranscription interface
+import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import type { SegmentWithId } from "~/types/transcriptionResponse";
 
 export interface ExportOptions {
     transcription: StoredTranscription;
+    segments: StoredSegment[];
     withSpeakers: boolean;
     withTimestamps: boolean;
     mergeSegments: boolean; // Only applies to text exports
@@ -17,11 +18,11 @@ export function useExport() {
      * @returns Array of merged segments
      */
     function mergeConsecutiveSegments(
-        segments: SegmentWithId[],
-    ): SegmentWithId[] {
+        segments: StoredSegment[],
+    ): StoredSegment[] {
         if (segments.length === 0) return [];
 
-        const merged: SegmentWithId[] = [];
+        const merged: StoredSegment[] = [];
         let currentSegment = { ...segments[0] };
 
         for (let i = 1; i < segments.length; i++) {
@@ -38,18 +39,18 @@ export function useExport() {
                 currentSegment.end = nextSegment.end;
             } else {
                 // Different speaker, save current and start new
-                merged.push(currentSegment as SegmentWithId);
+                merged.push(currentSegment as StoredSegment);
                 currentSegment = { ...nextSegment };
             }
         }
 
         // Don't forget the last segment
-        merged.push(currentSegment as SegmentWithId);
+        merged.push(currentSegment as StoredSegment);
         return merged;
     }
 
     function exportAsText(options: ExportOptions) {
-        let segments = options.transcription.segments;
+        let segments = options.segments;
 
         // Merge segments if requested
         if (options.mergeSegments) {
@@ -117,9 +118,10 @@ export function useExport() {
 
     function exportAsSrt(
         transciption: StoredTranscription,
+        segments: StoredSegment[],
         withSpeakers: boolean,
     ) {
-        const srt = transciption.segments
+        const srt = segments
             .map((s, i) => {
                 const start = srtFormatTime(s.start);
                 const end = srtFormatTime(s.end);
@@ -140,11 +142,14 @@ export function useExport() {
      * Exports the current transcription as a json file
      * This format preserves all transcription data including metadata
      */
-    function exportAsJson(transciption: StoredTranscription): void {
+    function exportAsJson(
+        transciption: StoredTranscription,
+        segments: StoredSegment[],
+    ): void {
         // Create a serializable object with all transcription data
         const exportData = {
             name: transciption.name,
-            segments: transciption.segments,
+            segments: segments,
             audioFileId: transciption.audioFileId,
             createdAt: transciption.createdAt,
             mediaFileName: transciption.mediaFileName,
@@ -169,7 +174,7 @@ export function useExport() {
     }
 
     async function exportAsDocx(options: ExportOptions) {
-        let segments = options.transcription.segments;
+        let segments = options.segments;
 
         if (options.mergeSegments) {
             segments = mergeConsecutiveSegments(segments);
