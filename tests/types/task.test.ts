@@ -80,7 +80,6 @@ describe("StoredTranscriptionSchema", () => {
     it("should validate valid stored transcription", () => {
         const transcription = {
             id: "trans-123",
-            segments: [{ id: "seg-1", start: 0, end: 5, text: "Hello" }],
             name: "Test Transcription",
             createdAt: "2024-01-01T00:00:00Z",
             updatedAt: "2024-01-01T00:00:00Z",
@@ -93,7 +92,6 @@ describe("StoredTranscriptionSchema", () => {
     it("should validate with optional fields", () => {
         const transcription = {
             id: "trans-123",
-            segments: [],
             name: "Test",
             createdAt: "2024-01-01T00:00:00Z",
             updatedAt: "2024-01-01T00:00:00Z",
@@ -109,7 +107,6 @@ describe("StoredTranscriptionSchema", () => {
     it("should convert date strings to Date objects", () => {
         const transcription = {
             id: "trans-123",
-            segments: [],
             name: "Test",
             createdAt: "2024-01-15T12:30:00Z",
             updatedAt: "2024-01-15T12:30:00Z",
