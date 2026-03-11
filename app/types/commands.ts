@@ -282,7 +282,9 @@ export class UpdateSegmentCommand implements ITransriboReversibleCommand {
     }
 }
 
-export class TranscriptionNameChangeCommand implements ITransriboReversibleCommand {
+export class TranscriptionNameChangeCommand
+    implements ITransriboReversibleCommand
+{
     readonly $type = "TranscriptionNameChangeCommand";
     $undoCommand: ICommand = new EmptyCommand();
 
