@@ -1,6 +1,7 @@
 import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
 import { match } from "ts-pattern";
 import { v4 as uuidv4 } from "uuid";
+import { db } from "~/stores/db";
 import type { MediaProgress } from "~/types/mediaProgress";
 import {
     type TaskStatus,
@@ -125,25 +126,30 @@ export function useTaskListener() {
         mediaFile: Blob,
         mediaName: string,
     ): Promise<void> {
-        const transcription = await addTranscription({
-            mediaFile: mediaFile,
-            mediaFileName: mediaName,
-            name: mediaName ?? t("transcription.untitled"),
+        const transcription = await db.transaction("rw", [db.transcriptions, db.segments], async () => {
+            const newTranscription = await addTranscription({
+                mediaFile: mediaFile,
+                mediaFileName: mediaName,
+                name: mediaName ?? t("transcription.untitled"),
+            });
+
+            await addSegments(
+                result.segments.map((x) => ({
+                    ...x,
+                    transcriptionId: newTranscription.id,
+                    text: x.text?.trim() ?? "",
+                    speaker:
+                        x.speaker?.trim().toUpperCase() ??
+                        t("transcription.noSpeaker"),
+                    id: uuidv4(),
+                })),
+            );
+
+            await deleteTask(taskId);
+
+            return newTranscription;
         });
 
-        await addSegments(
-            result.segments.map((x) => ({
-                ...x,
-                transcriptionId: transcription.id,
-                text: x.text?.trim() ?? "",
-                speaker:
-                    x.speaker?.trim().toUpperCase() ??
-                    t("transcription.noSpeaker"),
-                id: uuidv4(),
-            })),
-        );
-
-        await deleteTask(taskId);
         await navigateTo(`/transcription/${transcription.id}`);
     }
 

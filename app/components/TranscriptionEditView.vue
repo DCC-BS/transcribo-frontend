@@ -51,12 +51,8 @@ function initializeDuration(): void {
 <template>
     <div class="relative h-full flex flex-col">
         <div class="sticky top-0 z-40 bg-default/50 backdrop-blur-sm rounded">
-            <MediaPlaybackBar
-                v-model="currentTime"
-                :transcription="props.transcription"
-                :segments="props.segments"
-                :duration="duration"
-            />
+            <MediaPlaybackBar v-model="currentTime" :transcription="props.transcription" :segments="props.segments"
+                :duration="duration" />
 
             <div>
                 <!-- <TimelineEditor
@@ -64,27 +60,14 @@ function initializeDuration(): void {
                     :currentTime="currentTime"
                 /> -->
                 <div class="flex justify-between">
-                    <UndoRedoButtons
-                        :canRedo="canRedo"
-                        :canUndo="canUndo"
-                        @redo="redo"
-                        @undo="undo"
-                    />
-                    <UButton
-                        size="xs"
-                        variant="link"
-                        :color="autoScrollEnabled ? 'primary' : 'neutral'"
-                        @click="autoScrollEnabled = !autoScrollEnabled"
-                    >
+                    <UndoRedoButtons :canRedo="canRedo" :canUndo="canUndo" @redo="redo" @undo="undo" />
+                    <UButton size="xs" variant="link" :color="autoScrollEnabled ? 'primary' : 'neutral'"
+                        @click="autoScrollEnabled = !autoScrollEnabled">
                         <template #leading>
-                            <UIcon
-                                :name="
-                                    autoScrollEnabled
-                                        ? 'i-lucide-arrow-down-narrow-wide'
-                                        : 'i-lucide-arrow-down-narrow-wide'
-                                "
-                                :class="{ 'opacity-50': !autoScrollEnabled }"
-                            />
+                            <UIcon :name="autoScrollEnabled
+                                ? 'i-lucide-arrow-down-narrow-wide'
+                                : 'i-lucide-arrow-down-narrow-wide'
+                                " :class="{ 'opacity-50': !autoScrollEnabled }" />
                         </template>
                         <span class="text-xs">{{
                             autoScrollEnabled
@@ -99,35 +82,20 @@ function initializeDuration(): void {
         <div class="flex-1 min-h-0 flex flex-col">
             <template v-if="!isMobile">
                 <div class="p-4 flex flex-col gap-4">
-                    <RenameSpeakerView
-                        :transcriptionId="props.transcription.id"
-                        :segments="segments"
-                    />
-                    <TranscriptionList
-                        id="edit-transcription-list"
-                        :transcriptionId="props.transcription.id"
-                        :segments="segments"
-                        :currentTime="currentTime"
-                        :autoScrollEnabled="autoScrollEnabled"
-                    />
+                    <RenameSpeakerView :transcriptionId="props.transcription.id" :segments="props.segments" />
+                    <TranscriptionList id="edit-transcription-list" :transcriptionId="props.transcription.id"
+                        :segments="props.segments" :currentTime="currentTime" :autoScrollEnabled="autoScrollEnabled" />
                 </div>
             </template>
 
             <template v-else>
                 <div class="flex-1 min-h-0">
                     <div class="p-4 flex flex-col gap-4">
-                        <RenameSpeakerView
-                            id="edit-speaker-names"
-                            :transcriptionId="props.transcription.id"
-                            :segments="segments"
-                        />
-                        <TranscriptionList
-                            id="edit-transcription-list"
-                            :transcriptionId="props.transcription.id"
-                            :segments="segments"
-                            :currentTime="currentTime"
-                            :autoScrollEnabled="autoScrollEnabled"
-                        />
+                        <RenameSpeakerView id="edit-speaker-names" :transcriptionId="props.transcription.id"
+                            :segments="props.segments" />
+                        <TranscriptionList id="edit-transcription-list" :transcriptionId="props.transcription.id"
+                            :segments="props.segments" :currentTime="currentTime"
+                            :autoScrollEnabled="autoScrollEnabled" />
                     </div>
                 </div>
             </template>

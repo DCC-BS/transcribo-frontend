@@ -62,11 +62,11 @@ export const useTranscriptionCommandHandler = () => {
                 text: "",
                 transcriptionId: command.transcriptionId,
                 ...command.newSegment,
-            } as StoredSegment;
+            } as Omit<StoredSegment, "id">;
 
-            command.setUndoCommand(new DeleteSegmentCommand(newSegment.id));
+            const createdSegment = await addSegment(newSegment);
+            command.setUndoCommand(new DeleteSegmentCommand(createdSegment.id));
 
-            await addSegment(newSegment);
         },
     );
 

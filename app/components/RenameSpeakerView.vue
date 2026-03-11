@@ -34,7 +34,6 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
         return;
     }
 
-    console.log(`Renaming speaker from "${originalName}" to "${newName}"`);
     executeCommand(
         new RenameSpeakerCommand(props.transcriptionId, originalName, newName),
     );
@@ -48,19 +47,13 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
         </h3>
         <div class="flex gap-2 flex-wrap">
             <div v-for="(speakerMap, index) in speakerMappings" :key="index">
-                <UInput
-                    v-model="speakerMap.new"
-                    size="sm"
-                    :style="{ color: getSpeakerColor(speakerMap.original) }"
-                    :placeholder="t('transcription.placeholderSpeakerName')"
-                    class="w-32"
-                    @change="
+                <UInput v-model="speakerMap.new" size="sm" :style="{ color: getSpeakerColor(speakerMap.original) }"
+                    :placeholder="t('transcription.placeholderSpeakerName')" class="w-32" @change="
                         handleSpeakerNameChange(
                             speakerMap.original,
                             speakerMap.new,
                         )
-                    "
-                />
+                        " />
             </div>
         </div>
     </div>

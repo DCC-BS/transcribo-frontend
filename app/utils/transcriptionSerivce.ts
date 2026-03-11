@@ -55,8 +55,8 @@ export function getTranscriptionService() {
     }
 
     async function deleteTranscription(id: string) {
-        await db.transcriptions.delete(id);
         await db.segments.where("transcriptionId").equals(id).delete();
+        await db.transcriptions.delete(id);
     }
 
     async function cleanupOldTranscriptions(): Promise<number> {

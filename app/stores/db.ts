@@ -23,8 +23,6 @@ db.version(42)
         segments: "id, transcriptionId, speaker, start, end",
     })
     .upgrade(async (tx) => {
-        let newTx = tx;
-
         const transcriptions = await tx
             .table<StoredTranscription4>("transcriptions")
             .toArray();
@@ -49,16 +47,16 @@ db.version(42)
             });
 
         for (const t of transcriptions) {
-            newTx = await tx.table("segments").bulkAdd(
-                t.segments.map(
-                    (segment) =>
-                        ({
-                            ...segment,
-                            transcriptionId: t.id,
-                        }) as StoredSegment,
-                ),
+            const newSegments = (t.segments ?? []).map(
+                (segment) =>
+                    ({
+                        ...segment,
+                        transcriptionId: t.id,
+                    }) as StoredSegment,
+            );
+
+            await tx.table("segments").bulkAdd(
+                newSegments
             );
         }
-
-        return newTx;
     });

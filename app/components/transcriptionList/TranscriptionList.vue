@@ -99,7 +99,7 @@ watch(currentSegmentId, async (newId, oldId) => {
 });
 
 async function addSegmentAfter(segment: StoredSegment) {
-    executeCommand(
+    await executeCommand(
         new InsertSegmentCommand(
             segment.transcriptionId,
             segment.id,
@@ -110,55 +110,39 @@ async function addSegmentAfter(segment: StoredSegment) {
 }
 
 async function addSegmentAtZero() {
+    const speaker = speakers.value[0] ?? "SPEAKER_1";
+
     const segment = StoredSegmentSchema.parse({
         id: uuid(),
         text: "",
         start: 0,
         end: 2,
-        speaker: speakers.value[0],
+        speaker: speaker,
         transcriptionId: props.transcriptionId,
     } as StoredSegment);
-    executeCommand(new AddSegmentCommand(segment));
+    await executeCommand(new AddSegmentCommand(segment));
 }
 </script>
 
 <template>
     <div class="flex flex-col">
         <USeparator id="add-transcription-top">
-            <UButton
-                icon="i-lucide-plus"
-                variant="link"
-                color="neutral"
-                @click="() => addSegmentAtZero()"
-            />
+            <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegmentAtZero()" />
         </USeparator>
 
         <AnimatePresence>
             <div id="transcription-segments">
-                <motion.div
-                    v-for="segment in segments.slice(0, maxSegment)"
-                    :key="segment.id"
-                    :initial="{ opacity: 0, scaleY: 0 }"
-                    :animate="{ opacity: 1, scaleY: 1 }"
-                    :exit="{ scale: 0 }"
-                >
+                <motion.div v-for="segment in segments.slice(0, maxSegment)" :key="segment.id"
+                    :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
-                        <TranscriptionListItem
-                            :segment="segment"
-                            :speakers="speakers"
-                            :isActive="isSegmentActive(segment.id)"
-                            :currentTime="props.currentTime"
-                            :showProgress="useProgress"
-                        />
+                        <TranscriptionListItem :segment="segment" :speakers="speakers"
+                            :isActive="isSegmentActive(segment.id)" :currentTime="props.currentTime"
+                            :showProgress="useProgress" />
                     </div>
 
                     <USeparator>
-                        <UButton
-                            icon="i-lucide-plus"
-                            variant="link"
-                            color="neutral"
-                            @click="() => addSegmentAfter(segment)"
-                        />
+                        <UButton icon="i-lucide-plus" variant="link" color="neutral"
+                            @click="() => addSegmentAfter(segment)" />
                     </USeparator>
                 </motion.div>
             </div>
