@@ -66,7 +66,6 @@ export const useTranscriptionCommandHandler = () => {
 
             const createdSegment = await addSegment(newSegment);
             command.setUndoCommand(new DeleteSegmentCommand(createdSegment.id));
-
         },
     );
 

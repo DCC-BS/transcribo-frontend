@@ -2,12 +2,12 @@
 import { motion } from "motion-v";
 import type { WatchHandle } from "vue";
 import { UCard, UTextarea } from "#components";
-import type { StoredSegment } from "~/types/storedSegments";
 import {
     DeleteSegmentCommand,
     SeekToSecondsCommand,
     UpdateSegmentCommand,
 } from "~/types/commands";
+import type { StoredSegment } from "~/types/storedSegments";
 import { formatTime } from "~/utils/time";
 
 interface TranscriptionListProps {
