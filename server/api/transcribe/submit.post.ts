@@ -1,4 +1,3 @@
-import { apiFetch } from "@dcc-bs/communication.bs.js";
 import { z } from "zod";
 import { apiHandler } from "~~/server/utils/apiHanlder";
 import {
