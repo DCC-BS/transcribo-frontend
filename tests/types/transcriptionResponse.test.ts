@@ -2,11 +2,15 @@ import { describe, expect, it } from "vitest";
 import {
     WordSchema,
     SegmentSchema,
-    SegmentWithIdSchema,
     TranscriptionResponseSchema,
     VerboseSegmentSchema,
     VerboseTranscriptionResponseSchema,
-} from "../../../app/types/transcriptionResponse";
+} from "../../app/types/transcriptionResponse";
+
+import {
+    type StoredSegment,
+    StoredSegmentSchema
+} from "../../app/types/storedSegments"
 
 describe("Zod Schemas", () => {
     describe("WordSchema", () => {
@@ -103,9 +107,10 @@ describe("Zod Schemas", () => {
                 end: 5,
                 text: "Hello world",
                 speaker: "Speaker 1",
+                transcriptionId: "abc"
             };
 
-            const result = SegmentWithIdSchema.safeParse(segment);
+            const result = StoredSegmentSchema.safeParse(segment);
             expect(result.success).toBe(true);
         });
 
@@ -116,7 +121,7 @@ describe("Zod Schemas", () => {
                 text: "Hello world",
             };
 
-            const result = SegmentWithIdSchema.safeParse(segment);
+            const result = StoredSegmentSchema.safeParse(segment);
             expect(result.success).toBe(false);
         });
     });

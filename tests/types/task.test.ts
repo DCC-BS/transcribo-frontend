@@ -3,8 +3,8 @@ import {
     TaskStatusEnumSchema,
     TaskStatusSchema,
     TaskStatusEnum,
-} from "../../../app/types/task";
-import { StoredTranscriptionSchema } from "../../../app/types/storedTranscription";
+} from "../../app/types/storedTasks";
+import { StoredTranscriptionSchema } from "../../app/types/storedTranscription";
 
 describe("Task Types", () => {
     describe("TaskStatusEnumSchema", () => {
