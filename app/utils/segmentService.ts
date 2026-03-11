@@ -26,6 +26,8 @@ export function getSegmentService() {
         );
 
         await db.segments.bulkAdd(newSegments);
+        // this operation is only called on transcripion creation
+        // therefore I do not updarte the updateAt property here
 
         return newSegments;
     }

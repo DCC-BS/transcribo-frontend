@@ -38,9 +38,13 @@ db.version(42)
                     t.updatedAt = new Date(t.updatedAt);
                 } else if (typeof t.updatedAt === "string") {
                     const parsedDate = new Date(t.updatedAt);
-                    if (!isNaN(parsedDate.getTime())) {
+                    if (!Number.isNaN(parsedDate.getTime())) {
                         t.updatedAt = parsedDate;
+                    } else {
+                        t.updatedAt = new Date();
                     }
+                } else if (!(t.updatedAt instanceof Date)) {
+                    t.updatedAt = new Date();
                 }
             });
 
