@@ -55,8 +55,6 @@ db.version(42)
                     }) as StoredSegment,
             );
 
-            await tx.table("segments").bulkAdd(
-                newSegments
-            );
+            await tx.table("segments").bulkAdd(newSegments);
         }
     });
