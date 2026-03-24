@@ -6,7 +6,7 @@ export function useSegments(transcriptionId: string) {
     const segments = ref<StoredSegment[]>([]);
 
     const observable = liveQuery(() =>
-        db.segments.where("transcriptionId").equals(transcriptionId).toArray(),
+        db.segments.where("transcriptionId").equals(transcriptionId).sortBy("start"),
     );
 
     const subscription = observable.subscribe({
