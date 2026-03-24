@@ -97,7 +97,10 @@ watch(
             unsubscribe = watch(
                 () => props.currentTime,
                 (tNew, tOld) => {
-                    progress.value = (tNew - start.value) / (end.value - start.value);
+                    const range = end.value - start.value;
+                    progress.value = range > 0
+                        ? Math.min(Math.max((tNew - start.value) / range, 0), 1)
+                        : 0;
                     duration.value = Math.abs(tNew - tOld);
                 },
             );
