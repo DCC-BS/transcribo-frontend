@@ -119,6 +119,7 @@ function handleKeydown(event: KeyboardEvent): void {
 
 function handleCreateSpeaker(speaker: string): void {
     internalSegment.value.speaker = speaker;
+    markDirty();
 }
 
 function roundToTwoDecimals(value: number): number {
