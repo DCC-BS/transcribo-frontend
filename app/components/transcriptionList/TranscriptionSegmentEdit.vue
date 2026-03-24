@@ -128,14 +128,14 @@ function roundToTwoDecimals(value: number): number {
 const startTimeFormatted = computed({
     get: () => roundToTwoDecimals(start.value),
     set: (value: number) => {
-        start.value = value;
+        start.value = Math.min(value, end.value);
     },
 });
 
 const endTimeFormatted = computed({
     get: () => roundToTwoDecimals(end.value),
     set: (value: number) => {
-        end.value = value;
+        end.value = Math.max(value, start.value);
     },
 });
 </script>
