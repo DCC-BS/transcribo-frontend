@@ -139,7 +139,11 @@ export const useTranscriptionCommandHandler = () => {
             const segmentIds = affectedSegments.map((s) => s.id);
 
             command.setUndoCommand(
-                new UnmergeSpeakerCommandClass(command.removedSpeaker, segmentIds),
+                new UnmergeSpeakerCommandClass(
+                    command.transcriptionId,
+                    command.removedSpeaker,
+                    segmentIds,
+                ),
             );
 
             await db.segments
@@ -161,6 +165,11 @@ export const useTranscriptionCommandHandler = () => {
                 .where("id")
                 .anyOf(command.segmentIds)
                 .modify({ speaker: command.removedSpeaker });
+
+            await db.transcriptions
+                .where("id")
+                .equals(command.transcriptionId)
+                .modify({ updatedAt: new Date() });
         },
     );
 

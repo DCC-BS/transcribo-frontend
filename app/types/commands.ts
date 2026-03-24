@@ -381,6 +381,7 @@ export class UnmergeSpeakerCommand implements ICommand {
     readonly $type = "UnmergeSpeakerCommand";
 
     constructor(
+        public readonly transcriptionId: string,
         public readonly removedSpeaker: string,
         public readonly segmentIds: string[],
     ) {}

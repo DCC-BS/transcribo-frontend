@@ -32,7 +32,7 @@ const progress = ref(0);
 const duration = ref(0);
 
 const text = ref(props.segment.text);
-const speaker = ref(props.segment.speaker ?? "NA");
+const speaker = ref(props.segment.speaker);
 const start = ref(props.segment.start);
 const end = ref(props.segment.end);
 
@@ -40,7 +40,7 @@ watch(
     () => props.segment,
     (segment) => {
         text.value = segment.text;
-        speaker.value = segment.speaker ?? "NA";
+        speaker.value = segment.speaker;
         start.value = segment.start;
         end.value = segment.end;
     },
@@ -83,7 +83,7 @@ watchDebounced(
 );
 
 watch(speaker, (newSpeaker) => {
-    if (newSpeaker !== (props.segment.speaker ?? "NA")) {
+    if (newSpeaker !== props.segment.speaker) {
         applyUpdates({ speaker: newSpeaker });
     }
 });

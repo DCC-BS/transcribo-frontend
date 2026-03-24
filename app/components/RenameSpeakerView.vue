@@ -97,7 +97,7 @@ function cancelDelete(): void {
                     <template #trailing>
                         <UTooltip :text="t('speaker.delete')">
                             <UButton size="xs" variant="link" color="error" icon="i-lucide-trash-2"
-                                :disabled="speakers.length < 2" @click="openDeleteModal(speakerMap.original)" />
+                                :disabled="speakers.length < 2" @mousedown.prevent="openDeleteModal(speakerMap.original)" />
                         </UTooltip>
                     </template>
                 </UInput>
