@@ -102,6 +102,12 @@
         "failedDescription": "Während der Transkription ist ein Fehler aufgetreten. Bitte versuchen Sie es mit einer anderen Datei erneut.",
         "goBack": "Zurück"
     },
+    "speaker": {
+        "delete": "Sprecher löschen",
+        "deleteTitle": "Sprecher löschen",
+        "deleteMessage": "Alle Segmente von \"{speaker}\" werden neu zugewiesen. Wählen Sie, welchem Sprecher diese Segmente zugewiesen werden sollen:",
+        "reassignTo": "Zuweisen an Sprecher"
+    },
     "transcription": {
         "noSpeaker": "unbekannt",
         "applySpeakerChanges": "Möchtest du deine Änderungen übernehmen?",

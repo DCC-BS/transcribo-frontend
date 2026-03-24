@@ -102,6 +102,12 @@
         "failedDescription": "Something went wrong during the transcription process. Please try again with a different file.",
         "goBack": "Go Back"
     },
+    "speaker": {
+        "delete": "Delete Speaker",
+        "deleteTitle": "Delete Speaker",
+        "deleteMessage": "All segments from \"{speaker}\" will be reassigned. Select which speaker should receive these segments:",
+        "reassignTo": "Reassign to speaker"
+    },
     "transcription": {
         "noSpeaker": "unknown",
         "applySpeakerChanges": "Do you want to apply your changes?",
