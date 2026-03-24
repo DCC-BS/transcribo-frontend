@@ -110,9 +110,6 @@
     },
     "transcription": {
         "noSpeaker": "unbekannt",
-        "applySpeakerChanges": "Möchtest du deine Änderungen übernehmen?",
-        "undoChanges": "Rückgängig",
-        "applyChanges": "Übernehmen",
         "placeholderSpeakerName": "Sprechername",
         "loading": "Lädt...",
         "notFound": "Transkription nicht gefunden oder konnte nicht geladen werden",

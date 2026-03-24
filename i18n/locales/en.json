@@ -110,9 +110,6 @@
     },
     "transcription": {
         "noSpeaker": "unknown",
-        "applySpeakerChanges": "Do you want to apply your changes?",
-        "undoChanges": "Undo",
-        "applyChanges": "Apply",
         "placeholderSpeakerName": "Speaker name",
         "loading": "Loading...",
         "notFound": "Transcription not found or failed to load",

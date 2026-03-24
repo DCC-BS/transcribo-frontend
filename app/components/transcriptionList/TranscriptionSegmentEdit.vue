@@ -1,7 +1,8 @@
 <script lang="ts" setup>
+import { watchDebounced } from "@vueuse/core";
 import { motion } from "motion-v";
 import type { WatchHandle } from "vue";
-import { UCard, UTextarea } from "#components";
+import { UCard } from "#components";
 import {
     DeleteSegmentCommand,
     SeekToSecondsCommand,
@@ -26,30 +27,66 @@ const props = withDefaults(defineProps<TranscriptionListProps>(), {
 const MotionCard = motion.create(UCard);
 
 const { executeCommand } = useCommandBus();
-const internalSegment = ref<StoredSegment & { speaker: string }>({
-    ...props.segment,
-    speaker: props.segment.speaker ?? "NA",
-});
-const isDirty = ref(false);
 const { t } = useI18n();
 const progress = ref(0);
 const duration = ref(0);
 
+const text = ref(props.segment.text);
+const speaker = ref(props.segment.speaker ?? "NA");
+const start = ref(props.segment.start);
+const end = ref(props.segment.end);
+
 watch(
     () => props.segment,
     (segment) => {
-        if (!isDirty.value) {
-            internalSegment.value = {
-                ...segment,
-                speaker: segment.speaker ?? "NA",
-            };
-        }
+        text.value = segment.text;
+        speaker.value = segment.speaker ?? "NA";
+        start.value = segment.start;
+        end.value = segment.end;
     },
 );
 
-function markDirty(): void {
-    isDirty.value = true;
+function applyUpdates(updates: Partial<StoredSegment>): void {
+    executeCommand(
+        new UpdateSegmentCommand(props.segment.id, updates),
+    );
 }
+
+watchDebounced(
+    text,
+    (newText) => {
+        if (newText !== props.segment.text) {
+            applyUpdates({ text: newText });
+        }
+    },
+    { debounce: 3000 },
+);
+
+watchDebounced(
+    start,
+    (newStart) => {
+        if (newStart !== props.segment.start) {
+            applyUpdates({ start: newStart });
+        }
+    },
+    { debounce: 1000 },
+);
+
+watchDebounced(
+    end,
+    (newEnd) => {
+        if (newEnd !== props.segment.end) {
+            applyUpdates({ end: newEnd });
+        }
+    },
+    { debounce: 1000 },
+);
+
+watch(speaker, (newSpeaker) => {
+    if (newSpeaker !== (props.segment.speaker ?? "NA")) {
+        applyUpdates({ speaker: newSpeaker });
+    }
+});
 
 let unsubscribe: WatchHandle | undefined;
 
@@ -60,8 +97,7 @@ watch(
             unsubscribe = watch(
                 () => props.currentTime,
                 (tNew, tOld) => {
-                    const { start, end } = internalSegment.value;
-                    progress.value = (tNew - start) / (end - start);
+                    progress.value = (tNew - start.value) / (end.value - start.value);
                     duration.value = Math.abs(tNew - tOld);
                 },
             );
@@ -81,45 +117,8 @@ function seekTo(time: number): void {
     executeCommand(new SeekToSecondsCommand(time));
 }
 
-function applyChanges(): void {
-    isDirty.value = false;
-
-    const newSegment = internalSegment.value as Record<string, unknown>;
-    const oldSegment = props.segment as unknown as Record<string, unknown>;
-
-    const updates = Object.keys(newSegment).reduce(
-        (acc: Record<string, unknown>, key) => {
-            if (newSegment[key] !== oldSegment[key]) {
-                acc[key] = newSegment[key];
-            }
-            return acc;
-        },
-        {} as Partial<StoredSegment>,
-    );
-
-    executeCommand(new UpdateSegmentCommand(internalSegment.value.id, updates));
-}
-
-function unDoChanges(): void {
-    isDirty.value = false;
-    internalSegment.value = {
-        ...props.segment,
-        speaker: props.segment.speaker ?? "NA",
-    };
-}
-
-function handleKeydown(event: KeyboardEvent): void {
-    if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        if (isDirty.value) {
-            applyChanges();
-        }
-    }
-}
-
-function handleCreateSpeaker(speaker: string): void {
-    internalSegment.value.speaker = speaker;
-    markDirty();
+function handleCreateSpeaker(newSpeaker: string): void {
+    speaker.value = newSpeaker;
 }
 
 function roundToTwoDecimals(value: number): number {
@@ -127,18 +126,16 @@ function roundToTwoDecimals(value: number): number {
 }
 
 const startTimeFormatted = computed({
-    get: () => roundToTwoDecimals(internalSegment.value.start),
+    get: () => roundToTwoDecimals(start.value),
     set: (value: number) => {
-        internalSegment.value.start = value;
-        markDirty();
+        start.value = value;
     },
 });
 
 const endTimeFormatted = computed({
-    get: () => roundToTwoDecimals(internalSegment.value.end),
+    get: () => roundToTwoDecimals(end.value),
     set: (value: number) => {
-        internalSegment.value.end = value;
-        markDirty();
+        end.value = value;
     },
 });
 </script>
@@ -157,44 +154,28 @@ const endTimeFormatted = computed({
                 );
             " />
         <div class="relative z-10">
-            <UAlert v-if="isDirty" title="" :description="t('transcription.applySpeakerChanges')" color="info"
-                variant="outline" :actions="[
-                    {
-                        label: t('transcription.undoChanges'),
-                        onClick: unDoChanges,
-                    },
-                    {
-                        label: t('transcription.applyChanges'),
-                        color: 'neutral',
-                        variant: 'subtle',
-                        onClick: applyChanges,
-                    },
-                ]" />
-            <UTextarea v-model="internalSegment.text" class="w-full" @keydown="handleKeydown" @input="markDirty" />
+            <UTextarea v-model="text" class="w-full" />
 
-            <div class="flex justify-between gap-2 pt-2 flex-wrap" @keydown="handleKeydown">
-                <USelectMenu v-model="internalSegment.speaker" :items="props.speakers" create-item
-                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker"
-                    @update:model-value="markDirty()" />
+            <div class="flex justify-between gap-2 pt-2 flex-wrap">
+                <USelectMenu v-model="speaker" :items="props.speakers" create-item
+                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
 
                 <div class="flex gap-2 items-center">
-                    <UInput v-model="startTimeFormatted" type="number" class="w-[100px]" :step="0.1"
-                        @keydown="handleKeydown">
+                    <UInput v-model="startTimeFormatted" type="number" class="w-25" :step="0.1">
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
                     </UInput>
                     <div class="text-gray-700">
-                        <a @click="() => seekTo(internalSegment.start)">
-                            {{ formatTime(internalSegment.start) }}
+                        <a @click="() => seekTo(start)">
+                            {{ formatTime(start) }}
                         </a>
                         -
-                        <a @click="() => seekTo(internalSegment.end)">{{
-                            formatTime(internalSegment.end)
+                        <a @click="() => seekTo(end)">{{
+                            formatTime(end)
                         }}</a>
                     </div>
-                    <UInput v-model="endTimeFormatted" type="number" class="w-[100px]" :step="0.1"
-                        @keydown="handleKeydown">
+                    <UInput v-model="endTimeFormatted" type="number" class="w-25" :step="0.1">
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
@@ -203,7 +184,7 @@ const endTimeFormatted = computed({
 
                 <div class="flex gap-2">
                     <UTooltip :text="t('help.segments.deleteSegment')">
-                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(internalSegment)" />
+                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(props.segment)" />
                     </UTooltip>
                 </div>
             </div>
