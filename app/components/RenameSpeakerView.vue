@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { UInput } from "#components";
 import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
-import { RenameSpeakerCommand } from "~/types/commands";
+import { MergeSpeakerCommand, RenameSpeakerCommand } from "~/types/commands";
 
 interface InputProps {
     transcriptionId: string;
@@ -59,7 +59,7 @@ function confirmDelete(): void {
     if (!speakerToDelete.value || !reassignTarget.value) return;
 
     executeCommand(
-        new RenameSpeakerCommand(
+        new MergeSpeakerCommand(
             props.transcriptionId,
             speakerToDelete.value,
             reassignTarget.value,

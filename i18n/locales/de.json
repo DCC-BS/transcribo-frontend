@@ -220,6 +220,8 @@
         "updateSegmentNoUpdates": "Segment aktualisieren: Keine Änderungen",
         "changeTranscriptionName": "Transkriptionsname ändern zu: {name}",
         "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\"",
+        "mergeSpeaker": "Sprecher zusammenführen: \"{removedSpeaker}\" → \"{targetSpeaker}\"",
+        "unmergeSpeaker": "Sprecher trennen: \"{speaker}\" auf {count} Segmenten wiederherstellen",
         "restoreSegment": "Segment wiederherstellen"
     },
     "viewer": {
