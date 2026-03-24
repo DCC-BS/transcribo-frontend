@@ -42,9 +42,7 @@ watch(
     { immediate: true },
 );
 
-const segments = computed(() =>
-    props.segments.toSorted((a, b) => a.start - b.start),
-);
+const segments = computed(() => props.segments);
 
 const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
 
