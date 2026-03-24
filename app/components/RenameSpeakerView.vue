@@ -102,10 +102,7 @@ function cancelDelete(): void {
         </div>
     </div>
 
-    <UModal v-model:open="deleteModalOpen">
-        <template #header>
-            <h3 class="text-lg font-semibold">{{ t("speaker.deleteTitle") }}</h3>
-        </template>
+    <UDrawer v-model:open="deleteModalOpen" :title="t('speaker.deleteTitle')">
         <template #body>
             <p class="mb-4">
                 {{ t("speaker.deleteMessage", { speaker: speakerToDelete }) }}
@@ -119,5 +116,5 @@ function cancelDelete(): void {
                 <UButton color="error" :label="t('ui.confirm')" :disabled="!reassignTarget" @click="confirmDelete" />
             </div>
         </template>
-    </UModal>
+    </UDrawer>
 </template>
