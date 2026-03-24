@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { UInput } from "#components";
 import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
-import { RenameSpeakerCommand } from "~/types/commands";
+import { MergeSpeakerCommand, RenameSpeakerCommand } from "~/types/commands";
 
 interface InputProps {
     transcriptionId: string;
@@ -29,6 +29,15 @@ watch(
     { immediate: true },
 );
 
+const deleteModalOpen = ref(false);
+const speakerToDelete = ref<string | null>(null);
+const reassignTarget = ref<string | undefined>(undefined);
+
+const reassignOptions = computed(() => {
+    if (!speakerToDelete.value) return [];
+    return speakers.value.filter((s) => s !== speakerToDelete.value);
+});
+
 function handleSpeakerNameChange(originalName: string, newName: string): void {
     if (originalName === newName) {
         return;
@@ -38,6 +47,36 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
         new RenameSpeakerCommand(props.transcriptionId, originalName, newName),
     );
 }
+
+function openDeleteModal(speaker: string): void {
+    speakerToDelete.value = speaker;
+    const options = speakers.value.filter((s) => s !== speaker);
+    reassignTarget.value = options.length > 0 ? options[0] : undefined;
+    deleteModalOpen.value = true;
+}
+
+function confirmDelete(): void {
+    if (!speakerToDelete.value || !reassignTarget.value) return;
+
+    executeCommand(
+        new MergeSpeakerCommand(
+            props.transcriptionId,
+            speakerToDelete.value,
+            reassignTarget.value,
+        ),
+    );
+
+    deleteModalOpen.value = false;
+    speakerToDelete.value = null;
+    reassignTarget.value = undefined;
+}
+
+function cancelDelete(): void {
+    deleteModalOpen.value = false;
+    speakerToDelete.value = null;
+    reassignTarget.value = undefined;
+}
+
 </script>
 
 <template>
@@ -46,15 +85,39 @@ function handleSpeakerNameChange(originalName: string, newName: string): void {
             {{ t("common.speakers") }}
         </h3>
         <div class="flex gap-2 flex-wrap">
-            <div v-for="(speakerMap, index) in speakerMappings" :key="index">
+            <div v-for="(speakerMap, index) in speakerMappings" :key="`existing-${index}`"
+                class="flex items-center gap-1">
                 <UInput v-model="speakerMap.new" size="sm" :style="{ color: getSpeakerColor(speakerMap.original) }"
                     :placeholder="t('transcription.placeholderSpeakerName')" class="w-32" @change="
                         handleSpeakerNameChange(
                             speakerMap.original,
                             speakerMap.new,
                         )
-                        " />
+                        ">
+                    <template #trailing>
+                        <UTooltip :text="t('speaker.delete')">
+                            <UButton size="xs" variant="link" color="error" icon="i-lucide-trash-2"
+                                :disabled="speakers.length < 2" @mousedown.prevent="openDeleteModal(speakerMap.original)" />
+                        </UTooltip>
+                    </template>
+                </UInput>
             </div>
         </div>
     </div>
+
+    <UDrawer v-model:open="deleteModalOpen" :title="t('speaker.deleteTitle')">
+        <template #body>
+            <p class="mb-4">
+                {{ t("speaker.deleteMessage", { speaker: speakerToDelete }) }}
+            </p>
+            <USelect v-if="reassignOptions.length > 0" v-model="reassignTarget" :items="reassignOptions"
+                :placeholder="t('speaker.reassignTo')" />
+        </template>
+        <template #footer>
+            <div class="flex justify-end gap-2">
+                <UButton color="neutral" :label="t('ui.cancel')" @click="cancelDelete" />
+                <UButton color="error" :label="t('ui.confirm')" :disabled="!reassignTarget" @click="confirmDelete" />
+            </div>
+        </template>
+    </UDrawer>
 </template>

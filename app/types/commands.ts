@@ -15,6 +15,8 @@ export const Cmds = {
     UpdateSegmentCommand: "UpdateSegmentCommand",
     TranscriptionNameChangeCommand: "TranscriptionNameChangeCommand",
     RenameSpeakerCommand: "RenameSpeakerCommand",
+    MergeSpeakerCommand: "MergeSpeakerCommand",
+    UnmergeSpeakerCommand: "UnmergeSpeakerCommand",
     EmptyCommand: "EmptyCommand",
     AddSegmentCommand: "AddSegmentCommand",
     RestoreSegmentCommand: "RestoreSegmentCommand",
@@ -345,6 +347,53 @@ export class RenameSpeakerCommand implements ITransriboReversibleCommand {
         return t("commands.renameSpeaker", {
             oldName: this.oldName,
             newName: this.newName,
+        });
+    }
+}
+
+export class MergeSpeakerCommand implements ITransriboReversibleCommand {
+    readonly $type = "MergeSpeakerCommand";
+    $undoCommand: ICommand = new EmptyCommand();
+
+    constructor(
+        public readonly transcriptionId: string,
+        public readonly removedSpeaker: string,
+        public readonly targetSpeaker: string,
+    ) {}
+
+    public setUndoCommand(undoCommand: ICommand) {
+        this.$undoCommand = undoCommand;
+    }
+
+    toString(): string {
+        return `Merge Speaker: "${this.removedSpeaker}" → "${this.targetSpeaker}"`;
+    }
+
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.mergeSpeaker", {
+            removedSpeaker: this.removedSpeaker,
+            targetSpeaker: this.targetSpeaker,
+        });
+    }
+}
+
+export class UnmergeSpeakerCommand implements ICommand {
+    readonly $type = "UnmergeSpeakerCommand";
+
+    constructor(
+        public readonly transcriptionId: string,
+        public readonly removedSpeaker: string,
+        public readonly segmentIds: string[],
+    ) {}
+
+    toString(): string {
+        return `Unmerge Speaker: restore "${this.removedSpeaker}" on ${this.segmentIds.length} segments`;
+    }
+
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.unmergeSpeaker", {
+            speaker: this.removedSpeaker,
+            count: this.segmentIds.length,
         });
     }
 }

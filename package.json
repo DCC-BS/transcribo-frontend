@@ -1,6 +1,6 @@
 {
     "name": "transcribo-frontend",
-    "version": "1.0.4",
+    "version": "1.1.0",
     "private": true,
     "scripts": {
         "dev": "nuxt dev",
@@ -19,7 +19,7 @@
     },
     "dependencies": {
         "@dcc-bs/audio-recorder.bs.js": "2.1.1",
-        "@dcc-bs/common-ui.bs.js": "^1.2.5",
+        "@dcc-bs/common-ui.bs.js": "^1.2.6",
         "@dcc-bs/communication.bs.js": "0.1.3",
         "@dcc-bs/event-system.bs.js": "^1.4.3",
         "@ffmpeg/ffmpeg": "^0.12.15",

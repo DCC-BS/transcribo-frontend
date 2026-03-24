@@ -4,9 +4,12 @@ import {
     Cmds,
     DeleteSegmentCommand,
     type InsertSegmentCommand,
+    type MergeSpeakerCommand,
     type RenameSpeakerCommand,
     RestoreSegmentCommand,
     TranscriptionNameChangeCommand,
+    type UnmergeSpeakerCommand,
+    UnmergeSpeakerCommand as UnmergeSpeakerCommandClass,
     UpdateSegmentCommand,
 } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
@@ -116,6 +119,52 @@ export const useTranscriptionCommandHandler = () => {
                 .equals(command.transcriptionId)
                 .and((segment) => segment.speaker === command.oldName)
                 .modify({ speaker: command.newName });
+
+            await db.transcriptions
+                .where("id")
+                .equals(command.transcriptionId)
+                .modify({ updatedAt: new Date() });
+        },
+    );
+
+    onCommand<MergeSpeakerCommand>(
+        Cmds.MergeSpeakerCommand,
+        async (command) => {
+            const affectedSegments = await db.segments
+                .where("transcriptionId")
+                .equals(command.transcriptionId)
+                .and((segment) => segment.speaker === command.removedSpeaker)
+                .toArray();
+
+            const segmentIds = affectedSegments.map((s) => s.id);
+
+            command.setUndoCommand(
+                new UnmergeSpeakerCommandClass(
+                    command.transcriptionId,
+                    command.removedSpeaker,
+                    segmentIds,
+                ),
+            );
+
+            await db.segments
+                .where("id")
+                .anyOf(segmentIds)
+                .modify({ speaker: command.targetSpeaker });
+
+            await db.transcriptions
+                .where("id")
+                .equals(command.transcriptionId)
+                .modify({ updatedAt: new Date() });
+        },
+    );
+
+    onCommand<UnmergeSpeakerCommand>(
+        Cmds.UnmergeSpeakerCommand,
+        async (command) => {
+            await db.segments
+                .where("id")
+                .anyOf(command.segmentIds)
+                .modify({ speaker: command.removedSpeaker });
 
             await db.transcriptions
                 .where("id")

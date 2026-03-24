@@ -102,11 +102,14 @@
         "failedDescription": "Something went wrong during the transcription process. Please try again with a different file.",
         "goBack": "Go Back"
     },
+    "speaker": {
+        "delete": "Delete Speaker",
+        "deleteTitle": "Delete Speaker",
+        "deleteMessage": "All segments from \"{speaker}\" will be reassigned. Select which speaker should receive these segments:",
+        "reassignTo": "Reassign to speaker"
+    },
     "transcription": {
         "noSpeaker": "unknown",
-        "applySpeakerChanges": "Do you want to apply your changes?",
-        "undoChanges": "Undo",
-        "applyChanges": "Apply",
         "placeholderSpeakerName": "Speaker name",
         "loading": "Loading...",
         "notFound": "Transcription not found or failed to load",
@@ -217,6 +220,8 @@
         "updateSegmentNoUpdates": "Update Segment: Updates: none",
         "changeTranscriptionName": "Change Transcription Name To: {name}",
         "renameSpeaker": "Rename Speaker: \"{oldName}\" → \"{newName}\"",
+        "mergeSpeaker": "Merge Speaker: \"{removedSpeaker}\" → \"{targetSpeaker}\"",
+        "unmergeSpeaker": "Unmerge Speaker: restore \"{speaker}\" on {count} segments",
         "restoreSegment": "Restore Segment"
     },
     "viewer": {
