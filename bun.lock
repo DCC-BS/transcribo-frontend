@@ -20,7 +20,7 @@
         "@vueuse/core": "^14.2.1",
         "dexie": "^4.3.0",
         "driver.js": "^1.4.0",
-        "konva": "10.2.0",
+        "konva": "10.2.1",
         "motion-v": "2.0.0",
         "nuxt": "4.4.2",
         "pino": "10.3.1",
@@ -1793,7 +1793,7 @@
 
     "knitwork": ["knitwork@1.3.0", "", {}, "sha512-4LqMNoONzR43B1W0ek0fhXMsDNW/zxa1NdFAVMY+k28pgZLovR4G3PB5MrpTxCy1QaZCqNoiaKPr5w5qZHfSNw=="],
 
-    "konva": ["konva@10.2.0", "", {}, "sha512-JBoz0Xjbf49UPxCZegZ4WseqOzJ+C4AUDOtJ9eBve5RS5Fcq/u8TdBD5fDl/uPFInpC3a9uycm0sRyZpF4hheg=="],
+    "konva": ["konva@10.2.1", "", {}, "sha512-VV+EHD5mi/TWHEeQYBtGieYPU++IAZ21X7IrZIPoYmbWZV8q5d8OT3RoDuJR6Hg/nt5gjlYoOdNxBGhDNqlSyg=="],
 
     "launch-editor": ["launch-editor@2.13.2", "", { "dependencies": { "picocolors": "^1.1.1", "shell-quote": "^1.8.3" } }, "sha512-4VVDnbOpLXy/s8rdRCSXb+zfMeFR0WlJWpET1iA9CQdlZDfwyLjUuGQzXU4VeOoey6AicSAluWan7Etga6Kcmg=="],
 
