@@ -1,0 +1,4 @@
+[install]
+minimumReleaseAge = 604800 # 7 days in seconds
+# These packages will bypass the 7-day minimum age requirement
+minimumReleaseAgeExcludes = ["@types/bun", "@dcc-bs/audio-recorder.bs.js", "@dcc-bs/common-ui.bs.js", "@dcc-bs/communication.bs.js", "@dcc-bs/event-system.bs.js", "@dcc-bs/dependency-injection.bs.js"]

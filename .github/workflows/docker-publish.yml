@@ -8,7 +8,7 @@ permissions:
 
 jobs:
     publish:
-        uses: DCC-BS/ci-workflows/.github/workflows/publish-docker.yml@v8
+        uses: DCC-BS/ci-workflows/.github/workflows/publish-docker.yml@814649735835a84a3d0d6c8d6e6db87dfeb8b348 # v8
         secrets: inherit
         with:
             registry: ghcr.io
