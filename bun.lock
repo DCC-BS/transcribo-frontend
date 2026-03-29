@@ -21,7 +21,7 @@
         "dexie": "^4.3.0",
         "driver.js": "^1.4.0",
         "konva": "10.2.1",
-        "motion-v": "2.0.0",
+        "motion-v": "2.0.1",
         "nuxt": "4.4.2",
         "pino": "10.3.1",
         "ts-pattern": "^5.9.0",
@@ -1995,7 +1995,7 @@
 
     "motion-utils": ["motion-utils@12.36.0", "", {}, "sha512-eHWisygbiwVvf6PZ1vhaHCLamvkSbPIeAYxWUuL3a2PD/TROgE7FvfHWTIH4vMl798QLfMw15nRqIaRDXTlYRg=="],
 
-    "motion-v": ["motion-v@2.0.0", "", { "dependencies": { "framer-motion": "^12.29.2", "hey-listen": "^1.0.8", "motion-dom": "^12.29.2", "motion-utils": "^12.29.2" }, "peerDependencies": { "@vueuse/core": ">=10.0.0", "vue": ">=3.0.0" } }, "sha512-oQuQMrPhti+Zps6OosOaW3b/eqzaGAuwI54XHJKq/dIWtQWcNzfyhTo4VB5xmp7yLN+3BE9FKF6skLsynfgbHQ=="],
+    "motion-v": ["motion-v@2.0.1", "", { "dependencies": { "framer-motion": "^12.29.2", "hey-listen": "^1.0.8", "motion-dom": "^12.29.2", "motion-utils": "^12.29.2" }, "peerDependencies": { "@vueuse/core": ">=10.0.0", "vue": ">=3.0.0" } }, "sha512-oTzIRROq01knJLnCV4BqQQ7jdonrp29AIdYE1tJar/ls7b5rEZnexWGhuilVmZUl+ulI+6a7HXEFe1YV/FEPBA=="],
 
     "mrmime": ["mrmime@2.0.1", "", {}, "sha512-Y3wQdFg2Va6etvQ5I82yUhGdsKrcYox6p7FfL1LbK2J4V01F9TGlepTIhnK24t7koZibmg82KGglhA1XK5IsLQ=="],
 
