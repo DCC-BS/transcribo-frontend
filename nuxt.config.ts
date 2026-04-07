@@ -1,4 +1,5 @@
 import pwaIcons from "./public/icons.json";
+import { varlockVitePlugin } from "@varlock/vite-integration";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -51,7 +52,15 @@ export default defineNuxtConfig({
         },
     },
     vite: {
+        plugins: [varlockVitePlugin({ ssrInjectMode: "resolved-env" })],
         optimizeDeps: {
+            include: [
+                "pino",
+                "vue-konva",
+                "@dcc-bs/communication.bs.js",
+                "uuid",
+                "zod",
+            ],
             exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "@vueuse/core"],
         },
         server: {
