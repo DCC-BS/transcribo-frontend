@@ -25,7 +25,7 @@
         "pino": "10.3.1",
         "ts-pattern": "^5.9.0",
         "uuid": "^13.0.0",
-        "varlock": "^0.6.4",
+        "varlock": "^0.7.1",
         "vue": "3.5.31",
         "vue-konva": "3.4.0",
         "vue-tsc": "3.2.6",
@@ -35,7 +35,7 @@
         "@biomejs/biome": "2.4.10",
         "@nuxt/test-utils": "^4.0.0",
         "@types/bun": "1.3.11",
-        "@varlock/proton-pass-plugin": "^0.0.2",
+        "@varlock/proton-pass-plugin": "^0.0.3",
         "@varlock/vite-integration": "^0.2.7",
         "@vitest/coverage-v8": "^4.1.2",
         "@vue/test-utils": "^2.4.6",
@@ -949,7 +949,7 @@
 
     "@unhead/vue": ["@unhead/vue@2.1.12", "", { "dependencies": { "hookable": "^6.0.1", "unhead": "2.1.12" }, "peerDependencies": { "vue": ">=3.5.18" } }, "sha512-zEWqg0nZM8acpuTZE40wkeUl8AhIe0tU0OkilVi1D4fmVjACrwoh5HP6aNqJ8kUnKsoy6D+R3Vi/O+fmdNGO7g=="],
 
-    "@varlock/proton-pass-plugin": ["@varlock/proton-pass-plugin@0.0.2", "", { "peerDependencies": { "varlock": "^0.6.4" } }, "sha512-q8APKuYixhpHyLWcR3UPIFMew/BHbFcTekVpv2mRtmoZ6B+PCrg9WWKWzf9pAGtGzWkWwZUCaCuqWlc3bs8Ypw=="],
+    "@varlock/proton-pass-plugin": ["@varlock/proton-pass-plugin@0.0.3", "", { "peerDependencies": { "varlock": "^0.7.0" } }, "sha512-jzqe9DQjgVSG8RG+WkBFq1bZxgty8l5vP9cZnaM6TKyU34ZYXnkzDPgWElpFlA3jxh7wlszlemXPHSOjP2V+WQ=="],
 
     "@varlock/vite-integration": ["@varlock/vite-integration@0.2.7", "", { "peerDependencies": { "varlock": "^0.6.3", "vite": ">=5" } }, "sha512-HXgu94wosyKdU6J3oj7mZA/jmwPcqzoX4dOqKIu8fXccFVjg5QdaDz9jR2PasmhwiICmUjH69y3e8rzm/bZfag=="],
 
@@ -2693,7 +2693,7 @@
 
     "uuid": ["uuid@13.0.0", "", { "bin": { "uuid": "dist-node/bin/uuid" } }, "sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w=="],
 
-    "varlock": ["varlock@0.6.4", "", { "bin": { "varlock": "bin/cli.js" } }, "sha512-WcfIi+Sl0lUcT32xFHGcXPIWqY6m6gKzAi0RAcWMWmMUlUZjiXyX8ekIrLvMYE3Xv9o2QCf/rBQSqZvY1FuzsA=="],
+    "varlock": ["varlock@0.7.1", "", { "bin": { "varlock": "bin/cli.js" } }, "sha512-dPRddQmYWpnuMnICIXUalT0Kb1edFGjz17n18Nq3oJCHbw9HNDGXRhyygkUmL2MusDfk7vVurEZI+nX5vrzsKw=="],
 
     "vaul-vue": ["vaul-vue@0.4.1", "", { "dependencies": { "@vueuse/core": "^10.8.0", "reka-ui": "^2.0.0", "vue": "^3.4.5" } }, "sha512-A6jOWOZX5yvyo1qMn7IveoWN91mJI5L3BUKsIwkg6qrTGgHs1Sb1JF/vyLJgnbN1rH4OOOxFbtqL9A46bOyGUQ=="],
 

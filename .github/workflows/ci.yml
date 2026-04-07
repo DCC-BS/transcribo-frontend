@@ -9,8 +9,7 @@ on:
             - main
 
 env:
-    APP_MODE: "dev"
-    USE_FEEDBACK: false
+    APP_MODE: "ci"
 
 jobs:
     ci:
