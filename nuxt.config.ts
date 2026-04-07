@@ -1,5 +1,5 @@
-import pwaIcons from "./public/icons.json";
 import { varlockVitePlugin } from "@varlock/vite-integration";
+import pwaIcons from "./public/icons.json";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({

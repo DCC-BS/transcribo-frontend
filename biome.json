@@ -7,7 +7,14 @@
     },
     "files": {
         "ignoreUnknown": false,
-        "includes": ["**", "!.nuxt", "!!.output", "!!logs", "!!tests"]
+        "includes": [
+            "**",
+            "!.nuxt",
+            "!!.output",
+            "!!logs",
+            "!!tests",
+            "!env.d.ts"
+        ]
     },
     "html": {
         "experimentalFullSupportEnabled": true,
