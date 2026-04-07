@@ -8,6 +8,10 @@ on:
         branches:
             - main
 
+env:
+    APP_MODE: "dev"
+    USE_FEEDBACK: false
+
 jobs:
     ci:
         runs-on: ubuntu-latest
