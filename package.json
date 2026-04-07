@@ -29,8 +29,6 @@
         "@nuxt/ui": "4.6.0",
         "@nuxtjs/i18n": "10.2.4",
         "@nuxtjs/mdc": "0.21.0",
-        "@varlock/proton-pass-plugin": "^0.0.2",
-        "@varlock/vite-integration": "^0.2.7",
         "@vite-pwa/nuxt": "1.1.1",
         "@vueuse/core": "^14.2.1",
         "dexie": "^4.4.1",
@@ -60,6 +58,8 @@
         "sass": "1.98.0",
         "sass-loader": "16.0.7",
         "typescript": "^6.0.2",
-        "vitest": "^4.1.2"
+        "vitest": "^4.1.2",
+        "@varlock/proton-pass-plugin": "^0.0.2",
+        "@varlock/vite-integration": "^0.2.7"
     }
 }
