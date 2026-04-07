@@ -8,6 +8,9 @@ on:
         branches:
             - main
 
+env:
+    APP_MODE: "ci"
+
 jobs:
     ci:
         runs-on: ubuntu-latest

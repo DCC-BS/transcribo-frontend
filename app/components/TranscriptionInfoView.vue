@@ -84,7 +84,6 @@ async function handleNameChange() {
 
                     <!-- Download Media Button -->
                     <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <!-- biome-ignore lint/a11y/useAnchorContent: UButton inside provides accessible content -->
                         <a v-if="mediaUrl && mediaName" :href="mediaUrl" :download="mediaName"
                             :aria-label="t('media.downloadMedia')">
                             <motion.div :whileHover="{ scale: 1.02 }" :whileTap="{ scale: 0.98 }" :transition="{
