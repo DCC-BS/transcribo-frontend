@@ -24,7 +24,7 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
-        apiUrl: process.env.API_URL,
+        apiUrl: process.env.NUXT_API_URL,
         useDummyData: process.env.DUMMY || "",
         public: {
             logger_bs: {

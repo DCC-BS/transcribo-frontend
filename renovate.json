@@ -18,7 +18,6 @@
         }
     ],
     "lockFileMaintenance": {
-        "enabled": false,
-        "automerge": false
+        "enabled": false
     }
 }
