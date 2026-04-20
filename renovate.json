@@ -1,7 +1,7 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "dependencyDashboard": true,
-    "ignoreTests": true,
+    "ignoreTests": false,
     "extends": ["config:recommended", ":prImmediately"],
     "internalChecksFilter": "strict",
     "minimumReleaseAge": "14 days",
@@ -18,7 +18,7 @@
         }
     ],
     "lockFileMaintenance": {
-        "enabled": true,
-        "automerge": true
+        "enabled": false,
+        "automerge": false
     }
 }

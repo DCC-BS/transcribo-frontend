@@ -39,7 +39,7 @@
         "pino": "10.3.1",
         "ts-pattern": "^5.9.0",
         "uuid": "^13.0.0",
-        "varlock": "^0.7.1",
+        "varlock": "^0.7.2",
         "vue": "3.5.32",
         "vue-konva": "3.4.0",
         "vue-tsc": "3.2.6",
@@ -61,5 +61,8 @@
         "vitest": "^4.1.2",
         "@varlock/proton-pass-plugin": "^0.0.3",
         "@varlock/vite-integration": "^0.2.7"
+    },
+    "overrides": {
+        "vite": "7.3.2"
     }
 }

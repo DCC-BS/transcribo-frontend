@@ -312,7 +312,8 @@
             "completed": "Abgeschlossen",
             "failed": "Fehlgeschlagen",
             "cancelled": "Abgebrochen",
-            "pending": "Entwurf"
+            "pending": "Entwurf",
+            "processing": "In Bearbeitung..."
         },
         "errors": {
             "title": "Fehler",
