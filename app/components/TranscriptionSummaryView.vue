@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import type { SelectMenuItem } from "@nuxt/ui";
 import { useStorage } from "@vueuse/core";
 import { match } from "ts-pattern";
 import type { SummaryType } from "#shared/types/summary";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import { languages } from "~/utils/languages";
 
 interface Props {
     transcription: StoredTranscription;
@@ -47,19 +45,7 @@ const selectedLanguage = useStorage<string | undefined>(
     "auto",
 );
 
-// Language options for the select menu
-const languageOptions = computed<SelectMenuItem[]>(() => [
-    {
-        label: t("languages.autoDetect"),
-        value: "auto",
-        icon: "i-lucide-languages",
-    },
-    ...languages.map((lang) => ({
-        label: t(`languages.${lang.code}`),
-        value: lang.code,
-        icon: lang.icon,
-    })),
-]);
+const languageOptions = useLanguageOptions();
 
 const summaryError = ref<string | null>(null);
 

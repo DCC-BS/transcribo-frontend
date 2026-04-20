@@ -330,8 +330,6 @@
     "languages": {
         "autoDetect": "Auto-detect",
         "de": "German",
-        "en-us": "English (US)",
-        "en-gb": "English (UK)",
         "en": "English",
         "fr": "French",
         "it": "Italian",
@@ -426,7 +424,7 @@
         "haw": "Hawaiian",
         "ln": "Lingala",
         "ha": "Hausa",
-        "ba": "Basque",
+        "ba": "Bashkir",
         "jw": "Javanese",
         "su": "Sundanese",
         "yue": "Chinese (traditional)"
