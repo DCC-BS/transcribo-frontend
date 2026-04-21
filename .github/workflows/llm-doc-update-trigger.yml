@@ -10,7 +10,7 @@ jobs:
             github.event.issue.pull_request &&
             github.event.comment.body == '/documentation' &&
             (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER')
-        uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update.yml@7cc59467e7aa509171be63780597e00964f09b6d # v7
+        uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update.yml@814649735835a84a3d0d6c8d6e6db87dfeb8b348 # v8
         with:
             doc_repo: DCC-BS/documentation
             doc_path: "markdown/nuxt-layers"
