@@ -28,7 +28,7 @@
         "@mohtasham/md-to-docx": "2.9.0",
         "@nuxt/ui": "4.6.1",
         "@nuxtjs/i18n": "10.2.4",
-        "@nuxtjs/mdc": "0.21.0",
+        "@nuxtjs/mdc": "0.21.1",
         "@vite-pwa/nuxt": "1.1.1",
         "@vueuse/core": "^14.2.1",
         "dexie": "^4.4.1",
