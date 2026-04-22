@@ -312,7 +312,8 @@
             "completed": "Abgeschlossen",
             "failed": "Fehlgeschlagen",
             "cancelled": "Abgebrochen",
-            "pending": "Entwurf"
+            "pending": "Entwurf",
+            "processing": "In Bearbeitung..."
         },
         "errors": {
             "title": "Fehler",
@@ -329,8 +330,6 @@
     "languages": {
         "autoDetect": "Automatisch erkennen",
         "de": "Deutsch",
-        "en-us": "Englisch (US)",
-        "en-gb": "Englisch (UK)",
         "en": "Englisch",
         "fr": "Französisch",
         "it": "Italienisch",
@@ -429,7 +428,7 @@
         "ba": "Baschkirisch",
         "jw": "Javanisch",
         "su": "Sundanisch",
-        "yue": "Chinesisch (traditionell)"
+        "yue": "Kantonesisch"
     },
     "transcriptionList": {
         "title": "Ihre Transkriptionen",

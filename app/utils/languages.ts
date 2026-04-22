@@ -1,76 +1,113 @@
-/**
- * Language interface defining the structure for language objects
- */
 export interface Language {
     code: string;
     icon: string;
 }
 
 /**
- * Array of supported languages with their language codes and flag icons
- * Icons are sourced from https://icones.js.org/collection/flag
- *
- * Priority languages (de, en, fr, it) are at the top, followed by others alphabetically
+ * Supported language codes match the backend Whisper model's supported languages.
+ * Icons from https://icones.js.org/collection/flag
  */
 export const languages: Language[] = [
-    // Priority languages at the top
-    { code: "de", icon: "flag:de-4x3" }, // German - Germany
-    { code: "en-us", icon: "flag:us-4x3" }, // English - United States
-    { code: "en-gb", icon: "flag:gb-4x3" }, // English - United Kingdom
-    { code: "fr", icon: "flag:fr-4x3" }, // French - France
-    { code: "it", icon: "flag:it-4x3" }, // Italian - Italy
-    // Other languages alphabetically
-    { code: "af", icon: "flag:za-4x3" }, // Afrikaans - South Africa
-    { code: "ar", icon: "flag:sa-4x3" }, // Arabic - Saudi Arabia
-    { code: "bg", icon: "flag:bg-4x3" }, // Bulgarian - Bulgaria
-    { code: "bn", icon: "flag:bd-4x3" }, // Bengali - Bangladesh
-    { code: "ca", icon: "flag:es-ct-4x3" }, // Catalan - Catalonia
-    { code: "cs", icon: "flag:cz-4x3" }, // Czech - Czech Republic
-    { code: "cy", icon: "flag:gb-wls-4x3" }, // Welsh - Wales
-    { code: "da", icon: "flag:dk-4x3" }, // Danish - Denmark
-    { code: "el", icon: "flag:gr-4x3" }, // Greek - Greece
-    { code: "es", icon: "flag:es-4x3" }, // Spanish - Spain
-    { code: "et", icon: "flag:ee-4x3" }, // Estonian - Estonia
-    { code: "fa", icon: "flag:ir-4x3" }, // Persian - Iran
-    { code: "fi", icon: "flag:fi-4x3" }, // Finnish - Finland
-    { code: "gu", icon: "flag:in-4x3" }, // Gujarati - India
-    { code: "he", icon: "flag:il-4x3" }, // Hebrew - Israel
-    { code: "hi", icon: "flag:in-4x3" }, // Hindi - India
-    { code: "hr", icon: "flag:hr-4x3" }, // Croatian - Croatia
-    { code: "hu", icon: "flag:hu-4x3" }, // Hungarian - Hungary
-    { code: "id", icon: "flag:id-4x3" }, // Indonesian - Indonesia
-    { code: "ja", icon: "flag:jp-4x3" }, // Japanese - Japan
-    { code: "kn", icon: "flag:in-4x3" }, // Kannada - India
-    { code: "ko", icon: "flag:kr-4x3" }, // Korean - South Korea
-    { code: "lt", icon: "flag:lt-4x3" }, // Lithuanian - Lithuania
-    { code: "lv", icon: "flag:lv-4x3" }, // Latvian - Latvia
-    { code: "mk", icon: "flag:mk-4x3" }, // Macedonian - North Macedonia
-    { code: "ml", icon: "flag:in-4x3" }, // Malayalam - India
-    { code: "mr", icon: "flag:in-4x3" }, // Marathi - India
-    { code: "ne", icon: "flag:np-4x3" }, // Nepali - Nepal
-    { code: "nl", icon: "flag:nl-4x3" }, // Dutch - Netherlands
-    { code: "no", icon: "flag:no-4x3" }, // Norwegian - Norway
-    { code: "pa", icon: "flag:in-4x3" }, // Punjabi - India
-    { code: "pl", icon: "flag:pl-4x3" }, // Polish - Poland
-    { code: "pt", icon: "flag:pt-4x3" }, // Portuguese - Portugal
-    { code: "ro", icon: "flag:ro-4x3" }, // Romanian - Romania
-    { code: "ru", icon: "flag:ru-4x3" }, // Russian - Russia
-    { code: "sk", icon: "flag:sk-4x3" }, // Slovak - Slovakia
-    { code: "sl", icon: "flag:si-4x3" }, // Slovenian - Slovenia
-    { code: "so", icon: "flag:so-4x3" }, // Somali - Somalia
-    { code: "sq", icon: "flag:al-4x3" }, // Albanian - Albania
-    { code: "sv", icon: "flag:se-4x3" }, // Swedish - Sweden
-    { code: "sw", icon: "flag:tz-4x3" }, // Swahili - Tanzania
-    { code: "ta", icon: "flag:in-4x3" }, // Tamil - India
-    { code: "te", icon: "flag:in-4x3" }, // Telugu - India
-    { code: "th", icon: "flag:th-4x3" }, // Thai - Thailand
-    { code: "tl", icon: "flag:ph-4x3" }, // Filipino - Philippines
-    { code: "tr", icon: "flag:tr-4x3" }, // Turkish - Turkey
-    { code: "uk", icon: "flag:ua-4x3" }, // Ukrainian - Ukraine
-    { code: "ur", icon: "flag:pk-4x3" }, // Urdu - Pakistan
-    { code: "vi", icon: "flag:vn-4x3" }, // Vietnamese - Vietnam
-    { code: "zh-cn", icon: "flag:cn-4x3" }, // Chinese (Simplified) - China
-    { code: "zh-tw", icon: "flag:tw-4x3" }, // Chinese (Traditional) - Taiwan
+    // Priority languages
+    { code: "de", icon: "flag:de-4x3" },
+    { code: "en", icon: "flag:us-4x3" },
+    { code: "fr", icon: "flag:fr-4x3" },
+    { code: "it", icon: "flag:it-4x3" },
+    // Alphabetical
+    { code: "af", icon: "flag:za-4x3" },
+    { code: "am", icon: "flag:et-4x3" },
+    { code: "ar", icon: "flag:sa-4x3" },
+    { code: "as", icon: "flag:in-4x3" },
+    { code: "az", icon: "flag:az-4x3" },
+    { code: "ba", icon: "flag:ru-4x3" },
+    { code: "be", icon: "flag:by-4x3" },
+    { code: "bg", icon: "flag:bg-4x3" },
+    { code: "bn", icon: "flag:bd-4x3" },
+    { code: "bo", icon: "flag:cn-4x3" },
+    { code: "br", icon: "flag:fr-4x3" },
+    { code: "bs", icon: "flag:ba-4x3" },
+    { code: "ca", icon: "flag:es-ct-4x3" },
+    { code: "cs", icon: "flag:cz-4x3" },
+    { code: "cy", icon: "flag:gb-wls-4x3" },
+    { code: "da", icon: "flag:dk-4x3" },
+    { code: "el", icon: "flag:gr-4x3" },
+    { code: "es", icon: "flag:es-4x3" },
+    { code: "et", icon: "flag:ee-4x3" },
+    { code: "eu", icon: "flag:es-4x3" },
+    { code: "fa", icon: "flag:ir-4x3" },
+    { code: "fi", icon: "flag:fi-4x3" },
+    { code: "fo", icon: "flag:fo-4x3" },
+    { code: "gl", icon: "flag:es-4x3" },
+    { code: "gu", icon: "flag:in-4x3" },
+    { code: "ha", icon: "flag:ng-4x3" },
+    { code: "haw", icon: "flag:us-4x3" },
+    { code: "he", icon: "flag:il-4x3" },
+    { code: "hi", icon: "flag:in-4x3" },
+    { code: "hr", icon: "flag:hr-4x3" },
+    { code: "ht", icon: "flag:ht-4x3" },
+    { code: "hu", icon: "flag:hu-4x3" },
+    { code: "hy", icon: "flag:am-4x3" },
+    { code: "id", icon: "flag:id-4x3" },
+    { code: "is", icon: "flag:is-4x3" },
+    { code: "ja", icon: "flag:jp-4x3" },
+    { code: "jw", icon: "flag:id-4x3" }, // Whisper-specific code (not ISO 639-1 "jv")
+    { code: "ka", icon: "flag:ge-4x3" },
+    { code: "kk", icon: "flag:kz-4x3" },
+    { code: "km", icon: "flag:kh-4x3" },
+    { code: "kn", icon: "flag:in-4x3" },
+    { code: "ko", icon: "flag:kr-4x3" },
+    { code: "la", icon: "flag:va-4x3" },
+    { code: "lb", icon: "flag:lu-4x3" },
+    { code: "ln", icon: "flag:cd-4x3" },
+    { code: "lo", icon: "flag:la-4x3" },
+    { code: "lt", icon: "flag:lt-4x3" },
+    { code: "lv", icon: "flag:lv-4x3" },
+    { code: "mg", icon: "flag:mg-4x3" },
+    { code: "mi", icon: "flag:nz-4x3" },
+    { code: "mk", icon: "flag:mk-4x3" },
+    { code: "ml", icon: "flag:in-4x3" },
+    { code: "mn", icon: "flag:mn-4x3" },
+    { code: "mr", icon: "flag:in-4x3" },
+    { code: "ms", icon: "flag:my-4x3" },
+    { code: "mt", icon: "flag:mt-4x3" },
+    { code: "my", icon: "flag:mm-4x3" },
+    { code: "ne", icon: "flag:np-4x3" },
+    { code: "nl", icon: "flag:nl-4x3" },
+    { code: "nn", icon: "flag:no-4x3" },
+    { code: "no", icon: "flag:no-4x3" },
+    { code: "oc", icon: "flag:fr-4x3" },
+    { code: "pa", icon: "flag:in-4x3" },
+    { code: "pl", icon: "flag:pl-4x3" },
+    { code: "ps", icon: "flag:af-4x3" },
+    { code: "pt", icon: "flag:pt-4x3" },
+    { code: "ro", icon: "flag:ro-4x3" },
+    { code: "ru", icon: "flag:ru-4x3" },
+    { code: "sa", icon: "flag:in-4x3" },
+    { code: "sd", icon: "flag:pk-4x3" },
+    { code: "si", icon: "flag:lk-4x3" },
+    { code: "sk", icon: "flag:sk-4x3" },
+    { code: "sl", icon: "flag:si-4x3" },
+    { code: "sn", icon: "flag:zw-4x3" },
+    { code: "so", icon: "flag:so-4x3" },
+    { code: "sq", icon: "flag:al-4x3" },
+    { code: "sr", icon: "flag:rs-4x3" },
+    { code: "su", icon: "flag:id-4x3" },
+    { code: "sv", icon: "flag:se-4x3" },
+    { code: "sw", icon: "flag:tz-4x3" },
+    { code: "ta", icon: "flag:in-4x3" },
+    { code: "te", icon: "flag:in-4x3" },
+    { code: "tg", icon: "flag:tj-4x3" },
+    { code: "th", icon: "flag:th-4x3" },
+    { code: "tk", icon: "flag:tm-4x3" },
+    { code: "tl", icon: "flag:ph-4x3" },
+    { code: "tr", icon: "flag:tr-4x3" },
+    { code: "tt", icon: "flag:ru-4x3" },
+    { code: "uk", icon: "flag:ua-4x3" },
+    { code: "ur", icon: "flag:pk-4x3" },
+    { code: "uz", icon: "flag:uz-4x3" },
+    { code: "vi", icon: "flag:vn-4x3" },
+    { code: "yi", icon: "flag:il-4x3" },
+    { code: "yo", icon: "flag:ng-4x3" },
+    { code: "yue", icon: "flag:hk-4x3" }, // Whisper-specific code for Cantonese (not ISO 639-1)
+    { code: "zh", icon: "flag:cn-4x3" },
 ];
-
-export type LanguageCode = Language["code"];

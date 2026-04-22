@@ -330,8 +330,6 @@
     "languages": {
         "autoDetect": "Auto-detect",
         "de": "German",
-        "en-us": "English (US)",
-        "en-gb": "English (UK)",
         "en": "English",
         "fr": "French",
         "it": "Italian",
@@ -388,6 +386,7 @@
         "mn": "Mongolian",
         "bs": "Bosnian",
         "kk": "Kazakh",
+        "kn": "Kannada",
         "sq": "Albanian",
         "sw": "Swahili",
         "gl": "Galician",
@@ -426,10 +425,10 @@
         "haw": "Hawaiian",
         "ln": "Lingala",
         "ha": "Hausa",
-        "ba": "Basque",
+        "ba": "Bashkir",
         "jw": "Javanese",
         "su": "Sundanese",
-        "yue": "Chinese (traditional)"
+        "yue": "Cantonese"
     },
     "transcriptionList": {
         "title": "Your Transcriptions",

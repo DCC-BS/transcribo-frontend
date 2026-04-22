@@ -24,8 +24,7 @@ export default defineNuxtConfig({
         },
     },
     runtimeConfig: {
-        githubToken: process.env.GITHUB_TOKEN,
-        apiUrl: process.env.API_URL,
+        apiUrl: process.env.NUXT_API_URL,
         useDummyData: process.env.DUMMY || "",
         public: {
             logger_bs: {
@@ -36,6 +35,7 @@ export default defineNuxtConfig({
             repo: "Feedback",
             repoOwner: "DCC-BS",
             project: "Transcribo",
+            githubToken: process.env.NUXT_FEEDBACK_GITHUB_TOKEN,
         },
     },
     nitro: {

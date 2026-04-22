@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import type { SelectMenuItem } from "@nuxt/ui";
 import { motion } from "motion-v";
 import { v4 as uuidv4 } from "uuid";
 import type {
@@ -17,7 +16,6 @@ const { t } = useI18n();
 const language = ref<string>("de");
 const numSpeaker = ref<string>("auto");
 
-// Speaker options for the select input
 const speakerOptions = [
     { label: t("upload.autoDetection"), value: "auto" },
     { label: "1", value: "1" },
@@ -28,19 +26,7 @@ const speakerOptions = [
     { label: "6", value: "6" },
 ];
 
-// Language options for the select menu
-const audioLanguageOptions: SelectMenuItem[] = [
-    {
-        label: t("upload.autoDetection"),
-        value: "auto",
-        icon: "i-lucide-languages",
-    },
-    ...languages.map((lang) => ({
-        label: t(`languages.${lang.code}`),
-        value: lang.code,
-        icon: lang.icon,
-    })),
-];
+const audioLanguageOptions = useLanguageOptions();
 
 const isVideo = computed(() => isVideoFile(input.value.media));
 const mediaSource = computed(() => URL.createObjectURL(input.value.media));
