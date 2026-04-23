@@ -63,6 +63,6 @@
         "@varlock/vite-integration": "^0.2.7"
     },
     "overrides": {
-        "vite": "7.3.2"
+        "vite": "8.0.8"
     }
 }
