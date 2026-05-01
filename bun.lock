@@ -12,7 +12,7 @@
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
         "@iconify-json/lucide": "1.2.102",
-        "@mohtasham/md-to-docx": "2.9.0",
+        "@mohtasham/md-to-docx": "2.9.1",
         "@nuxt/ui": "4.6.1",
         "@nuxtjs/i18n": "10.2.4",
         "@nuxtjs/mdc": "0.21.1",
@@ -455,7 +455,7 @@
 
     "@miyaneee/rollup-plugin-json5": ["@miyaneee/rollup-plugin-json5@1.2.0", "", { "dependencies": { "@rollup/pluginutils": "^5.1.0", "json5": "^2.2.3" }, "peerDependencies": { "rollup": "^1.20.0 || ^2.0.0 || ^3.0.0 || ^4.0.0" } }, "sha512-JjTIaXZp9WzhUHpElrqPnl1AzBi/rvRs065F71+aTmlqvTMVkdbjZ8vfFl4nRlgJy+TPBw69ZK4pwFdmOAt4aA=="],
 
-    "@mohtasham/md-to-docx": ["@mohtasham/md-to-docx@2.9.0", "", { "dependencies": { "docx": "^9.5.0", "file-saver": "^2.0.5", "mdast-util-find-and-replace": "^3.0.2", "remark": "^15.0.1", "remark-gfm": "^4.0.1", "remark-parse": "^11.0.0", "unified": "^11.0.5", "unist-util-visit": "^5.0.0" }, "bin": { "md-to-docx": "dist/cli.js" } }, "sha512-ZGTp9RSWQN5Jl3YpXMNWk9D0sBe6e2/zfc4YYU9qew+rEImfsSsOzUAISfQb54zSVdbTbfXGo3sOojul/sI3mw=="],
+    "@mohtasham/md-to-docx": ["@mohtasham/md-to-docx@2.9.1", "", { "dependencies": { "docx": "^9.5.0", "file-saver": "^2.0.5", "mdast-util-find-and-replace": "^3.0.2", "remark": "^15.0.1", "remark-gfm": "^4.0.1", "remark-parse": "^11.0.0", "unified": "^11.0.5", "unist-util-visit": "^5.0.0" }, "bin": { "md-to-docx": "dist/cli.js" } }, "sha512-5bqkheoajBtCsos97wOw0OW7T1f6CbCggnkfZlChC81hG/A8gkyaKiCr6r3BdDaba3cJkb/qN5xXubZl0yjRWg=="],
 
     "@mswjs/interceptors": ["@mswjs/interceptors@0.41.3", "", { "dependencies": { "@open-draft/deferred-promise": "^2.2.0", "@open-draft/logger": "^0.3.0", "@open-draft/until": "^2.0.0", "is-node-process": "^1.2.0", "outvariant": "^1.4.3", "strict-event-emitter": "^0.5.1" } }, "sha512-cXu86tF4VQVfwz8W1SPbhoRyHJkti6mjH/XJIxp40jhO4j2k1m4KYrEykxqWPkFF3vrK4rgQppBh//AwyGSXPA=="],
 
