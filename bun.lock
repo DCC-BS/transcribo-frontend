@@ -26,7 +26,7 @@
         "pino": "10.3.1",
         "ts-pattern": "^5.9.0",
         "uuid": "^13.0.0",
-        "varlock": "^0.7.2",
+        "varlock": "^0.9.0",
         "vue": "3.5.32",
         "vue-konva": "3.4.0",
         "vue-tsc": "3.2.6",
@@ -2701,7 +2701,7 @@
 
     "uuid": ["uuid@13.0.0", "", { "bin": { "uuid": "dist-node/bin/uuid" } }, "sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w=="],
 
-    "varlock": ["varlock@0.7.4", "", { "bin": { "varlock": "bin/cli.js" } }, "sha512-F6L99HHJMHBrLs6/6Mijgu/8q6JbHGHwmpKFnYGQMB1CTFekJXJ3FbK8IHhHwC0mokUnKIx5HGiPApWJMNvBcg=="],
+    "varlock": ["varlock@0.9.1", "", { "bin": { "varlock": "bin/cli.js" } }, "sha512-AMF41b5Pqo7rOOBK5mXuR+Jv++R/jeq9T9KdWCiYXD4ARZKH6MWbe0N/2JKpSPPDpiCWD2tlRLDPfh/gHAavkg=="],
 
     "vaul-vue": ["vaul-vue@0.4.1", "", { "dependencies": { "@vueuse/core": "^10.8.0", "reka-ui": "^2.0.0", "vue": "^3.4.5" } }, "sha512-A6jOWOZX5yvyo1qMn7IveoWN91mJI5L3BUKsIwkg6qrTGgHs1Sb1JF/vyLJgnbN1rH4OOOxFbtqL9A46bOyGUQ=="],
 
