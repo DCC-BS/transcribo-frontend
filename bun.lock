@@ -11,7 +11,7 @@
         "@dcc-bs/event-system.bs.js": "^1.4.3",
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
-        "@iconify-json/lucide": "1.2.102",
+        "@iconify-json/lucide": "1.2.103",
         "@mohtasham/md-to-docx": "2.10.1",
         "@nuxt/ui": "4.6.1",
         "@nuxtjs/i18n": "10.2.4",
@@ -385,7 +385,7 @@
 
     "@humanwhocodes/retry": ["@humanwhocodes/retry@0.4.3", "", {}, "sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ=="],
 
-    "@iconify-json/lucide": ["@iconify-json/lucide@1.2.102", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-Dm3EEqu5NrmzyDMB2U1+8yroEj2/dB9V4KlH0m/szwwF/ofSf0cPaGTZqkd1aExXjCor+vU53ttRMCGuXf+/cg=="],
+    "@iconify-json/lucide": ["@iconify-json/lucide@1.2.103", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-A5WdDll62RPxYs1yeYa9b2mV1Vs+lK/wX0wYKR+xVnhwsfPGLBwo6qfyoAQLo7AaP7oHlkw3gnHdOCERegbwTA=="],
 
     "@iconify/collections": ["@iconify/collections@1.0.672", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-9gvifOeD1bLabzru45VVb2kZ6Lw2tgnipZnDbXGrpmP/SnJyOHqxzV1P2EddM1yXbTwna18whNMZlQccAssQAw=="],
 
