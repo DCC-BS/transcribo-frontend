@@ -43,7 +43,7 @@
         "vue": "3.5.33",
         "vue-konva": "3.4.0",
         "vue-tsc": "3.2.7",
-        "zod": "4.3.6"
+        "zod": "4.4.1"
     },
     "devDependencies": {
         "@biomejs/biome": "2.4.13",
