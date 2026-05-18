@@ -59,7 +59,7 @@
         "sass-loader": "16.0.7",
         "typescript": "^6.0.2",
         "vitest": "^4.1.2",
-        "@varlock/proton-pass-plugin": "^0.0.3",
+        "@varlock/proton-pass-plugin": "^1.0.0",
         "@varlock/vite-integration": "^0.2.7"
     },
     "overrides": {
