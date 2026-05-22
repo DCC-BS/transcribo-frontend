@@ -52,4 +52,4 @@ COPY --from=ghcr.io/dmno-dev/varlock:latest --chown=node:node /usr/local/bin/var
 EXPOSE 3000
 
 # Start the application
-ENTRYPOINT ["varlock", "run", "--" "node", "./server/index.mjs"]
+ENTRYPOINT ["varlock", "run", "--", "node", "./server/index.mjs"]
