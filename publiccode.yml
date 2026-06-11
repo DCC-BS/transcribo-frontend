@@ -8,6 +8,7 @@ platforms:
 developmentStatus: beta
 softwareType: standalone/web
 organisation:
+  uri: https://ld.admin.ch/canton/12
   name: DCC Data Competence Center - Statistisches Amt Kanton Basel-Stadt
 description:
   en:
