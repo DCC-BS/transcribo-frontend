@@ -11,7 +11,7 @@ const transcribeSchema = z.object({
     language: z.string().optional(),
 });
 
-export default apiHandler
+const transcribeHandler = apiHandler
     .withMethod("POST")
     .withBodyProvider(async (event) => {
         const inputFromData = await readFormData(event);
@@ -35,3 +35,27 @@ export default apiHandler
     })
     .withDummyFetcher(createDummyTaskStatus(generateDummyTaskId(), "completed"))
     .build("/transcribe");
+
+// Cap concurrent uploads: each buffers a full audio file in memory.
+let activeTranscriptions = 0;
+
+export default defineEventHandler(async (event) => {
+    const maxConcurrent = useRuntimeConfig()
+        .maxConcurrentTranscriptions as number;
+
+    if (activeTranscriptions >= maxConcurrent) {
+        setResponseStatus(event, 429);
+        return {
+            errorId: "rate_limit_exceeded",
+            debugMessage:
+                "Maximum number of concurrent transcription uploads reached.",
+        };
+    }
+
+    activeTranscriptions++;
+    try {
+        return await transcribeHandler(event);
+    } finally {
+        activeTranscriptions--;
+    }
+});

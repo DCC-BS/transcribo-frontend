@@ -26,6 +26,9 @@ export default defineNuxtConfig({
     runtimeConfig: {
         apiUrl: process.env.NUXT_API_URL,
         useDummyData: process.env.DUMMY || "",
+        // Max concurrent transcription uploads before the server returns 429.
+        maxConcurrentTranscriptions:
+            Number(process.env.NUXT_MAX_CONCURRENT_TRANSCRIPTIONS) || 20,
         public: {
             logger_bs: {
                 loglevel: process.env.LOG_LEVEL || "debug",
