@@ -15,7 +15,8 @@
         "docker:dev": "docker compose -f ./docker-compose.dev.yml up --build -d",
         "docker:prod": "docker compose -f ./docker-compose.yml up --build -d",
         "docker:dev:down": "docker compose -f ./docker-compose.dev.yml down",
-        "docker:prod:down": "docker compose -f ./docker-compose.yml down"
+        "docker:prod:down": "docker compose -f ./docker-compose.yml down",
+        "env:check": "bunx varlock load"
     },
     "dependencies": {
         "@dcc-bs/audio-recorder.bs.js": "2.1.3",
