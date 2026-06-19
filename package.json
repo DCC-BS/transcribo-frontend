@@ -31,7 +31,7 @@
         "@iconify-json/lucide": "1.2.105",
         "@mohtasham/md-to-docx": "2.10.2",
         "@nuxt/ui": "4.7.1",
-        "@nuxtjs/i18n": "10.3.0",
+        "@nuxtjs/i18n": "10.4.0",
         "@nuxtjs/mdc": "0.21.1",
         "@vite-pwa/nuxt": "1.1.1",
         "@vueuse/core": "^14.3.0",
