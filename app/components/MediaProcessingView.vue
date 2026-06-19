@@ -31,7 +31,7 @@ const start_progression: [MediaProgress, MediaProgress, MediaProgress] = [
 const progressions =
     ref<[MediaProgress, MediaProgress, MediaProgress]>(start_progression);
 
-const { extractAudioFromVideo } = useAudioExtract();
+const { extractAudio } = useAudioExtract();
 const { t } = useI18n();
 const logger = useLogger();
 const { addTask, deleteTask } = useTasks();
@@ -58,28 +58,21 @@ async function processMedia() {
     }
 }
 
-// extract the audio form when video file; else do nothing
 async function preprocessMedia(progress: MediaProgress) {
-    if (isVideoFile(input.value.media)) {
-        const { audioBlob, audioFileName } = await extractAudioFromVideo(
-            input.value.media,
-        );
+    const isVideo = isVideoFile(input.value.media);
 
-        const audioFile = new File([audioBlob], audioFileName, {
-            type: audioBlob.type,
-        });
+    const { audioBlob, audioFileName } = await extractAudio(input.value.media);
 
-        progress.message = t("task.preprocessing.extractedAudio");
-        progress.progress = 100;
+    const audioFile = new File([audioBlob], audioFileName, {
+        type: audioBlob.type,
+    });
 
-        return audioFile;
-    }
-
-    progress.message = t("task.preprocessing.audioPreprocessed");
+    progress.message = isVideo
+        ? t("task.preprocessing.extractedAudio")
+        : t("task.preprocessing.audioPreprocessed");
     progress.progress = 100;
 
-    // on audio do nothin
-    return input.value.media;
+    return audioFile;
 }
 
 async function uploadFile(

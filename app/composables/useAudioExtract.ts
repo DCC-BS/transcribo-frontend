@@ -11,6 +11,16 @@ function toBlob(data: Uint8Array | string, mimeType: string): Blob {
     return new Blob([uint8], { type: mimeType });
 }
 
+function extension(fileName: string): string {
+    const lastDotIndex = fileName.lastIndexOf(".");
+    return lastDotIndex > 0 ? fileName.substring(lastDotIndex + 1) : "";
+}
+
+function stripExtension(fileName: string): string {
+    const lastDotIndex = fileName.lastIndexOf(".");
+    return lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
+}
+
 export const useAudioExtract = () => {
     const ffmpeg = new FFmpeg();
 
@@ -18,44 +28,49 @@ export const useAudioExtract = () => {
         ffmpeg.terminate();
     });
 
-    async function extractAudioFromVideo(
-        videoFile: File,
+    // Transcode any audio/video to mono 16 kHz MP3 (drops video, shrinks upload).
+    async function extractAudio(
+        mediaFile: File,
     ): Promise<{ audioBlob: Blob; audioFileName: string }> {
         await ffmpeg.load();
-        const originalName = videoFile.name;
-        const lastDotIndex = originalName.lastIndexOf(".");
-        const audioFileName =
-            lastDotIndex > 0
-                ? `${originalName.substring(0, lastDotIndex)}.wav`
-                : `${originalName}.wav`;
-        const videoFileName = "input_video.mp4";
+
+        const audioFileName = `${stripExtension(mediaFile.name)}.mp3`;
+        // Keep source extension so ffmpeg picks the right demuxer.
+        const ext = extension(mediaFile.name) || "bin";
+        const inputFileName = `input.${ext}`;
+
         try {
-            await ffmpeg.writeFile(videoFileName, await fetchFile(videoFile));
+            await ffmpeg.writeFile(inputFileName, await fetchFile(mediaFile));
             await ffmpeg.exec([
                 "-i",
-                videoFileName,
+                inputFileName,
                 "-vn",
                 "-acodec",
-                "pcm_s16le",
+                "libmp3lame",
                 "-ar",
                 "16000",
+                "-ac",
+                "1",
+                "-b:a",
+                "64k",
                 audioFileName,
             ]);
             const data = await ffmpeg.readFile(audioFileName);
             return {
-                audioBlob: toBlob(data, "audio/wav"),
+                audioBlob: toBlob(data, "audio/mp3"),
                 audioFileName,
             };
         } catch (error) {
             throw new Error(
-                `Failed to extract audio from video: ${error instanceof Error ? error.message : "Unknown error"}`,
+                `Failed to extract audio: ${error instanceof Error ? error.message : "Unknown error"}`,
             );
         } finally {
-            await ffmpeg.deleteFile(videoFileName);
+            await ffmpeg.deleteFile(inputFileName);
             await ffmpeg.deleteFile(audioFileName);
         }
     }
+
     return {
-        extractAudioFromVideo,
+        extractAudio,
     };
 };

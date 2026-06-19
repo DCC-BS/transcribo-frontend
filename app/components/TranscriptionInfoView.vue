@@ -75,15 +75,18 @@ async function handleNameChange() {
                     class="p-4 space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
                     <!-- File Name Input -->
                     <div class="space-y-1.5">
-                        <label class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                        <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the UInput below (id forwarded to native input) -->
+                        <label for="transcription-name"
+                            class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                             {{ t("transcription.nameLabel") || "Name" }}
                         </label>
-                        <UInput class="w-full" v-model="newName" @change="handleNameChange"
+                        <UInput id="transcription-name" class="w-full" v-model="newName" @change="handleNameChange"
                             :placeholder="t('transcription.namePlaceholder')" size="sm" />
                     </div>
 
                     <!-- Download Media Button -->
                     <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
+                        <!-- biome-ignore lint/a11y/useValidAnchor: href is bound dynamically via :href for media download -->
                         <a v-if="mediaUrl && mediaName" :href="mediaUrl" :download="mediaName"
                             :aria-label="t('media.downloadMedia')">
                             <motion.div :whileHover="{ scale: 1.02 }" :whileTap="{ scale: 0.98 }" :transition="{

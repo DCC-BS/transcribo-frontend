@@ -163,12 +163,15 @@ watch(
 
 <template>
     <div class="h-full flex flex-col">
-        <div v-if="duration > 0" class="flex-1 flex flex-col min-h-0" tabindex="0" @keydown="handleKeyDown">
+        <!-- biome-ignore lint/a11y/noNoninteractiveTabindex: role="application" widget is intentionally tab-reachable for its keyboard shortcuts -->
+        <div v-if="duration > 0" role="application" class="flex-1 flex flex-col min-h-0" tabindex="0"
+            @keydown="handleKeyDown">
             <div class="px-2 pt-2 pb-1 shrink-0">
                 <USlider v-model="timeRange" :min="0" :max="duration" />
             </div>
 
             <ClientOnly>
+                <!-- biome-ignore lint/a11y/noStaticElementInteractions: canvas pan/zoom surface for the Konva timeline; no semantic HTML role applies -->
                 <div
                     class="flex-1 min-h-0"
                     @wheel="handleWheel"

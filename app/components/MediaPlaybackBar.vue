@@ -173,8 +173,8 @@ function toggleExpanded(): void {
                         <div class="p-2 bg-default/50 backdrop-blur-sm rounded">
                             <USlider v-model="playbackRate" :min="0.1" :max="3" :step="0.1"></USlider>
                             <div class="flex gap-1 p-2">
-                                <UButton v-for="i in [0.25, 0.5, 1, 1.5, 2, 3]" variant="outline" color="secondary"
-                                    @click="playbackRate = i">{{ i }}x</UButton>
+                                <UButton v-for="i in [0.25, 0.5, 1, 1.5, 2, 3]" :key="i" variant="outline"
+                                    color="secondary" @click="playbackRate = i">{{ i }}x</UButton>
                             </div>
                         </div>
                     </template>

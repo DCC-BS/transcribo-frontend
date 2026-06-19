@@ -4,24 +4,24 @@
         "retry": "Erneut versuchen"
     },
     "errors": {
-        "invalid_json_response": "Serverfehler: Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut. Wenn das Problem weiterhin besteht, kontaktieren Sie dcc{'@'}bs.ch",
+        "invalid_json_response": "Serverfehler: Etwas ist schiefgelaufen. Bitte versuche es erneut. Wenn das Problem weiterhin besteht, kontaktiere dcc{'@'}bs.ch",
         "unexpected_error": "Ein unerwarteter Fehler ist aufgetreten",
         "service_unavailable": "Dienst vorübergehend nicht verfügbar",
         "invalid_request": "Ungültige Anfrage",
         "authentication_failed": "Authentifizierung fehlgeschlagen",
         "permission_denied": "Zugriff verweigert",
         "resource_not_found": "Ressource nicht gefunden",
-        "rate_limit_exceeded": "Zu viele Anfragen. Bitte versuchen Sie es später erneut",
+        "rate_limit_exceeded": "Zu viele Anfragen. Bitte versuche es später erneut",
         "validation_error": "Validierungsfehler"
     },
     "upload": {
         "convertingMedia": "Konvertiere Medien in WAV-Format...",
         "uploadingMedia": "Lade die Mediendatei hoch...",
-        "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuchen Sie es erneut.",
-        "uploadError": "Fehler beim Hochladen der Datei. Bitte versuchen Sie es erneut.",
+        "processingError": "Fehler bei der Verarbeitung der Mediendatei. Bitte versuche es erneut.",
+        "uploadError": "Fehler beim Hochladen der Datei. Bitte versuche es erneut.",
         "extractingAudio": "Extrahiere Audio aus Video...",
         "numSpeakers": "Anzahl der Sprecher",
-        "numSpeakersHelp": "Wählen Sie die Anzahl der Sprecher in der Audiodatei oder wählen Sie automatische Erkennung",
+        "numSpeakersHelp": "Wähle die Anzahl der Sprecher in der Audiodatei oder wähle automatische Erkennung",
         "autoDetection": "Automatische Erkennung",
         "filePreview": "Dateivorschau",
         "videoFile": "Video",
@@ -31,39 +31,39 @@
         "selectDifferentFile": "Andere Datei auswählen",
         "error": "Fehler",
         "unsupportedFileTypeTitle": "Nicht unterstützter Dateityp",
-        "unsupportedFileTypeDescription": "Erlaubte Dateitypen: mp3, mp4, m4a, flac, wav, webm. Wenn Sie Unterstützung für weitere Dateitypen benötigen, dann kontaktieren Sie uns über den Feedback-Knopf.",
+        "unsupportedFileTypeDescription": "Erlaubte Dateitypen: mp3, mp4, m4a, flac, wav, webm. Wenn du Unterstützung für weitere Dateitypen benötigst, dann kontaktiere uns über den Feedback-Knopf.",
         "fileTooLargeTitle": "Datei zu gross",
-        "fileTooLargeDescription": "Die Dateigröße überschreitet das maximal erlaubte Limit von 500MB. Bitte versuchen Sie es mit einer kleineren Datei.",
+        "fileTooLargeDescription": "Die Dateigröße überschreitet das maximal erlaubte Limit von 500MB. Bitte versuche es mit einer kleineren Datei.",
         "tooManyRequestsTitle": "Zu viele Anfragen",
-        "tooManyRequestsDescription": "Sie haben zu viele Anfragen gestellt. Bitte warten Sie einige Minuten, bevor Sie es erneut versuchen.",
+        "tooManyRequestsDescription": "Du hast zu viele Anfragen gestellt. Bitte warte einige Minuten, bevor du es erneut versuchst.",
         "audioLanguage": "Audio-Sprache",
-        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn Sie nicht sicher sind, wählen Sie 'Automatische Erkennung'.",
+        "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn du nicht sicher bist, wähle 'Automatische Erkennung'.",
         "settings": "Einstellungen",
-        "configureTranscription": "Konfigurieren Sie Ihre Transkription",
-        "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Sie können beide auf automatische Erkennung lassen, wenn Sie unsicher sind."
+        "configureTranscription": "Konfiguriere deine Transkription",
+        "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Du kannst beide auf automatische Erkennung lassen, wenn du unsicher bist."
     },
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transkribieren Sie Ihre Audio- und Videodateien mit KI und erstellen Sie automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
+            "subtitle": "Transkribiere deine Audio- und Videodateien mit KI und erstelle automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
             "uploadMedia": "Medien hochladen",
-            "uploadDescription": "Laden Sie Ihre Audio- oder Videodateien hoch",
+            "uploadDescription": "Lade deine Audio- oder Videodateien hoch",
             "recordAudio": "Audio aufnehmen",
-            "recordDescription": "Nehmen Sie Audio direkt über Ihr Mikrofon auf",
+            "recordDescription": "Nimm Audio direkt über dein Mikrofon auf",
             "featuresTitle": "Warum Transcribo wählen?",
             "feature1Title": "Schnell & Präzise",
             "feature1Description": "KI-gestützte Transkription mit hoher Genauigkeit und Geschwindigkeit",
             "feature2Title": "Mehrere Sprachen",
             "feature2Description": "Unterstützung für verschiedene Sprachen und Dialekte",
             "feature3Title": "Sicher & Privat",
-            "feature3Description": "Ihre Daten werden sicher und privat verarbeitet",
+            "feature3Description": "Deine Daten werden sicher und privat verarbeitet",
             "experimentalTitle": "Experimentell",
             "experimental": "Die Aufnahmefunktion ist experimentell und wurde nur mit kurzen Aufnahmen getestet. Aufnahmen länger als 5 Minuten können zu Fehlern und Datenverlust führen. Für lange Gespräche empfehlen wir den Dateiupload.",
             "step1": "Medien hochladen",
             "step2": "Einstellungen",
             "step3": "Medien verarbeiten",
             "pendingTitle": "Unfertige Transkriptionen",
-            "pendingDescription": "Sie haben unfertige Transkriptionen",
+            "pendingDescription": "Du hast unfertige Transkriptionen",
             "goToTranscriptions": "Zu den Transkriptionen"
         }
     },
@@ -80,10 +80,10 @@
     },
     "audioRecorder": {
         "useRecording": "Diese Aufnahme verwenden",
-        "makeSureMicrophoneIsProperlyConnected": "Stellen Sie sicher, dass Ihr Mikrofon ordnungsgemäss verbunden ist",
-        "checkBrowserPermissionsForMicrophoneAccess": "Überprüfen Sie die Browser-Berechtigungen für Mikrofonzugriff",
-        "tryUsingDifferentBrowser": "Versuchen Sie einen anderen Browser",
-        "restartDeviceIfIssuePersists": "Starten Sie Ihr Gerät neu, wenn das Problem besteht"
+        "makeSureMicrophoneIsProperlyConnected": "Stelle sicher, dass dein Mikrofon ordnungsgemäss verbunden ist",
+        "checkBrowserPermissionsForMicrophoneAccess": "Überprüfe die Browser-Berechtigungen für Mikrofonzugriff",
+        "tryUsingDifferentBrowser": "Versuche einen anderen Browser",
+        "restartDeviceIfIssuePersists": "Starte dein Gerät neu, wenn das Problem besteht"
     },
     "timeline": {
         "noTranscription": "Keine Transkription verfügbar"
@@ -99,13 +99,13 @@
         "processing": "Verarbeite deine Anfrage...",
         "completed": "Transkription erfolgreich abgeschlossen!",
         "failed": "Transkription fehlgeschlagen",
-        "failedDescription": "Während der Transkription ist ein Fehler aufgetreten. Bitte versuchen Sie es mit einer anderen Datei erneut.",
+        "failedDescription": "Während der Transkription ist ein Fehler aufgetreten. Bitte versuche es mit einer anderen Datei erneut.",
         "goBack": "Zurück"
     },
     "speaker": {
         "delete": "Sprecher löschen",
         "deleteTitle": "Sprecher löschen",
-        "deleteMessage": "Alle Segmente von \"{speaker}\" werden neu zugewiesen. Wählen Sie, welchem Sprecher diese Segmente zugewiesen werden sollen:",
+        "deleteMessage": "Alle Segmente von \"{speaker}\" werden neu zugewiesen. Wähle, welchem Sprecher diese Segmente zugewiesen werden sollen:",
         "reassignTo": "Zuweisen an Sprecher"
     },
     "transcription": {
@@ -124,7 +124,7 @@
         "timelineTab": "Zeitleiste",
         "delete": {
             "title": "Transkription löschen",
-            "confirmation": "Sind Sie sicher, dass Sie diese Transkription löschen möchten?"
+            "confirmation": "Bist du sicher, dass du diese Transkription löschen möchtest?"
         },
         "actions": {
             "edit": "Bearbeiten",
@@ -201,7 +201,7 @@
         "errors": {
             "noMediaFile": "Keine Mediendatei für diese Aufgabe gefunden",
             "failedToLoad": "Fehler beim Laden der Aufgabe",
-            "transcriptionFailed": "Transkription fehlgeschlagen. Bitte versuchen Sie es erneut.",
+            "transcriptionFailed": "Transkription fehlgeschlagen. Bitte versuche es erneut.",
             "failedToCreateTranscription": "Fehler beim Erstellen der Transkription aus den Ergebnissen",
             "noResult": "Kein Transkriptionsergebnis verfügbar",
             "TaskNotFound": "Aufgabe nicht gefunden"
@@ -256,13 +256,13 @@
             "spectrogram": "Spektrogramm",
             "timeline": "Zeitleiste",
             "title": "Grundlegende Mediensteuerung",
-            "spacebar": "Drücken Sie {space} zum Abspielen/Pausieren von Video oder Audio",
-            "spectrogramClick": "Klicken oder ziehen Sie auf das {spectrogram}, um zu einer bestimmten Position zu springen",
-            "arrowKeys": "Verwenden Sie {leftKey} oder {rightKey} um 5 Sekunden zurück oder vorwärts zu springen",
-            "shiftArrows": "Halten Sie {shiftKey} + {leftKey} / {rightKey} um 30 Sekunden zu springen",
-            "ctrlArrows": "Halten Sie {ctrlKey} + {leftKey} / {rightKey} um 1 Sekunde zu springen",
-            "mouseWheel": "Verwenden Sie das Mausrad zum Zoomen in die {timeline} oder nutzen Sie den Bereichsregler unten",
-            "ctrlClick": "Verwenden Sie {ctrlKey} + Linksklick, um sich auf der {timeline} zu bewegen"
+            "spacebar": "Drücke {space} zum Abspielen/Pausieren von Video oder Audio",
+            "spectrogramClick": "Klicke oder ziehe auf das {spectrogram}, um zu einer bestimmten Position zu springen",
+            "arrowKeys": "Verwende {leftKey} oder {rightKey} um 5 Sekunden zurück oder vorwärts zu springen",
+            "shiftArrows": "Halte {shiftKey} + {leftKey} / {rightKey} um 30 Sekunden zu springen",
+            "ctrlArrows": "Halte {ctrlKey} + {leftKey} / {rightKey} um 1 Sekunde zu springen",
+            "mouseWheel": "Verwende das Mausrad zum Zoomen in die {timeline} oder nutze den Bereichsregler unten",
+            "ctrlClick": "Verwende {ctrlKey} + Linksklick, um dich auf der {timeline} zu bewegen"
         },
         "segments": {
             "title": "Transkriptionssegmente",
@@ -270,32 +270,32 @@
             "dropdown": "Dropdown-Menü",
             "timespanTextFields": "Zeitspannen-Textfelder",
             "intro": "Am unteren Rand wird das aktuelle {transcriptionSegment} zur Bearbeitung angezeigt:",
-            "speaker": "Im {dropdown} können Sie einen Sprecher zuweisen (tippen Sie in das Suchfeld, um einen neuen Sprecher zu erstellen)",
-            "timeChange": "Ändern Sie die Zeit in Sekunden in den {timespanTextFields}",
-            "seekTime": "Klicken Sie auf die Zeitstempel, um zu dieser Zeit zu springen",
-            "insertBefore": "Drücken Sie den Knopf mit dem Pfeil {insertAbove} nach oben, um ein Segment davor einzufügen",
-            "insertAfter": "Drücken Sie den Knopf mit dem Pfeil {insertBelow} nach unten, um ein Segment danach einzufügen",
-            "deleteSegment": "Drücken Sie den Löschen-Knopf {delete}, um das Segment zu entfernen"
+            "speaker": "Im {dropdown} kannst du einen Sprecher zuweisen (tippe in das Suchfeld, um einen neuen Sprecher zu erstellen)",
+            "timeChange": "Ändere die Zeit in Sekunden in den {timespanTextFields}",
+            "seekTime": "Klicke auf die Zeitstempel, um zu dieser Zeit zu springen",
+            "insertBefore": "Drücke den Knopf mit dem Pfeil {insertAbove} nach oben, um ein Segment davor einzufügen",
+            "insertAfter": "Drücke den Knopf mit dem Pfeil {insertBelow} nach unten, um ein Segment danach einzufügen",
+            "deleteSegment": "Drücke den Löschen-Knopf {delete}, um das Segment zu entfernen"
         },
         "timeline": {
             "title": "Arbeiten mit Segmenten auf der Zeitleiste",
-            "hoverText": "Fahren Sie mit dem Mauszeiger über ein Rechteck, um den Text zu sehen",
-            "clickSelect": "Klicken Sie auf ein Rechteck, um es auszuwählen und die Griffe zu sehen",
-            "moveWithKeys": "Wenn ausgewählt, können Sie das Rechteck mit den Pfeiltasten um 0,5 Sekunden nach links oder rechts verschieben",
-            "dragMove": "Ziehen Sie das Rechteck, um es zu verschieben",
-            "resizeHandles": "Ziehen Sie die Griffe auf der linken oder rechten Seite, um das Rechteck in der Grösse zu ändern",
-            "altSnap": "Halten Sie die {altKey}-Taste gedrückt, während Sie es verschieben, um das Einrasten an anderen Rechtecken zu verhindern"
+            "hoverText": "Fahre mit dem Mauszeiger über ein Rechteck, um den Text zu sehen",
+            "clickSelect": "Klicke auf ein Rechteck, um es auszuwählen und die Griffe zu sehen",
+            "moveWithKeys": "Wenn ausgewählt, kannst du das Rechteck mit den Pfeiltasten um 0,5 Sekunden nach links oder rechts verschieben",
+            "dragMove": "Ziehe das Rechteck, um es zu verschieben",
+            "resizeHandles": "Ziehe die Griffe auf der linken oder rechten Seite, um das Rechteck in der Grösse zu ändern",
+            "altSnap": "Halte die {altKey}-Taste gedrückt, während du es verschiebst, um das Einrasten an anderen Rechtecken zu verhindern"
         },
         "editing": {
             "title": "Bearbeitungsvorgänge",
-            "undo": "Verwenden Sie {ctrlKey} + {zKey} zum Rückgängigmachen",
-            "redo": "Verwenden Sie {ctrlKey} + {yKey} zum Wiederholen",
-            "buttons": "Oder drücken Sie die Schaltflächen für Rückgängig/Wiederholen oben links"
+            "undo": "Verwende {ctrlKey} + {zKey} zum Rückgängigmachen",
+            "redo": "Verwende {ctrlKey} + {yKey} zum Wiederholen",
+            "buttons": "Oder drücke die Schaltflächen für Rückgängig/Wiederholen oben links"
         }
     },
     "processing": {
         "title": "Transkriptionen in Bearbeitung",
-        "description": "Überwachen Sie den Status Ihrer Transkriptionen",
+        "description": "Überwache den Status deiner Transkriptionen",
         "refresh": "Aktualisieren",
         "unknownFile": "Unbekannte Datei",
         "transcribe": "Transkribieren",
@@ -324,7 +324,7 @@
     "audio": {
         "abandonedRecording": "Aufnahme abgebrochen am {date}",
         "recover": "Wiederherstellen",
-        "abandonedRecordings": "Sie haben {count} abgebrochene Aufnahmen.",
+        "abandonedRecordings": "Du hast {count} abgebrochene Aufnahmen.",
         "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen"
     },
     "languages": {
@@ -431,8 +431,8 @@
         "yue": "Kantonesisch"
     },
     "transcriptionList": {
-        "title": "Ihre Transkriptionen",
-        "description": "Hier sehen Sie alle Ihre transkribierten Dateien"
+        "title": "Deine Transkriptionen",
+        "description": "Hier siehst du alle deine transkribierten Dateien"
     },
     "retention": {
         "title": "Verfügbarkeit der Transkriptionen",

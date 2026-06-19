@@ -69,7 +69,8 @@ const columns = computed<TableColumn<StoredTask>[]>(() => [
         </div>
 
         <UAlert
-            v-for="error in props.errors"
+            v-for="(error, index) in props.errors"
+            :key="index"
             icon="i-lucide-triangle-alert"
             color="error"
             variant="soft"

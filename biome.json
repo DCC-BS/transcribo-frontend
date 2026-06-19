@@ -13,7 +13,9 @@
             "!!.output",
             "!!logs",
             "!!tests",
-            "!env.d.ts"
+            "!env.d.ts",
+            "!public",
+            "!.claude"
         ]
     },
     "html": {
