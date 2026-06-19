@@ -28,7 +28,7 @@
         "@dcc-bs/event-system.bs.js": "^1.4.3",
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
-        "@iconify-json/lucide": "1.2.105",
+        "@iconify-json/lucide": "1.2.111",
         "@mohtasham/md-to-docx": "2.12.2",
         "@nuxt/ui": "4.8.2",
         "@nuxtjs/i18n": "10.4.0",
