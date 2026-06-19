@@ -170,13 +170,13 @@ const endTimeFormatted = computed({
                         </template>
                     </UInput>
                     <div class="text-gray-700">
-                        <a @click="() => seekTo(start)">
+                        <button type="button" class="cursor-pointer underline" @click="() => seekTo(start)">
                             {{ formatTime(start) }}
-                        </a>
+                        </button>
                         -
-                        <a @click="() => seekTo(end)">{{
+                        <button type="button" class="cursor-pointer underline" @click="() => seekTo(end)">{{
                             formatTime(end)
-                        }}</a>
+                        }}</button>
                     </div>
                     <UInput v-model="endTimeFormatted" type="number" class="w-25" :step="0.1">
                         <template #trailing>

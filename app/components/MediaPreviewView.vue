@@ -248,7 +248,9 @@ function onNext() {
                                             class="w-4 h-4 text-blue-600 dark:text-blue-400"
                                         />
                                     </div>
+                                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelect below (id forwarded to native control) -->
                                     <label
+                                        for="num-speakers"
                                         class="text-sm font-medium text-gray-900 dark:text-white"
                                     >
                                         {{ t("upload.numSpeakers") }}
@@ -260,6 +262,7 @@ function onNext() {
                                     {{ t("upload.numSpeakersHelp") }}
                                 </p>
                                 <USelect
+                                    id="num-speakers"
                                     v-model="numSpeaker"
                                     :items="speakerOptions"
                                     placeholder="Select number of speakers"
@@ -287,7 +290,9 @@ function onNext() {
                                             class="w-4 h-4 text-purple-600 dark:text-purple-400"
                                         />
                                     </div>
+                                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelectMenu below (id forwarded to native control) -->
                                     <label
+                                        for="audio-language"
                                         class="text-sm font-medium text-gray-900 dark:text-white"
                                     >
                                         {{ t("upload.audioLanguage") }}
@@ -299,6 +304,7 @@ function onNext() {
                                     {{ t("upload.audioLanguageHelp") }}
                                 </p>
                                 <USelectMenu
+                                    id="audio-language"
                                     v-model="language"
                                     value-key="value"
                                     :items="audioLanguageOptions"

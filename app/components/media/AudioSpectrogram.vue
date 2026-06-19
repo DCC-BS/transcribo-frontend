@@ -268,6 +268,7 @@ const handleMouseUp = (): void => {
     <div ref="container" class="audio-spectrogram">
         <!-- Audio spectrogram display using Konva, shown when audio is loaded -->
         <div v-if="audioLoaded">
+            <!-- biome-ignore lint/a11y/noStaticElementInteractions: Konva canvas stage; pointer handlers are the only interaction path -->
             <v-stage :config="configKonva" @click="handleStageClick" @mousedown="handleMouseDown"
                 @mousemove="handleMouseMove" @mouseup="handleMouseUp" @mouseleave="handleMouseUp">
                 <v-layer :config="transformedLayerConfig">

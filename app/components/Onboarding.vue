@@ -255,4 +255,7 @@ onCommand<ShowOnboardingCommand>(Cmds.ShowOnboardingCommand, async () => {
 });
 </script>
 
-<template></template>
+<template>
+    <!-- Renderless: drives the driver.js onboarding overlay, no DOM of its own -->
+    <span hidden aria-hidden="true" />
+</template>

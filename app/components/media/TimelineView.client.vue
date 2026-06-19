@@ -485,6 +485,7 @@ function onPointerMove(e: KonvaEventObject<MouseEvent, Stage>): void {
 
 <template>
     <div ref="container" class="w-full">
+        <!-- biome-ignore lint/a11y/noStaticElementInteractions: Konva canvas stage; pointer handlers are the only interaction path -->
         <v-stage v-if="segments.length > 0" :config="configKonva" @mousemove="onPointerMove" @click="clearSelection">
             <!-- Time Axis layer -->
             <TimeAxisLayer :start-time="props.startTime" :end-time="props.endTime" :zoom-x="props.zoomX"
@@ -492,6 +493,7 @@ function onPointerMove(e: KonvaEventObject<MouseEvent, Stage>): void {
 
             <!-- Timeline segments layer -->
             <v-layer :config="timelineLayerConfig">
+                <!-- biome-ignore lint/a11y/noStaticElementInteractions: Konva canvas rect; pointer handlers are the only interaction path -->
                 <v-rect v-for="(rectConfig, index) in rectConfigs" :key="index" :config="rectConfig" @click="
                     (e: KonvaEventObject<MouseEvent, Rect>) =>
                         onSegmentClicked(e, rectConfig.id!)
