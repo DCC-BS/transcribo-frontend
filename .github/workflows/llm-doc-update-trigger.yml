@@ -1,22 +1,18 @@
-name: LLM Doc Update Trigger
-
+name: Documentation on demand
 on:
-    issue_comment:
-        types: [created]
+  issue_comment:
+    types: [ created ]
 
 jobs:
-    llm-doc-update:
-        if: >
-            github.event.issue.pull_request &&
-            github.event.comment.body == '/documentation' &&
-            (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER')
-        uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update.yml@d56b755ec3877da25146ac5f34a2b4003ff6339d # v8
-        with:
-            doc_repo: DCC-BS/documentation
-            doc_path: "markdown/nuxt-layers"
-            openai_model: GLM-5.1
-            openai_base_url: https://api.z.ai/api/coding/paas/v4
-            pr_number: ${{ format('{0}', github.event.issue.number) }}
-        secrets:
-            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-            GH_TOKEN: ${{ secrets.GH_TOKEN_CUSTOM }}
+  docs:
+    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@v9
+    with:
+      doc_repo: "DCC-BS/documentation"
+      doc_path: "markdown/nuxt-layers"
+      openai_model: GLM-5.1
+      openai_base_url: https://api.z.ai/api/coding/paas/v4
+      pr_number: ${{ github.event.issue.number }}
+      app_id: ${{ vars.DOC_APP_ID }}
+    secrets:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
