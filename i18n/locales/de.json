@@ -103,6 +103,7 @@
         "goBack": "Zurück"
     },
     "speaker": {
+        "jumpToFirstAppearance": "Zum ersten Auftreten springen",
         "delete": "Sprecher löschen",
         "deleteTitle": "Sprecher löschen",
         "deleteMessage": "Alle Segmente von \"{speaker}\" werden neu zugewiesen. Wähle, welchem Sprecher diese Segmente zugewiesen werden sollen:",

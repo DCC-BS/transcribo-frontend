@@ -103,6 +103,7 @@
         "goBack": "Go Back"
     },
     "speaker": {
+        "jumpToFirstAppearance": "Jump to first appearance",
         "delete": "Delete Speaker",
         "deleteTitle": "Delete Speaker",
         "deleteMessage": "All segments from \"{speaker}\" will be reassigned. Select which speaker should receive these segments:",

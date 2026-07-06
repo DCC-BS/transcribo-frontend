@@ -76,12 +76,15 @@ function initializeDuration(): void {
                     </UButton>
                 </div>
             </div>
+
+            <div class="px-4 pb-2">
+                <RenameSpeakerView :transcriptionId="props.transcription.id" :segments="props.segments" />
+            </div>
         </div>
 
         <div class="flex-1 min-h-0 flex flex-col">
             <template v-if="!isMobile">
                 <div class="p-4 flex flex-col gap-4">
-                    <RenameSpeakerView :transcriptionId="props.transcription.id" :segments="props.segments" />
                     <TranscriptionList id="edit-transcription-list" :transcriptionId="props.transcription.id"
                         :segments="props.segments" :currentTime="currentTime" :autoScrollEnabled="autoScrollEnabled" />
                 </div>
@@ -90,8 +93,6 @@ function initializeDuration(): void {
             <template v-else>
                 <div class="flex-1 min-h-0">
                     <div class="p-4 flex flex-col gap-4">
-                        <RenameSpeakerView id="edit-speaker-names" :transcriptionId="props.transcription.id"
-                            :segments="props.segments" />
                         <TranscriptionList id="edit-transcription-list" :transcriptionId="props.transcription.id"
                             :segments="props.segments" :currentTime="currentTime"
                             :autoScrollEnabled="autoScrollEnabled" />
