@@ -19,23 +19,23 @@ const isInEditor = computed(() => {
                 <!-- Center: Action buttons -->
                 <div class="flex items-center justify-center shrink-0 h-full">
                     <UTooltip :text="t('navigation.new')">
-                        <ULink to="/">
-                            <UButton variant="ghost" icon="i-lucide-plus">
-                                <span class="hidden md:inline">
-                                    {{ t("navigation.new") }}
-                                </span>
-                            </UButton>
-                        </ULink>
+                        <UButton to="/" variant="ghost" icon="i-lucide-plus">
+                            <span class="hidden md:inline">
+                                {{ t("navigation.new") }}
+                            </span>
+                        </UButton>
                     </UTooltip>
 
                     <UTooltip :text="t('navigation.transcriptions')">
-                        <ULink to="/transcription">
-                            <UButton variant="ghost" icon="i-lucide-list">
-                                <span class="hidden md:inline">
-                                    {{ t("navigation.transcriptions") }}
-                                </span>
-                            </UButton>
-                        </ULink>
+                        <UButton
+                            to="/transcription"
+                            variant="ghost"
+                            icon="i-lucide-list"
+                        >
+                            <span class="hidden md:inline">
+                                {{ t("navigation.transcriptions") }}
+                            </span>
+                        </UButton>
                     </UTooltip>
                 </div>
             </template>

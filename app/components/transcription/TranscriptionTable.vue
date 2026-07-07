@@ -88,11 +88,15 @@ function handleDeleteClick(transcriptionId: string): void {
                     </div>
                 </div>
                 <div class="flex gap-2 pt-2">
-                    <ULink :to="`transcription/${transcription.id}`" class="flex-1">
-                        <UButton icon="i-lucide-pencil" color="primary" block>
-                            {{ t("transcription.actions.edit") }}
-                        </UButton>
-                    </ULink>
+                    <UButton
+                        :to="`/transcription/${transcription.id}`"
+                        icon="i-lucide-pencil"
+                        color="primary"
+                        block
+                        class="flex-1"
+                    >
+                        {{ t("transcription.actions.edit") }}
+                    </UButton>
                     <UButton
                         icon="i-lucide-trash-2"
                         color="error"
@@ -123,11 +127,13 @@ function handleDeleteClick(transcriptionId: string): void {
 
             <template #actions-cell="{ row }">
                 <div class="flex gap-2 justify-end">
-                    <ULink :to="`transcription/${row.original.id}`">
-                        <UButton icon="i-lucide-pencil" color="primary">
-                            {{ t("transcription.actions.edit") }}
-                        </UButton>
-                    </ULink>
+                    <UButton
+                        :to="`/transcription/${row.original.id}`"
+                        icon="i-lucide-pencil"
+                        color="primary"
+                    >
+                        {{ t("transcription.actions.edit") }}
+                    </UButton>
                     <UButton
                         icon="i-lucide-trash-2"
                         color="error"
