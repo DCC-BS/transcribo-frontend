@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { UInput } from "#components";
 import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
 import {
@@ -19,6 +20,9 @@ const { executeCommand } = useCommandBus();
 const { getSpeakerColor } = useSpeakerColor(speakers);
 
 const { t } = useI18n();
+
+const isMobile = useBreakpoints(breakpointsTailwind).smaller("md");
+const speakersExpanded = ref(!isMobile.value);
 
 const speakerMappings = ref<{ original: string; new: string }[]>([]);
 
@@ -91,10 +95,21 @@ function cancelDelete(): void {
 
 <template>
     <div id="speaker-names-section" class="bg-muted/50 rounded-lg p-3">
-        <h3 class="text-sm font-semibold mb-2 text-muted-foreground">
-            {{ t("common.speakers") }}
-        </h3>
-        <div class="flex gap-2 flex-wrap">
+        <button
+            type="button"
+            class="w-full flex items-center justify-between"
+            @click="speakersExpanded = !speakersExpanded"
+        >
+            <h3 class="text-sm font-semibold text-muted-foreground">
+                {{ t("common.speakers") }} ({{ speakers.length }})
+            </h3>
+            <UIcon
+                name="i-lucide-chevron-down"
+                class="size-4 text-muted-foreground transition-transform"
+                :class="{ '-rotate-180': speakersExpanded }"
+            />
+        </button>
+        <div v-show="speakersExpanded" class="flex gap-2 flex-wrap mt-2">
             <div
                 v-for="(speakerMap, index) in speakerMappings"
                 :key="`existing-${index}`"
