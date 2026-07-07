@@ -76,9 +76,8 @@ function initializeDuration(): void {
                     </UButton>
                 </div>
             </div>
-
             <div class="px-4 pb-2">
-                <RenameSpeakerView :transcriptionId="props.transcription.id" :segments="props.segments" />
+                <RenameSpeakerView :transcription-id="props.transcription.id" :segments="props.segments" />
             </div>
         </div>
 
