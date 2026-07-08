@@ -137,15 +137,22 @@ export function useTaskListener() {
                 });
 
                 await addSegments(
-                    result.segments.map((x) => ({
-                        ...x,
-                        transcriptionId: newTranscription.id,
-                        text: x.text?.trim() ?? "",
-                        speaker:
-                            x.speaker?.trim().toUpperCase() ??
-                            t("transcription.noSpeaker"),
-                        id: uuidv4(),
-                    })),
+                    result.segments.map((x) => {
+                        const text = x.text?.trim() ?? "";
+                        return {
+                            ...x,
+                            transcriptionId: newTranscription.id,
+                            text,
+                            lowConfidenceRanges: computeLowConfidenceRanges(
+                                text,
+                                x.words,
+                            ),
+                            speaker:
+                                x.speaker?.trim().toUpperCase() ??
+                                t("transcription.noSpeaker"),
+                            id: uuidv4(),
+                        };
+                    }),
                 );
 
                 await deleteTask(taskId);

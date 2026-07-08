@@ -46,8 +46,15 @@ async function processMedia() {
         errorMessage.value = undefined;
         progressions.value = start_progression;
         const processedFile = await preprocessMedia(progressions.value[0]);
-        const task = await uploadFile(processedFile, progressions.value[1]);
-        await waitForTask(task, progressions.value[2]);
+        const storedMedia = isVideoFile(input.value.media)
+            ? input.value.media
+            : processedFile;
+        const task = await uploadFile(
+            processedFile,
+            storedMedia,
+            progressions.value[1],
+        );
+        await waitForTask(task, storedMedia, progressions.value[2]);
     } catch (e) {
         logger.error(e, "Failed to finish the task");
         if (!errorMessage.value) {
@@ -77,6 +84,7 @@ async function preprocessMedia(progress: MediaProgress) {
 
 async function uploadFile(
     processedFile: File,
+    storedMedia: File,
     progress: MediaProgress,
 ): Promise<TaskStatus> {
     progress.message = t("upload.uploadingMedia");
@@ -109,18 +117,17 @@ async function uploadFile(
     progress.progress = 90;
 
     deleteTask(input.value.task.id);
-    addTask(
-        response,
-        input.value.media,
-        input.value.media.name,
-        input.value.media.type,
-    );
+    addTask(response, storedMedia, storedMedia.name, storedMedia.type);
 
     progress.progress = 100;
     return response;
 }
 
-async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
+async function waitForTask(
+    task: TaskStatus,
+    storedMedia: File,
+    mediaProgress: MediaProgress,
+) {
     await pollTaskStatus(
         task.task_id,
         // on progress
@@ -134,8 +141,8 @@ async function waitForTask(task: TaskStatus, mediaProgress: MediaProgress) {
                 await applyTaskResult(
                     task.task_id,
                     transcription,
-                    input.value.media,
-                    input.value.media.name,
+                    storedMedia,
+                    storedMedia.name,
                 );
             } catch (e) {
                 logger.error(e, "Failed to finish the task");

@@ -3,6 +3,10 @@
         "speakers": "Sprecherinnen und Sprecher",
         "retry": "Erneut versuchen"
     },
+    "confidence": {
+        "veryUncertain": "Sehr unsichere Erkennung",
+        "uncertain": "Unsichere Erkennung"
+    },
     "errors": {
         "invalid_json_response": "Serverfehler: Etwas ist schiefgelaufen. Bitte versuche es erneut. Wenn das Problem weiterhin besteht, kontaktiere dcc{'@'}bs.ch",
         "unexpected_error": "Ein unerwarteter Fehler ist aufgetreten",

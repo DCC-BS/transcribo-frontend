@@ -3,6 +3,10 @@
         "speakers": "Speakers",
         "retry": "Retry"
     },
+    "confidence": {
+        "veryUncertain": "Very uncertain detection",
+        "uncertain": "Uncertain detection"
+    },
     "errors": {
         "invalid_json_response": "Server error: Something went wrong. Please try again. If the problem persists, contact dcc{'@'}bs.ch",
         "unexpected_error": "An unexpected error occurred",

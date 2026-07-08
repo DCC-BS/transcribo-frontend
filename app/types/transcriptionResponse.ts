@@ -29,6 +29,7 @@ export const SegmentSchema = z.object({
     end: z.number(),
     text: z.string(),
     speaker: z.string().nullable().optional(),
+    words: z.array(WordSchema).nullable().optional(),
 });
 
 /**

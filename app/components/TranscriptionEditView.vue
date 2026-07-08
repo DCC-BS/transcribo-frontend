@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { useMediaQuery } from "@vueuse/core";
+import { useElementBounding, useMediaQuery } from "@vueuse/core";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
@@ -11,6 +11,8 @@ interface InputProps {
 const props = defineProps<InputProps>();
 
 const isMobile = useMediaQuery("(max-width: 800px)");
+const stickyHeader = ref<HTMLElement>();
+const { bottom: stickyHeaderBottom } = useElementBounding(stickyHeader);
 const { canUndo, canRedo, undo, redo } = useCommandHistory();
 const { t } = useI18n();
 
@@ -53,7 +55,7 @@ function initializeDuration(): void {
 
 <template>
     <div class="relative h-full flex flex-col">
-        <div class="sticky top-0 z-40 bg-default/50 backdrop-blur-sm rounded">
+        <div ref="stickyHeader" class="sticky top-0 z-40 bg-default/50 backdrop-blur-sm rounded">
             <MediaPlaybackBar v-model="currentTime" :transcription="props.transcription" :segments="props.segments"
                 :duration="duration" />
 
@@ -85,7 +87,8 @@ function initializeDuration(): void {
             <template v-if="!isMobile">
                 <div class="p-4 flex flex-col gap-4">
                     <TranscriptionList id="edit-transcription-list" :transcriptionId="props.transcription.id"
-                        :segments="props.segments" :currentTime="currentTime" :autoScrollEnabled="autoScrollEnabled" />
+                        :segments="props.segments" :currentTime="currentTime" :autoScrollEnabled="autoScrollEnabled"
+                        :stickyHeaderBottom="stickyHeaderBottom" />
                 </div>
             </template>
 
@@ -94,7 +97,7 @@ function initializeDuration(): void {
                     <div class="p-4 flex flex-col gap-4">
                         <TranscriptionList id="edit-transcription-list" :transcriptionId="props.transcription.id"
                             :segments="props.segments" :currentTime="currentTime"
-                            :autoScrollEnabled="autoScrollEnabled" />
+                            :autoScrollEnabled="autoScrollEnabled" :stickyHeaderBottom="stickyHeaderBottom" />
                     </div>
                 </div>
             </template>

@@ -14,21 +14,24 @@ interface InputProps {
     segments: StoredSegment[];
     currentTime?: number;
     autoScrollEnabled?: boolean;
+    /** Bottom edge (viewport px) of the sticky header that overlaps the list. */
+    stickyHeaderBottom?: number;
 }
 
 const props = withDefaults(defineProps<InputProps>(), {
     currentTime: 0,
     autoScrollEnabled: true,
+    stickyHeaderBottom: 0,
 });
 
 const { executeCommand } = useCommandBus();
 
 const segmentRefs = ref<Map<string, HTMLElement>>(new Map());
 const { height: windowHeight } = useWindowSize();
-const segmentSize = 192;
+const segmentSize = 120;
 const { y } = useWindowScroll();
 
-const maxSegment = ref(0);
+const maxSegment = ref(15);
 const useProgress = computed(() => segments.value.length < 500);
 
 watch(
@@ -75,7 +78,7 @@ function isSegmentActive(segmentId: string): boolean {
 }
 
 watch(currentSegmentId, async (newId, oldId) => {
-    if (!props.autoScrollEnabled || !newId || newId === oldId) {
+    if (!newId || newId === oldId) {
         return;
     }
 
@@ -84,12 +87,35 @@ watch(currentSegmentId, async (newId, oldId) => {
         maxSegment.value = Math.max(index + 2, maxSegment.value);
     }
 
+    if (!props.autoScrollEnabled) {
+        return;
+    }
+
     // wait for the element to load
     await nextTick();
 
     const segmentEl = segmentRefs.value.get(newId);
     if (!segmentEl) {
         console.warn(`No element found for segment ID: ${newId}`);
+        return;
+    }
+
+    const headerBottom = props.stickyHeaderBottom;
+    const visibleHeight = window.innerHeight - headerBottom;
+
+    if (visibleHeight > 0) {
+        const rect = segmentEl.getBoundingClientRect();
+        const elementDocTop = window.scrollY + rect.top;
+        const elementHeight = rect.height;
+        const elementDocCenter = elementDocTop + elementHeight / 2;
+
+        const visibleCenterInViewport = headerBottom + visibleHeight / 2;
+        const targetScrollY = elementDocCenter - visibleCenterInViewport;
+
+        window.scrollTo({
+            top: targetScrollY,
+            behavior: "smooth",
+        });
         return;
     }
 
@@ -123,9 +149,11 @@ async function addSegmentAtZero() {
 
 <template>
     <div class="flex flex-col">
-        <USeparator id="add-transcription-top">
-            <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegmentAtZero()" />
-        </USeparator>
+        <div id="add-transcription-top">
+            <USeparator>
+                <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegmentAtZero()" />
+            </USeparator>
+        </div>
 
         <AnimatePresence>
             <div id="transcription-segments">
@@ -133,7 +161,8 @@ async function addSegmentAtZero() {
                     :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
                         <TranscriptionListItem :segment="segment" :speakers="speakers"
-                            :isActive="isSegmentActive(segment.id)" :currentTime="props.currentTime"
+                            :isActive="isSegmentActive(segment.id)"
+                            :currentTime="isSegmentActive(segment.id) ? props.currentTime : 0"
                             :showProgress="useProgress" />
                     </div>
 

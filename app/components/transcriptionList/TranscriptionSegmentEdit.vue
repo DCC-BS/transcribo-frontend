@@ -10,6 +10,7 @@ import {
 } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import { formatTime } from "~/utils/time";
+import ConfidenceEditor from "./ConfidenceEditor.vue";
 
 interface TranscriptionListProps {
     segment: StoredSegment;
@@ -32,6 +33,7 @@ const progress = ref(0);
 const duration = ref(0);
 
 const text = ref(props.segment.text);
+const lowConfidenceRanges = ref(props.segment.lowConfidenceRanges ?? []);
 const speaker = ref(props.segment.speaker);
 const start = ref(props.segment.start);
 const end = ref(props.segment.end);
@@ -39,6 +41,7 @@ const end = ref(props.segment.end);
 watch(
     () => props.segment,
     (segment) => {
+        lowConfidenceRanges.value = segment.lowConfidenceRanges ?? [];
         text.value = segment.text;
         speaker.value = segment.speaker;
         start.value = segment.start;
@@ -47,20 +50,30 @@ watch(
 );
 
 function applyUpdates(updates: Partial<StoredSegment>): void {
-    executeCommand(
-        new UpdateSegmentCommand(props.segment.id, updates),
-    );
+    executeCommand(new UpdateSegmentCommand(props.segment.id, updates));
 }
 
 watchDebounced(
     text,
     (newText) => {
         if (newText !== props.segment.text) {
-            applyUpdates({ text: newText });
+            applyUpdates({
+                text: newText,
+                lowConfidenceRanges: lowConfidenceRanges.value,
+            });
         }
     },
     { debounce: 3000 },
 );
+
+onUnmounted(() => {
+    if (text.value !== props.segment.text) {
+        applyUpdates({
+            text: text.value,
+            lowConfidenceRanges: lowConfidenceRanges.value,
+        });
+    }
+});
 
 watchDebounced(
     start,
@@ -98,9 +111,13 @@ watch(
                 () => props.currentTime,
                 (tNew, tOld) => {
                     const range = end.value - start.value;
-                    progress.value = range > 0
-                        ? Math.min(Math.max((tNew - start.value) / range, 0), 1)
-                        : 0;
+                    progress.value =
+                        range > 0
+                            ? Math.min(
+                                  Math.max((tNew - start.value) / range, 0),
+                                  1,
+                              )
+                            : 0;
                     duration.value = Math.abs(tNew - tOld);
                 },
             );
@@ -144,41 +161,77 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <MotionCard layout variant="subtle" :ui="{
-        root: props.isActive ? 'ring-2 ring-teal-500' : '',
-    }" class="relative overflow-hidden">
-        <motion.div v-if="props.isActive && props.showProgress" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
+    <MotionCard
+        layout
+        variant="subtle"
+        :ui="{
+            root: props.isActive ? 'ring-2 ring-teal-500' : '',
+        }"
+        class="relative overflow-hidden"
+    >
+        <motion.div
+            v-if="props.isActive && props.showProgress"
+            :initial="{ scaleX: 0 }"
+            :animate="{ scaleX: progress }"
             :transition="{ duration: duration, ease: 'linear' }"
-            class="absolute inset-0 origin-left pointer-events-none z-0" style="
+            class="absolute inset-0 origin-left pointer-events-none z-0"
+            style="
                 background: linear-gradient(
                     to right,
                     rgba(20, 184, 166, 0.15),
                     rgba(20, 184, 166, 0.25)
                 );
-            " />
+            "
+        />
         <div class="relative z-10">
-            <UTextarea v-model="text" class="w-full" />
+            <ConfidenceEditor
+                v-model="text"
+                v-model:ranges="lowConfidenceRanges"
+            />
 
             <div class="flex justify-between gap-2 pt-2 flex-wrap">
-                <USelectMenu v-model="speaker" :items="props.speakers" create-item
-                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
+                <USelectMenu
+                    v-model="speaker"
+                    :items="props.speakers"
+                    create-item
+                    :placeholder="t('transcription.placeholderSpeakerName')"
+                    @create="handleCreateSpeaker"
+                />
 
                 <div class="flex gap-2 items-center">
-                    <UInput v-model="startTimeFormatted" type="number" class="w-25" :step="0.1">
+                    <UInput
+                        v-model="startTimeFormatted"
+                        type="number"
+                        class="w-25"
+                        :step="0.1"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
                     </UInput>
                     <div class="text-gray-700">
-                        <button type="button" class="cursor-pointer underline" @click="() => seekTo(start)">
+                        <button
+                            type="button"
+                            class="cursor-pointer underline"
+                            @click="() => seekTo(start)"
+                        >
                             {{ formatTime(start) }}
                         </button>
                         -
-                        <button type="button" class="cursor-pointer underline" @click="() => seekTo(end)">{{
-                            formatTime(end)
-                        }}</button>
+                        <button
+                            type="button"
+                            class="cursor-pointer underline"
+                            @click="() => seekTo(end)"
+                        >
+                            {{ formatTime(end) }}
+                        </button>
                     </div>
-                    <UInput v-model="endTimeFormatted" type="number" class="w-25" :step="0.1">
+                    <UInput
+                        v-model="endTimeFormatted"
+                        type="number"
+                        class="w-25"
+                        :step="0.1"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
@@ -187,7 +240,11 @@ const endTimeFormatted = computed({
 
                 <div class="flex gap-2">
                     <UTooltip :text="t('help.segments.deleteSegment')">
-                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(props.segment)" />
+                        <UButton
+                            color="error"
+                            icon="i-lucide-trash-2"
+                            @click="removeSegment(props.segment)"
+                        />
                     </UTooltip>
                 </div>
             </div>
