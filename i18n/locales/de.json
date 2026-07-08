@@ -49,7 +49,7 @@
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transkribiere deine Audio- und Videodateien mit KI und erstelle automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
+            "subtitle": "Transkribiere deine Audio- und Videodateien mit KI und erstelle automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien mit einer Länge bis zu 2 Stunden unterstützt.",
             "uploadMedia": "Medien hochladen",
             "uploadDescription": "Lade deine Audio- oder Videodateien hoch",
             "recordAudio": "Audio aufnehmen",
