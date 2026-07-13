@@ -38,12 +38,17 @@ async function handleSpeakerNameChange(
     originalName: string,
     newName: string,
 ): Promise<void> {
-    if (originalName === newName || !newName.trim()) {
+    const trimmedName = newName.trim();
+    if (originalName === trimmedName || !trimmedName) {
         return;
     }
 
     await executeCommand(
-        new RenameSpeakerCommand(props.transcriptionId, originalName, newName),
+        new RenameSpeakerCommand(
+            props.transcriptionId,
+            originalName,
+            trimmedName,
+        ),
     );
 
     // Mentions of the speaker inside the transcript texts follow the rename,
@@ -51,14 +56,14 @@ async function handleSpeakerNameChange(
     await replaceTermInSegmentTexts(
         props.segments,
         originalName,
-        newName,
+        trimmedName,
         executeCommand,
     );
 
-    await renameKeyword(originalName, newName);
+    await renameKeyword(originalName, trimmedName);
 
     // Learn the confirmed name for future transcriptions.
-    await getVocabularyService().rememberTerm(newName, "person");
+    await getVocabularyService().rememberTerm(trimmedName, "person");
 }
 
 /*
@@ -183,6 +188,7 @@ function cancelDelete(): void {
                             variant="subtle"
                             icon="i-lucide-trash-2"
                             :disabled="speakers.length < 2"
+                            @mousedown="(e: MouseEvent) => e.preventDefault()"
                             @click="openDeleteModal(speaker)"
                         />
                     </UTooltip>

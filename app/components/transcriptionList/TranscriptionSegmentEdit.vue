@@ -57,9 +57,16 @@ watchDebounced(
     { debounce: 3000 },
 );
 
+// Flush edits whose debounce timer has not fired yet.
 onUnmounted(() => {
     if (text.value !== props.segment.text) {
         applyUpdates({ text: text.value });
+    }
+    if (start.value !== props.segment.start) {
+        applyUpdates({ start: start.value });
+    }
+    if (end.value !== props.segment.end) {
+        applyUpdates({ end: end.value });
     }
 });
 

@@ -52,11 +52,13 @@ onUnmounted(() => {
     }
 });
 
-function isPlainButton(target: EventTarget | null): boolean {
+// Space toggles playback globally (focus on body) and on the play/pause
+// button itself (preventDefault stops the native click from firing a second
+// toggle). Other buttons keep their native Space activation.
+function isPlayButton(target: EventTarget | null): boolean {
     return (
-        target instanceof HTMLButtonElement &&
-        !target.hasAttribute("role") &&
-        !target.hasAttribute("aria-haspopup")
+        target instanceof HTMLElement &&
+        target.closest("#media-play-button") !== null
     );
 }
 
@@ -65,7 +67,7 @@ useEventListener(window, "keydown", (event: KeyboardEvent) => {
         return;
     }
 
-    if (event.target !== document.body && !isPlainButton(event.target)) {
+    if (event.target !== document.body && !isPlayButton(event.target)) {
         return;
     }
 
@@ -79,6 +81,11 @@ onCommand<TogglePlayCommand>(Cmds.TogglePlayCommand, async (_) => {
 
 onCommand<SeekToSecondsCommand>(Cmds.SeekToSecondsCommand, async (cmd) => {
     seekTo(cmd.seconds);
+    // A jump button keeps focus after the click, which would make Space
+    // re-activate it instead of toggling playback; hand focus back to the body.
+    if (document.activeElement instanceof HTMLButtonElement) {
+        document.activeElement.blur();
+    }
 });
 
 watch(playbackRate, (rate) => {
@@ -209,6 +216,7 @@ function toggleExpanded(): void {
 
             <div class="flex items-center gap-2 p-2">
                 <UButton
+                    id="media-play-button"
                     size="sm"
                     color="secondary"
                     variant="ghost"
