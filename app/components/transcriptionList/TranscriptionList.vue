@@ -161,9 +161,9 @@ async function addSegmentAtZero() {
                     :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
                         <TranscriptionListItem :segment="segment" :speakers="speakers"
-                            :isActive="isSegmentActive(segment.id)"
-                            :currentTime="isSegmentActive(segment.id) ? props.currentTime : 0"
-                            :showProgress="useProgress" />
+                            :is-active="isSegmentActive(segment.id)"
+                            :current-time="isSegmentActive(segment.id) ? props.currentTime : 0"
+                            :show-progress="useProgress" />
                     </div>
 
                     <USeparator>

@@ -3,10 +3,6 @@
         "speakers": "Speakers",
         "retry": "Retry"
     },
-    "confidence": {
-        "veryUncertain": "Very uncertain detection",
-        "uncertain": "Uncertain detection"
-    },
     "errors": {
         "invalid_json_response": "Server error: Something went wrong. Please try again. If the problem persists, contact dcc{'@'}bs.ch",
         "unexpected_error": "An unexpected error occurred",
@@ -197,8 +193,10 @@
             "in_progress": "In progress",
             "completed": "Completed",
             "failed": "Failed",
-            "cancelled": "Cancelled"
+            "cancelled": "Cancelled",
+            "pending": "Pending"
         },
+        "postProcessing": "Post-processing transcript …",
         "preprocessing": {
             "extractedAudio": "Extracted audio from video",
             "audioPreprocessed": "Audio preprocessed"
@@ -521,5 +519,18 @@
             "title": "You're All Set!",
             "description": "You're ready to use Transcribo! Click the help button anytime to see this tour again."
         }
+    },
+    "hotWords": {
+        "title": "Key terms",
+        "hint": "Special names and terms detected in this transcript. Renaming replaces the term in every passage.",
+        "jumpToNextOccurrence": "Jump to next occurrence",
+        "type": {
+            "person": "People",
+            "location": "Places",
+            "institution": "Institutions",
+            "object": "Other terms"
+        },
+        "renameSuccess": "Renamed to \"{term}\" — replaced in {count} passage(s).",
+        "noOccurrence": "No occurrences found in the transcript."
     }
 }

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { watchDebounced } from "@vueuse/core";
 import { motion } from "motion-v";
-import type { WatchHandle } from "vue";
 import { UCard } from "#components";
 import {
     DeleteSegmentCommand,
@@ -10,7 +9,6 @@ import {
 } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import { formatTime } from "~/utils/time";
-import ConfidenceEditor from "./ConfidenceEditor.vue";
 
 interface TranscriptionListProps {
     segment: StoredSegment;
@@ -29,21 +27,17 @@ const MotionCard = motion.create(UCard);
 
 const { executeCommand } = useCommandBus();
 const { t } = useI18n();
-const progress = ref(0);
-const duration = ref(0);
 
 const text = ref(props.segment.text);
-const lowConfidenceRanges = ref(props.segment.lowConfidenceRanges ?? []);
-const speaker = ref(props.segment.speaker);
+const speaker = ref(props.segment.speaker ?? undefined);
 const start = ref(props.segment.start);
 const end = ref(props.segment.end);
 
 watch(
     () => props.segment,
     (segment) => {
-        lowConfidenceRanges.value = segment.lowConfidenceRanges ?? [];
         text.value = segment.text;
-        speaker.value = segment.speaker;
+        speaker.value = segment.speaker ?? undefined;
         start.value = segment.start;
         end.value = segment.end;
     },
@@ -57,10 +51,7 @@ watchDebounced(
     text,
     (newText) => {
         if (newText !== props.segment.text) {
-            applyUpdates({
-                text: newText,
-                lowConfidenceRanges: lowConfidenceRanges.value,
-            });
+            applyUpdates({ text: newText });
         }
     },
     { debounce: 3000 },
@@ -68,10 +59,7 @@ watchDebounced(
 
 onUnmounted(() => {
     if (text.value !== props.segment.text) {
-        applyUpdates({
-            text: text.value,
-            lowConfidenceRanges: lowConfidenceRanges.value,
-        });
+        applyUpdates({ text: text.value });
     }
 });
 
@@ -101,33 +89,16 @@ watch(speaker, (newSpeaker) => {
     }
 });
 
-let unsubscribe: WatchHandle | undefined;
-
-watch(
-    () => props.isActive,
-    (isActive) => {
-        if (isActive && props.showProgress) {
-            unsubscribe = watch(
-                () => props.currentTime,
-                (tNew, tOld) => {
-                    const range = end.value - start.value;
-                    progress.value =
-                        range > 0
-                            ? Math.min(
-                                  Math.max((tNew - start.value) / range, 0),
-                                  1,
-                              )
-                            : 0;
-                    duration.value = Math.abs(tNew - tOld);
-                },
-            );
-        } else if (unsubscribe) {
-            unsubscribe();
-            progress.value = 0;
-        }
-    },
-    { immediate: true },
-);
+const progress = computed(() => {
+    if (!props.isActive || !props.showProgress) {
+        return 0;
+    }
+    const range = end.value - start.value;
+    if (range <= 0) {
+        return 0;
+    }
+    return Math.min(Math.max((props.currentTime - start.value) / range, 0), 1);
+});
 
 function removeSegment(segment: StoredSegment): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
@@ -173,7 +144,7 @@ const endTimeFormatted = computed({
             v-if="props.isActive && props.showProgress"
             :initial="{ scaleX: 0 }"
             :animate="{ scaleX: progress }"
-            :transition="{ duration: duration, ease: 'linear' }"
+            :transition="{ duration: 0.3, ease: 'linear' }"
             class="absolute inset-0 origin-left pointer-events-none z-0"
             style="
                 background: linear-gradient(
@@ -184,10 +155,7 @@ const endTimeFormatted = computed({
             "
         />
         <div class="relative z-10">
-            <ConfidenceEditor
-                v-model="text"
-                v-model:ranges="lowConfidenceRanges"
-            />
+            <UTextarea v-model="text" class="w-full" />
 
             <div class="flex justify-between gap-2 pt-2 flex-wrap">
                 <USelectMenu

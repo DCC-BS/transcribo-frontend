@@ -36,7 +36,7 @@ function handleKeyDown(event: KeyboardEvent) {
     <Changelogs />
     <Disclaimer
         app-name="Transcribo"
-        :postfixHTML="disclaimerText"
+        :postfix-html="disclaimerText"
         confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."
     />
     <UApp>

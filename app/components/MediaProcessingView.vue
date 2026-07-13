@@ -132,7 +132,8 @@ async function waitForTask(
         task.task_id,
         // on progress
         ({ message, progress }) => {
-            mediaProgress.message = t(`task.status.${message}`);
+            // Messages arrive already translated from useTaskListener.
+            mediaProgress.message = message;
             mediaProgress.progress = progress;
         },
         // on complete
@@ -160,7 +161,7 @@ async function waitForTask(
         <div v-if="!errorMessage">
             <!-- Media File Card with Upload Animation -->
             <div class="relative w-full max-w-lg">
-                <MediaProgressView :media="input.media" :mediaName="input.media.name" :progressSteps="progressions" />
+                <MediaProgressView :media="input.media" :media-name="input.media.name" :progress-steps="progressions" />
             </div>
         </div>
 

@@ -16,8 +16,6 @@
         "@nuxt/ui": "4.9.0",
         "@nuxtjs/i18n": "10.4.0",
         "@nuxtjs/mdc": "0.22.0",
-        "@tiptap/core": "3.26.1",
-        "@tiptap/pm": "3.26.1",
         "@vite-pwa/nuxt": "1.1.1",
         "@vueuse/core": "^14.3.0",
         "dexie": "^4.4.3",

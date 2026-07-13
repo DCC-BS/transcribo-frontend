@@ -2,6 +2,7 @@ import { Dexie, type EntityTable } from "dexie";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTask } from "~/types/storedTasks";
 import type { StoredTranscription } from "~/types/storedTranscription";
+import type { StoredVocabularyEntry } from "~/types/storedVocabulary";
 
 import type { StoredTranscription as StoredTranscription4 } from "./migrations/v4/storedTranscription";
 
@@ -9,6 +10,7 @@ export const db = new Dexie("transcribo-db") as Dexie & {
     tasks: EntityTable<StoredTask, "id">;
     transcriptions: EntityTable<StoredTranscription, "id">;
     segments: EntityTable<StoredSegment, "id">;
+    vocabulary: EntityTable<StoredVocabularyEntry, "term">;
 };
 
 db.version(3).stores({
@@ -58,3 +60,10 @@ db.version(42)
             await tx.table("segments").bulkAdd(newSegments);
         }
     });
+
+db.version(43).stores({
+    tasks: "id, status, createdAt",
+    transcriptions: "id, name, createdAt, updatedAt, audioFiledId",
+    segments: "id, transcriptionId, speaker, start, end",
+    vocabulary: "term",
+});

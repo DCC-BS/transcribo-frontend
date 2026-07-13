@@ -3,10 +3,6 @@
         "speakers": "Sprecherinnen und Sprecher",
         "retry": "Erneut versuchen"
     },
-    "confidence": {
-        "veryUncertain": "Sehr unsichere Erkennung",
-        "uncertain": "Unsichere Erkennung"
-    },
     "errors": {
         "invalid_json_response": "Serverfehler: Etwas ist schiefgelaufen. Bitte versuche es erneut. Wenn das Problem weiterhin besteht, kontaktiere dcc{'@'}bs.ch",
         "unexpected_error": "Ein unerwarteter Fehler ist aufgetreten",
@@ -197,8 +193,10 @@
             "in_progress": "In Bearbeitung",
             "completed": "Abgeschlossen",
             "failed": "Fehlgeschlagen",
-            "cancelled": "Abgebrochen"
+            "cancelled": "Abgebrochen",
+            "pending": "Ausstehend"
         },
+        "postProcessing": "Transkript wird nachbearbeitet …",
         "preprocessing": {
             "extractedAudio": "Audio aus Video extrahiert",
             "audioPreprocessed": "Audio vorbereitet"
@@ -521,5 +519,18 @@
             "title": "Du bist startklar!",
             "description": "Du bist bereit, Transcribo zu nutzen! Klicke jederzeit auf den Hilfe-Button, um diese Tour erneut zu starten."
         }
+    },
+    "hotWords": {
+        "title": "Schlüsselbegriffe",
+        "hint": "Im Transkript erkannte spezielle Namen und Begriffe. Das Umbenennen ersetzt den Begriff in allen Textstellen.",
+        "jumpToNextOccurrence": "Zum nächsten Vorkommen springen",
+        "type": {
+            "person": "Personen",
+            "location": "Orte",
+            "institution": "Institutionen",
+            "object": "Weitere Begriffe"
+        },
+        "renameSuccess": "Umbenannt in \"{term}\" — in {count} Stelle(n) ersetzt.",
+        "noOccurrence": "Keine Vorkommen im Transkript gefunden."
     }
 }

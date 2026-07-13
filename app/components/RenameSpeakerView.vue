@@ -17,25 +17,13 @@ const props = defineProps<InputProps>();
 
 const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
 const { executeCommand } = useCommandBus();
+const { getTranscription, updateTranscription } = getTranscriptionService();
 const { getSpeakerColor } = useSpeakerColor(speakers);
 
 const { t } = useI18n();
 
 const isMobile = useBreakpoints(breakpointsTailwind).smaller("md");
 const speakersExpanded = ref(!isMobile.value);
-
-const speakerMappings = ref<{ original: string; new: string }[]>([]);
-
-watch(
-    speakers,
-    () => {
-        speakerMappings.value = speakers.value.map((speaker) => ({
-            original: speaker,
-            new: speaker,
-        }));
-    },
-    { immediate: true },
-);
 
 const deleteModalOpen = ref(false);
 const speakerToDelete = ref<string | null>(null);
@@ -46,14 +34,62 @@ const reassignOptions = computed(() => {
     return speakers.value.filter((s) => s !== speakerToDelete.value);
 });
 
-function handleSpeakerNameChange(originalName: string, newName: string): void {
-    if (originalName === newName) {
+async function handleSpeakerNameChange(
+    originalName: string,
+    newName: string,
+): Promise<void> {
+    if (originalName === newName || !newName.trim()) {
         return;
     }
 
-    executeCommand(
+    await executeCommand(
         new RenameSpeakerCommand(props.transcriptionId, originalName, newName),
     );
+
+    // Mentions of the speaker inside the transcript texts follow the rename,
+    // same as keyword renames.
+    await replaceTermInSegmentTexts(
+        props.segments,
+        originalName,
+        newName,
+        executeCommand,
+    );
+
+    await renameKeyword(originalName, newName);
+
+    // Learn the confirmed name for future transcriptions.
+    await getVocabularyService().rememberTerm(newName, "person");
+}
+
+/*
+    Keep the keywords in sync with speaker renames: since the rename also
+    rewrites the term inside the segment texts, an entry still holding the old
+    name would no longer resolve when jumping to its occurrences.
+*/
+async function renameKeyword(
+    originalName: string,
+    newName: string,
+): Promise<void> {
+    const transcription = await getTranscription(props.transcriptionId);
+    const keywords = transcription?.keywords;
+    if (!keywords?.length) {
+        return;
+    }
+
+    const target = originalName.trim().toLowerCase();
+    const trimmedNew = newName.trim();
+    let changed = false;
+    const updated = keywords.map((entry) => {
+        if (entry.term.trim().toLowerCase() === target) {
+            changed = true;
+            return { ...entry, term: trimmedNew };
+        }
+        return entry;
+    });
+
+    if (changed) {
+        await updateTranscription(props.transcriptionId, { keywords: updated });
+    }
 }
 
 function seekToFirstAppearance(speaker: string): void {
@@ -94,38 +130,43 @@ function cancelDelete(): void {
 </script>
 
 <template>
-    <div id="speaker-names-section" class="bg-muted/50 rounded-lg p-3">
-        <button
-            type="button"
-            class="w-full flex items-center justify-between"
-            @click="speakersExpanded = !speakersExpanded"
+    <UCollapsible
+        id="speaker-names-section"
+        v-model:open="speakersExpanded"
+        class="flex flex-col gap-2"
+    >
+        <UButton
+            variant="link"
+            color="neutral"
+            :trailing-icon="
+                speakersExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'
+            "
+            class="self-start px-0"
         >
-            <h3 class="text-sm font-semibold text-muted-foreground">
-                {{ t("common.speakers") }} ({{ speakers.length }})
-            </h3>
-            <UIcon
-                name="i-lucide-chevron-down"
-                class="size-4 text-muted-foreground transition-transform"
-                :class="{ '-rotate-180': speakersExpanded }"
-            />
-        </button>
-        <div v-show="speakersExpanded" class="flex gap-2 flex-wrap mt-2">
+            {{ t("common.speakers") }} ({{ speakers.length }})
+        </UButton>
+
+        <template #content>
             <div
-                v-for="(speakerMap, index) in speakerMappings"
+                class="flex gap-2 flex-wrap pb-2 max-h-48 overflow-y-auto"
+            >
+            <div
+                v-for="(speaker, index) in speakers"
                 :key="`existing-${index}`"
                 class="flex items-center gap-1"
             >
                 <UFieldGroup size="sm">
                     <UInput
-                        v-model="speakerMap.new"
-                        :style="{ color: getSpeakerColor(speakerMap.original) }"
+                        :model-value="speaker"
+                        :style="{ color: getSpeakerColor(speaker) }"
                         :placeholder="t('transcription.placeholderSpeakerName')"
                         class="w-32"
                         @change="
-                            handleSpeakerNameChange(
-                                speakerMap.original,
-                                speakerMap.new,
-                            )
+                            (event: Event) =>
+                                handleSpeakerNameChange(
+                                    speaker,
+                                    (event.target as HTMLInputElement).value,
+                                )
                         "
                     />
                     <UTooltip :text="t('speaker.jumpToFirstAppearance')">
@@ -133,7 +174,7 @@ function cancelDelete(): void {
                             color="neutral"
                             variant="subtle"
                             icon="i-lucide-step-forward"
-                            @click="seekToFirstAppearance(speakerMap.original)"
+                            @click="seekToFirstAppearance(speaker)"
                         />
                     </UTooltip>
                     <UTooltip :text="t('speaker.delete')">
@@ -142,13 +183,14 @@ function cancelDelete(): void {
                             variant="subtle"
                             icon="i-lucide-trash-2"
                             :disabled="speakers.length < 2"
-                            @click="openDeleteModal(speakerMap.original)"
+                            @click="openDeleteModal(speaker)"
                         />
                     </UTooltip>
                 </UFieldGroup>
             </div>
-        </div>
-    </div>
+            </div>
+        </template>
+    </UCollapsible>
 
     <UDrawer v-model:open="deleteModalOpen" :title="t('speaker.deleteTitle')">
         <template #body>
