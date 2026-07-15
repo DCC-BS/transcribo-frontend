@@ -11,6 +11,9 @@ export const StoredVocabularyEntrySchema = z.object({
     type: KeywordTypeSchema,
     description: z.string(),
     updatedAt: z.date(),
+    // Last time the term actually appeared in a finished transcription;
+    // eviction removes the least recently used entries first.
+    lastUsedAt: z.date(),
 });
 
 export type StoredVocabularyEntry = z.infer<typeof StoredVocabularyEntrySchema>;

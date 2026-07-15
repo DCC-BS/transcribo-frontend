@@ -32,7 +32,6 @@ const segmentSize = 120;
 const { y } = useWindowScroll();
 
 const maxSegment = ref(15);
-const useProgress = computed(() => segments.value.length < 500);
 
 watch(
     () => [windowHeight.value, y.value],
@@ -162,8 +161,7 @@ async function addSegmentAtZero() {
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
                         <TranscriptionListItem :segment="segment" :speakers="speakers"
                             :is-active="isSegmentActive(segment.id)"
-                            :current-time="isSegmentActive(segment.id) ? props.currentTime : 0"
-                            :show-progress="useProgress" />
+                            :current-time="isSegmentActive(segment.id) ? props.currentTime : 0" />
                     </div>
 
                     <USeparator>

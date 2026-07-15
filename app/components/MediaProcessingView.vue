@@ -10,29 +10,41 @@ const input = defineModel<MediaConfigureData>("input", { required: true });
 
 const errorMessage = ref<string>();
 
-const start_progression: [MediaProgress, MediaProgress, MediaProgress] = [
-    {
-        icon: "i-lucide-file",
-        message: "...",
-        progress: 0,
-    },
-    {
-        icon: "i-lucide-upload-cloud",
-        message: "...",
-        progress: 0,
-    },
-    {
-        icon: "i-lucide-cpu",
-        message: "...",
-        progress: 0,
-    },
-];
-
-const progressions =
-    ref<[MediaProgress, MediaProgress, MediaProgress]>(start_progression);
-
 const { extractAudio } = useAudioExtract();
 const { t } = useI18n();
+
+type ProgressSteps = [MediaProgress, MediaProgress, MediaProgress, MediaProgress];
+
+// Fresh objects on every (re)start so a retry never inherits the finished
+// state of the previous attempt.
+function createStartProgression(): ProgressSteps {
+    return [
+        {
+            icon: "i-lucide-file",
+            message: isVideoFile(input.value.media)
+                ? t("upload.extractingAudio")
+                : t("upload.preparingAudio"),
+            progress: 0,
+        },
+        {
+            icon: "i-lucide-upload-cloud",
+            message: t("upload.uploadingMedia"),
+            progress: 0,
+        },
+        {
+            icon: "i-lucide-cpu",
+            message: t("task.status.pending"),
+            progress: 0,
+        },
+        {
+            icon: "i-lucide-sparkles",
+            message: t("task.postProcessing"),
+            progress: 0,
+        },
+    ];
+}
+
+const progressions = ref<ProgressSteps>(createStartProgression());
 const logger = useLogger();
 const { addTask, deleteTask } = useTasks();
 const { pollTaskStatus, applyTaskResult } = useTaskListener();
@@ -44,17 +56,22 @@ onMounted(() => {
 async function processMedia() {
     try {
         errorMessage.value = undefined;
-        progressions.value = start_progression;
+        progressions.value = createStartProgression();
+        // The re-encode only shrinks the upload; playback and export always
+        // use the original file.
         const processedFile = await preprocessMedia(progressions.value[0]);
-        const storedMedia = isVideoFile(input.value.media)
-            ? input.value.media
-            : processedFile;
+        const storedMedia = input.value.media;
         const task = await uploadFile(
             processedFile,
             storedMedia,
             progressions.value[1],
         );
-        await waitForTask(task, storedMedia, progressions.value[2]);
+        await waitForTask(
+            task,
+            storedMedia,
+            progressions.value[2],
+            progressions.value[3],
+        );
     } catch (e) {
         logger.error(e, "Failed to finish the task");
         if (!errorMessage.value) {
@@ -68,7 +85,12 @@ async function processMedia() {
 async function preprocessMedia(progress: MediaProgress) {
     const isVideo = isVideoFile(input.value.media);
 
-    const { audioBlob, audioFileName } = await extractAudio(input.value.media);
+    const { audioBlob, audioFileName } = await extractAudio(
+        input.value.media,
+        (percent) => {
+            progress.progress = percent;
+        },
+    );
 
     const audioFile = new File([audioBlob], audioFileName, {
         type: audioBlob.type,
@@ -126,15 +148,16 @@ async function uploadFile(
 async function waitForTask(
     task: TaskStatus,
     storedMedia: File,
-    mediaProgress: MediaProgress,
+    transcriptionProgress: MediaProgress,
+    postProcessingProgress: MediaProgress,
 ) {
     await pollTaskStatus(
         task.task_id,
         // on progress
         ({ message, progress }) => {
             // Messages arrive already translated from useTaskListener.
-            mediaProgress.message = message;
-            mediaProgress.progress = progress;
+            transcriptionProgress.message = message;
+            transcriptionProgress.progress = progress;
         },
         // on complete
         async (transcription) => {
@@ -151,6 +174,11 @@ async function waitForTask(
                     "task.errors.failedToCreateTranscription",
                 );
             }
+        },
+        // on post-processing (own step: the LLM pass after transcription)
+        ({ message, progress }) => {
+            postProcessingProgress.message = message;
+            postProcessingProgress.progress = progress;
         },
     );
 }

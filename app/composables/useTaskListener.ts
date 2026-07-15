@@ -43,6 +43,7 @@ export function useTaskListener() {
         taskId: string,
         onProgressUpdate: (progress: MediaProgress) => void,
         onComplete: (transcription: TranscriptionResponse) => void,
+        onPostProcessing?: (progress: MediaProgress) => void,
     ) {
         let status = {
             task_id: taskId,
@@ -62,19 +63,29 @@ export function useTaskListener() {
             }
 
             if (status.status === TaskStatusEnum.COMPLETED) {
+                // Transcription itself is done.
+                onProgressUpdate(createProgress(status));
                 /*
                     Fetching the result also runs the LLM post-processing
                     (cleanup, keywords, speaker names) on the server, which
-                    takes a while. Keep the step visibly in progress instead of
-                    reporting the task as completed while we are still waiting.
+                    takes a while. Report it as its own step where the caller
+                    provides one; otherwise keep the single step visibly in
+                    progress instead of reporting the task as completed while
+                    we are still waiting.
                 */
-                onProgressUpdate({
-                    icon: "i-lucide-cpu",
+                const notifyPostProcessing =
+                    onPostProcessing ?? onProgressUpdate;
+                notifyPostProcessing({
+                    icon: "i-lucide-sparkles",
                     message: t("task.postProcessing"),
                     progress: null,
                 });
                 const result = await fetchTaskResult(status.task_id);
-                onProgressUpdate(createProgress(status));
+                notifyPostProcessing({
+                    icon: "i-lucide-sparkles",
+                    message: t("task.postProcessingDone"),
+                    progress: 100,
+                });
                 onComplete(result);
             } else {
                 onProgressUpdate(createProgress(status));
@@ -154,12 +165,45 @@ export function useTaskListener() {
             return assignedNames.get(label) ?? label;
         }
 
-        const keywords = (result.keywords ?? []).filter((entry) => {
+        const proposedKeywords = (result.keywords ?? []).filter((entry) => {
             const pattern = buildTermPattern(entry.term);
             return result.segments.some((segment) =>
                 pattern.test(segment.text ?? ""),
             );
         });
+
+        /*
+            Also surface stored vocabulary terms that occur in this
+            transcription. A vocabulary spelling can be applied as a wrong
+            guess (a similar but different name); listing the term with the
+            transcription keeps it correctable. Occurrence also refreshes the
+            entry's lastUsedAt so LRU eviction keeps relevant terms.
+        */
+        const vocabulary =
+            await getVocabularyService().getVocabularyAsKeywords();
+        const proposedTerms = new Set(
+            proposedKeywords.map((entry) => entry.term.toLowerCase()),
+        );
+        const resolvedSpeakerNames = new Set(
+            [...assignedNames.values()].map((name) => name.toLowerCase()),
+        );
+        const usedVocabulary = vocabulary.filter((entry) => {
+            if (proposedTerms.has(entry.term.toLowerCase())) {
+                return false;
+            }
+            // Used = occurs in the text or was assigned as a speaker name.
+            if (resolvedSpeakerNames.has(entry.term.toLowerCase())) {
+                return true;
+            }
+            const pattern = buildTermPattern(entry.term);
+            return result.segments.some((segment) =>
+                pattern.test(segment.text ?? ""),
+            );
+        });
+        await getVocabularyService().touchTerms(
+            usedVocabulary.map((entry) => entry.term),
+        );
+        const keywords = [...proposedKeywords, ...usedVocabulary];
 
         const transcription = await db.transaction(
             "rw",

@@ -40,7 +40,8 @@
         "audioLanguageHelp": "What language was spoken in the audio file? If you are not sure, select 'Auto detection'.",
         "settings": "Settings",
         "configureTranscription": "Configure your transcription",
-        "settingsInfo": "These settings help improve transcription accuracy. You can leave both on auto-detection if you're unsure."
+        "settingsInfo": "These settings help improve transcription accuracy. You can leave both on auto-detection if you're unsure.",
+        "preparingAudio": "Preparing audio..."
     },
     "pages": {
         "index": {
@@ -208,7 +209,8 @@
             "failedToCreateTranscription": "Failed to create transcription from results",
             "noResult": "No transcription result available",
             "TaskNotFound": "Task not found"
-        }
+        },
+        "postProcessingDone": "Post-processing finished"
     },
     "commands": {
         "empty": "Empty Command",

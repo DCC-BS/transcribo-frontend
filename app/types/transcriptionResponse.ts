@@ -1,27 +1,10 @@
 import { z } from "zod";
 
 /**
- * Zod schema for Word
- * Represents a word in the transcription
- * Corresponds to the Python Word model
- */
-export const WordSchema = z.object({
-    start: z.number(),
-    end: z.number(),
-    word: z.string(),
-    probability: z.number(),
-    speaker: z.string().nullable(),
-});
-
-/**
- * Type representing a word in the transcription
- * Inferred from WordSchema
- */
-export type Word = z.infer<typeof WordSchema>;
-
-/**
  * Zod schema for Segment
- * Represents a segment in the transcription
+ * Represents a segment in the transcription. The backend contract is
+ * fragment level only: {start, end, text, speaker} — word-level data never
+ * leaves the backend.
  * Corresponds to the Python Segment model
  */
 export const SegmentSchema = z.object({
@@ -85,6 +68,24 @@ export const KeywordSchema = z.object({
 export type Keyword = z.infer<typeof KeywordSchema>;
 
 /**
+ * Zod schema for TranscriptCorrection
+ * A find/replace pair the backend post-processing applied to the segment texts
+ * Corresponds to the Python TranscriptCorrection model
+ */
+export const TranscriptCorrectionSchema = z.object({
+    original: z.string(),
+    corrected: z.string(),
+    reason: z.string().default(""),
+    confidence: z.number(),
+});
+
+/**
+ * Type representing an applied correction
+ * Inferred from TranscriptCorrectionSchema
+ */
+export type TranscriptCorrection = z.infer<typeof TranscriptCorrectionSchema>;
+
+/**
  * Zod schema for TranscriptionResponse
  * Represents a transcription response
  * Corresponds to the Python TranscriptionResponse model
@@ -95,6 +96,10 @@ export const TranscriptionResponseSchema = z.object({
         .array(SpeakerNameAssignmentSchema)
         .nullable()
         .optional(),
+    applied_corrections: z
+        .array(TranscriptCorrectionSchema)
+        .nullable()
+        .optional(),
     keywords: z.array(KeywordSchema).nullable().optional(),
 });
 
@@ -103,51 +108,3 @@ export const TranscriptionResponseSchema = z.object({
  * Inferred from TranscriptionResponseSchema
  */
 export type TranscriptionResponse = z.infer<typeof TranscriptionResponseSchema>;
-
-/**
- * Zod schema for VerboseSegment
- * Represents a verbose segment in the transcription
- * Corresponds to the Python VerboseSegment model
- */
-export const VerboseSegmentSchema = z.object({
-    id: z.number(),
-    seek: z.number(),
-    start: z.number(),
-    end: z.number(),
-    text: z.string(),
-    tokens: z.array(z.number()),
-    temperature: z.number(),
-    avg_logprob: z.number(),
-    compression_ratio: z.number(),
-    no_speech_prob: z.number(),
-    words: z.array(WordSchema).nullable(),
-    speaker: z.string().nullable(),
-});
-
-/**
- * Type representing a verbose segment in the transcription
- * Inferred from VerboseSegmentSchema
- */
-export type VerboseSegment = z.infer<typeof VerboseSegmentSchema>;
-
-/**
- * Zod schema for VerboseTranscriptionResponse
- * Represents a verbose transcription response
- * Corresponds to the Python VerboseTranscriptionResponse model
- */
-export const VerboseTranscriptionResponseSchema = z.object({
-    task: z.string(), // Default is "transcribe"
-    language: z.string(),
-    duration: z.number(),
-    text: z.string(),
-    words: z.array(WordSchema),
-    segments: z.array(VerboseSegmentSchema),
-});
-
-/**
- * Type representing a verbose transcription response
- * Inferred from VerboseTranscriptionResponseSchema
- */
-export type VerboseTranscriptionResponse = z.infer<
-    typeof VerboseTranscriptionResponseSchema
->;

@@ -95,11 +95,13 @@ async function handleWordChange(
     entry.term = trimmed;
     await updateTranscription(props.transcription.id, { keywords });
 
-    // Learn the confirmed spelling for future transcriptions.
+    // Learn the confirmed spelling for future transcriptions; drop the
+    // entry of the spelling that was renamed away from.
     await getVocabularyService().rememberTerm(
         trimmed,
         entry.type ?? "object",
         entry.description,
+        oldTerm,
     );
 
     const count = await replaceTermInSegmentTexts(

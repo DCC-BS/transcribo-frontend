@@ -67,3 +67,21 @@ db.version(43).stores({
     segments: "id, transcriptionId, speaker, start, end",
     vocabulary: "term",
 });
+
+db.version(44)
+    .stores({
+        tasks: "id, status, createdAt",
+        transcriptions: "id, name, createdAt, updatedAt, audioFiledId",
+        segments: "id, transcriptionId, speaker, start, end",
+        vocabulary: "term, lastUsedAt",
+    })
+    .upgrade(async (tx) => {
+        await tx
+            .table("vocabulary")
+            .toCollection()
+            .modify((entry) => {
+                if (!(entry.lastUsedAt instanceof Date)) {
+                    entry.lastUsedAt = entry.updatedAt ?? new Date();
+                }
+            });
+    });

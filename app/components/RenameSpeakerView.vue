@@ -62,8 +62,14 @@ async function handleSpeakerNameChange(
 
     await renameKeyword(originalName, trimmedName);
 
-    // Learn the confirmed name for future transcriptions.
-    await getVocabularyService().rememberTerm(trimmedName, "person");
+    // Learn the confirmed name for future transcriptions; drop the entry
+    // of the name that was renamed away from.
+    await getVocabularyService().rememberTerm(
+        trimmedName,
+        "person",
+        "",
+        originalName,
+    );
 }
 
 /*

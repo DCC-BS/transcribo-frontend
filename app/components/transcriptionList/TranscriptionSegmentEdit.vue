@@ -15,12 +15,10 @@ interface TranscriptionListProps {
     speakers: string[];
     isActive?: boolean;
     currentTime: number;
-    showProgress?: boolean;
 }
 
 const props = withDefaults(defineProps<TranscriptionListProps>(), {
     isActive: false,
-    showProgress: true,
 });
 
 const MotionCard = motion.create(UCard);
@@ -96,16 +94,12 @@ watch(speaker, (newSpeaker) => {
     }
 });
 
-const progress = computed(() => {
-    if (!props.isActive || !props.showProgress) {
-        return 0;
-    }
-    const range = end.value - start.value;
-    if (range <= 0) {
-        return 0;
-    }
-    return Math.min(Math.max((props.currentTime - start.value) / range, 0), 1);
-});
+// Not gated by transcription size — see calculateSegmentProgress.
+const progress = computed(() =>
+    props.isActive
+        ? calculateSegmentProgress(start.value, end.value, props.currentTime)
+        : 0,
+);
 
 function removeSegment(segment: StoredSegment): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
@@ -148,7 +142,7 @@ const endTimeFormatted = computed({
         class="relative overflow-hidden"
     >
         <motion.div
-            v-if="props.isActive && props.showProgress"
+            v-if="props.isActive"
             :initial="{ scaleX: 0 }"
             :animate="{ scaleX: progress }"
             :transition="{ duration: 0.3, ease: 'linear' }"

@@ -40,7 +40,8 @@
         "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn du nicht sicher bist, wähle 'Automatische Erkennung'.",
         "settings": "Einstellungen",
         "configureTranscription": "Konfiguriere deine Transkription",
-        "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Du kannst beide auf automatische Erkennung lassen, wenn du unsicher bist."
+        "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Du kannst beide auf automatische Erkennung lassen, wenn du unsicher bist.",
+        "preparingAudio": "Audio wird vorbereitet..."
     },
     "pages": {
         "index": {
@@ -208,7 +209,8 @@
             "failedToCreateTranscription": "Fehler beim Erstellen der Transkription aus den Ergebnissen",
             "noResult": "Kein Transkriptionsergebnis verfügbar",
             "TaskNotFound": "Aufgabe nicht gefunden"
-        }
+        },
+        "postProcessingDone": "Nachbearbeitung abgeschlossen"
     },
     "commands": {
         "empty": "Leerer Befehl",
