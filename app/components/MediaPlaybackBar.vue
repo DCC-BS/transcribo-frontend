@@ -3,6 +3,7 @@ import { useEventListener } from "@vueuse/core";
 import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
 import {
     Cmds,
+    type PlayFromSecondsCommand,
     type SeekToSecondsCommand,
     type TogglePlayCommand,
 } from "~/types/commands";
@@ -52,13 +53,28 @@ onUnmounted(() => {
     }
 });
 
-// Space toggles playback globally (focus on body) and on the play/pause
-// button itself (preventDefault stops the native click from firing a second
-// toggle). Other buttons keep their native Space activation.
+// Space toggles playback everywhere except inside text entry (inputs,
+// textareas, contenteditable) — there it must keep typing spaces. On the
+// play/pause button preventDefault stops the native click from firing a
+// second toggle; other buttons keep their native Space activation.
 function isPlayButton(target: EventTarget | null): boolean {
     return (
         target instanceof HTMLElement &&
         target.closest("#media-play-button") !== null
+    );
+}
+
+function keepsNativeSpace(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) {
+        return false;
+    }
+    if (target.isContentEditable) {
+        return true;
+    }
+    return (
+        target.closest(
+            'input, textarea, select, [contenteditable="true"], button, a, [role="button"]',
+        ) !== null
     );
 }
 
@@ -67,7 +83,7 @@ useEventListener(window, "keydown", (event: KeyboardEvent) => {
         return;
     }
 
-    if (event.target !== document.body && !isPlayButton(event.target)) {
+    if (!isPlayButton(event.target) && keepsNativeSpace(event.target)) {
         return;
     }
 
@@ -87,6 +103,16 @@ onCommand<SeekToSecondsCommand>(Cmds.SeekToSecondsCommand, async (cmd) => {
         document.activeElement.blur();
     }
 });
+
+onCommand<PlayFromSecondsCommand>(
+    Cmds.PlayFromSecondsCommand,
+    async (cmd) => {
+        seekTo(cmd.seconds);
+        if (!isPlaying.value) {
+            togglePlay();
+        }
+    },
+);
 
 watch(playbackRate, (rate) => {
     updatePlaybackRate(rate);

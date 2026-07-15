@@ -227,7 +227,8 @@
         "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\"",
         "mergeSpeaker": "Sprecher zusammenführen: \"{removedSpeaker}\" → \"{targetSpeaker}\"",
         "unmergeSpeaker": "Sprecher trennen: \"{speaker}\" auf {count} Segmenten wiederherstellen",
-        "restoreSegment": "Segment wiederherstellen"
+        "restoreSegment": "Segment wiederherstellen",
+        "playFromSeconds": "Abspielen ab {seconds} Sekunden"
     },
     "viewer": {
         "mode": "Ansichtsmodus",
@@ -242,7 +243,8 @@
         "summary": "Zusammenfassung",
         "editor": "Editor",
         "statistics": "Statistik",
-        "switch": "Modus wechseln"
+        "switch": "Modus wechseln",
+        "document": "Dokument"
     },
     "statistics": {
         "title": "Sprecher-Statistik",
@@ -533,6 +535,18 @@
             "object": "Weitere Begriffe"
         },
         "renameSuccess": "Umbenannt in \"{term}\" — in {count} Stelle(n) ersetzt.",
-        "noOccurrence": "Keine Vorkommen im Transkript gefunden."
+        "noOccurrence": "Keine Vorkommen im Transkript gefunden.",
+        "addSuccess": "\"{term}\" zu Schlüsselwörtern hinzugefügt"
+    },
+    "documentEditor": {
+        "playFromHere": "Ab hier abspielen",
+        "editWord": "\"{term}\" bearbeiten",
+        "replaceOne": "Nur hier",
+        "replaceAll": "Überall",
+        "replaceSuccess": "\"{term}\" an {count} Stelle(n) ersetzt.",
+        "addKeyword": "\"{term}\" zu Schlüsselwörtern hinzufügen",
+        "speakerChange": "Sprecher für diesen Abschnitt ändern",
+        "speakerRename": "Überall umbenennen",
+        "rememberSpeaker": "\"{name}\" zu Schlüsselwörtern hinzufügen"
     }
 }

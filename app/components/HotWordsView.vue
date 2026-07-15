@@ -3,10 +3,7 @@ import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { SeekToSecondsCommand } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import type {
-    Keyword,
-    KeywordType,
-} from "~/types/transcriptionResponse";
+import type { KeywordType } from "~/types/transcriptionResponse";
 
 interface HotWordsViewProps {
     transcription: StoredTranscription;
@@ -17,8 +14,11 @@ const props = defineProps<HotWordsViewProps>();
 
 const { t } = useI18n();
 const { executeCommand } = useCommandBus();
-const { updateTranscription } = getTranscriptionService();
 const { showToast } = useUserFeedback();
+const { renameTerm } = useKeywordActions(
+    () => props.transcription,
+    () => props.segments,
+);
 
 /*
     Names that already appear as speakers are managed in the speaker section,
@@ -72,48 +72,15 @@ const groupedMappings = computed(() =>
 const isMobile = useBreakpoints(breakpointsTailwind).smaller("md");
 const isOpen = ref(!isMobile.value);
 
-/*
-    A rename is just a spelling change: replace all occurrences in the segment
-    texts directly (undoable per segment) — no LLM run needed. Persist the
-    rename BEFORE editing segments so the liveQuery re-emission triggered by
-    the segment updates already carries the new term.
-*/
 async function handleWordChange(
     index: number,
     newName: string,
 ): Promise<void> {
-    const keywords: Keyword[] = structuredClone(
-        toRaw(props.transcription.keywords) ?? [],
-    );
-    const entry = keywords[index];
-    const trimmed = newName.trim();
-    if (!entry || !trimmed || trimmed === entry.term) {
+    const entry = (props.transcription.keywords ?? [])[index];
+    if (!entry) {
         return;
     }
-
-    const oldTerm = entry.term;
-    entry.term = trimmed;
-    await updateTranscription(props.transcription.id, { keywords });
-
-    // Learn the confirmed spelling for future transcriptions; drop the
-    // entry of the spelling that was renamed away from.
-    await getVocabularyService().rememberTerm(
-        trimmed,
-        entry.type ?? "object",
-        entry.description,
-        oldTerm,
-    );
-
-    const count = await replaceTermInSegmentTexts(
-        props.segments,
-        oldTerm,
-        trimmed,
-        executeCommand,
-    );
-    showToast(
-        t("hotWords.renameSuccess", { term: trimmed, count }),
-        "success",
-    );
+    await renameTerm(entry.term, newName);
 }
 
 /*

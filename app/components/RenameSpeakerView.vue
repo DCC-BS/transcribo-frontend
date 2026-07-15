@@ -1,12 +1,8 @@
 <script lang="ts" setup>
 import { breakpointsTailwind, useBreakpoints } from "@vueuse/core";
 import { UInput } from "#components";
-import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
-import {
-    MergeSpeakerCommand,
-    RenameSpeakerCommand,
-    SeekToSecondsCommand,
-} from "~/types/commands";
+import { MergeSpeakerCommand, SeekToSecondsCommand } from "~/types/commands";
+import type { StoredSegment } from "~/types/storedSegments";
 
 interface InputProps {
     transcriptionId: string;
@@ -17,7 +13,10 @@ const props = defineProps<InputProps>();
 
 const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
 const { executeCommand } = useCommandBus();
-const { getTranscription, updateTranscription } = getTranscriptionService();
+const { renameSpeakerEverywhere } = useSpeakerRename(
+    () => props.transcriptionId,
+    () => props.segments,
+);
 const { getSpeakerColor } = useSpeakerColor(speakers);
 
 const { t } = useI18n();
@@ -38,69 +37,7 @@ async function handleSpeakerNameChange(
     originalName: string,
     newName: string,
 ): Promise<void> {
-    const trimmedName = newName.trim();
-    if (originalName === trimmedName || !trimmedName) {
-        return;
-    }
-
-    await executeCommand(
-        new RenameSpeakerCommand(
-            props.transcriptionId,
-            originalName,
-            trimmedName,
-        ),
-    );
-
-    // Mentions of the speaker inside the transcript texts follow the rename,
-    // same as keyword renames.
-    await replaceTermInSegmentTexts(
-        props.segments,
-        originalName,
-        trimmedName,
-        executeCommand,
-    );
-
-    await renameKeyword(originalName, trimmedName);
-
-    // Learn the confirmed name for future transcriptions; drop the entry
-    // of the name that was renamed away from.
-    await getVocabularyService().rememberTerm(
-        trimmedName,
-        "person",
-        "",
-        originalName,
-    );
-}
-
-/*
-    Keep the keywords in sync with speaker renames: since the rename also
-    rewrites the term inside the segment texts, an entry still holding the old
-    name would no longer resolve when jumping to its occurrences.
-*/
-async function renameKeyword(
-    originalName: string,
-    newName: string,
-): Promise<void> {
-    const transcription = await getTranscription(props.transcriptionId);
-    const keywords = transcription?.keywords;
-    if (!keywords?.length) {
-        return;
-    }
-
-    const target = originalName.trim().toLowerCase();
-    const trimmedNew = newName.trim();
-    let changed = false;
-    const updated = keywords.map((entry) => {
-        if (entry.term.trim().toLowerCase() === target) {
-            changed = true;
-            return { ...entry, term: trimmedNew };
-        }
-        return entry;
-    });
-
-    if (changed) {
-        await updateTranscription(props.transcriptionId, { keywords: updated });
-    }
+    await renameSpeakerEverywhere(originalName, newName);
 }
 
 function seekToFirstAppearance(speaker: string): void {

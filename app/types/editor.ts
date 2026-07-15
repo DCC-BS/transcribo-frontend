@@ -1,1 +1,6 @@
-export type EditorMode = "view" | "summary" | "edit" | "statistics";
+export type EditorMode =
+    | "view"
+    | "summary"
+    | "edit"
+    | "document"
+    | "statistics";

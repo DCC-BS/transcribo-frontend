@@ -149,6 +149,14 @@ const pageTransition = {
                         />
                     </template>
 
+                    <!-- Document Mode (script-style TipTap editor) -->
+                    <template v-else-if="editorMode === 'document'">
+                        <TranscriptDocumentView
+                            :transcription="transcription"
+                            :segments="segments"
+                        />
+                    </template>
+
                     <!-- Statistics Mode -->
                     <template v-else-if="editorMode === 'statistics'">
                         <SpeakerStatisticsView

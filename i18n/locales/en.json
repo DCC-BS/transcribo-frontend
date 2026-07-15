@@ -227,7 +227,8 @@
         "renameSpeaker": "Rename Speaker: \"{oldName}\" → \"{newName}\"",
         "mergeSpeaker": "Merge Speaker: \"{removedSpeaker}\" → \"{targetSpeaker}\"",
         "unmergeSpeaker": "Unmerge Speaker: restore \"{speaker}\" on {count} segments",
-        "restoreSegment": "Restore Segment"
+        "restoreSegment": "Restore Segment",
+        "playFromSeconds": "Play from {seconds} seconds"
     },
     "viewer": {
         "mode": "View Mode",
@@ -242,7 +243,8 @@
         "summary": "Summary",
         "editor": "Editor",
         "statistics": "Statistics",
-        "switch": "Switch Mode"
+        "switch": "Switch Mode",
+        "document": "Document"
     },
     "statistics": {
         "title": "Speaker Statistics",
@@ -533,6 +535,18 @@
             "object": "Other terms"
         },
         "renameSuccess": "Renamed to \"{term}\" — replaced in {count} passage(s).",
-        "noOccurrence": "No occurrences found in the transcript."
+        "noOccurrence": "No occurrences found in the transcript.",
+        "addSuccess": "\"{term}\" added to keywords"
+    },
+    "documentEditor": {
+        "playFromHere": "Play from here",
+        "editWord": "Edit \"{term}\"",
+        "replaceOne": "Only here",
+        "replaceAll": "Everywhere",
+        "replaceSuccess": "\"{term}\" replaced in {count} passage(s).",
+        "addKeyword": "Add \"{term}\" to keywords",
+        "speakerChange": "Change speaker for this passage",
+        "speakerRename": "Rename everywhere",
+        "rememberSpeaker": "Add \"{name}\" to keywords"
     }
 }
