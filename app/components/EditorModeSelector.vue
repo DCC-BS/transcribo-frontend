@@ -33,12 +33,11 @@ const modes: { value: EditorMode; icon: string; label: string }[] = [
                 :key="m.value"
                 :variant="mode === m.value ? 'solid' : 'soft'"
                 color="primary"
-                :whileHover="{ scale: 1.02 }"
-                :whileTap="{ scale: 0.98 }"
+                :while-hover="{ scale: 1.02 }"
+                :while-tap="{ scale: 0.98 }"
                 :transition="{
-                    type: 'spring' as const,
-                    stiffness: 400,
-                    damping: 17,
+                    type: 'tween' as const,
+                    duration: 0.15,
                 }"
                 class="w-full flex justify-center"
                 @click="mode = m.value"

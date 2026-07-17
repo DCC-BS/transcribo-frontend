@@ -93,11 +93,8 @@ const fetchTaskStatus = async (): Promise<void> => {
         let result: TranscriptionResponse | undefined;
         if (status.value?.status === TaskStatusEnum.COMPLETED) {
             try {
-                const response = await apiFetch(
-                    `/api/transcribe/${props.taskId}`,
-                    {
-                        schema: TranscriptionResponseSchema,
-                    },
+                const response = await fetchTaskResultWithVocabulary(
+                    props.taskId,
                 );
 
                 if (isApiError(response)) {

@@ -6,7 +6,6 @@ import {
     TaskStatusEnum,
     TaskStatusSchema,
 } from "~/types/storedTasks";
-import { TranscriptionResponseSchema } from "~/types/transcriptionResponse";
 
 export function useInProgressTasksListener() {
     const { getTask, updateTaskStatus, deleteTask } = useTasks();
@@ -81,9 +80,8 @@ export function useInProgressTasksListener() {
     }
 
     async function processCompletedTask(task: StoredTask) {
-        const transcriptionResponse = await apiFetch(
-            `/api/transcribe/${task.id}`,
-            { schema: TranscriptionResponseSchema },
+        const transcriptionResponse = await fetchTaskResultWithVocabulary(
+            task.id,
         );
 
         const fullTask = await getTask(task.id);

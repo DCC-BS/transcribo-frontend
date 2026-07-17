@@ -45,7 +45,7 @@
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transcribe your audio and video files with AI and automatically generate summaries. 96 languages and audio files up to 2 hours supported.",
+            "subtitle": "Transcribe your audio and video files with AI and automatically generate summaries. 96 languages and audio files with a length up to 2 hours supported.",
             "uploadMedia": "Upload Media",
             "uploadDescription": "Upload your audio or video files",
             "recordAudio": "Record Audio",
@@ -103,6 +103,7 @@
         "goBack": "Go Back"
     },
     "speaker": {
+        "jumpToFirstAppearance": "Jump to first appearance",
         "delete": "Delete Speaker",
         "deleteTitle": "Delete Speaker",
         "deleteMessage": "All segments from \"{speaker}\" will be reassigned. Select which speaker should receive these segments:",
@@ -192,8 +193,10 @@
             "in_progress": "In progress",
             "completed": "Completed",
             "failed": "Failed",
-            "cancelled": "Cancelled"
+            "cancelled": "Cancelled",
+            "pending": "Pending"
         },
+        "postProcessing": "Post-processing transcript …",
         "preprocessing": {
             "extractedAudio": "Extracted audio from video",
             "audioPreprocessed": "Audio preprocessed"
@@ -516,5 +519,18 @@
             "title": "You're All Set!",
             "description": "You're ready to use Transcribo! Click the help button anytime to see this tour again."
         }
+    },
+    "hotWords": {
+        "title": "Key terms",
+        "hint": "Special names and terms detected in this transcript. Renaming replaces the term in every passage.",
+        "jumpToNextOccurrence": "Jump to next occurrence",
+        "type": {
+            "person": "People",
+            "location": "Places",
+            "institution": "Institutions",
+            "object": "Other terms"
+        },
+        "renameSuccess": "Renamed to \"{term}\" — replaced in {count} passage(s).",
+        "noOccurrence": "No occurrences found in the transcript."
     }
 }

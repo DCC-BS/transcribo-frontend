@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { watchDebounced } from "@vueuse/core";
 import { motion } from "motion-v";
-import type { WatchHandle } from "vue";
 import { UCard } from "#components";
 import {
     DeleteSegmentCommand,
@@ -28,11 +27,9 @@ const MotionCard = motion.create(UCard);
 
 const { executeCommand } = useCommandBus();
 const { t } = useI18n();
-const progress = ref(0);
-const duration = ref(0);
 
 const text = ref(props.segment.text);
-const speaker = ref(props.segment.speaker);
+const speaker = ref(props.segment.speaker ?? undefined);
 const start = ref(props.segment.start);
 const end = ref(props.segment.end);
 
@@ -40,16 +37,14 @@ watch(
     () => props.segment,
     (segment) => {
         text.value = segment.text;
-        speaker.value = segment.speaker;
+        speaker.value = segment.speaker ?? undefined;
         start.value = segment.start;
         end.value = segment.end;
     },
 );
 
 function applyUpdates(updates: Partial<StoredSegment>): void {
-    executeCommand(
-        new UpdateSegmentCommand(props.segment.id, updates),
-    );
+    executeCommand(new UpdateSegmentCommand(props.segment.id, updates));
 }
 
 watchDebounced(
@@ -61,6 +56,19 @@ watchDebounced(
     },
     { debounce: 3000 },
 );
+
+// Flush edits whose debounce timer has not fired yet.
+onUnmounted(() => {
+    if (text.value !== props.segment.text) {
+        applyUpdates({ text: text.value });
+    }
+    if (start.value !== props.segment.start) {
+        applyUpdates({ start: start.value });
+    }
+    if (end.value !== props.segment.end) {
+        applyUpdates({ end: end.value });
+    }
+});
 
 watchDebounced(
     start,
@@ -88,29 +96,16 @@ watch(speaker, (newSpeaker) => {
     }
 });
 
-let unsubscribe: WatchHandle | undefined;
-
-watch(
-    () => props.isActive,
-    (isActive) => {
-        if (isActive && props.showProgress) {
-            unsubscribe = watch(
-                () => props.currentTime,
-                (tNew, tOld) => {
-                    const range = end.value - start.value;
-                    progress.value = range > 0
-                        ? Math.min(Math.max((tNew - start.value) / range, 0), 1)
-                        : 0;
-                    duration.value = Math.abs(tNew - tOld);
-                },
-            );
-        } else if (unsubscribe) {
-            unsubscribe();
-            progress.value = 0;
-        }
-    },
-    { immediate: true },
-);
+const progress = computed(() => {
+    if (!props.isActive || !props.showProgress) {
+        return 0;
+    }
+    const range = end.value - start.value;
+    if (range <= 0) {
+        return 0;
+    }
+    return Math.min(Math.max((props.currentTime - start.value) / range, 0), 1);
+});
 
 function removeSegment(segment: StoredSegment): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
@@ -144,41 +139,74 @@ const endTimeFormatted = computed({
 </script>
 
 <template>
-    <MotionCard layout variant="subtle" :ui="{
-        root: props.isActive ? 'ring-2 ring-teal-500' : '',
-    }" class="relative overflow-hidden">
-        <motion.div v-if="props.isActive && props.showProgress" :initial="{ scaleX: 0 }" :animate="{ scaleX: progress }"
-            :transition="{ duration: duration, ease: 'linear' }"
-            class="absolute inset-0 origin-left pointer-events-none z-0" style="
+    <MotionCard
+        layout
+        variant="subtle"
+        :ui="{
+            root: props.isActive ? 'ring-2 ring-teal-500' : '',
+        }"
+        class="relative overflow-hidden"
+    >
+        <motion.div
+            v-if="props.isActive && props.showProgress"
+            :initial="{ scaleX: 0 }"
+            :animate="{ scaleX: progress }"
+            :transition="{ duration: 0.3, ease: 'linear' }"
+            class="absolute inset-0 origin-left pointer-events-none z-0"
+            style="
                 background: linear-gradient(
                     to right,
                     rgba(20, 184, 166, 0.15),
                     rgba(20, 184, 166, 0.25)
                 );
-            " />
+            "
+        />
         <div class="relative z-10">
             <UTextarea v-model="text" class="w-full" />
 
             <div class="flex justify-between gap-2 pt-2 flex-wrap">
-                <USelectMenu v-model="speaker" :items="props.speakers" create-item
-                    :placeholder="t('transcription.placeholderSpeakerName')" @create="handleCreateSpeaker" />
+                <USelectMenu
+                    v-model="speaker"
+                    :items="props.speakers"
+                    create-item
+                    :placeholder="t('transcription.placeholderSpeakerName')"
+                    @create="handleCreateSpeaker"
+                />
 
                 <div class="flex gap-2 items-center">
-                    <UInput v-model="startTimeFormatted" type="number" class="w-25" :step="0.1">
+                    <UInput
+                        v-model="startTimeFormatted"
+                        type="number"
+                        class="w-25"
+                        :step="0.1"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
                     </UInput>
                     <div class="text-gray-700">
-                        <button type="button" class="cursor-pointer underline" @click="() => seekTo(start)">
+                        <button
+                            type="button"
+                            class="cursor-pointer underline"
+                            @click="() => seekTo(start)"
+                        >
                             {{ formatTime(start) }}
                         </button>
                         -
-                        <button type="button" class="cursor-pointer underline" @click="() => seekTo(end)">{{
-                            formatTime(end)
-                        }}</button>
+                        <button
+                            type="button"
+                            class="cursor-pointer underline"
+                            @click="() => seekTo(end)"
+                        >
+                            {{ formatTime(end) }}
+                        </button>
                     </div>
-                    <UInput v-model="endTimeFormatted" type="number" class="w-25" :step="0.1">
+                    <UInput
+                        v-model="endTimeFormatted"
+                        type="number"
+                        class="w-25"
+                        :step="0.1"
+                    >
                         <template #trailing>
                             <span class="text-xs">s</span>
                         </template>
@@ -187,7 +215,11 @@ const endTimeFormatted = computed({
 
                 <div class="flex gap-2">
                     <UTooltip :text="t('help.segments.deleteSegment')">
-                        <UButton color="error" icon="i-lucide-trash-2" @click="removeSegment(props.segment)" />
+                        <UButton
+                            color="error"
+                            icon="i-lucide-trash-2"
+                            @click="removeSegment(props.segment)"
+                        />
                     </UTooltip>
                 </div>
             </div>

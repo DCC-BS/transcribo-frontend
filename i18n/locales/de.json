@@ -45,7 +45,7 @@
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transkribiere deine Audio- und Videodateien mit KI und erstelle automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien bis zu 2 Stunden unterstützt.",
+            "subtitle": "Transkribiere deine Audio- und Videodateien mit KI und erstelle automatisch Protokolle daraus. Es werden 96 Sprachen und Audio-Dateien mit einer Länge bis zu 2 Stunden unterstützt.",
             "uploadMedia": "Medien hochladen",
             "uploadDescription": "Lade deine Audio- oder Videodateien hoch",
             "recordAudio": "Audio aufnehmen",
@@ -103,6 +103,7 @@
         "goBack": "Zurück"
     },
     "speaker": {
+        "jumpToFirstAppearance": "Zum ersten Auftreten springen",
         "delete": "Sprecher löschen",
         "deleteTitle": "Sprecher löschen",
         "deleteMessage": "Alle Segmente von \"{speaker}\" werden neu zugewiesen. Wähle, welchem Sprecher diese Segmente zugewiesen werden sollen:",
@@ -192,8 +193,10 @@
             "in_progress": "In Bearbeitung",
             "completed": "Abgeschlossen",
             "failed": "Fehlgeschlagen",
-            "cancelled": "Abgebrochen"
+            "cancelled": "Abgebrochen",
+            "pending": "Ausstehend"
         },
+        "postProcessing": "Transkript wird nachbearbeitet …",
         "preprocessing": {
             "extractedAudio": "Audio aus Video extrahiert",
             "audioPreprocessed": "Audio vorbereitet"
@@ -516,5 +519,18 @@
             "title": "Du bist startklar!",
             "description": "Du bist bereit, Transcribo zu nutzen! Klicke jederzeit auf den Hilfe-Button, um diese Tour erneut zu starten."
         }
+    },
+    "hotWords": {
+        "title": "Schlüsselbegriffe",
+        "hint": "Im Transkript erkannte spezielle Namen und Begriffe. Das Umbenennen ersetzt den Begriff in allen Textstellen.",
+        "jumpToNextOccurrence": "Zum nächsten Vorkommen springen",
+        "type": {
+            "person": "Personen",
+            "location": "Orte",
+            "institution": "Institutionen",
+            "object": "Weitere Begriffe"
+        },
+        "renameSuccess": "Umbenannt in \"{term}\" — in {count} Stelle(n) ersetzt.",
+        "noOccurrence": "Keine Vorkommen im Transkript gefunden."
     }
 }

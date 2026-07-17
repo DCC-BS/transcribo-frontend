@@ -8,10 +8,7 @@ import {
     TaskStatusEnum,
     TaskStatusSchema,
 } from "~/types/storedTasks";
-import {
-    type TranscriptionResponse,
-    TranscriptionResponseSchema,
-} from "~/types/transcriptionResponse";
+import type { TranscriptionResponse } from "~/types/transcriptionResponse";
 
 export function useTaskListener() {
     const { deleteTask } = useTasks();
@@ -24,7 +21,7 @@ export function useTaskListener() {
     function createProgress(status: TaskStatus): MediaProgress {
         return {
             icon: "i-lucide-cpu",
-            message: status.status ?? "",
+            message: status.status ? t(`task.status.${status.status}`) : "",
             progress: calculateProgress(status),
         };
     }
@@ -55,18 +52,32 @@ export function useTaskListener() {
         try {
             while (status.status === TaskStatusEnum.IN_PROGRESS) {
                 status = await fetchTaskStatus(taskId);
-                onProgressUpdate(createProgress(status));
 
                 if (status.status !== TaskStatusEnum.IN_PROGRESS) {
                     break;
                 }
 
+                onProgressUpdate(createProgress(status));
                 await new Promise((resolve) => setTimeout(resolve, 5000));
             }
 
             if (status.status === TaskStatusEnum.COMPLETED) {
+                /*
+                    Fetching the result also runs the LLM post-processing
+                    (cleanup, keywords, speaker names) on the server, which
+                    takes a while. Keep the step visibly in progress instead of
+                    reporting the task as completed while we are still waiting.
+                */
+                onProgressUpdate({
+                    icon: "i-lucide-cpu",
+                    message: t("task.postProcessing"),
+                    progress: null,
+                });
                 const result = await fetchTaskResult(status.task_id);
+                onProgressUpdate(createProgress(status));
                 onComplete(result);
+            } else {
+                onProgressUpdate(createProgress(status));
             }
         } catch (e) {
             logger.error(
@@ -101,9 +112,7 @@ export function useTaskListener() {
         taskId: string,
     ): Promise<TranscriptionResponse> {
         try {
-            const response = await apiFetch(`/api/transcribe/${taskId}`, {
-                schema: TranscriptionResponseSchema,
-            });
+            const response = await fetchTaskResultWithVocabulary(taskId);
 
             if (isApiError(response)) {
                 showError(response);
@@ -126,6 +135,32 @@ export function useTaskListener() {
         mediaFile: Blob,
         mediaName: string,
     ): Promise<void> {
+        const assignedNames = new Map<string, string>();
+        for (const assignment of result.speaker_assignments ?? []) {
+            const display = assignment.name ?? assignment.role;
+            if (display) {
+                assignedNames.set(
+                    assignment.speaker.trim().toUpperCase(),
+                    display,
+                );
+            }
+        }
+
+        function resolveSpeaker(speaker: string | null | undefined): string {
+            const label = speaker?.trim().toUpperCase();
+            if (!label) {
+                return t("transcription.noSpeaker");
+            }
+            return assignedNames.get(label) ?? label;
+        }
+
+        const keywords = (result.keywords ?? []).filter((entry) => {
+            const pattern = buildTermPattern(entry.term);
+            return result.segments.some((segment) =>
+                pattern.test(segment.text ?? ""),
+            );
+        });
+
         const transcription = await db.transaction(
             "rw",
             [db.transcriptions, db.segments, db.tasks],
@@ -134,6 +169,7 @@ export function useTaskListener() {
                     mediaFile: mediaFile,
                     mediaFileName: mediaName,
                     name: mediaName ?? t("transcription.untitled"),
+                    keywords,
                 });
 
                 await addSegments(
@@ -141,9 +177,7 @@ export function useTaskListener() {
                         ...x,
                         transcriptionId: newTranscription.id,
                         text: x.text?.trim() ?? "",
-                        speaker:
-                            x.speaker?.trim().toUpperCase() ??
-                            t("transcription.noSpeaker"),
+                        speaker: resolveSpeaker(x.speaker),
                         id: uuidv4(),
                     })),
                 );
