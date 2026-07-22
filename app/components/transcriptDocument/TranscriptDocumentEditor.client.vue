@@ -1,16 +1,24 @@
 <script lang="ts" setup>
 import { Extension } from "@tiptap/core";
+import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Editor, EditorContent } from "@tiptap/vue-3";
-import { onClickOutside, useEventListener } from "@vueuse/core";
+import { useEventListener, useStyleTag } from "@vueuse/core";
 import {
-    PlayFromSecondsCommand,
+    DeleteSegmentCommand,
+    DeleteSegmentsCommand,
+    InsertSegmentCommand,
+    RenameSpeakerCommand,
     SeekToSecondsCommand,
     UpdateSegmentCommand,
+    UpdateSegmentsCommand,
 } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
+import type { Keyword } from "~/types/transcriptionResponse";
+import { replaceTermInSegmentTexts } from "~/utils/segmentTextReplace";
 import {
     buildTranscriptDocContent,
+    buildTranscriptTurns,
     createKeywordHighlightPlugin,
     createPlayheadPlugin,
     keywordPluginKey,
@@ -21,56 +29,108 @@ import {
     TranscriptTextNode,
 } from "~/utils/tiptapTranscript";
 import { charOffsetAtTime, timeAtCharOffset } from "~/utils/transcriptDoc";
+import { planTranscriptEdits } from "~/utils/transcriptEdits";
 
 /*
-    Read-only script-style transcript viewer: consecutive same-speaker
-    segments flow as one paragraph under a clickable speaker label. Clicking
-    into the text seeks the player, right-clicking a word offers structured
-    edits (this occurrence or everywhere) and keyword actions, clicking a
-    speaker label opens the speaker menu. All edits run through the command
-    bus, so undo/redo covers them.
+    Script-style transcript editor: consecutive same-speaker segments flow
+    as one editable paragraph under a clickable speaker label. Typing edits
+    the text in place with a normal caret; changes sync back to the
+    segments (undoable) after a short pause, and edited words are captured
+    silently into the vocabulary (edit counter + timestamp in IndexedDB).
+    Clicking into the text seeks the player, clicking a speaker label opens
+    the speaker menu.
 */
 interface TranscriptDocumentEditorProps {
     transcription: StoredTranscription;
     segments: StoredSegment[];
     currentTime: number;
     autoScrollEnabled?: boolean;
+    /** Merge consecutive same-speaker segments into one flowing turn. */
+    mergeSegments?: boolean;
+    /** Show the keyword background highlight (capture stays silent). */
+    keywordHighlightEnabled?: boolean;
 }
 
 const props = withDefaults(defineProps<TranscriptDocumentEditorProps>(), {
     autoScrollEnabled: true,
+    mergeSegments: true,
+    keywordHighlightEnabled: false,
 });
 
 const { t } = useI18n();
 const { executeCommand } = useCommandBus();
-const { showToast } = useUserFeedback();
-const { isKeyword, renameTerm, addTerm } = useKeywordActions(
-    () => props.transcription,
-    () => props.segments,
-);
-const { renameSpeakerEverywhere } = useSpeakerRename(
-    () => props.transcription.id,
-    () => props.segments,
-);
+const { updateTranscription } = getTranscriptionService();
 
 const editorRoot = ref<HTMLElement>();
 
-const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
-const { getSpeakerColor } = useSpeakerColor(speakers);
+const { speakerIds, displayName, speakerColors } = useSpeakerRegistry();
 
-function speakerColorFor(speaker: string | undefined): string {
-    return getSpeakerColor(speaker).toString();
+/*
+    Speaker colors are applied via CSS rules keyed on the turn's
+    data-speaker attribute — never baked into the document. Colors follow
+    order changes, renames and added speakers live, without doc rebuilds,
+    and always match the lanes exactly.
+*/
+function escapeAttributeValue(value: string): string {
+    return value.replace(/["\\]/g, "\\$&");
 }
+
+// Renames change no segment, so no rebuild happens — refresh the turn
+// labels' display names in place instead.
+watch(
+    () => speakerIds.value.map(displayName).join("|"),
+    () => {
+        const { tr, doc } = editor.state;
+        let changed = false;
+        doc.descendants((node, pos) => {
+            if (node.type.name !== "speakerTurn") {
+                return false;
+            }
+            const name = node.attrs.speaker
+                ? displayName(node.attrs.speaker as string)
+                : null;
+            if (node.attrs.speakerName !== name) {
+                tr.setNodeMarkup(pos, undefined, {
+                    ...node.attrs,
+                    speakerName: name,
+                });
+                changed = true;
+            }
+            return false;
+        });
+        if (changed) {
+            editor.view.dispatch(tr);
+        }
+    },
+);
+
+useStyleTag(
+    computed(() =>
+        Object.entries(speakerColors.value)
+            .map(
+                ([speaker, color]) =>
+                    `.transcript-document-editor .transcript-turn[data-speaker="${escapeAttributeValue(speaker)}"] { --speaker-color: ${color}; }`,
+            )
+            .join("\n"),
+    ),
+);
 
 const decorationsExtension = Extension.create({
     name: "transcriptDecorations",
     addProseMirrorPlugins() {
         return [createPlayheadPlugin(), createKeywordHighlightPlugin()];
     },
+    addKeyboardShortcuts() {
+        // Segment texts are single flowing lines — Enter must not split the
+        // document structure. Undo/redo belong to the app-wide command
+        // history (Ctrl+Z/Y on the window), not to ProseMirror.
+        return {
+            Enter: () => true,
+        };
+    },
 });
 
 const editor = new Editor({
-    editable: false,
     extensions: [
         TranscriptDocNode,
         TranscriptTextNode,
@@ -78,26 +138,286 @@ const editor = new Editor({
         TranscriptSegmentNode,
         decorationsExtension,
     ],
-    content: buildTranscriptDocContent(props.segments, speakerColorFor),
+    content: buildTranscriptDocContent(
+        props.segments,
+        displayName,
+        props.mergeSegments,
+    ),
     editorProps: {
         attributes: { class: "transcript-document-content" },
+    },
+    onUpdate({ transaction }) {
+        if (transaction.docChanged) {
+            // the transaction's `before` doc is the exact pre-edit state —
+            // unlike props.segments it can never lag behind a pending sync
+            snapshotCaptureBaseline(transaction.before);
+            scheduleTextSync();
+        }
     },
 });
 
 onUnmounted(() => {
+    clearTimeout(syncTimer);
+    void captureFromBaseline();
     editor.destroy();
 });
 
 watch(
-    () => props.segments,
-    (segments) => {
+    [() => props.segments, () => props.mergeSegments],
+    ([segments]) => {
+        // Skip the rebuild when the incoming change is the echo of our own
+        // text sync — rebuilding would destroy the caret mid-typing.
+        if (docReflectsSegments(segments, props.mergeSegments)) {
+            refreshKeywordHighlights();
+            return;
+        }
         editor.commands.setContent(
-            buildTranscriptDocContent(segments, speakerColorFor),
+            buildTranscriptDocContent(
+                segments,
+                displayName,
+                props.mergeSegments,
+            ),
         );
         refreshKeywordHighlights();
+        if (pendingFocusSegmentId.value) {
+            focusSegment(pendingFocusSegmentId.value);
+            pendingFocusSegmentId.value = null;
+        }
     },
     { deep: true },
 );
+
+// --- Inline editing: sync doc → segments, capture words silently ------------
+
+let syncTimer: ReturnType<typeof setTimeout> | undefined;
+
+function scheduleTextSync(): void {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => void flushTextEdits(), 600);
+}
+
+/**
+ * Segment texts as present in the given document (defaults to the current
+ * one). All but the last segment of a turn carry the join-space appended
+ * by the builder; it is stripped again here so the round trip is loss-free.
+ */
+function readDocSegmentTexts(
+    doc: ProseMirrorNode = editor.state.doc,
+): Map<string, string> {
+    const texts = new Map<string, string>();
+    doc.forEach((turn) => {
+        turn.forEach((segmentNode, _offset, index) => {
+            const id = segmentNode.attrs.segmentId as string | null;
+            if (!id) {
+                return;
+            }
+            let text = segmentNode.textContent;
+            if (index < turn.childCount - 1 && text.endsWith(" ")) {
+                text = text.slice(0, -1);
+            }
+            texts.set(id, text);
+        });
+    });
+    return texts;
+}
+
+/** True when the document already mirrors the given segments exactly. */
+function docReflectsSegments(
+    segments: StoredSegment[],
+    mergeSegments: boolean,
+): boolean {
+    const turns = buildTranscriptTurns(segments, mergeSegments);
+    const doc = editor.state.doc;
+    if (doc.childCount !== turns.length) {
+        return false;
+    }
+    const docTexts = readDocSegmentTexts();
+    let matches = true;
+    doc.forEach((turnNode, _offset, turnIndex) => {
+        const turn = turns[turnIndex];
+        if (
+            !turn ||
+            (turnNode.attrs.speaker ?? null) !== turn.speaker ||
+            turnNode.childCount !== turn.segments.length
+        ) {
+            matches = false;
+            return;
+        }
+        for (const segment of turn.segments) {
+            if (docTexts.get(segment.id) !== segment.text) {
+                matches = false;
+                return;
+            }
+        }
+    });
+    return matches;
+}
+
+async function flushTextEdits(): Promise<void> {
+    const docTexts = readDocSegmentTexts();
+    const { deletedSegmentIds, textUpdates } = planTranscriptEdits(
+        props.segments,
+        docTexts,
+    );
+
+    for (const update of textUpdates) {
+        await executeCommand(
+            new UpdateSegmentCommand(update.segmentId, { text: update.text }),
+        );
+    }
+
+    if (deletedSegmentIds.length > 1) {
+        await executeCommand(new DeleteSegmentsCommand(deletedSegmentIds));
+        return;
+    }
+
+    const deletedSegmentId = deletedSegmentIds[0];
+    if (deletedSegmentId) {
+        await executeCommand(new DeleteSegmentCommand(deletedSegmentId));
+    }
+}
+
+const captureBaseline = new Map<string, string>();
+
+function snapshotCaptureBaseline(beforeDoc: ProseMirrorNode): void {
+    if (captureBaseline.size > 0) {
+        return; // session already running — keep the pre-edit state
+    }
+    for (const [segmentId, text] of readDocSegmentTexts(beforeDoc)) {
+        captureBaseline.set(segmentId, text);
+    }
+}
+
+async function captureFromBaseline(): Promise<void> {
+    if (captureBaseline.size === 0) {
+        return;
+    }
+    const docTexts = readDocSegmentTexts();
+    const baseline = new Map(captureBaseline);
+    captureBaseline.clear();
+    for (const [segmentId, oldText] of baseline) {
+        const newText = docTexts.get(segmentId);
+        if (newText === undefined || newText === oldText) {
+            continue;
+        }
+        await captureEditedWords(segmentId, oldText, newText, docTexts);
+    }
+}
+
+function onEditorFocusOut(event: FocusEvent): void {
+    // focus moved within the editor (e.g. between segments) — not a session
+    // end
+    const next = event.relatedTarget as Node | null;
+    if (next && editorRoot.value?.contains(next)) {
+        return;
+    }
+    // make sure the final text state is synced, then diff the session once
+    clearTimeout(syncTimer);
+    void flushTextEdits().then(captureFromBaseline);
+}
+
+useEventListener(editorRoot, "focusout", onEditorFocusOut);
+
+async function captureEditedWords(
+    segmentId: string,
+    oldText: string,
+    newText: string,
+    docTexts: ReadonlyMap<string, string>,
+): Promise<void> {
+    const edited = diffEditedTerm(oldText, newText);
+    if (!edited) {
+        return;
+    }
+
+    const keyword = findKeyword(edited.replaced);
+    if (keyword) {
+        await propagateKeywordEdit(
+            segmentId,
+            oldText,
+            docTexts,
+            keyword,
+            edited.term,
+        );
+        return;
+    }
+
+    await getVocabularyService().rememberTerm(
+        edited.term,
+        "object",
+        "",
+        edited.replaced,
+    );
+}
+
+function normalizeTerm(term: string): string {
+    return term.trim().toLocaleLowerCase();
+}
+
+function findKeyword(term: string | undefined): Keyword | undefined {
+    if (!term) {
+        return undefined;
+    }
+    const normalizedTerm = normalizeTerm(term);
+    return props.transcription.keywords?.find(
+        (keyword) => normalizeTerm(keyword.term) === normalizedTerm,
+    );
+}
+
+async function propagateKeywordEdit(
+    editedSegmentId: string,
+    oldEditedText: string,
+    docTexts: ReadonlyMap<string, string>,
+    keyword: Keyword,
+    newTerm: string,
+): Promise<void> {
+    const sourceSegments = props.segments.map((segment) => ({
+        ...segment,
+        text:
+            segment.id === editedSegmentId
+                ? oldEditedText
+                : (docTexts.get(segment.id) ?? segment.text),
+    }));
+
+    await replaceTermInSegmentTexts(
+        sourceSegments,
+        keyword.term,
+        newTerm,
+        executeCommand,
+    );
+
+    const matchingSpeakerId = speakerIds.value.find(
+        (speakerId) =>
+            normalizeTerm(displayName(speakerId)) ===
+            normalizeTerm(keyword.term),
+    );
+    if (matchingSpeakerId) {
+        await executeCommand(
+            new RenameSpeakerCommand(
+                props.transcription.id,
+                matchingSpeakerId,
+                displayName(matchingSpeakerId),
+                newTerm,
+            ),
+        );
+    }
+
+    const renamedKeywords = (props.transcription.keywords ?? []).map(
+        (entry) =>
+            normalizeTerm(entry.term) === normalizeTerm(keyword.term)
+                ? { ...entry, term: newTerm }
+                : entry,
+    );
+    await updateTranscription(props.transcription.id, {
+        keywords: renamedKeywords,
+    });
+
+    await getVocabularyService().rememberTerm(
+        newTerm,
+        keyword.type,
+        keyword.description,
+        keyword.term,
+    );
+}
 
 function segmentById(id: string | null): StoredSegment | undefined {
     return id
@@ -137,58 +457,229 @@ function locateSegmentAt(
     return null;
 }
 
-// --- Playback position ----------------------------------------------------
+const activeSegment = computed(() => {
+    for (const turn of buildTranscriptTurns(
+        props.segments,
+        props.mergeSegments,
+    )) {
+        const first = turn.segments[0];
+        const last = turn.segments[turn.segments.length - 1];
+        if (
+            !first ||
+            !last ||
+            props.currentTime < first.start ||
+            props.currentTime >= last.end
+        ) {
+            continue;
+        }
+        let active = first;
+        for (const segment of turn.segments) {
+            if (segment.start <= props.currentTime) {
+                active = segment;
+            }
+        }
+        return active;
+    }
+    return undefined;
+});
 
-const activeSegment = computed(() =>
-    props.segments.find(
-        (segment) =>
-            props.currentTime >= segment.start &&
-            props.currentTime < segment.end,
-    ),
-);
+// Scrolling remains stable in silent gaps, but no word is highlighted there.
+const scrollAnchorSegment = computed(() => {
+    let anchor: (typeof props.segments)[number] | undefined;
+    let first: (typeof props.segments)[number] | undefined;
+    for (const segment of props.segments) {
+        if (!first || segment.start < first.start) {
+            first = segment;
+        }
+        if (
+            segment.start <= props.currentTime &&
+            (!anchor || segment.start > anchor.start)
+        ) {
+            anchor = segment;
+        }
+    }
+    return anchor ?? first;
+});
+
+function wordStartAt(text: string, offset: number): number {
+    let index = Math.min(Math.max(offset, 0), text.length);
+    while (index > 0 && !/\s/.test(text[index - 1] ?? " ")) {
+        index--;
+    }
+    return index;
+}
+
+let lastPlayheadKey = "";
+function applyPlayheadDecorations(): boolean {
+    const segment = activeSegment.value;
+    const position = segment
+        ? {
+              segmentId: segment.id,
+              charOffset: charOffsetAtTime(segment, props.currentTime),
+          }
+        : { segmentId: null, charOffset: 0 };
+    const key = segment
+        ? `${position.segmentId}:${wordStartAt(segment.text, position.charOffset)}`
+        : "";
+    if (key === lastPlayheadKey) {
+        return false;
+    }
+    lastPlayheadKey = key;
+    editor.view.dispatch(editor.state.tr.setMeta(playheadPluginKey, position));
+    return true;
+}
+
+function syncPlayheadDecorations(): void {
+    if (!applyPlayheadDecorations() || !props.autoScrollEnabled) {
+        return;
+    }
+    nextTick(() => centerActiveKaraokeWord("smooth", false));
+}
 
 watch(
     () => [activeSegment.value?.id, props.currentTime] as const,
-    () => {
-        const segment = activeSegment.value;
-        const position = segment
-            ? {
-                  segmentId: segment.id,
-                  charOffset: charOffsetAtTime(segment, props.currentTime),
-              }
-            : { segmentId: null, charOffset: 0 };
-        editor.view.dispatch(
-            editor.state.tr.setMeta(playheadPluginKey, position),
-        );
-    },
+    syncPlayheadDecorations,
 );
 
 watch(
-    () => activeSegment.value?.id,
-    async (segmentId) => {
+    () => scrollAnchorSegment.value?.id,
+    (segmentId) => {
         if (!segmentId || !props.autoScrollEnabled) {
             return;
         }
-        await nextTick();
-        editorRoot.value
-            ?.querySelector(`[data-segment-id="${segmentId}"]`)
-            ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        nextTick(() => centerActiveKaraokeWord("smooth", true));
     },
 );
 
-// --- Keyword highlighting --------------------------------------------------
+function centerActiveKaraokeWord(
+    behavior: ScrollBehavior = "auto",
+    force = true,
+): void {
+    const root = editorRoot.value;
+    const scrollContainer = root?.closest<HTMLElement>(
+        "[data-transcript-scroll]",
+    );
+    const active =
+        root?.querySelector<HTMLElement>(".transcript-w-current") ??
+        (scrollAnchorSegment.value
+            ? root?.querySelector<HTMLElement>(
+                  `[data-segment-id="${scrollAnchorSegment.value.id}"]`,
+              )
+            : null);
+    if (!scrollContainer || !active) {
+        return;
+    }
+
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    const readableTop = containerRect.top + containerRect.height * 0.3;
+    const readableBottom = containerRect.bottom - containerRect.height * 0.3;
+    if (
+        !force &&
+        activeRect.top >= readableTop &&
+        activeRect.bottom <= readableBottom
+    ) {
+        return;
+    }
+
+    scrollContainer.scrollBy({
+        top:
+            activeRect.top +
+            activeRect.height / 2 -
+            (containerRect.top + containerRect.height / 2),
+        behavior,
+    });
+}
+
+onMounted(() => {
+    let attempts = 0;
+    const tryScroll = () => {
+        const word = editorRoot.value?.querySelector<HTMLElement>(
+            ".transcript-w-current",
+        );
+        const anchorId = scrollAnchorSegment.value?.id;
+        const anchor = anchorId
+            ? editorRoot.value?.querySelector<HTMLElement>(
+                  `[data-segment-id="${anchorId}"]`,
+              )
+            : null;
+        const target = word ?? anchor;
+        if (
+            target &&
+            target.getBoundingClientRect().height > 0 &&
+            (word || attempts >= 5)
+        ) {
+            centerActiveKaraokeWord("auto", true);
+            return;
+        }
+        if (++attempts < 30) {
+            requestAnimationFrame(tryScroll);
+        }
+    };
+    nextTick(() => {
+        applyPlayheadDecorations();
+        requestAnimationFrame(tryScroll);
+    });
+});
 
 function refreshKeywordHighlights(): void {
-    const terms = (props.transcription.keywords ?? []).map(
-        (entry) => entry.term,
-    );
+    // the highlight is a visual layer only — when switched off no terms are
+    // decorated; silent capture of edited words is unaffected
+    const terms = props.keywordHighlightEnabled
+        ? (props.transcription.keywords ?? []).map((entry) => entry.term)
+        : [];
     editor.view.dispatch(editor.state.tr.setMeta(keywordPluginKey, terms));
 }
 
-watch(() => props.transcription.keywords, refreshKeywordHighlights, {
-    immediate: true,
-    deep: true,
-});
+watch(
+    [() => props.transcription.keywords, () => props.keywordHighlightEnabled],
+    refreshKeywordHighlights,
+    {
+        immediate: true,
+        deep: true,
+    },
+);
+
+// --- Insert segment ---------------------------------------------------------
+
+// Focused once the rebuilt doc contains it, so the new (empty) segment is
+// immediately editable — in merged mode it flows inside the existing turn
+// and clicking out simply syncs the typed text back like any other edit.
+const pendingFocusSegmentId = ref<string | null>(null);
+
+async function insertSegmentAfter(afterId: string): Promise<void> {
+    // the command handler assigns a unique new speaker and clean timing
+    const command = new InsertSegmentCommand(
+        props.transcription.id,
+        afterId,
+        {},
+        "after",
+    );
+    await executeCommand(command);
+    // the handler stores the created segment's id in the undo command
+    // (and leaves an EmptyCommand when there was no room to insert)
+    const undo = command.$undoCommand;
+    if (undo instanceof DeleteSegmentCommand) {
+        pendingFocusSegmentId.value = undo.segmentId;
+    }
+}
+
+function focusSegment(segmentId: string): void {
+    let pos: number | null = null;
+    editor.state.doc.descendants((node, nodePos) => {
+        if (
+            node.type.name === "transcriptSegment" &&
+            node.attrs.segmentId === segmentId
+        ) {
+            pos = nodePos + 1;
+            return false;
+        }
+        return true;
+    });
+    if (pos !== null) {
+        editor.chain().focus().setTextSelection(pos).run();
+    }
+}
 
 // --- Click: seek the player / open the speaker menu -------------------------
 
@@ -207,6 +698,22 @@ function handleClick(event: MouseEvent): void {
     }
     speakerMenu.value = null;
 
+    // start time code: play from the turn's beginning
+    const timecode = target?.closest(".transcript-turn-tc[data-seek]");
+    if (timecode instanceof HTMLElement && timecode.dataset.seek !== "") {
+        executeCommand(
+            new SeekToSecondsCommand(Number(timecode.dataset.seek)),
+        );
+        return;
+    }
+
+    // hover divider: insert an empty buffer segment after this turn
+    const addseg = target?.closest(".transcript-addseg");
+    if (addseg instanceof HTMLElement && addseg.dataset.insertAfter) {
+        insertSegmentAfter(addseg.dataset.insertAfter);
+        return;
+    }
+
     // Selecting text must not jump the player around.
     const selection = window.getSelection();
     if (selection && !selection.isCollapsed) {
@@ -224,145 +731,6 @@ function handleClick(event: MouseEvent): void {
     );
 }
 
-// --- Word context menu -------------------------------------------------------
-
-interface ContextMenuState {
-    x: number;
-    y: number;
-    segmentId: string;
-    time: number;
-    word: string | null;
-    wordStart: number | null;
-    wordIsKeyword: boolean;
-}
-
-const contextMenu = ref<ContextMenuState | null>(null);
-const contextMenuElement = ref<HTMLElement>();
-const editWordInput = ref("");
-const isEditingWord = ref(false);
-
-onClickOutside(contextMenuElement, () => {
-    closeContextMenu();
-});
-
-function closeContextMenu(): void {
-    contextMenu.value = null;
-    isEditingWord.value = false;
-    editWordInput.value = "";
-}
-
-function wordAtOffset(
-    text: string,
-    offset: number,
-): { word: string; index: number } | null {
-    const wordPattern = /[\p{L}\p{N}][\p{L}\p{N}'-]*/gu;
-    for (const match of text.matchAll(wordPattern)) {
-        const index = match.index ?? 0;
-        if (offset >= index && offset <= index + match[0].length) {
-            return { word: match[0], index };
-        }
-    }
-    return null;
-}
-
-useEventListener(editorRoot, "contextmenu", handleContextMenu);
-
-function handleContextMenu(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    if (
-        target?.closest(".transcript-turn-label") ||
-        target?.closest(".transcript-document-menu")
-    ) {
-        return;
-    }
-
-    const located = locateSegmentAt(event);
-    if (!located) {
-        return;
-    }
-
-    event.preventDefault();
-
-    const wordMatch = wordAtOffset(located.segment.text, located.charOffset);
-    const bounds = editorRoot.value?.getBoundingClientRect();
-
-    speakerMenu.value = null;
-    isEditingWord.value = false;
-    editWordInput.value = wordMatch?.word ?? "";
-    contextMenu.value = {
-        x: event.clientX - (bounds?.left ?? 0),
-        y: event.clientY - (bounds?.top ?? 0),
-        segmentId: located.segment.id,
-        time: timeAtCharOffset(located.segment, located.charOffset),
-        word: wordMatch?.word ?? null,
-        wordStart: wordMatch?.index ?? null,
-        wordIsKeyword: wordMatch !== null && isKeyword(wordMatch.word),
-    };
-}
-
-async function playFromHere(): Promise<void> {
-    if (!contextMenu.value) {
-        return;
-    }
-    await executeCommand(new PlayFromSecondsCommand(contextMenu.value.time));
-    closeContextMenu();
-}
-
-async function applyEditWordHere(): Promise<void> {
-    const menu = contextMenu.value;
-    const replacement = editWordInput.value.trim();
-    if (!menu?.word || menu.wordStart === null || !replacement) {
-        return;
-    }
-    const segment = segmentById(menu.segmentId);
-    if (!segment) {
-        return;
-    }
-    const newText =
-        segment.text.slice(0, menu.wordStart) +
-        replacement +
-        segment.text.slice(menu.wordStart + menu.word.length);
-    await executeCommand(
-        new UpdateSegmentCommand(segment.id, { text: newText }),
-    );
-    closeContextMenu();
-}
-
-async function applyEditWordEverywhere(): Promise<void> {
-    const menu = contextMenu.value;
-    const replacement = editWordInput.value.trim();
-    if (!menu?.word || !replacement) {
-        return;
-    }
-    if (menu.wordIsKeyword) {
-        // Keyword renames also update the keyword list and the vocabulary.
-        await renameTerm(menu.word, replacement);
-    } else {
-        const count = await replaceTermInSegmentTexts(
-            props.segments,
-            menu.word,
-            replacement,
-            executeCommand,
-        );
-        showToast(
-            t("documentEditor.replaceSuccess", { term: replacement, count }),
-            "success",
-        );
-    }
-    refreshKeywordHighlights();
-    closeContextMenu();
-}
-
-async function addWordToKeywords(): Promise<void> {
-    const word = contextMenu.value?.word;
-    if (!word) {
-        return;
-    }
-    await addTerm(word);
-    refreshKeywordHighlights();
-    closeContextMenu();
-}
-
 // --- Speaker menu ------------------------------------------------------------
 
 interface SpeakerMenuState {
@@ -373,13 +741,6 @@ interface SpeakerMenuState {
 }
 
 const speakerMenu = ref<SpeakerMenuState | null>(null);
-const speakerMenuElement = ref<HTMLElement>();
-const speakerSelect = ref<string | undefined>();
-const speakerRenameInput = ref("");
-
-onClickOutside(speakerMenuElement, () => {
-    speakerMenu.value = null;
-});
 
 function openSpeakerMenu(event: MouseEvent, label: HTMLElement): void {
     const turn = label.closest(".transcript-turn");
@@ -390,189 +751,75 @@ function openSpeakerMenu(event: MouseEvent, label: HTMLElement): void {
     const segmentIds = Array.from(turn.querySelectorAll("[data-segment-id]"))
         .map((element) => element.getAttribute("data-segment-id"))
         .filter((id): id is string => !!id);
-    const bounds = editorRoot.value?.getBoundingClientRect();
-
-    closeContextMenu();
-    speakerSelect.value = speaker;
-    speakerRenameInput.value = speaker;
+    // EditorSpeakerMoveMenu is fixed-positioned, so use viewport coordinates
     speakerMenu.value = {
-        x: event.clientX - (bounds?.left ?? 0),
-        y: event.clientY - (bounds?.top ?? 0),
+        x: event.clientX,
+        y: event.clientY,
         speaker,
         segmentIds,
     };
 }
 
-/** Assign an existing or freshly created speaker to this turn only. */
-async function changeTurnSpeaker(newSpeaker: string): Promise<void> {
-    const menu = speakerMenu.value;
-    const name = newSpeaker.trim();
-    if (!menu || !name || name === menu.speaker) {
-        return;
-    }
-    for (const segmentId of menu.segmentIds) {
-        await executeCommand(
-            new UpdateSegmentCommand(segmentId, { speaker: name }),
-        );
-    }
-    speakerMenu.value = null;
-}
-
-async function confirmRenameSpeaker(): Promise<void> {
+/*
+    A speaker already talking within the turn's time span can't take it
+    (same-speaker segments must never overlap), so it is greyed out.
+*/
+function moveDisabledFor(target: string): boolean {
     const menu = speakerMenu.value;
     if (!menu) {
-        return;
+        return false;
     }
-    await renameSpeakerEverywhere(menu.speaker, speakerRenameInput.value);
-    speakerMenu.value = null;
+    const members = props.segments.filter((segment) =>
+        menu.segmentIds.includes(segment.id),
+    );
+    const start = Math.min(...members.map((segment) => segment.start));
+    const end = Math.max(...members.map((segment) => segment.end));
+    return props.segments.some(
+        (segment) =>
+            segment.speaker === target &&
+            !menu.segmentIds.includes(segment.id) &&
+            segment.start < end &&
+            segment.end > start,
+    );
 }
 
-async function addSpeakerToKeywords(): Promise<void> {
-    const speaker = speakerMenu.value?.speaker;
-    if (!speaker) {
+/*
+    Move every segment of the turn to another speaker — one segment in
+    unmerged mode, the whole merged run otherwise.
+*/
+async function changeTurnSpeaker(newSpeaker: string): Promise<void> {
+    const menu = speakerMenu.value;
+    speakerMenu.value = null;
+    if (!menu || newSpeaker === menu.speaker) {
         return;
     }
-    await addTerm(speaker, "person");
-    refreshKeywordHighlights();
-    speakerMenu.value = null;
+    // one bulk command so undo reverts the whole turn at once
+    await executeCommand(
+        new UpdateSegmentsCommand(
+            menu.segmentIds.map((segmentId) => ({
+                segmentId,
+                updates: { speaker: newSpeaker },
+            })),
+        ),
+    );
 }
+
 </script>
 
 <template>
     <div ref="editorRoot" class="transcript-document-editor relative">
         <EditorContent :editor="editor" />
 
-        <!-- Word context menu -->
-        <div
-            v-if="contextMenu"
-            ref="contextMenuElement"
-            class="transcript-document-menu absolute z-50 min-w-48"
-            :style="{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }"
-        >
-            <UCard :ui="{ body: 'p-1 sm:p-1' }">
-                <template v-if="!isEditingWord">
-                    <div class="flex flex-col">
-                        <UButton
-                            variant="ghost"
-                            color="neutral"
-                            icon="i-lucide-play"
-                            class="justify-start"
-                            @click="playFromHere"
-                        >
-                            {{ t("documentEditor.playFromHere") }}
-                        </UButton>
-                        <UButton
-                            v-if="contextMenu.word"
-                            variant="ghost"
-                            color="neutral"
-                            icon="i-lucide-pen-line"
-                            class="justify-start"
-                            @click="isEditingWord = true"
-                        >
-                            {{
-                                t("documentEditor.editWord", {
-                                    term: contextMenu.word,
-                                })
-                            }}
-                        </UButton>
-                        <UButton
-                            v-if="contextMenu.word && !contextMenu.wordIsKeyword"
-                            variant="ghost"
-                            color="neutral"
-                            icon="i-lucide-bookmark-plus"
-                            class="justify-start"
-                            @click="addWordToKeywords"
-                        >
-                            {{
-                                t("documentEditor.addKeyword", {
-                                    term: contextMenu.word,
-                                })
-                            }}
-                        </UButton>
-                    </div>
-                </template>
-                <template v-else>
-                    <div class="flex flex-col gap-1 p-1">
-                        <UInput
-                            v-model="editWordInput"
-                            size="sm"
-                            @keydown.enter="applyEditWordHere"
-                            @keydown.escape="closeContextMenu"
-                        />
-                        <div class="flex gap-1">
-                            <UButton
-                                size="sm"
-                                variant="soft"
-                                @click="applyEditWordHere"
-                            >
-                                {{ t("documentEditor.replaceOne") }}
-                            </UButton>
-                            <UButton
-                                size="sm"
-                                variant="soft"
-                                @click="applyEditWordEverywhere"
-                            >
-                                {{ t("documentEditor.replaceAll") }}
-                            </UButton>
-                        </div>
-                    </div>
-                </template>
-            </UCard>
-        </div>
-
-        <!-- Speaker menu -->
-        <div
+        <!-- same popup as the speaker lane's ⋮ menu -->
+        <EditorSpeakerMoveMenu
             v-if="speakerMenu"
-            ref="speakerMenuElement"
-            class="transcript-document-menu absolute z-50 min-w-56"
-            :style="{ left: `${speakerMenu.x}px`, top: `${speakerMenu.y}px` }"
-        >
-            <UCard :ui="{ body: 'p-2 sm:p-2' }">
-                <div class="flex flex-col gap-2">
-                    <USelectMenu
-                        v-model="speakerSelect"
-                        :items="speakers"
-                        create-item
-                        size="sm"
-                        :placeholder="t('documentEditor.speakerChange')"
-                        @update:model-value="
-                            (value: string) => changeTurnSpeaker(value)
-                        "
-                        @create="changeTurnSpeaker"
-                    />
-                    <div class="flex gap-1">
-                        <UInput
-                            v-model="speakerRenameInput"
-                            size="sm"
-                            @keydown.enter="confirmRenameSpeaker"
-                            @keydown.escape="speakerMenu = null"
-                        />
-                        <UTooltip :text="t('documentEditor.speakerRename')">
-                            <UButton
-                                size="sm"
-                                icon="i-lucide-pen-line"
-                                @click="confirmRenameSpeaker"
-                            />
-                        </UTooltip>
-                    </div>
-                    <UButton
-                        v-if="!isKeyword(speakerMenu.speaker)"
-                        variant="ghost"
-                        color="neutral"
-                        size="sm"
-                        icon="i-lucide-bookmark-plus"
-                        class="justify-start"
-                        @click="addSpeakerToKeywords"
-                    >
-                        {{
-                            t("documentEditor.rememberSpeaker", {
-                                name: speakerMenu.speaker,
-                            })
-                        }}
-                    </UButton>
-                </div>
-            </UCard>
-        </div>
+            :x="speakerMenu.x"
+            :y="speakerMenu.y"
+            :current-speaker="speakerMenu.speaker"
+            :disabled-for="moveDisabledFor"
+            @select="changeTurnSpeaker"
+            @close="speakerMenu = null"
+        />
     </div>
 </template>
 
@@ -587,25 +834,91 @@ async function addSpeakerToKeywords(): Promise<void> {
         outline: none;
         padding: 1rem;
         line-height: 1.75;
+        caret-color: var(--ui-primary);
+        white-space: pre-wrap;
     }
 
     .transcript-turn {
-        margin: 0 0 1.25rem;
+        display: flex;
+        gap: 18px;
+        margin: 0 0 1.6rem;
+    }
+
+    /* layout column; only the name span inside opens the speaker menu */
+    .transcript-turn-labelbox {
+        display: block;
+        width: 128px;
+        flex: none;
+        padding-top: 2px;
+        user-select: none;
+
+        &:has(> .transcript-turn-label:empty) {
+            display: none;
+        }
     }
 
     .transcript-turn-label {
-        display: block;
-        width: fit-content;
-        font-weight: 700;
-        font-size: 0.8rem;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        color: var(--speaker-color, inherit);
+        display: inline-block;
+        max-width: 100%;
+        font-weight: 500;
+        font-size: 0.84rem;
+        color: var(--ui-text-muted);
         cursor: pointer;
-        user-select: none;
+        overflow-wrap: anywhere;
+        white-space: normal;
+
+        &::before {
+            content: "";
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 99px;
+            margin-right: 8px;
+            background: var(--speaker-color, var(--ui-border));
+        }
 
         &:hover {
             text-decoration: underline;
+        }
+    }
+
+    .transcript-turn-body {
+        flex: 1;
+        min-width: 0;
+        border-left: 2px solid var(--ui-border);
+        padding-left: 22px;
+        transition: border-color 0.3s;
+    }
+
+    .transcript-turn:has(.transcript-segment--active) .transcript-turn-body {
+        border-left-color: var(--speaker-color, var(--ui-primary));
+    }
+
+    @media (max-width: 640px) {
+        .transcript-turn {
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .transcript-turn-labelbox {
+            width: auto;
+            padding-top: 0;
+        }
+
+        .transcript-turn-body {
+            padding-left: 12px;
+        }
+    }
+
+    .transcript-turn-tc {
+        display: block;
+        font-size: 0.72rem;
+        color: var(--ui-text-dimmed);
+        font-variant-numeric: tabular-nums;
+        user-select: none;
+
+        &[data-seek]:not([data-seek=""]) {
+            cursor: pointer;
         }
 
         &:empty {
@@ -613,8 +926,57 @@ async function addSpeakerToKeywords(): Promise<void> {
         }
     }
 
+    .transcript-turn-tc-end {
+        margin-top: 4px;
+    }
+
     .transcript-turn-text {
-        margin: 0;
+        margin: 3px 0 0;
+        font-size: 1.02rem;
+        line-height: 1.85;
+    }
+
+    .transcript-addseg {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 14px;
+        margin: 10px 0 -10px;
+        opacity: 0;
+        transition: opacity 0.15s;
+        user-select: none;
+
+        &::before,
+        &::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--ui-border);
+        }
+
+        &:hover {
+            opacity: 1;
+        }
+
+        button {
+            width: 20px;
+            height: 20px;
+            border-radius: 99px;
+            flex: none;
+            background: var(--ui-primary-soft);
+            color: var(--ui-primary-strong);
+            display: grid;
+            place-items: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+
+            &:hover {
+                background: var(--ui-primary);
+                color: #fff;
+            }
+        }
     }
 
     .transcript-segment {
@@ -623,18 +985,35 @@ async function addSpeakerToKeywords(): Promise<void> {
         cursor: pointer;
     }
 
-    .transcript-segment--active {
-        background-color: rgba(20, 184, 166, 0.08);
+    /* formatting-only paragraph break inside a turn (see
+       buildTranscriptTurns) — rendered as a blank line, still one turn
+       with a single speaker label */
+    .transcript-segment--break::before {
+        content: "\A\A";
+        white-space: pre;
     }
 
-    .transcript-playhead-caret {
-        display: inline-block;
-        width: 2px;
-        height: 1.15em;
-        margin: 0 -1px;
-        vertical-align: text-bottom;
-        background-color: rgb(20, 184, 166);
-        animation: transcript-playhead-blink 1s steps(2, start) infinite;
+    /* Karaoke states must never change metrics (font-weight/size/spacing) —
+       color + a doubled text-shadow "fake bold" only, so playback never
+       reflows the line. */
+    .transcript-w-played {
+        color: var(--ui-text);
+        transition: color 0.2s ease;
+    }
+
+    .transcript-w-current {
+        color: var(--ui-primary-strong);
+        text-shadow:
+            0 0 0.35px currentColor,
+            0 0 0.35px currentColor;
+        transition:
+            color 0.2s ease,
+            text-shadow 0.2s ease;
+    }
+
+    .transcript-w-upcoming {
+        color: var(--ui-text-dimmed);
+        transition: color 0.2s ease;
     }
 
     .transcript-keyword {
@@ -644,9 +1023,4 @@ async function addSpeakerToKeywords(): Promise<void> {
     }
 }
 
-@keyframes transcript-playhead-blink {
-    50% {
-        opacity: 0;
-    }
-}
 </style>

@@ -1,52 +1,35 @@
 <script setup lang="ts">
-import { motion } from "motion-v";
-import { UButton } from "#components";
-
+import type { TabsItem } from "@nuxt/ui";
 import type { EditorMode } from "~/types/editor";
-
-const UButtonMotion = motion.create(UButton);
-
-const props = withDefaults(defineProps<{ idPrefix?: string }>(), {
-    idPrefix: "",
-});
 
 const mode = defineModel<EditorMode>({ default: "view" });
 
 const { t } = useI18n();
 
-const modes: { value: EditorMode; icon: string; label: string }[] = [
-    { value: "view", icon: "i-lucide-eye", label: "viewer" },
-    { value: "summary", icon: "i-lucide-sparkles", label: "summary" },
-    { value: "edit", icon: "i-lucide-square-pen", label: "editor" },
-    { value: "document", icon: "i-lucide-file-text", label: "document" },
-    { value: "statistics", icon: "i-lucide-bar-chart-2", label: "statistics" },
-];
+const items = computed<TabsItem[]>(() => [
+    { value: "view", icon: "i-lucide-eye", label: t("mode.viewer") },
+    { value: "summary", icon: "i-lucide-sparkles", label: t("mode.summary") },
+    { value: "edit", icon: "i-lucide-square-pen", label: t("mode.editor") },
+    {
+        value: "statistics",
+        icon: "i-lucide-bar-chart-2",
+        label: t("mode.statistics"),
+    },
+]);
 </script>
 
 <template>
-    <div
-        :id="`${props.idPrefix}editor-mode-selector`"
-        class="editor-mode-selector"
+    <UTabs
+        id="editor-mode-selector"
+        v-model="mode"
+        :items="items"
+        :content="false"
+        size="sm"
     >
-        <UFieldGroup :ui="{ base: 'flex justify-stretch' }">
-            <UButtonMotion
-                v-for="(m, index) in modes"
-                :key="m.value"
-                :variant="mode === m.value ? 'solid' : 'soft'"
-                color="primary"
-                :while-hover="{ scale: 1.02 }"
-                :while-tap="{ scale: 0.98 }"
-                :transition="{
-                    type: 'tween' as const,
-                    duration: 0.15,
-                }"
-                class="w-full flex justify-center"
-                @click="mode = m.value"
-                :id="`${props.idPrefix}mode-${m.value}`"
-            >
-                <UIcon :name="m.icon" class="h-6 w-6 md:w-4 md:h-4" />
-                <span class="hidden md:inline">{{ t(`mode.${m.label}`) }}</span>
-            </UButtonMotion>
-        </UFieldGroup>
-    </div>
+        <template #default="{ item }">
+            <span :id="`mode-${item.value}`" class="hidden sm:inline">{{
+                item.label
+            }}</span>
+        </template>
+    </UTabs>
 </template>

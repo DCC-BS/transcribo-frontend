@@ -8,7 +8,9 @@ import {
     TaskStatusEnum,
     TaskStatusSchema,
 } from "~/types/storedTasks";
+import type { Speaker } from "~/types/storedTranscription";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
+import { isVideoFile } from "~/utils/videoUtils";
 
 export function useTaskListener() {
     const { deleteTask } = useTasks();
@@ -17,6 +19,37 @@ export function useTaskListener() {
     const { showError } = useUserFeedback();
     const { t } = useI18n();
     const logger = useLogger();
+
+    // The four steps of the transcription flow as shown in MediaProgressView:
+    // preprocess, upload, transcribe, post-process.
+    function createProgressSteps(
+        media: File | Blob,
+    ): [MediaProgress, MediaProgress, MediaProgress, MediaProgress] {
+        return [
+            {
+                icon: "i-lucide-file",
+                message: isVideoFile(media)
+                    ? t("upload.extractingAudio")
+                    : t("upload.preparingAudio"),
+                progress: 0,
+            },
+            {
+                icon: "i-lucide-upload-cloud",
+                message: t("upload.uploadingMedia"),
+                progress: 0,
+            },
+            {
+                icon: "i-lucide-cpu",
+                message: t("task.status.pending"),
+                progress: 0,
+            },
+            {
+                icon: "i-lucide-sparkles",
+                message: t("task.postProcessing"),
+                progress: 0,
+            },
+        ];
+    }
 
     function createProgress(status: TaskStatus): MediaProgress {
         return {
@@ -146,6 +179,12 @@ export function useTaskListener() {
         mediaFile: Blob,
         mediaName: string,
     ): Promise<void> {
+        /*
+            Segments keep the stable diarization key (SPEAKER_00, …); the
+            AI-guessed display names go onto the speaker roster instead, in
+            first-appearance order — that order fixes each speaker's color
+            slot for good.
+        */
         const assignedNames = new Map<string, string>();
         for (const assignment of result.speaker_assignments ?? []) {
             const display = assignment.name ?? assignment.role;
@@ -157,12 +196,18 @@ export function useTaskListener() {
             }
         }
 
-        function resolveSpeaker(speaker: string | null | undefined): string {
-            const label = speaker?.trim().toUpperCase();
-            if (!label) {
-                return t("transcription.noSpeaker");
+        function speakerKey(speaker: string | null | undefined): string {
+            return (
+                speaker?.trim().toUpperCase() || t("transcription.noSpeaker")
+            );
+        }
+
+        const speakers: Speaker[] = [];
+        for (const segment of result.segments) {
+            const key = speakerKey(segment.speaker);
+            if (!speakers.some((speaker) => speaker.id === key)) {
+                speakers.push({ id: key, name: assignedNames.get(key) });
             }
-            return assignedNames.get(label) ?? label;
         }
 
         const proposedKeywords = (result.keywords ?? []).filter((entry) => {
@@ -214,6 +259,7 @@ export function useTaskListener() {
                     mediaFileName: mediaName,
                     name: mediaName ?? t("transcription.untitled"),
                     keywords,
+                    speakers,
                 });
 
                 await addSegments(
@@ -221,7 +267,7 @@ export function useTaskListener() {
                         ...x,
                         transcriptionId: newTranscription.id,
                         text: x.text?.trim() ?? "",
-                        speaker: resolveSpeaker(x.speaker),
+                        speaker: speakerKey(x.speaker),
                         id: uuidv4(),
                     })),
                 );
@@ -236,6 +282,7 @@ export function useTaskListener() {
     }
 
     return {
+        createProgressSteps,
         pollTaskStatus,
         applyTaskResult,
     };

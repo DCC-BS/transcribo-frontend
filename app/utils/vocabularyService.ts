@@ -7,7 +7,7 @@ import type { Keyword, KeywordType } from "~/types/transcriptionResponse";
     stay small; when the limit is exceeded the least recently used entries
     (oldest lastUsedAt) are evicted.
 */
-export const MAX_VOCABULARY_ENTRIES = 100;
+const MAX_VOCABULARY_ENTRIES = 100;
 
 export function getVocabularyService() {
     async function getVocabularyAsKeywords(): Promise<Keyword[]> {
@@ -36,9 +36,15 @@ export function getVocabularyService() {
         }
         await db.transaction("rw", db.vocabulary, async () => {
             const previous = replaces?.trim();
+            // an edit of a known spelling carries its confirmation count over
+            let editCount = 1;
             if (previous && previous !== trimmed) {
+                const replaced = await db.vocabulary.get(previous);
+                editCount += replaced?.editCount ?? 0;
                 await db.vocabulary.delete(previous);
             }
+            const existing = await db.vocabulary.get(trimmed);
+            editCount += existing?.editCount ?? 0;
             const now = new Date();
             await db.vocabulary.put({
                 term: trimmed,
@@ -46,6 +52,7 @@ export function getVocabularyService() {
                 description,
                 updatedAt: now,
                 lastUsedAt: now,
+                editCount,
             });
             await evictOverflow();
         });
@@ -81,5 +88,49 @@ export function getVocabularyService() {
         await db.vocabulary.bulkDelete(oldest);
     }
 
-    return { getVocabularyAsKeywords, rememberTerm, touchTerms };
+    // --- management (vocabulary settings page) --------------------------
+
+    async function deleteTerm(term: string): Promise<void> {
+        await db.vocabulary.delete(term);
+    }
+
+    /*
+        Rename keeps the entry's history (edit count, timestamps); changing
+        only the type updates in place. Renaming onto an already existing
+        term merges the two histories instead of overwriting the target.
+    */
+    async function updateTerm(
+        originalTerm: string,
+        updates: { term?: string; type?: KeywordType },
+    ): Promise<void> {
+        const newTerm = updates.term?.trim();
+        await db.transaction("rw", db.vocabulary, async () => {
+            const entry = await db.vocabulary.get(originalTerm);
+            if (!entry) {
+                return;
+            }
+            const targetTerm = newTerm || entry.term;
+            let editCount = entry.editCount ?? 1;
+            if (targetTerm !== originalTerm) {
+                const existing = await db.vocabulary.get(targetTerm);
+                editCount += existing?.editCount ?? 0;
+                await db.vocabulary.delete(originalTerm);
+            }
+            await db.vocabulary.put({
+                ...entry,
+                term: targetTerm,
+                type: updates.type ?? entry.type,
+                editCount,
+                updatedAt: new Date(),
+            });
+        });
+    }
+
+    return {
+        getVocabularyAsKeywords,
+        rememberTerm,
+        touchTerms,
+        deleteTerm,
+        updateTerm,
+    };
 }

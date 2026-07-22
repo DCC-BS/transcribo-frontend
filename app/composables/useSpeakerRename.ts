@@ -2,11 +2,10 @@ import { RenameSpeakerCommand } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 
 /*
-    Renaming a speaker everywhere: the segment speaker fields (undoable
-    command), mentions inside the transcript texts, the matching keyword
-    entry and the learned vocabulary all follow the new name. Shared by the
-    speaker toolbar (RenameSpeakerView) and the document viewer's speaker
-    menu.
+    Renaming a speaker: set the display name on the speaker entity
+    (undoable), then let everything that referenced the old display name
+    follow — mentions inside the transcript texts, the matching keyword
+    entry and the learned vocabulary. Segment speaker ids never change.
 */
 export function useSpeakerRename(
     transcriptionId: MaybeRefOrGetter<string>,
@@ -15,19 +14,21 @@ export function useSpeakerRename(
     const { executeCommand } = useCommandBus();
     const { getTranscription, updateTranscription } = getTranscriptionService();
 
-    async function renameSpeakerEverywhere(
-        originalName: string,
+    async function renameSpeaker(
+        speakerId: string,
+        oldDisplayName: string,
         newName: string,
     ): Promise<void> {
         const trimmedName = newName.trim();
-        if (originalName === trimmedName || !trimmedName) {
+        if (oldDisplayName === trimmedName || !trimmedName) {
             return;
         }
 
         await executeCommand(
             new RenameSpeakerCommand(
                 toValue(transcriptionId),
-                originalName,
+                speakerId,
+                oldDisplayName,
                 trimmedName,
             ),
         );
@@ -36,12 +37,12 @@ export function useSpeakerRename(
         // rename, same as keyword renames.
         await replaceTermInSegmentTexts(
             toValue(segments),
-            originalName,
+            oldDisplayName,
             trimmedName,
             executeCommand,
         );
 
-        await renameKeywordEntry(originalName, trimmedName);
+        await renameKeywordEntry(oldDisplayName, trimmedName);
 
         // Learn the confirmed name for future transcriptions; drop the entry
         // of the name that was renamed away from.
@@ -49,7 +50,7 @@ export function useSpeakerRename(
             trimmedName,
             "person",
             "",
-            originalName,
+            oldDisplayName,
         );
     }
 
@@ -86,5 +87,5 @@ export function useSpeakerRename(
         }
     }
 
-    return { renameSpeakerEverywhere };
+    return { renameSpeaker };
 }

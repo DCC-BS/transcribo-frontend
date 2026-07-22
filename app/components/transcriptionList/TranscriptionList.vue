@@ -25,6 +25,7 @@ const props = withDefaults(defineProps<InputProps>(), {
 });
 
 const { executeCommand } = useCommandBus();
+const logger = useLogger();
 
 const segmentRefs = ref<Map<string, HTMLElement>>(new Map());
 const { height: windowHeight } = useWindowSize();
@@ -65,7 +66,7 @@ function setSegmentRef(id: string, el: unknown): void {
     if (el instanceof HTMLElement) {
         segmentRefs.value.set(id, el);
     } else {
-        console.warn(
+        logger.warn(
             `Attempted to set segment ref for ID ${id} with a non-HTMLElement`,
             el,
         );
@@ -95,7 +96,7 @@ watch(currentSegmentId, async (newId, oldId) => {
 
     const segmentEl = segmentRefs.value.get(newId);
     if (!segmentEl) {
-        console.warn(`No element found for segment ID: ${newId}`);
+        logger.warn(`No element found for segment ID: ${newId}`);
         return;
     }
 

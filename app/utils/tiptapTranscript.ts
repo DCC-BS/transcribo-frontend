@@ -3,6 +3,7 @@ import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { StoredSegment } from "~/types/storedSegments";
+import { formatTime } from "~/utils/time";
 
 /*
     TipTap building blocks for the read-only script-style transcript viewer:
@@ -37,18 +38,16 @@ export const SpeakerTurnNode = Node.create({
                     "data-speaker": attributes.speaker ?? "",
                 }),
             },
-            /** CSS color used by the speaker label element. */
-            speakerColor: {
-                default: null,
-                parseHTML: (element) =>
-                    element.style.getPropertyValue("--speaker-color") || null,
-                renderHTML: (attributes) =>
-                    attributes.speakerColor
-                        ? {
-                              style: `--speaker-color: ${attributes.speakerColor}`,
-                          }
-                        : {},
-            },
+            /** Display name of the speaker entity; the `speaker` attr is
+             *  the stable id. Refreshed by the editor on renames. */
+            speakerName: { default: null },
+            /** Start of the first and end of the last merged segment — the
+             *  turn shows exactly one start and one end time code. */
+            startTime: { default: null },
+            endTime: { default: null },
+            /** Id of the turn's last segment — target for the hover
+             *  "insert segment after this turn" divider. */
+            lastSegmentId: { default: null },
         };
     },
 
@@ -59,20 +58,65 @@ export const SpeakerTurnNode = Node.create({
     renderHTML({ node, HTMLAttributes }) {
         /*
             The label is a real element (not a ::before) so it can be clicked
-            to open the speaker menu.
+            to open the speaker menu. One start time code above and one end
+            time code below the text — never per merged sub-segment.
         */
+        const startTime = node.attrs.startTime as number | null;
+        const endTime = node.attrs.endTime as number | null;
         return [
             "div",
             mergeAttributes(HTMLAttributes, { class: "transcript-turn" }),
             [
                 "span",
                 {
-                    class: "transcript-turn-label",
+                    class: "transcript-turn-labelbox",
                     contenteditable: "false",
                 },
-                (node.attrs.speaker as string | null) ?? "",
+                [
+                    "span",
+                    {
+                        class: "transcript-turn-label",
+                        title: (node.attrs.speakerName as string | null) ?? "",
+                    },
+                    (node.attrs.speakerName as string | null) ?? "",
+                ],
             ],
-            ["p", { class: "transcript-turn-text" }, 0],
+            [
+                "div",
+                { class: "transcript-turn-body" },
+                [
+                    "span",
+                    {
+                        class: "transcript-turn-tc",
+                        contenteditable: "false",
+                        "data-seek": startTime ?? "",
+                    },
+                    startTime !== null
+                        ? formatTime(startTime, { milliseconds: false })
+                        : "",
+                ],
+                ["p", { class: "transcript-turn-text" }, 0],
+                [
+                    "span",
+                    {
+                        class: "transcript-turn-tc transcript-turn-tc-end",
+                        contenteditable: "false",
+                    },
+                    endTime !== null
+                        ? formatTime(endTime, { milliseconds: false })
+                        : "",
+                ],
+                [
+                    "div",
+                    {
+                        class: "transcript-addseg",
+                        contenteditable: "false",
+                        "data-insert-after":
+                            (node.attrs.lastSegmentId as string | null) ?? "",
+                    },
+                    ["button", { type: "button", tabindex: "-1" }, "+"],
+                ],
+            ],
         ];
     },
 });
@@ -92,6 +136,16 @@ export const TranscriptSegmentNode = Node.create({
                     "data-segment-id": attributes.segmentId ?? "",
                 }),
             },
+            /** Starts a new paragraph within the turn (formatting only). */
+            paragraphBreak: {
+                default: false,
+                parseHTML: (element) =>
+                    element.classList.contains("transcript-segment--break"),
+                renderHTML: (attributes) =>
+                    attributes.paragraphBreak
+                        ? { class: "transcript-segment--break" }
+                        : {},
+            },
         };
     },
 
@@ -108,20 +162,83 @@ export const TranscriptSegmentNode = Node.create({
     },
 });
 
-export function buildTranscriptDocContent(
+export interface TranscriptTurn {
+    speaker: string | null;
+    segments: StoredSegment[];
+    /** Indices of segments that start a new paragraph within the turn. */
+    paragraphBreaks: Set<number>;
+}
+
+/*
+    Formatting-only paragraph breaks inside overlong same-speaker turns: a
+    single speaker talking for minutes would otherwise merge into one wall
+    of text. Paragraphs aim for ~6 rendered lines but a finished sentence
+    (or a clear pause) matters more than the exact length, so the actual
+    size varies. The turn itself stays one block with one speaker label.
+*/
+const CHARS_PER_LINE = 90; // approximation of both views' line width
+const SOFT_SPLIT_CHARS = 5.5 * CHARS_PER_LINE;
+const HARD_SPLIT_CHARS = 9 * CHARS_PER_LINE;
+const SPLIT_PAUSE_SECONDS = 2.5;
+const SENTENCE_END = /[.!?…]["')\]]?$/;
+
+function shouldBreakParagraph(
+    paragraphLength: number,
+    lastSegment: StoredSegment,
+    next: StoredSegment,
+): boolean {
+    if (paragraphLength >= HARD_SPLIT_CHARS) {
+        return true;
+    }
+    if (paragraphLength < SOFT_SPLIT_CHARS) {
+        return false;
+    }
+    return (
+        SENTENCE_END.test(lastSegment.text.trimEnd()) ||
+        next.start - lastSegment.end >= SPLIT_PAUSE_SECONDS
+    );
+}
+
+/** Group segments into speaker turns — the doc structure of the editor. */
+export function buildTranscriptTurns(
     segments: StoredSegment[],
-    getSpeakerColor: (speaker: string | undefined) => string,
-) {
-    const turns: { speaker: string | null; segments: StoredSegment[] }[] = [];
+    mergeSegments = true,
+): TranscriptTurn[] {
+    const turns: TranscriptTurn[] = [];
+    let paragraphLength = 0;
     for (const segment of segments) {
         const speaker = segment.speaker ?? null;
         const currentTurn = turns[turns.length - 1];
-        if (currentTurn && currentTurn.speaker === speaker) {
+        const lastSegment = currentTurn?.segments.at(-1);
+        if (mergeSegments && currentTurn && currentTurn.speaker === speaker) {
+            if (
+                lastSegment &&
+                shouldBreakParagraph(paragraphLength, lastSegment, segment)
+            ) {
+                currentTurn.paragraphBreaks.add(currentTurn.segments.length);
+                paragraphLength = segment.text.length;
+            } else {
+                paragraphLength += segment.text.length + 1;
+            }
             currentTurn.segments.push(segment);
         } else {
-            turns.push({ speaker, segments: [segment] });
+            turns.push({
+                speaker,
+                segments: [segment],
+                paragraphBreaks: new Set(),
+            });
+            paragraphLength = segment.text.length;
         }
     }
+    return turns;
+}
+
+export function buildTranscriptDocContent(
+    segments: StoredSegment[],
+    displayName: (speakerId: string | undefined) => string,
+    mergeSegments = true,
+) {
+    const turns = buildTranscriptTurns(segments, mergeSegments);
 
     return {
         type: "doc",
@@ -129,7 +246,11 @@ export function buildTranscriptDocContent(
             type: "speakerTurn",
             attrs: {
                 speaker: turn.speaker,
-                speakerColor: getSpeakerColor(turn.speaker ?? undefined),
+                speakerName: turn.speaker ? displayName(turn.speaker) : null,
+                startTime: turn.segments[0]?.start ?? null,
+                endTime: turn.segments[turn.segments.length - 1]?.end ?? null,
+                lastSegmentId:
+                    turn.segments[turn.segments.length - 1]?.id ?? null,
             },
             content: turn.segments.map((segment, index) => {
                 // Trailing space joins the merged segments into flowing text.
@@ -139,7 +260,10 @@ export function buildTranscriptDocContent(
                         : segment.text;
                 return {
                     type: "transcriptSegment",
-                    attrs: { segmentId: segment.id },
+                    attrs: {
+                        segmentId: segment.id,
+                        paragraphBreak: turn.paragraphBreaks.has(index),
+                    },
                     content: text ? [{ type: "text", text }] : undefined,
                 };
             }),
@@ -159,6 +283,14 @@ export const playheadPluginKey = new PluginKey<PlayheadPosition>(
     "transcriptPlayhead",
 );
 
+/*
+    Karaoke word states: everything
+    before the playback position keeps the full text color, the word at the
+    position gets the primary color with a text-shadow fake-bold (no metric
+    change, so nothing reflows), everything after is dimmed. Kept cheap by
+    decorating whole ranges — only the current word is word-level, so the
+    set stays at O(#segments) decorations per update.
+*/
 export function createPlayheadPlugin(): Plugin<PlayheadPosition> {
     return new Plugin<PlayheadPosition>({
         key: playheadPluginKey,
@@ -175,35 +307,80 @@ export function createPlayheadPlugin(): Plugin<PlayheadPosition> {
                 }
 
                 const decorations: Decoration[] = [];
+                let reachedActive = false;
                 state.doc.descendants((node, pos) => {
                     if (node.type.name !== "transcriptSegment") {
                         return true;
                     }
+
+                    const from = pos + 1;
+                    const to = pos + 1 + node.content.size;
                     if (node.attrs.segmentId !== playhead.segmentId) {
+                        if (node.content.size > 0) {
+                            decorations.push(
+                                Decoration.inline(from, to, {
+                                    class: reachedActive
+                                        ? "transcript-w-upcoming"
+                                        : "transcript-w-played",
+                                }),
+                            );
+                        }
                         return false;
                     }
 
+                    reachedActive = true;
                     decorations.push(
                         Decoration.node(pos, pos + node.nodeSize, {
                             class: "transcript-segment--active",
                         }),
                     );
 
+                    // expand the interpolated char offset to word boundaries
+                    const text = node.textContent;
                     const offset = Math.min(
                         Math.max(playhead.charOffset, 0),
-                        node.content.size,
+                        text.length,
                     );
-                    decorations.push(
-                        Decoration.widget(
-                            pos + 1 + offset,
-                            () => {
-                                const caret = document.createElement("span");
-                                caret.className = "transcript-playhead-caret";
-                                return caret;
-                            },
-                            { side: -1 },
-                        ),
-                    );
+                    let wordStart = offset;
+                    while (
+                        wordStart > 0 &&
+                        !/\s/.test(text[wordStart - 1] ?? " ")
+                    ) {
+                        wordStart--;
+                    }
+                    let wordEnd = offset;
+                    while (
+                        wordEnd < text.length &&
+                        !/\s/.test(text[wordEnd] ?? " ")
+                    ) {
+                        wordEnd++;
+                    }
+
+                    if (wordStart > 0) {
+                        decorations.push(
+                            Decoration.inline(from, from + wordStart, {
+                                class: "transcript-w-played",
+                            }),
+                        );
+                    }
+                    if (wordEnd > wordStart) {
+                        decorations.push(
+                            Decoration.inline(
+                                from + wordStart,
+                                from + wordEnd,
+                                {
+                                    class: "transcript-w-current",
+                                },
+                            ),
+                        );
+                    }
+                    if (wordEnd < text.length) {
+                        decorations.push(
+                            Decoration.inline(from + wordEnd, to, {
+                                class: "transcript-w-upcoming",
+                            }),
+                        );
+                    }
                     return false;
                 });
                 return DecorationSet.create(state.doc, decorations);

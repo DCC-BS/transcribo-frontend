@@ -4,6 +4,13 @@ import {
     type StoredSegment,
     StoredSegmentSchema,
 } from "~/types/storedSegments";
+import type { Segment } from "~/types/transcriptionResponse";
+
+export function toStoredSegmentRecords(
+    segments: readonly StoredSegment[],
+): StoredSegment[] {
+    return segments.map((segment) => StoredSegmentSchema.parse(segment));
+}
 
 export function getSegmentService() {
     async function getSegment(id: string): Promise<StoredSegment | undefined> {
@@ -51,6 +58,19 @@ export function getSegmentService() {
         await updateTranscriptionUpdatedAt(segmentParsed.transcriptionId);
     }
 
+    async function putSegments(segments: readonly StoredSegment[]) {
+        const parsedSegments = toStoredSegmentRecords(segments);
+        await db.transaction("rw", db.segments, db.transcriptions, async () => {
+            await db.segments.bulkPut(parsedSegments);
+            const transcriptionIds = new Set(
+                parsedSegments.map((segment) => segment.transcriptionId),
+            );
+            for (const transcriptionId of transcriptionIds) {
+                await updateTranscriptionUpdatedAt(transcriptionId);
+            }
+        });
+    }
+
     async function updateSegment(id: string, updates: Partial<StoredSegment>) {
         const updatesParsed = StoredSegmentSchema.partial().parse({
             ...updates,
@@ -64,6 +84,46 @@ export function getSegmentService() {
         }
 
         return newSegment;
+    }
+
+    async function updateSegments(
+        entries: { segmentId: string; updates: Partial<Segment> }[],
+    ): Promise<StoredSegment[]> {
+        return db.transaction(
+            "rw",
+            db.segments,
+            db.transcriptions,
+            async () => {
+                const existing = await db.segments.bulkGet(
+                    entries.map((entry) => entry.segmentId),
+                );
+                const previous: StoredSegment[] = [];
+                const updated: StoredSegment[] = [];
+                for (const [index, entry] of entries.entries()) {
+                    const segment = existing[index];
+                    if (!segment) {
+                        continue;
+                    }
+                    previous.push(segment);
+                    updated.push(
+                        StoredSegmentSchema.parse({
+                            ...segment,
+                            ...entry.updates,
+                        }),
+                    );
+                }
+                await db.segments.bulkPut(updated);
+                const transcriptionIds = new Set(
+                    updated.map((segment) => segment.transcriptionId),
+                );
+                for (const transcriptionId of transcriptionIds) {
+                    await db.transcriptions.update(transcriptionId, {
+                        updatedAt: new Date(),
+                    });
+                }
+                return previous;
+            },
+        );
     }
 
     async function deleteSegment(id: string) {
@@ -80,7 +140,9 @@ export function getSegmentService() {
         addSegments,
         addSegment,
         putSegment,
+        putSegments,
         updateSegment,
+        updateSegments,
         deleteSegment,
     };
 }

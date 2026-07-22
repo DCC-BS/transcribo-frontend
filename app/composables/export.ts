@@ -227,11 +227,26 @@ export function useExport() {
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Downloads the original media file (audio/video) of the transcription.
+     */
+    function exportMedia(transcription: StoredTranscription): void {
+        if (!transcription.mediaFile) return;
+
+        const url = URL.createObjectURL(transcription.mediaFile);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = transcription.mediaFileName ?? transcription.name;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     return {
         exportAsText,
         exportAsSrt,
         exportAsJson,
         exportAsDocx,
         exportSummaryAsDocx,
+        exportMedia,
     };
 }

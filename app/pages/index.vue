@@ -1,137 +1,82 @@
 <script lang="ts" setup>
-import type {
-    MediaConfigureData,
-    MediaSelectionData,
-} from "~/types/mediaStepInOut";
-import { TaskStatusEnum } from "~/types/storedTasks";
+import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "#imports";
+import ProcessingTasksTable from "~/components/transcription/ProcessingTasksTable.vue";
+import TranscriptionTable from "~/components/transcription/TranscriptionTable.vue";
+import { useInProgressTasksListener } from "~/composables/useInProgressTasksListener";
 
-const { t } = useI18n();
-const { getTask, deleteTask, getTasksByStatus } = useTasks();
-const route = useRoute();
-const { showError } = useUserFeedback();
-const logger = useLogger();
-
-const taskId = route.query.taskId as string | undefined;
-
-const step = ref(1);
-const mediaSelectionData = ref<MediaSelectionData>();
-const mediaPreviewData = ref<MediaConfigureData>();
-const hasPendingTasks = ref(false);
-
-onMounted(async () => {
-    if (taskId) {
-        const task = await getTask(taskId.trim());
-        if (!task?.mediaFile || !task.mediaFileName) {
-            const error = new Error("Task not found or has no media file");
-            showError(error);
-            logger.error(error, `Failed to load task with id ${taskId}`);
-        } else {
-            deleteTask(taskId);
-            mediaSelectionData.value = {
-                media: new File([task.mediaFile], task.mediaFileName, {
-                    type: task.mediaFile.type,
-                }),
-                taskId: taskId,
-            };
-            step.value = 2;
-        }
-    } else {
-        const pendingTasks = await getTasksByStatus(TaskStatusEnum.PENDING);
-        hasPendingTasks.value = pendingTasks.length > 0;
-    }
+const retentionDays = computed(() => {
+    return Math.ceil(TRANSCRIPTION_RETENTION_PERIOD_MS / (1000 * 60 * 60 * 24));
 });
 
-function onMediaSelected(data: MediaSelectionData) {
-    mediaSelectionData.value = data;
-    step.value = 2;
-}
+const showRetentionHint = useLocalStorage("retention-hint-visible", true);
 
-function onMediaConfigure(payload: MediaConfigureData) {
-    mediaPreviewData.value = payload;
-    step.value = 3;
-}
+const { transcriptions } = useTranscriptions();
+const { deleteTranscription } = getTranscriptionService();
+const { taskErrors, unfinishedTasks } = useInProgressTasksListener();
+
+const { t } = useI18n();
+
+const search = ref("");
+const filteredTranscriptions = computed(() => {
+    const needle = search.value.trim().toLowerCase();
+    if (!needle) {
+        return transcriptions.value;
+    }
+    return transcriptions.value?.filter((transcription) =>
+        transcription.name.toLowerCase().includes(needle),
+    );
+});
 </script>
 
 <template>
-    <div class="mx-auto max-w-[95vw]">
-        <p class="hidden md:block text-lg text-gray-600 dark:text-gray-300 m-4">
-            {{ t("pages.index.subtitle") }}
-        </p>
-
-        <UAlert
-            v-if="hasPendingTasks"
-            @update:open="(o) => (hasPendingTasks = o)"
-            color="info"
-            icon="i-lucide-info"
-            variant="soft"
-            :title="t('pages.index.pendingTitle')"
-            :description="t('pages.index.pendingDescription')"
-            :actions="[
-                {
-                    label: t('pages.index.goToTranscriptions'),
-                    href: '/transcription',
-                    color: 'secondary',
-                },
-            ]"
-            close
-        >
-        </UAlert>
-
-        <div class="flex items-center justify-center">
-            <UButton
-                icon="i-lucide-file-up"
-                variant="link"
-                :aria-label="t('pages.index.step1')"
-                :class="{ 'font-bold': step === 1 }"
-                @click="step = 1"
-            >
-                <span class="hidden md:inline">
-                    1. {{ t("pages.index.step1") }}
-                </span>
-            </UButton>
-            <template v-if="step > 1">
-                <UIcon name="i-lucide-chevron-right" />
+    <div class="grow overflow-y-auto px-4 py-10 sm:px-12">
+        <div class="mx-auto w-full max-w-220">
+            <div class="mb-5 flex flex-wrap items-center gap-3.5">
+                <h2 class="flex-1 text-[1.35rem] font-bold tracking-tight">
+                    {{ t("transcriptionList.title") }}
+                </h2>
+                <UInput
+                    v-model="search"
+                    icon="i-lucide-search"
+                    :placeholder="t('transcriptionList.searchPlaceholder')"
+                    class="w-56"
+                />
                 <UButton
-                    icon="i-lucide-settings"
-                    variant="link"
-                    :aria-label="t('pages.index.step2')"
-                    :class="{ 'font-bold': step === 2 }"
-                    @click="step = 2"
+                    to="/new-transcription"
+                    color="primary"
+                    icon="i-lucide-plus"
                 >
-                    <span class="hidden md:inline">
-                        2. {{ t("pages.index.step2") }}
-                    </span>
+                    {{ t("navigation.new") }}
                 </UButton>
-            </template>
-            <template v-if="step > 2">
-                <UIcon name="i-lucide-chevron-right" />
-                <UButton
-                    icon="i-lucide-cpu"
-                    variant="link"
-                    :aria-label="t('pages.index.step3')"
-                    :class="{ 'font-bold': step === 3 }"
-                >
-                    <span class="hidden md:inline">
-                        3. {{ t("pages.index.step3") }}
-                    </span>
-                </UButton>
-            </template>
-        </div>
+            </div>
 
-        <div class="p-2">
-            <MediaSelectionView
-                v-if="step === 1"
-                @onMediaSelected="onMediaSelected"
+            <UAlert
+                v-if="showRetentionHint"
+                icon="i-lucide-info"
+                color="info"
+                variant="soft"
+                :title="t('retention.title')"
+                :description="
+                    t('retention.description', { retentionDays: retentionDays })
+                "
+                close
+                @update:open="(open) => (showRetentionHint = open)"
             />
-            <MediaPreviewView
-                v-if="step === 2 && mediaSelectionData"
-                v-model:input="mediaSelectionData"
-                @on-next="onMediaConfigure"
-            />
-            <MediaProcessingView
-                v-if="step === 3 && mediaPreviewData"
-                v-model:input="mediaPreviewData"
-            />
+
+            <div class="mt-5">
+                <ProcessingTasksTable
+                    :tasks="unfinishedTasks"
+                    :errors="taskErrors"
+                    @dismiss-error="taskErrors = []"
+                />
+            </div>
+
+            <div class="mt-5">
+                <TranscriptionTable
+                    :transcriptions="filteredTranscriptions"
+                    @delete="deleteTranscription"
+                />
+            </div>
         </div>
     </div>
 </template>

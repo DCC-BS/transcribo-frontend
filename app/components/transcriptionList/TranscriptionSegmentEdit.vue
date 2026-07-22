@@ -94,7 +94,6 @@ watch(speaker, (newSpeaker) => {
     }
 });
 
-// Not gated by transcription size — see calculateSegmentProgress.
 const progress = computed(() =>
     props.isActive
         ? calculateSegmentProgress(start.value, end.value, props.currentTime)
@@ -178,7 +177,7 @@ const endTimeFormatted = computed({
                             <span class="text-xs">s</span>
                         </template>
                     </UInput>
-                    <div class="text-gray-700">
+                    <div class="text-default">
                         <button
                             type="button"
                             class="cursor-pointer underline"

@@ -16,7 +16,7 @@ describe("formatTime", () => {
         });
 
         it("should format hours correctly", () => {
-            expect(formatTime(3661.5)).toBe("61:01.500");
+            expect(formatTime(3661.5)).toBe("1:01:01.500");
         });
 
         it("should handle milliseconds correctly", () => {
@@ -37,6 +37,21 @@ describe("formatTime", () => {
             expect(formatTime(90, { milliseconds: false })).toBe("1:30");
         });
 
+        it("should pad minutes to requested minimum digits", () => {
+            expect(
+                formatTime(0, {
+                    milliseconds: false,
+                    minimumMinuteDigits: 2,
+                }),
+            ).toBe("00:00");
+            expect(
+                formatTime(90, {
+                    milliseconds: false,
+                    minimumMinuteDigits: 2,
+                }),
+            ).toBe("01:30");
+        });
+
         it("should format zero time without milliseconds", () => {
             expect(formatTime(0, { milliseconds: false })).toBe("0:00");
         });
@@ -52,7 +67,7 @@ describe("formatTime", () => {
         });
 
         it("should handle large values", () => {
-            expect(formatTime(7384.567)).toBe("123:04.567");
+            expect(formatTime(7384.567)).toBe("2:03:04.567");
         });
     });
 });

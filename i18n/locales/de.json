@@ -41,7 +41,8 @@
         "settings": "Einstellungen",
         "configureTranscription": "Konfiguriere deine Transkription",
         "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Du kannst beide auf automatische Erkennung lassen, wenn du unsicher bist.",
-        "preparingAudio": "Audio wird vorbereitet..."
+        "preparingAudio": "Audio wird vorbereitet...",
+        "processing": "In Bearbeitung"
     },
     "pages": {
         "index": {
@@ -65,11 +66,14 @@
             "step3": "Medien verarbeiten",
             "pendingTitle": "Unfertige Transkriptionen",
             "pendingDescription": "Du hast unfertige Transkriptionen",
-            "goToTranscriptions": "Zu den Transkriptionen"
+            "goToTranscriptions": "Zu den Transkriptionen",
+            "dropzoneLabel": "Datei hierher ziehen oder klicken",
+            "dropzoneFormats": "mp3, mp4, m4a, flac, wav, webm … max. 500 MB"
         }
     },
     "navigation": {
         "app": "Transcribo",
+        "home": "Startseite",
         "new": "Neue Transkription",
         "transcriptions": "Alle Transkriptionen",
         "languages": "Sprachen",
@@ -77,7 +81,9 @@
         "de": "Deutsch",
         "undo": "Rückgängig",
         "redo": "Wiederholen",
-        "actions": "Aktionen"
+        "actions": "Aktionen",
+        "settings": "Einstellungen",
+        "language": "Sprache"
     },
     "audioRecorder": {
         "useRecording": "Diese Aufnahme verwenden",
@@ -94,7 +100,8 @@
         "pause": "Pause",
         "addSegment": "Segment hinzufügen",
         "downloadMedia": "Medien herunterladen",
-        "noMedia": "Keine Mediendatei verfügbar"
+        "noMedia": "Keine Mediendatei verfügbar",
+        "recordings": "Audio-Aufnahmen"
     },
     "taskStatus": {
         "processing": "Verarbeite deine Anfrage...",
@@ -139,7 +146,6 @@
         }
     },
     "ui": {
-        "saveChangesHint": "Textfeld verlassen oder Enter drücken, um Änderungen zu übernehmen",
         "emptyState": {
             "title": "Keine Daten gefunden",
             "description": "Es sind keine Daten zum Anzeigen verfügbar."
@@ -175,6 +181,8 @@
         "hide": "Zusammenfassung ausblenden",
         "title": "Meeting-Zusammenfassung",
         "error": "Fehler bei der Zusammenfassung",
+        "copy": "In Zwischenablage kopieren",
+        "copied": "Zusammenfassung kopiert",
         "empty": "Noch keine Zusammenfassung erstellt",
         "export": "Zusammenfassung exportieren",
         "selectType": "Zusammenfassungsart wählen",
@@ -214,14 +222,16 @@
     },
     "commands": {
         "empty": "Leerer Befehl",
-        "startTranscription": "Starte Transkription: Aufgaben-ID {taskId}, Datei: {fileName}",
         "transcriptionFinished": "Transkription abgeschlossen: Status {status}{hasResults}",
         "transcriptionFinishedResults": ", Ergebnisse verfügbar",
         "seekToSeconds": "Springe zu: {seconds} Sekunden",
         "togglePlay": "Wiedergabe/Pause umschalten",
         "insertSegment": "Segment {direction} einfügen",
         "deleteSegment": "Segment löschen",
+        "deleteSegments": "{count} Segmente löschen",
+        "restoreSegments": "{count} Segmente wiederherstellen",
         "updateSegment": "Segment aktualisieren: Änderungen: {updates}",
+        "updateSegments": "{count} Segmente aktualisieren",
         "updateSegmentNoUpdates": "Segment aktualisieren: Keine Änderungen",
         "changeTranscriptionName": "Transkriptionsname ändern zu: {name}",
         "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\"",
@@ -236,7 +246,8 @@
         "showSpeakers": "Sprecher anzeigen",
         "showTimestamps": "Zeitstempel anzeigen",
         "mergeSegments": "Transkriptionen zusammenführen",
-        "placeholder": "Keine Transkription zur Anzeige verfügbar"
+        "placeholder": "Keine Transkription zur Anzeige verfügbar",
+        "playFromHere": "Hierhin springen"
     },
     "mode": {
         "viewer": "Betrachter",
@@ -306,6 +317,7 @@
         "refresh": "Aktualisieren",
         "unknownFile": "Unbekannte Datei",
         "transcribe": "Transkribieren",
+        "viewStatus": "Status anzeigen",
         "delete": "Löschen",
         "noTasksFound": "Keine Aufgaben gefunden",
         "noTasksDescription": "Es gibt derzeit keine Transkriptionen in Bearbeitung",
@@ -439,7 +451,8 @@
     },
     "transcriptionList": {
         "title": "Deine Transkriptionen",
-        "description": "Hier siehst du alle deine transkribierten Dateien"
+        "description": "Hier siehst du alle deine transkribierten Dateien",
+        "searchPlaceholder": "Suchen…"
     },
     "retention": {
         "title": "Verfügbarkeit der Transkriptionen",
@@ -500,16 +513,20 @@
             "description": "Hier kannst du die Sprecher umbenennen. Gib einfach einen neuen Namen ein und er wird auf alle Segmente dieses Sprechers angewendet."
         },
         "editTranscriptions": {
-            "title": "Transkriptionen Bearbeiten",
-            "description": "Jedes Segment kann bearbeitet werden: Ändere den Text, aktualisiere den Sprecher oder ändere Start- und Endzeiten. Klicke auf die Zeitstempel um zu dieser Position zu springen."
+            "title": "Transkript Bearbeiten",
+            "description": "Klicke in den Text und bearbeite ihn direkt. Ein Klick auf einen Sprechernamen benennt ihn um oder weist die Passage einem anderen Sprecher zu."
+        },
+        "speakerLanes": {
+            "title": "Sprecher-Spuren",
+            "description": "Jede Spur zeigt die Segmente eines Sprechers auf der Zeitachse. Ziehe Blöcke zum Verschieben oder auf eine andere Spur (wenn dort frei), benenne Sprecher per Klick auf den Namen um und öffne mit Rechtsklick das Zuweisungsmenü."
         },
         "addTranscription": {
-            "title": "Neue Transkription Hinzufügen",
-            "description": "Klicke auf den + Button um an beliebiger Stelle neue Transkriptionssegmente hinzuzufügen."
+            "title": "Neues Segment Hinzufügen",
+            "description": "Fügt am Abspielpunkt ein neues, leeres Segment ein."
         },
         "mediaPlayback": {
             "title": "Medienwiedergabe",
-            "description": "Nutze die Medienleiste um dein Audio oder Video abzuspielen."
+            "description": "Abspielen und Pausieren (auch mit der Leertaste), Geschwindigkeit ändern und mit dem Zeit-Chip durch die Aufnahme fahren."
         },
         "mediaExpand": {
             "title": "Medienansicht Erweitern",
@@ -524,29 +541,67 @@
             "description": "Du bist bereit, Transcribo zu nutzen! Klicke jederzeit auf den Hilfe-Button, um diese Tour erneut zu starten."
         }
     },
-    "hotWords": {
-        "title": "Schlüsselbegriffe",
-        "hint": "Im Transkript erkannte spezielle Namen und Begriffe. Das Umbenennen ersetzt den Begriff in allen Textstellen.",
-        "jumpToNextOccurrence": "Zum nächsten Vorkommen springen",
-        "type": {
-            "person": "Personen",
-            "location": "Orte",
-            "institution": "Institutionen",
-            "object": "Weitere Begriffe"
-        },
-        "renameSuccess": "Umbenannt in \"{term}\" — in {count} Stelle(n) ersetzt.",
-        "noOccurrence": "Keine Vorkommen im Transkript gefunden.",
-        "addSuccess": "\"{term}\" zu Schlüsselwörtern hinzugefügt"
-    },
     "documentEditor": {
-        "playFromHere": "Ab hier abspielen",
-        "editWord": "\"{term}\" bearbeiten",
-        "replaceOne": "Nur hier",
-        "replaceAll": "Überall",
-        "replaceSuccess": "\"{term}\" an {count} Stelle(n) ersetzt.",
-        "addKeyword": "\"{term}\" zu Schlüsselwörtern hinzufügen",
         "speakerChange": "Sprecher für diesen Abschnitt ändern",
-        "speakerRename": "Überall umbenennen",
-        "rememberSpeaker": "\"{name}\" zu Schlüsselwörtern hinzufügen"
+        "speakerRename": "Überall umbenennen"
+    },
+    "editor": {
+        "toolrow": {
+            "highlightKeywords": "Schlüsselbegriffe hervorheben",
+            "highlightKeywordsHint": "Erkannte spezielle Begriffe und Personen",
+            "autoScroll": "Auto-Scroll",
+            "mergeSegments": "Segmente zusammenführen"
+        },
+        "dock": {
+            "zoom": "Zeitachse zoomen",
+            "zoomReset": "Zoom zurücksetzen",
+            "addSegment": "Neues Segment am Abspielpunkt einfügen",
+            "segment": "Segment",
+            "playbackSpeed": "Wiedergabegeschwindigkeit",
+            "toggleVideo": "Video ein-/ausblenden",
+            "video": "Video",
+            "toggleLanes": "Sprecher-Ansicht ein-/ausklappen",
+            "resizeLanes": "Sprecher-Ansicht vergrössern/verkleinern"
+        },
+        "lanes": {
+            "speakers": "Sprecher",
+            "addSpeaker": "Sprecher hinzufügen",
+            "addSpeakerPrompt": "Name der neuen Sprecherin/des neuen Sprechers:",
+            "laneMenu": "Sprecher-Menü",
+            "rename": "Umbenennen",
+            "resizeSpeakerColumn": "Ziehen, um die Sprecherspalte zu verbreitern",
+            "moveSegmentsTo": "Segmente verschieben zu",
+            "noOtherSpeakers": "Keine anderen Sprecher",
+            "jumpToNext": "Zum nächsten Auftritt springen",
+            "time": "Zeit",
+            "scrollHorizontally": "Horizontal scrollen"
+        }
+    },
+    "footer": {
+        "logoAlt": "Datenwissenschaften und Künstliche Intelligenz",
+        "title": "Datenwissenschaften und KI",
+        "subtitle": "Developed with ♥ by DCC - Data Competence Center",
+        "help": "Hilfe"
+    },
+    "vocabulary": {
+        "title": "Wortschatz",
+        "description": "Wörter, die aus deinen Korrekturen im Editor gelernt wurden. Sie werden bei jeder neuen Transkription mitgegeben, um die Schreibweise zu verbessern.",
+        "storageTitle": "Speicherung des Wortschatzes",
+        "storageDescription": "Die Schlüsselwörter werden lokal in deinem Browser gespeichert.",
+        "newPlaceholder": "Neues Wort…",
+        "add": "Hinzufügen",
+        "rename": "Umbenennen",
+        "delete": "Löschen",
+        "added": "«{term}» zum Wortschatz hinzugefügt",
+        "deleted": "«{term}» aus dem Wortschatz entfernt",
+        "empty": "Noch keine Wörter im Wortschatz. Korrigiere Wörter im Editor oder füge sie hier hinzu.",
+        "editCountHint": "Wie oft diese Schreibweise bestätigt wurde",
+        "updatedAtHint": "Zuletzt geändert",
+        "types": {
+            "person": "Person",
+            "location": "Ort",
+            "object": "Begriff",
+            "institution": "Institution"
+        }
     }
 }

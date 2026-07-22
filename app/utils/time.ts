@@ -3,6 +3,8 @@ type formatOptions = {
      * If true, the time will be formatted with milliseconds
      */
     milliseconds?: boolean;
+    /** Minimum digits used for minutes when hours are not shown. */
+    minimumMinuteDigits?: number;
 };
 
 const defaultFormatOptions: formatOptions = {
@@ -10,7 +12,8 @@ const defaultFormatOptions: formatOptions = {
 };
 
 /**
- * Formats time in seconds to MM:SS display
+ * Formats time in seconds to M:SS display, or H:MM:SS once the time
+ * reaches an hour (recordings can be up to two hours long).
  * @param {number} time - Time in seconds
  * @returns {string} Formatted time string
  */
@@ -20,16 +23,23 @@ export function formatTime(time: number, options?: formatOptions): string {
         ...options,
     };
 
-    const minutes: number = Math.floor(time / 60);
+    const hours: number = Math.floor(time / 3600);
+    const minutes: number = Math.floor((time % 3600) / 60);
     const seconds: number = Math.floor(time % 60);
     const milliseconds: number = Math.floor((time % 1) * 1000);
 
     const secondsString = seconds.toString().padStart(2, "0");
-    const millisecondsString = useMilliseconds
-        ? milliseconds.toString().padStart(3, "0")
+    const suffix = useMilliseconds
+        ? `.${milliseconds.toString().padStart(3, "0")}`
         : "";
+    const head =
+        hours > 0
+            ? `${hours}:${minutes.toString().padStart(2, "0")}`
+            : minutes
+                  .toString()
+                  .padStart(options?.minimumMinuteDigits ?? 1, "0");
 
-    return `${minutes}:${secondsString}${millisecondsString ? `.${millisecondsString}` : ""}`;
+    return `${head}:${secondsString}${suffix}`;
 }
 
 /**

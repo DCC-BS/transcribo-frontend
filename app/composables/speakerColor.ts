@@ -1,27 +1,45 @@
-import { getColorMap } from "~/services/colorMapService";
-import type { RGBColor } from "~/types/color";
+import { RGBColor } from "~/types/color";
+
+const SPEAKER_PALETTE = [
+    "#0e81a7",
+    "#9156b4",
+    "#e69500",
+    "#a57251",
+    "#009a79",
+    "#c74f4f",
+] as const;
+
+const FALLBACK_COLOR = new RGBColor(115, 115, 115);
+
+function hexToRgb(hex: string): RGBColor {
+    const match = hex.match(/^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i);
+    if (!match) {
+        return FALLBACK_COLOR;
+    }
+    return new RGBColor(
+        Number.parseInt(match[1] as string, 16),
+        Number.parseInt(match[2] as string, 16),
+        Number.parseInt(match[3] as string, 16),
+    );
+}
 
 export function useSpeakerColor(speakers: Ref<(string | undefined)[]>) {
     const speakerSet = computed(() =>
         Array.from(
-            new Set<string>(
-                speakers.value
-                    .filter((speaker) => speaker)
-                    .map((speaker) => speaker as string),
+            new Set(
+                speakers.value.filter((speaker): speaker is string =>
+                    Boolean(speaker),
+                ),
             ),
         ),
     );
 
-    const colorMap = getColorMap("textFriendly");
-
-    // Compute a dictionary mapping each speaker to their color
     const colorDict = computed(() =>
         speakerSet.value.reduce(
             (acc, speaker, index) => {
-                const t = index / speakerSet.value.length;
-
-                acc[speaker] = colorMap(t);
-
+                acc[speaker] = hexToRgb(
+                    SPEAKER_PALETTE[index % SPEAKER_PALETTE.length] as string,
+                );
                 return acc;
             },
             {} as Record<string, RGBColor>,
@@ -29,11 +47,10 @@ export function useSpeakerColor(speakers: Ref<(string | undefined)[]>) {
     );
 
     function getSpeakerColor(speaker: string | undefined): RGBColor {
-        if (!speaker || !colorDict.value[speaker]) {
-            return { r: 1, g: 1, b: 1 };
+        if (!speaker) {
+            return FALLBACK_COLOR;
         }
-
-        return colorDict.value[speaker];
+        return colorDict.value[speaker] ?? FALLBACK_COLOR;
     }
 
     return {

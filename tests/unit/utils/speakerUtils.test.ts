@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { getUniqueSpeakers } from "../../../app/utils/speakerUtils";
+import {
+    getUniqueSpeakers,
+    nextSpeakerName,
+} from "../../../app/utils/speakerUtils";
 import type { Segment } from "../../../app/types/transcriptionResponse";
 
 describe("getUniqueSpeakers", () => {
@@ -58,5 +61,21 @@ describe("getUniqueSpeakers", () => {
         ];
         const result = getUniqueSpeakers(segments);
         expect(result).toEqual(new Set([""]));
+    });
+});
+
+describe("nextSpeakerName", () => {
+    it("starts at SPEAKER_00 when there are none", () => {
+        expect(nextSpeakerName([])).toBe("SPEAKER_00");
+        expect(nextSpeakerName(["Alice", "Bob"])).toBe("SPEAKER_00");
+    });
+
+    it("continues past the highest existing index", () => {
+        expect(nextSpeakerName(["SPEAKER_00", "SPEAKER_01"])).toBe("SPEAKER_02");
+        expect(nextSpeakerName(["SPEAKER_03", "Alice"])).toBe("SPEAKER_04");
+    });
+
+    it("ignores gaps and picks max + 1", () => {
+        expect(nextSpeakerName(["SPEAKER_00", "SPEAKER_05"])).toBe("SPEAKER_06");
     });
 });

@@ -35,6 +35,10 @@ function emitAudio(): void {
     }
 }
 
+function startRecording(): void {
+    shouldRecord.value = true;
+}
+
 const audioSessionActions = computed(() => [
     {
         label: "Process",
@@ -65,7 +69,7 @@ const audioSessionActions = computed(() => [
                 }}
             </p>
             <UDrawer
-                title="Audio Recordings"
+                :title="t('media.recordings')"
                 description="Abandoned audio recordings"
                 v-model:open="showAbandonedRecordings"
             >
@@ -88,7 +92,7 @@ const audioSessionActions = computed(() => [
         <UButton
             v-if="!shouldRecord"
             icon="i-lucide-mic"
-            @click="shouldRecord = true"
+            @click="startRecording"
             >{{ t("pages.index.recordAudio") }}</UButton
         >
     </div>

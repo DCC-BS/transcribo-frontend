@@ -20,22 +20,6 @@ watch(() => props.transcription.name, () => {
     newName.value = props.transcription.name;
 });
 
-const mediaUrl = computed(() => {
-    if (props.transcription.mediaFile) {
-        return URL.createObjectURL(props.transcription.mediaFile);
-    }
-
-    return undefined;
-});
-
-const mediaName = computed(() => {
-    if (props.transcription.mediaFileName) {
-        return props.transcription.mediaFileName;
-    }
-
-    return undefined;
-});
-
 async function handleNameChange() {
     if (newName.value !== props.transcription.name) {
         await executeCommand(
@@ -53,18 +37,12 @@ async function handleNameChange() {
     <motion.div id="transcription-info" :animate="{ opacity: 1, x: 0 }" :initial="{ opacity: 0, x: -10 }"
         :transition="{ ...pageTransition, delay: staggerDelay }">
         <UPopover v-model:open="isInfoExpanded" :ui="{ content: 'p-0 min-w-72' }">
-            <UButton id="transcription-info-button" variant="ghost" color="neutral" size="sm" class="gap-2">
-                <template #leading>
-                    <div
-                        class="w-6 h-6 rounded-md bg-linear-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-400/20 dark:to-purple-400/20 flex items-center justify-center">
-                        <UIcon name="i-lucide-info" class="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
-                    </div>
-                </template>
-                <span class="truncate max-w-32 sm:max-w-48">{{
+            <UButton id="transcription-info-button" variant="ghost" color="neutral" size="sm" class="gap-1.5">
+                <span class="truncate max-w-32 sm:max-w-56 text-[0.9rem] font-semibold text-default">{{
                     props.transcription.name || t("transcription.info")
                 }}</span>
                 <template #trailing>
-                    <UIcon name="i-lucide-chevron-down" class="w-4 h-4 transition-transform duration-200"
+                    <UIcon name="i-lucide-chevron-down" class="size-3.5 text-dimmed transition-transform duration-200"
                         :class="{ 'rotate-180': isInfoExpanded }" />
                 </template>
             </UButton>
@@ -72,36 +50,16 @@ async function handleNameChange() {
             <template #content>
                 <motion.div :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: -5 }"
                     :transition="{ duration: 0.2 }"
-                    class="p-4 space-y-4 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700">
+                    class="p-4 space-y-4 bg-default rounded-lg shadow-xl border border-default">
                     <!-- File Name Input -->
                     <div class="space-y-1.5">
                         <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the UInput below (id forwarded to native input) -->
                         <label for="transcription-name"
-                            class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                            {{ t("transcription.nameLabel") || "Name" }}
+                            class="text-xs font-medium text-muted uppercase tracking-wide">
+                            {{ t("transcription.nameLabel") }}
                         </label>
                         <UInput id="transcription-name" class="w-full" v-model="newName" @change="handleNameChange"
                             :placeholder="t('transcription.namePlaceholder')" size="sm" />
-                    </div>
-
-                    <!-- Download Media Button -->
-                    <div class="pt-2 border-t border-gray-200 dark:border-gray-700">
-                        <!-- biome-ignore lint/a11y/useValidAnchor: href is bound dynamically via :href for media download -->
-                        <a v-if="mediaUrl && mediaName" :href="mediaUrl" :download="mediaName"
-                            :aria-label="t('media.downloadMedia')">
-                            <motion.div :whileHover="{ scale: 1.02 }" :whileTap="{ scale: 0.98 }" :transition="{
-                                type: 'spring' as const,
-                                stiffness: 400,
-                                damping: 17,
-                            }">
-                                <UButton icon="i-lucide-download" variant="soft" :label="t('media.downloadMedia')"
-                                    color="info" size="sm" block />
-                            </motion.div>
-                        </a>
-                        <div v-else class="flex items-center gap-2 text-sm text-gray-400 dark:text-gray-500 italic">
-                            <UIcon name="i-lucide-file-x" class="w-4 h-4" />
-                            {{ t("media.noMedia") }}
-                        </div>
                     </div>
                 </motion.div>
             </template>

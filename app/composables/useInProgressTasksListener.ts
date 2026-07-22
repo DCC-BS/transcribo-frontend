@@ -7,14 +7,22 @@ import {
     TaskStatusSchema,
 } from "~/types/storedTasks";
 
+// The status endpoint can return a transient 5xx while the task keeps
+// running fine; only surface an error after this many failed polls in a row.
+const FAILURE_THRESHOLD = 3;
+
 export function useInProgressTasksListener() {
     const { getTask, updateTaskStatus, deleteTask } = useTasks();
     const { applyTaskResult } = useTaskListener();
     const { apiFetch } = useApi();
     const { t } = useI18n();
+    const logger = useLogger();
 
     const unfinishedTasks = ref<StoredTask[]>([]);
     const taskErrors = ref<Error[]>([]);
+
+    // taskId -> number of consecutive failed polls.
+    const consecutiveFailures = new Map<string, number>();
 
     let subscription: Subscription | undefined;
 
@@ -60,22 +68,50 @@ export function useInProgressTasksListener() {
                     throw statusResponse;
                 }
 
+                consecutiveFailures.delete(task.id);
+
                 if (statusResponse.status === TaskStatusEnum.COMPLETED) {
-                    processCompletedTask(task);
+                    await processCompletedTask(task);
                 } else {
                     updateTaskStatus(task.id, statusResponse);
                 }
             } catch (e: unknown) {
-                if (e instanceof Error) {
-                    taskErrors.value.push(e);
-                } else {
-                    taskErrors.value.push(new Error(String(e)));
-                }
-
-                if (taskErrors.value.length > 5) {
-                    taskErrors.value = taskErrors.value.slice(-5);
-                }
+                handleTaskError(task, e);
             }
+        }
+    }
+
+    function handleTaskError(task: StoredTask, e: unknown) {
+        const taskId = task.id;
+        logger.error(e, `Background poll for task ${taskId} failed`);
+
+        // The server no longer knows this task; retrying can never succeed.
+        // Mark it failed so the poll loop stops.
+        if (isApiError(e) && e.errorId === "resource_not_found") {
+            updateTaskStatus(taskId, {
+                ...task.status,
+                status: TaskStatusEnum.FAILED,
+            });
+        } else {
+            const failures = (consecutiveFailures.get(taskId) ?? 0) + 1;
+            consecutiveFailures.set(taskId, failures);
+            if (failures < FAILURE_THRESHOLD) {
+                return;
+            }
+        }
+
+        const message = isApiError(e)
+            ? t(`errors.${e.errorId}`)
+            : e instanceof Error
+              ? e.message
+              : String(e);
+
+        if (taskErrors.value.some((err) => err.message === message)) {
+            return;
+        }
+        taskErrors.value.push(new Error(message));
+        if (taskErrors.value.length > 5) {
+            taskErrors.value = taskErrors.value.slice(-5);
         }
     }
 

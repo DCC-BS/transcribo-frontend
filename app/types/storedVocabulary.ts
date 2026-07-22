@@ -14,6 +14,9 @@ export const StoredVocabularyEntrySchema = z.object({
     // Last time the term actually appeared in a finished transcription;
     // eviction removes the least recently used entries first.
     lastUsedAt: z.date(),
+    // How often the user edited/confirmed this spelling in the editor;
+    // repeated confirmation signals the term matters to the user.
+    editCount: z.number().default(1),
 });
 
 export type StoredVocabularyEntry = z.infer<typeof StoredVocabularyEntrySchema>;

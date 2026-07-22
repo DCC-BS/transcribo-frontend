@@ -42,10 +42,10 @@ describe("buildTermPattern", () => {
 });
 
 describe("replaceTermInSegmentTexts", () => {
-    it("replaces every whole-word occurrence (case-sensitive) and emits one command per changed segment", async () => {
+    it("replaces every whole-word occurrence case-insensitively in one bulk command", async () => {
         const segments = [
             { id: "1", text: "Herr Meier war da." },
-            { id: "2", text: "Meier und Meier." },
+            { id: "2", text: "meier und MEIER." },
             { id: "3", text: "Meierhof bleibt." },
         ];
         const executeCommand = vi.fn().mockResolvedValue(undefined);
@@ -59,12 +59,18 @@ describe("replaceTermInSegmentTexts", () => {
 
         // Segment 3 ("Meierhof") is a partial match and stays untouched.
         expect(changed).toBe(2);
-        expect(executeCommand).toHaveBeenCalledTimes(2);
-        const first = executeCommand.mock.calls[0]?.[0];
-        expect(first.segmentId).toBe("1");
-        expect(first.updates).toEqual({ text: "Herr Müller war da." });
-        const second = executeCommand.mock.calls[1]?.[0];
-        expect(second.updates).toEqual({ text: "Müller und Müller." });
+        expect(executeCommand).toHaveBeenCalledTimes(1);
+        const command = executeCommand.mock.calls[0]?.[0];
+        expect(command.entries).toEqual([
+            {
+                segmentId: "1",
+                updates: { text: "Herr Müller war da." },
+            },
+            {
+                segmentId: "2",
+                updates: { text: "Müller und Müller." },
+            },
+        ]);
     });
 
     it("does nothing when the term is empty or unchanged", async () => {

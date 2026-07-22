@@ -2,10 +2,8 @@
 import { motion } from "motion-v";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import {
-    computeSpeakerStatistics,
-    formatDuration,
-} from "~/utils/speakerStatistics";
+import { computeSpeakerStatistics } from "~/utils/speakerStatistics";
+import { formatTime } from "~/utils/time";
 
 interface InputProps {
     transcription: StoredTranscription;
@@ -25,9 +23,7 @@ const totalSpeakingTime = computed(() =>
     statistics.value.reduce((sum, s) => sum + s.duration, 0),
 );
 
-const speakers = computed(() => statistics.value.map((s) => s.speaker));
-
-const { getSpeakerColor } = useSpeakerColor(speakers);
+const { getSpeakerColor, displayName } = useSpeakerRegistry();
 
 const speakingPercentage = computed(() => {
     if (mediaDuration.value <= 0) return 0;
@@ -68,14 +64,13 @@ onMounted(() => {
 </script>
 
 <template>
-    <div id="speaker-statistics" class="grow h-full flex flex-col">
-        <div
-            class="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800"
-        >
-            <h3 class="font-medium text-sm">
+    <div id="speaker-statistics" class="grow min-h-0 flex flex-col overflow-y-auto px-5 py-8">
+        <div class="mx-auto w-full max-w-225">
+        <div class="mb-4">
+            <h3 class="font-semibold text-sm">
                 {{ t("statistics.title", "Speaker Statistics") }}
             </h3>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p class="text-xs text-muted mt-1">
                 {{
                     t(
                         "statistics.description",
@@ -85,7 +80,7 @@ onMounted(() => {
             </p>
         </div>
 
-        <div class="flex-1 p-4 overflow-auto">
+        <div class="flex-1">
             <motion.div
                 v-if="statistics.length > 0"
                 class="space-y-4"
@@ -100,10 +95,10 @@ onMounted(() => {
                     :transition="{ duration: 0.3 }"
                 >
                     <div
-                        class="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                        class="p-3.5 rounded-2xl border border-default bg-default shadow-sm"
                     >
                         <div
-                            class="text-xs text-gray-500 dark:text-gray-400 mb-1"
+                            class="text-xs text-muted mb-1"
                         >
                             {{
                                 t("statistics.audioDuration", "Audio Duration")
@@ -111,32 +106,32 @@ onMounted(() => {
                         </div>
                         <div class="font-mono text-lg font-semibold">
                             <template v-if="isLoadingDuration">
-                                <span class="text-gray-400">...</span>
+                                <span class="text-dimmed">...</span>
                             </template>
                             <template v-else>
-                                {{ formatDuration(mediaDuration) }}
+                                {{ formatTime(mediaDuration, { milliseconds: false }) }}
                             </template>
                         </div>
                     </div>
 
                     <div
-                        class="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                        class="p-3.5 rounded-2xl border border-default bg-default shadow-sm"
                     >
                         <div
-                            class="text-xs text-gray-500 dark:text-gray-400 mb-1"
+                            class="text-xs text-muted mb-1"
                         >
                             {{ t("statistics.speakingTime", "Speaking Time") }}
                         </div>
                         <div class="font-mono text-lg font-semibold">
-                            {{ formatDuration(totalSpeakingTime) }}
+                            {{ formatTime(totalSpeakingTime, { milliseconds: false }) }}
                         </div>
                     </div>
 
                     <div
-                        class="p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                        class="p-3.5 rounded-2xl border border-default bg-default shadow-sm"
                     >
                         <div
-                            class="text-xs text-gray-500 dark:text-gray-400 mb-1"
+                            class="text-xs text-muted mb-1"
                         >
                             {{
                                 t(
@@ -147,7 +142,7 @@ onMounted(() => {
                         </div>
                         <div class="font-mono text-lg font-semibold">
                             <template v-if="isLoadingDuration">
-                                <span class="text-gray-400">...</span>
+                                <span class="text-dimmed">...</span>
                             </template>
                             <template v-else>
                                 {{ speakingPercentage.toFixed(1) }}%
@@ -156,9 +151,9 @@ onMounted(() => {
                     </div>
                 </motion.div>
 
-                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                <div class="border-t border-default pt-4">
                     <h4
-                        class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3"
+                        class="text-sm font-semibold mb-3"
                     >
                         {{ t("statistics.bySpeaker", "By Speaker") }}
                     </h4>
@@ -167,7 +162,7 @@ onMounted(() => {
                         <motion.div
                             v-for="(stat, index) in statistics"
                             :key="stat.speaker"
-                            class="flex items-center gap-4 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                            class="flex items-center gap-4 p-3.5 rounded-2xl border border-default bg-default shadow-sm"
                             :initial="{ opacity: 0, x: -20 }"
                             :animate="{ opacity: 1, x: 0 }"
                             :transition="{ duration: 0.3, delay: index * 0.05 }"
@@ -183,16 +178,16 @@ onMounted(() => {
 
                             <div class="flex-1 min-w-0">
                                 <div class="font-medium text-sm truncate">
-                                    {{ stat.speaker }}
+                                    {{ displayName(stat.speaker) }}
                                 </div>
                             </div>
 
                             <div class="text-right shrink-0">
                                 <div class="font-mono text-sm font-medium">
-                                    {{ formatDuration(stat.duration) }}
+                                    {{ formatTime(stat.duration, { milliseconds: false }) }}
                                 </div>
                                 <div
-                                    class="text-xs text-gray-500 dark:text-gray-400"
+                                    class="text-xs text-muted"
                                 >
                                     {{ stat.percentage.toFixed(1) }}%
                                 </div>
@@ -200,7 +195,7 @@ onMounted(() => {
 
                             <div class="w-20 shrink-0">
                                 <div
-                                    class="h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
+                                    class="h-1.5 bg-elevated rounded-full overflow-hidden"
                                 >
                                     <motion.div
                                         class="h-full rounded-full"
@@ -228,7 +223,7 @@ onMounted(() => {
 
             <div
                 v-else
-                class="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400"
+                class="flex flex-col items-center justify-center h-full text-muted"
             >
                 <UIcon
                     name="i-lucide-users"
@@ -236,6 +231,7 @@ onMounted(() => {
                 />
                 <p>{{ t("statistics.noData", "No speaker data available") }}</p>
             </div>
+        </div>
         </div>
     </div>
 </template>

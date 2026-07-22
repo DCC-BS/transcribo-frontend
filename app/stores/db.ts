@@ -85,3 +85,25 @@ db.version(44)
                 }
             });
     });
+
+db.version(45)
+    .stores({
+        tasks: "id, status, createdAt",
+        transcriptions: "id, name, createdAt, updatedAt, audioFiledId",
+        segments: "id, transcriptionId, speaker, start, end",
+        vocabulary: "term, lastUsedAt",
+    })
+    .upgrade(async (tx) => {
+        // speakerOrder (display-name list) becomes the speaker roster.
+        // Legacy segments carry display names as their speaker value, so
+        // each old name becomes a speaker id without a separate name.
+        await tx
+            .table("transcriptions")
+            .toCollection()
+            .modify((transcription) => {
+                transcription.speakers = (transcription.speakerOrder ?? []).map(
+                    (id: string) => ({ id }),
+                );
+                delete transcription.speakerOrder;
+            });
+    });

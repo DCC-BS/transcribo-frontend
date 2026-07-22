@@ -1,5 +1,5 @@
 import type { ICommand } from "#build/types/commands";
-import { UpdateSegmentCommand } from "~/types/commands";
+import { UpdateSegmentsCommand } from "~/types/commands";
 
 interface SegmentWithText {
     id: string;
@@ -26,16 +26,19 @@ export async function replaceTermInSegmentTexts(
         return 0;
     }
 
-    const pattern = buildTermPattern(from, "g");
-    let changed = 0;
+    const pattern = buildTermPattern(from, "gi");
+    const entries: ConstructorParameters<typeof UpdateSegmentsCommand>[0] = [];
     for (const segment of segments) {
         const newText = segment.text.replace(pattern, to);
         if (newText !== segment.text) {
-            changed++;
-            await executeCommand(
-                new UpdateSegmentCommand(segment.id, { text: newText }),
-            );
+            entries.push({
+                segmentId: segment.id,
+                updates: { text: newText },
+            });
         }
     }
-    return changed;
+    if (entries.length > 0) {
+        await executeCommand(new UpdateSegmentsCommand(entries));
+    }
+    return entries.length;
 }

@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { motion } from "motion-v";
 import { v4 as uuidv4 } from "uuid";
 import type {
     MediaConfigureData,
@@ -29,7 +28,19 @@ const speakerOptions = [
 const audioLanguageOptions = useLanguageOptions();
 
 const isVideo = computed(() => isVideoFile(input.value.media));
-const mediaSource = computed(() => URL.createObjectURL(input.value.media));
+// side-effect-free: URL created in a watch, previous one revoked — a
+// computed with createObjectURL leaks a blob URL per recompute
+const mediaSource = ref("");
+watch(
+    () => input.value.media,
+    (media) => {
+        if (mediaSource.value) {
+            URL.revokeObjectURL(mediaSource.value);
+        }
+        mediaSource.value = URL.createObjectURL(media);
+    },
+    { immediate: true },
+);
 const task = ref<StoredTask>();
 
 watch(
@@ -84,278 +95,132 @@ function onNext() {
 </script>
 
 <template>
-    <div class="w-full max-w-[95vw] mx-auto">
-        <div
-            class="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start justify-center max-w-7xl mx-auto p-4 lg:p-6"
-        >
-            <!-- Media Preview Column -->
-            <motion.div
-                :animate="{ opacity: 1, scale: 1, rotateX: 0 }"
-                :initial="{ opacity: 0, scale: 0.95, rotateX: -5 }"
-                :transition="{ duration: 0.6, delay: 0.1, ease: 'easeOut' }"
-                class="w-full lg:w-3/5"
+    <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1.15fr_1fr]">
+        <UCard class="min-w-0" :ui="{ body: 'flex flex-col gap-5 p-6' }">
+            <CardHead
+                :icon="isVideo ? 'i-lucide-video' : 'i-lucide-audio-lines'"
+                tone="primary"
+                size="lg"
+                :title="input.media.name"
+                :subtitle="formatFileSize(input.media.size)"
+            />
+            <div
+                v-if="isVideo"
+                class="overflow-hidden rounded-xl bg-black"
             >
-                <div
-                    class="relative group rounded-3xl overflow-hidden shadow-2xl shadow-gray-900/10 dark:shadow-black/30 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 ring-1 ring-gray-200/50 dark:ring-gray-700/50"
+                <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
+                <video
+                    controls
+                    class="h-auto w-full object-contain"
+                    :src="mediaSource"
+                    :type="input.media.type"
                 >
-                    <!-- Video Preview -->
-                    <div v-if="isVideo" class="space-y-0">
-                        <!-- Video Metadata -->
-                        <div class="flex items-center gap-6 p-6 rounded-t-2xl">
-                            <div class="flex-shrink-0 relative">
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"
-                                />
-                                <div
-                                    class="relative w-14 h-14 lg:w-16 lg:h-16 bg-gradient-to-br from-red-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300"
-                                >
-                                    <UIcon
-                                        name="i-lucide-video"
-                                        class="w-7 h-7 lg:w-8 lg:h-8 text-white"
-                                    />
-                                </div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3
-                                    class="text-base lg:text-lg font-semibold text-gray-900 dark:text-white truncate"
-                                >
-                                    {{ input.media.name }}
-                                </h3>
-                                <p
-                                    class="text-sm text-gray-500 dark:text-gray-400 mt-1"
-                                >
-                                    {{ formatFileSize(input.media.size) }}
-                                </p>
-                            </div>
-                        </div>
-                        <!-- Video Player -->
-                        <div
-                            class="w-full overflow-hidden shadow-lg rounded-b-2xl bg-black"
-                        >
-                            <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
-                            <video
-                                controls
-                                class="w-full h-auto object-contain"
-                                :src="mediaSource"
-                                :type="input.media.type"
-                            >
-                                Your browser does not support the video tag.
-                            </video>
-                        </div>
-                    </div>
-
-                    <!-- Audio Preview -->
-                    <div v-else class="p-8 lg:p-12 space-y-6">
-                        <div class="flex items-center gap-6">
-                            <div class="flex-shrink-0 relative">
-                                <div
-                                    class="absolute inset-0 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"
-                                />
-                                <div
-                                    class="relative w-20 h-20 lg:w-24 lg:h-24 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300"
-                                >
-                                    <UIcon
-                                        name="i-lucide-audio-lines"
-                                        class="w-10 h-10 lg:w-12 lg:h-12 text-white"
-                                    />
-                                </div>
-                            </div>
-                            <div class="flex-1 min-w-0">
-                                <h3
-                                    class="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white truncate"
-                                >
-                                    {{ input.media.name }}
-                                </h3>
-                                <p
-                                    class="text-sm text-gray-500 dark:text-gray-400 mt-1"
-                                >
-                                    {{ formatFileSize(input.media.size) }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="relative">
-                            <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
-                            <audio
-                                controls
-                                class="w-full h-12 rounded-xl"
-                                :src="mediaSource"
-                                :type="input.media.type"
-                            >
-                                Your browser does not support the audio element.
-                            </audio>
-                        </div>
-                    </div>
-
-                    <!-- Decorative elements -->
-                    <div
-                        class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-blue-500/10 to-transparent rounded-bl-full pointer-events-none"
-                    />
-                    <div
-                        class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-transparent rounded-tr-full pointer-events-none"
-                    />
-                </div>
-            </motion.div>
-
-            <!-- Settings Column -->
-            <motion.div
-                :animate="{ opacity: 1, x: 0 }"
-                :initial="{ opacity: 0, x: 20 }"
-                :transition="{ duration: 0.6, delay: 0.2, ease: 'easeOut' }"
-                class="w-full lg:w-2/5"
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
+            <audio
+                v-else
+                controls
+                class="h-12 w-full"
+                :src="mediaSource"
+                :type="input.media.type"
             >
-                <div class="sticky top-6 space-y-6">
-                    <!-- Card Header -->
-                    <div
-                        class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-6 text-white shadow-xl shadow-blue-500/20"
-                    >
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center"
-                            >
-                                <UIcon
-                                    name="i-lucide-settings-2"
-                                    class="w-5 h-5"
-                                />
-                            </div>
-                            <div>
-                                <h2 class="text-lg font-semibold">
-                                    {{ t("upload.settings") }}
-                                </h2>
-                                <p class="text-sm text-white/80">
-                                    {{ t("upload.configureTranscription") }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                Your browser does not support the audio element.
+            </audio>
+        </UCard>
 
-                    <!-- Settings Card -->
-                    <div
-                        class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-gray-900/10 dark:shadow-black/20 ring-1 ring-gray-200/50 dark:ring-gray-700/50 p-6 space-y-6"
-                    >
-                        <!-- Number of Speakers -->
-                        <motion.div
-                            :animate="{ opacity: 1, y: 0 }"
-                            :initial="{ opacity: 0, y: 10 }"
-                            :transition="{ duration: 0.4, delay: 0.3 }"
-                        >
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center"
-                                    >
-                                        <UIcon
-                                            name="i-lucide-users"
-                                            class="w-4 h-4 text-blue-600 dark:text-blue-400"
-                                        />
-                                    </div>
-                                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelect below (id forwarded to native control) -->
-                                    <label
-                                        for="num-speakers"
-                                        class="text-sm font-medium text-gray-900 dark:text-white"
-                                    >
-                                        {{ t("upload.numSpeakers") }}
-                                    </label>
-                                </div>
-                                <p
-                                    class="text-xs text-gray-500 dark:text-gray-400 pl-10"
-                                >
-                                    {{ t("upload.numSpeakersHelp") }}
-                                </p>
-                                <USelect
-                                    id="num-speakers"
-                                    v-model="numSpeaker"
-                                    :items="speakerOptions"
-                                    placeholder="Select number of speakers"
-                                    size="lg"
-                                    class="w-full"
-                                />
-                            </div>
-                        </motion.div>
-
-                        <div class="h-px bg-gray-200 dark:bg-gray-700" />
-
-                        <!-- Audio Language -->
-                        <motion.div
-                            :animate="{ opacity: 1, y: 0 }"
-                            :initial="{ opacity: 0, y: 10 }"
-                            :transition="{ duration: 0.4, delay: 0.4 }"
-                        >
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-2">
-                                    <div
-                                        class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center"
-                                    >
-                                        <UIcon
-                                            name="i-lucide-globe"
-                                            class="w-4 h-4 text-purple-600 dark:text-purple-400"
-                                        />
-                                    </div>
-                                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelectMenu below (id forwarded to native control) -->
-                                    <label
-                                        for="audio-language"
-                                        class="text-sm font-medium text-gray-900 dark:text-white"
-                                    >
-                                        {{ t("upload.audioLanguage") }}
-                                    </label>
-                                </div>
-                                <p
-                                    class="text-xs text-gray-500 dark:text-gray-400 pl-10"
-                                >
-                                    {{ t("upload.audioLanguageHelp") }}
-                                </p>
-                                <USelectMenu
-                                    id="audio-language"
-                                    v-model="language"
-                                    value-key="value"
-                                    :items="audioLanguageOptions"
-                                    size="lg"
-                                    class="w-full"
-                                />
-                            </div>
-                        </motion.div>
-
-                        <!-- Info Box -->
-                        <motion.div
-                            :animate="{ opacity: 1, scale: 1 }"
-                            :initial="{ opacity: 0, scale: 0.95 }"
-                            :transition="{ duration: 0.4, delay: 0.5 }"
-                        >
-                            <div
-                                class="flex items-start gap-3 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-xl border border-blue-100 dark:border-blue-800/30"
-                            >
-                                <UIcon
-                                    name="i-lucide-info"
-                                    class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5"
-                                />
-                                <p
-                                    class="text-xs text-gray-600 dark:text-gray-300 leading-relaxed"
-                                >
-                                    {{ t("upload.settingsInfo") }}
-                                </p>
-                            </div>
-                        </motion.div>
-
-                        <!-- Next Button -->
-                        <motion.div
-                            :animate="{ opacity: 1, y: 0 }"
-                            :initial="{ opacity: 0, y: 10 }"
-                            :transition="{ duration: 0.4, delay: 0.6 }"
-                        >
-                            <UButton
-                                size="lg"
-                                color="primary"
-                                variant="solid"
-                                icon="i-lucide-arrow-right"
-                                trailing
-                                class="w-full"
-                                @click="onNext"
-                            >
-                                {{ t("navigation.new") }}
-                            </UButton>
-                        </motion.div>
-                    </div>
+        <UCard class="lg:sticky lg:top-4 overflow-hidden shadow-md" :ui="{ body: 'p-0 sm:p-0' }">
+            <div
+                class="flex items-center gap-3 bg-primary px-4.5 py-3.5 text-(--ui-on-primary)"
+            >
+                <span
+                    class="grid size-10 flex-none place-items-center rounded-[11px] bg-white/20 dark:bg-black/15"
+                >
+                    <UIcon name="i-lucide-settings-2" class="size-5" />
+                </span>
+                <div class="min-w-0">
+                    <strong class="block text-[0.95rem]">
+                        {{ t("upload.settings") }}
+                    </strong>
+                    <small class="text-[0.78rem] opacity-85">
+                        {{ t("upload.configureTranscription") }}
+                    </small>
                 </div>
-            </motion.div>
-        </div>
+            </div>
+
+            <div class="flex flex-col gap-4 p-4.5">
+                <div class="flex flex-col gap-1.5">
+                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelect below (id forwarded to native control) -->
+                    <label
+                        for="num-speakers"
+                        class="flex items-center gap-2 text-sm font-semibold"
+                    >
+                        <UIcon
+                            name="i-lucide-users"
+                            class="size-4 text-(--ui-primary-strong)"
+                        />
+                        {{ t("upload.numSpeakers") }}
+                    </label>
+                    <p class="text-xs leading-relaxed text-muted">
+                        {{ t("upload.numSpeakersHelp") }}
+                    </p>
+                    <USelect
+                        id="num-speakers"
+                        v-model="numSpeaker"
+                        :items="speakerOptions"
+                        size="lg"
+                        class="w-full"
+                    />
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelectMenu below (id forwarded to native control) -->
+                    <label
+                        for="audio-language"
+                        class="flex items-center gap-2 text-sm font-semibold"
+                    >
+                        <UIcon
+                            name="i-lucide-globe"
+                            class="size-4 text-(--ui-primary-strong)"
+                        />
+                        {{ t("upload.audioLanguage") }}
+                    </label>
+                    <p class="text-xs leading-relaxed text-muted">
+                        {{ t("upload.audioLanguageHelp") }}
+                    </p>
+                    <USelectMenu
+                        id="audio-language"
+                        v-model="language"
+                        value-key="value"
+                        :items="audioLanguageOptions"
+                        size="lg"
+                        class="w-full"
+                    />
+                </div>
+
+                <div
+                    class="flex items-start gap-2.5 rounded-[10px] bg-(--ui-primary-soft) px-3 py-2.5 text-xs leading-relaxed text-(--ui-primary-strong)"
+                >
+                    <UIcon
+                        name="i-lucide-info"
+                        class="mt-0.5 size-4 flex-none"
+                    />
+                    {{ t("upload.settingsInfo") }}
+                </div>
+
+                <UButton
+                    size="lg"
+                    color="primary"
+                    variant="solid"
+                    icon="i-lucide-arrow-right"
+                    trailing
+                    class="w-full justify-center"
+                    @click="onNext"
+                >
+                    {{ t("navigation.new") }}
+                </UButton>
+            </div>
+        </UCard>
     </div>
 </template>

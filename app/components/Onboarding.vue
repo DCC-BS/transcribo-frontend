@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { type Driver, driver } from "driver.js";
 import "driver.js/dist/driver.css";
-import { useMediaQuery } from "@vueuse/core";
 import {
     ChangeEditorModeCommand,
     Cmds,
@@ -17,14 +16,13 @@ const { t } = useI18n();
 const { executeCommand, onCommand } = useCommandBus();
 
 const ONBOARDING_KEY = "transcribo-onboarding-completed";
-const isMobile = useMediaQuery("(max-width: 768px)");
 
 async function switchToMode(mode: "view" | "summary" | "edit" | "statistics") {
     await executeCommand(new ChangeEditorModeCommand(mode));
 }
 
 function getSelector(baseId: string): string {
-    return isMobile.value ? `#mobile-${baseId}` : `#desktop-${baseId}`;
+    return `#${baseId}`;
 }
 
 function createDriver() {
@@ -130,48 +128,39 @@ function createDriver() {
                 },
             },
             {
-                element: "#speaker-names-section",
-                popover: {
-                    title: t("onboarding.speakerNames.title"),
-                    description: t("onboarding.speakerNames.description"),
-                    side: "bottom",
-                    align: "start",
-                },
-            },
-            {
-                element: "#transcription-segments",
+                element: "#transcript-document",
                 popover: {
                     title: t("onboarding.editTranscriptions.title"),
                     description: t("onboarding.editTranscriptions.description"),
+                    side: "top",
+                    align: "center",
+                },
+            },
+            {
+                element: "#editor-lanes",
+                popover: {
+                    title: t("onboarding.speakerLanes.title"),
+                    description: t("onboarding.speakerLanes.description"),
+                    side: "top",
+                    align: "center",
+                },
+            },
+            {
+                element: "#dock-add-segment",
+                popover: {
+                    title: t("onboarding.addTranscription.title"),
+                    description: t("onboarding.addTranscription.description"),
                     side: "top",
                     align: "start",
                 },
             },
             {
-                element: "#add-transcription-top",
-                popover: {
-                    title: t("onboarding.addTranscription.title"),
-                    description: t("onboarding.addTranscription.description"),
-                    side: "bottom",
-                    align: "center",
-                },
-            },
-            {
-                element: "#media-playback-bar",
+                element: "#media-play-button",
                 popover: {
                     title: t("onboarding.mediaPlayback.title"),
                     description: t("onboarding.mediaPlayback.description"),
-                    side: "bottom",
-                    align: "start",
-                },
-            },
-            {
-                element: "#media-expand-button-collapsed",
-                popover: {
-                    title: t("onboarding.mediaExpand.title"),
-                    description: t("onboarding.mediaExpand.description"),
-                    side: "bottom",
-                    align: "start",
+                    side: "top",
+                    align: "center",
                 },
             },
             {

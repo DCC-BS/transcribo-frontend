@@ -1,12 +1,16 @@
 export default defineAppConfig({
-    // ui: {
-    //     colors: {
-    //         primary: "purple",
-    //         secondary: "teal",
-    //         success: "green",
-    //         info: "blue",
-    //         warning: "yellow",
-    //         error: "red",
-    //     },
-    // },
+    ui: {
+        colors: {
+            primary: "bs-purple",
+            secondary: "bs-teal",
+            warning: "bs-yellow",
+            neutral: "neutral",
+        },
+        card: {
+            slots: {
+                root: "rounded-2xl shadow-sm",
+                body: "p-5 sm:p-5",
+            },
+        },
+    },
 });

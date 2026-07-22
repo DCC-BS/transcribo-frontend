@@ -13,41 +13,8 @@ const { t } = useI18n();
 const { formatDate } = useDateFormatter();
 const { openDialog } = useDialog();
 
-const columns = [
-    {
-        accessorKey: "name",
-        header: t("transcription.table.name"),
-        enableSorting: true,
-        enableResizing: true,
-        size: 200,
-        maxSize: 300,
-    },
-    {
-        accessorKey: "createdAt",
-        header: t("transcription.table.createdAt"),
-        enableResizing: true,
-        enableSorting: true,
-        cell: (props: { row: { original: StoredTranscription } }) => {
-            return formatDate(props.row.original.createdAt);
-        },
-    },
-    {
-        accessorKey: "updatedAt",
-        header: t("transcription.table.updatedAt"),
-        enableSorting: true,
-        enableResizing: true,
-        cell: (opts: unknown) => {
-            const row = (
-                opts as { row: { getValue: (key: string) => unknown } }
-            ).row;
-            return formatDate(row.getValue("updatedAt") as number);
-        },
-    },
-    {
-        accessorKey: "actions",
-        header: "",
-    },
-];
+const rowGrid =
+    "grid grid-cols-[minmax(0,1fr)_84px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_150px_150px_84px]";
 
 function handleDeleteClick(transcriptionId: string): void {
     openDialog({
@@ -59,90 +26,76 @@ function handleDeleteClick(transcriptionId: string): void {
 </script>
 
 <template>
-    <div>
-        <!-- Mobile Card View -->
-        <div class="space-y-3 md:hidden">
-            <div
-                v-if="!props.transcriptions?.length"
-                class="text-center py-8 text-gray-500"
-            >
-                <UIcon name="i-lucide-file-text" class="w-12 h-12 mx-auto mb-2 opacity-50" />
-                <p>{{ t("transcription.noTranscriptionsFound") }}</p>
+    <UCard class="overflow-hidden" :ui="{ body: 'p-0 sm:p-0' }">
+        <!-- head row -->
+        <div
+            class="border-b border-default bg-muted px-5 py-2.5 text-[0.72rem] font-medium uppercase tracking-wider text-dimmed"
+            :class="rowGrid"
+        >
+            <div>{{ t("transcription.table.name") }}</div>
+            <div class="hidden sm:block">
+                {{ t("transcription.table.createdAt") }}
             </div>
-            <div
-                v-for="transcription in props.transcriptions"
-                :key="transcription.id"
-                class="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 space-y-3"
-            >
-                <div class="font-bold text-wrap">
-                    {{ transcription.name }}
-                </div>
-                <div class="text-sm text-gray-600 dark:text-gray-400 space-y-1">
-                    <div class="flex justify-between">
-                        <span>{{ t("transcription.table.createdAt") }}:</span>
-                        <span>{{ formatDate(transcription.createdAt) }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span>{{ t("transcription.table.updatedAt") }}:</span>
-                        <span>{{ formatDate(transcription.updatedAt) }}</span>
-                    </div>
-                </div>
-                <div class="flex gap-2 pt-2">
-                    <UButton
-                        :to="`/transcription/${transcription.id}`"
-                        icon="i-lucide-pencil"
-                        color="primary"
-                        block
-                        class="flex-1"
-                    >
-                        {{ t("transcription.actions.edit") }}
-                    </UButton>
-                    <UButton
-                        icon="i-lucide-trash-2"
-                        color="error"
-                        @click="handleDeleteClick(transcription.id)"
-                    />
-                </div>
+            <div class="hidden sm:block">
+                {{ t("transcription.table.updatedAt") }}
             </div>
+            <div />
         </div>
 
-        <!-- Desktop Table View -->
-        <UTable
-            class="hidden md:block"
-            :columns="columns"
-            :data="props.transcriptions"
-            sticky
-            :empty-state="{
-                icon: 'i-lucide-file-text',
-                label: t('transcription.noTranscriptionsFound'),
-                description: t('ui.emptyState.description'),
-            }"
-            :sorting-options="{ enableSorting: true }"
+        <div
+            v-if="!props.transcriptions?.length"
+            class="px-5 py-10 text-center text-muted"
         >
-            <template #name-cell="{ row }">
-                <div class="font-bold text-wrap">
-                    {{ row.original.name }}
-                </div>
-            </template>
+            <UIcon
+                name="i-lucide-file-text"
+                class="mx-auto mb-2 size-10 opacity-50"
+            />
+            <p>{{ t("transcription.noTranscriptionsFound") }}</p>
+            <p class="mt-1 text-sm text-dimmed">
+                {{ t("ui.emptyState.description") }}
+            </p>
+        </div>
 
-            <template #actions-cell="{ row }">
-                <div class="flex gap-2 justify-end">
-                    <UButton
-                        :to="`/transcription/${row.original.id}`"
-                        icon="i-lucide-pencil"
-                        color="primary"
-                    >
-                        {{ t("transcription.actions.edit") }}
-                    </UButton>
-                    <UButton
-                        icon="i-lucide-trash-2"
-                        color="error"
-                        @click="handleDeleteClick(row.original.id)"
-                    >
-                        {{ t("transcription.actions.delete") }}
-                    </UButton>
-                </div>
-            </template>
-        </UTable>
-    </div>
+        <NuxtLink
+            v-for="transcription in props.transcriptions"
+            :key="transcription.id"
+            :to="`/transcription/${transcription.id}`"
+            class="border-b border-default px-5 py-3 text-[0.88rem] transition-colors last:border-b-0 hover:bg-muted"
+            :class="rowGrid"
+        >
+            <div class="flex min-w-0 items-center gap-3">
+                <span
+                    class="grid size-7.5 flex-none place-items-center rounded-lg bg-(--ui-primary-soft) text-(--ui-primary-strong)"
+                >
+                    <UIcon name="i-lucide-file-audio" class="size-4" />
+                </span>
+                <span
+                    class="truncate font-medium"
+                    :title="transcription.name"
+                >
+                    {{ transcription.name }}
+                </span>
+            </div>
+            <div
+                class="hidden tabular-nums text-muted sm:block"
+            >
+                {{ formatDate(transcription.createdAt) }}
+            </div>
+            <div
+                class="hidden tabular-nums text-muted sm:block"
+            >
+                {{ formatDate(transcription.updatedAt) }}
+            </div>
+            <div class="flex justify-end gap-1">
+                <UButton
+                    icon="i-lucide-trash-2"
+                    variant="ghost"
+                    color="error"
+                    size="sm"
+                    :title="t('transcription.actions.delete')"
+                    @click.prevent.stop="handleDeleteClick(transcription.id)"
+                />
+            </div>
+        </NuxtLink>
+    </UCard>
 </template>

@@ -1,12 +1,5 @@
 <script lang="ts" setup>
-import { useEventListener } from "@vueuse/core";
 import type { StoredSegment } from "~/stores/migrations/v4/storedSegments";
-import {
-    Cmds,
-    type PlayFromSecondsCommand,
-    type SeekToSecondsCommand,
-    type TogglePlayCommand,
-} from "~/types/commands";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { formatTime } from "~/utils/time";
 
@@ -21,19 +14,21 @@ const props = defineProps<MediaPlaybackBarProps>();
 const currentTime = defineModel<number>({ required: true });
 
 const isExpanded = ref(false);
-const mediaFile = ref<Blob | null>(null);
-const mediaSrc = ref<string>("");
-const videoElement = ref<HTMLVideoElement | null>(null);
-const audioElement = ref<HTMLAudioElement | null>(null);
-const isPlaying = ref<boolean>(false);
-const isVideoFile = ref<boolean>(false);
-const playbackRate = ref<number>(1);
 
-const { getSpeakerColor } = useSpeakerColor(
-    computed(() => Array.from(getUniqueSpeakers(props.segments))),
-);
+const {
+    mediaFile,
+    mediaSrc,
+    videoElement,
+    audioElement,
+    isPlaying,
+    isVideoFile,
+    playbackRate,
+    togglePlay,
+    seekTo,
+    onTimeUpdate,
+} = useMediaPlayback(() => props.transcription, currentTime);
 
-const { onCommand } = useCommandBus();
+const { getSpeakerColor, displayName } = useSpeakerRegistry();
 
 const currentSegments = computed(() => {
     return props.segments.filter(
@@ -43,321 +38,108 @@ const currentSegments = computed(() => {
     );
 });
 
-onMounted(() => {
-    loadMedia();
-});
-
-onUnmounted(() => {
-    if (mediaSrc.value) {
-        URL.revokeObjectURL(mediaSrc.value);
-    }
-});
-
-// Space toggles playback everywhere except inside text entry (inputs,
-// textareas, contenteditable) — there it must keep typing spaces. On the
-// play/pause button preventDefault stops the native click from firing a
-// second toggle; other buttons keep their native Space activation.
-function isPlayButton(target: EventTarget | null): boolean {
-    return (
-        target instanceof HTMLElement &&
-        target.closest("#media-play-button") !== null
-    );
-}
-
-function keepsNativeSpace(target: EventTarget | null): boolean {
-    if (!(target instanceof HTMLElement)) {
-        return false;
-    }
-    if (target.isContentEditable) {
-        return true;
-    }
-    return (
-        target.closest(
-            'input, textarea, select, [contenteditable="true"], button, a, [role="button"]',
-        ) !== null
-    );
-}
-
-useEventListener(window, "keydown", (event: KeyboardEvent) => {
-    if (event.code !== "Space" || event.repeat) {
-        return;
-    }
-
-    if (!isPlayButton(event.target) && keepsNativeSpace(event.target)) {
-        return;
-    }
-
-    event.preventDefault();
-    togglePlay();
-});
-
-onCommand<TogglePlayCommand>(Cmds.TogglePlayCommand, async (_) => {
-    togglePlay();
-});
-
-onCommand<SeekToSecondsCommand>(Cmds.SeekToSecondsCommand, async (cmd) => {
-    seekTo(cmd.seconds);
-    // A jump button keeps focus after the click, which would make Space
-    // re-activate it instead of toggling playback; hand focus back to the body.
-    if (document.activeElement instanceof HTMLButtonElement) {
-        document.activeElement.blur();
-    }
-});
-
-onCommand<PlayFromSecondsCommand>(
-    Cmds.PlayFromSecondsCommand,
-    async (cmd) => {
-        seekTo(cmd.seconds);
-        if (!isPlaying.value) {
-            togglePlay();
-        }
-    },
-);
-
-watch(playbackRate, (rate) => {
-    updatePlaybackRate(rate);
-});
-
-function loadMedia(): void {
-    if (!props.transcription?.mediaFile) {
-        return;
-    }
-
-    if (mediaSrc.value) {
-        URL.revokeObjectURL(mediaSrc.value);
-    }
-
-    mediaFile.value = props.transcription.mediaFile;
-    mediaSrc.value = URL.createObjectURL(mediaFile.value);
-    isVideoFile.value = mediaFile.value.type.startsWith("video/");
-    isPlaying.value = false;
-    nextTick(() => updatePlaybackRate(playbackRate.value));
-}
-
-function togglePlay(): void {
-    if (videoElement.value) {
-        if (isPlaying.value) {
-            videoElement.value.pause();
-        } else {
-            videoElement.value.play();
-        }
-    } else if (audioElement.value) {
-        if (isPlaying.value) {
-            audioElement.value.pause();
-        } else {
-            audioElement.value.play();
-        }
-    }
-    isPlaying.value = !isPlaying.value;
-}
-
-function seekTo(time: number): void {
-    if (audioElement.value && audioElement.value.currentTime !== time) {
-        audioElement.value.currentTime = time;
-    } else if (videoElement.value && videoElement.value.currentTime !== time) {
-        videoElement.value.currentTime = time;
-    }
-    currentTime.value = time;
-}
-
-function onTimeUpdate(): void {
-    if (videoElement.value) {
-        currentTime.value = videoElement.value.currentTime;
-    } else if (audioElement.value) {
-        currentTime.value = audioElement.value.currentTime;
-    }
-}
-
-function onSliderChange(value: number | undefined): void {
-    if (value !== undefined) {
-        seekTo(value);
-    }
-}
-
-function updatePlaybackRate(rate: number): void {
-    if (videoElement.value) {
-        videoElement.value.playbackRate = rate;
-    } else if (audioElement.value) {
-        audioElement.value.playbackRate = rate;
-    }
-}
-
 function toggleExpanded(): void {
     isExpanded.value = !isExpanded.value;
 }
+
 </script>
 
 <template>
     <div
         id="media-playback-bar"
-        class="bg-default border-b border-default shadow-sm"
+        class="flex-none border-t border-default bg-default"
     >
-        <!-- We cannot use v-if here because the video need to exist so it can be played therefore we use v-show -->
-        <div class="p-2">
-            <div
-                v-show="isExpanded"
-                class="media-container"
-                :class="{ 'media-container--audio': !isVideoFile }"
+        <!-- We cannot use v-if here because the video needs to exist so it
+             can be played, therefore we use v-show -->
+        <div
+            v-show="isExpanded"
+            class="relative mx-auto w-fit p-2"
+            :class="{ 'w-full': !isVideoFile }"
+        >
+            <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
+            <video
+                v-if="isVideoFile && mediaFile"
+                ref="videoElement"
+                class="block max-h-75 rounded"
+                playsinline
+                webkit-playsinline
+                @timeupdate="onTimeUpdate"
+                @click="togglePlay"
             >
-                <!-- biome-ignore lint/a11y/useMediaCaption: User-uploaded media may not have captions -->
-                <video
-                    v-if="isVideoFile && mediaFile"
-                    ref="videoElement"
-                    class="media-player rounded"
-                    @timeupdate="onTimeUpdate"
-                    @click="togglePlay"
-                    playsinline
-                    webkit-playsinline
-                >
-                    <source :src="mediaSrc" :type="mediaFile.type" />
-                </video>
-                <audio
-                    v-if="!isVideoFile && mediaFile"
-                    ref="audioElement"
-                    :src="mediaSrc"
-                    @timeupdate="onTimeUpdate"
-                />
+                <source :src="mediaSrc" :type="mediaFile.type" />
+            </video>
 
+            <div
+                class="absolute inset-x-2 bottom-2 flex min-h-7.5 justify-center rounded bg-[rgba(177,177,177,0.9)] px-3 py-2"
+            >
                 <div
-                    v-if="!isVideoFile && mediaFile"
-                    class="audio-visualization"
-                ></div>
-
-                <div class="subtitles-container">
-                    <div
-                        v-for="segment in currentSegments"
-                        :key="segment.id"
-                        class="subtitle-segment"
-                        :style="{
-                            '--text-color': getSpeakerColor(
-                                segment.speaker ?? 'unknown',
-                            ).toString(),
-                        }"
-                    >
-                        <span class="font-bold">{{ segment.speaker }}: </span>
-                        <span>{{ segment.text }}</span>
-                    </div>
+                    v-for="segment in currentSegments"
+                    :key="segment.id"
+                    class="text-base [-webkit-text-stroke:0.5px_#313131]"
+                    :style="{
+                        color: getSpeakerColor(
+                            segment.speaker ?? 'unknown',
+                        ).toString(),
+                    }"
+                >
+                    <span class="font-bold">{{ displayName(segment.speaker ?? undefined) }}: </span>
+                    <span>{{ segment.text }}</span>
                 </div>
             </div>
+        </div>
+        <audio
+            v-if="!isVideoFile && mediaFile"
+            ref="audioElement"
+            :src="mediaSrc"
+            @timeupdate="onTimeUpdate"
+        />
 
-            <div class="flex items-center gap-2 p-2">
-                <UButton
-                    id="media-play-button"
-                    size="sm"
-                    color="secondary"
-                    variant="ghost"
-                    :aria-label="isPlaying ? 'Pause' : 'Play'"
-                    @click="togglePlay"
+        <!-- chip track on its own row, controls centered beneath — the
+             centered play group mirrors the editor dock and keeps the
+             round play button away from the footer branding below -->
+        <div class="flex flex-col gap-1.5 px-5 pt-2.5 pb-2">
+            <PlaybarChipTrack
+                :current-time="currentTime"
+                :duration="props.duration"
+                compact-chip
+                @seek="seekTo"
+            />
+
+            <div class="relative flex items-center justify-center gap-3">
+                <span
+                    class="text-[0.78rem] tabular-nums text-muted"
                 >
-                    <UIcon
-                        :name="isPlaying ? 'i-lucide-pause' : 'i-lucide-play'"
-                    />
-                </UButton>
-
-                <USlider
-                    :model-value="currentTime"
-                    color="secondary"
-                    :min="0"
-                    :max="props.duration"
-                    :step="0.1"
-                    class="flex-1"
-                    @update:model-value="onSliderChange"
-                />
-
-                <UPopover>
-                    <UButton class="w-10" variant="ghost" color="secondary"
-                        >{{ playbackRate }}x</UButton
-                    >
-                    <template #content>
-                        <div class="p-2 bg-default/50 backdrop-blur-sm rounded">
-                            <USlider
-                                v-model="playbackRate"
-                                :min="0.1"
-                                :max="3"
-                                :step="0.1"
-                            ></USlider>
-                            <div class="flex gap-1 p-2">
-                                <UButton
-                                    v-for="i in [0.25, 0.5, 1, 1.5, 2, 3]"
-                                    :key="i"
-                                    variant="outline"
-                                    color="secondary"
-                                    @click="playbackRate = i"
-                                    >{{ i }}x</UButton
-                                >
-                            </div>
-                        </div>
-                    </template>
-                </UPopover>
-
-                <div
-                    class="text-sm text-muted-foreground min-w-[80px] text-right"
-                >
-                    {{ formatTime(currentTime, { milliseconds: false }) }} /
+                    {{
+                        formatTime(currentTime, {
+                            milliseconds: false,
+                            minimumMinuteDigits: 2,
+                        })
+                    }} /
                     {{ formatTime(props.duration, { milliseconds: false }) }}
-                </div>
+                </span>
+                <PlayButton
+                    :playing="isPlaying"
+                    tone="primary"
+                    @click="togglePlay"
+                />
+                <PlaybackSpeedButton v-model="playbackRate" />
 
                 <UButton
+                    v-if="isVideoFile"
                     id="media-expand-button"
+                    class="absolute right-0"
                     size="sm"
                     variant="ghost"
-                    @click="toggleExpanded"
+                    color="neutral"
+                    :icon="
+                        isExpanded
+                            ? 'i-lucide-chevron-down'
+                            : 'i-lucide-chevron-up'
+                    "
                     :aria-label="isExpanded ? 'Collapse' : 'Expand'"
-                >
-                    <UIcon
-                        :name="
-                            isExpanded
-                                ? 'i-lucide-chevron-up'
-                                : 'i-lucide-chevron-down'
-                        "
-                    />
-                </UButton>
+                    @click="toggleExpanded"
+                />
             </div>
         </div>
     </div>
 </template>
-
-<style lang="scss" scoped>
-.media-container {
-    position: relative;
-    margin: auto;
-    width: fit-content;
-}
-
-.media-container--audio {
-    width: 100%;
-}
-
-.media-player {
-    @apply rounded;
-    display: block;
-    border-radius: 4px;
-    max-height: 300px;
-}
-
-.audio-visualization {
-    @apply bg-muted rounded;
-    display: block;
-    width: 100%;
-    height: 120px;
-}
-
-.subtitles-container {
-    position: absolute;
-    bottom: 0.5rem;
-    left: 0.5rem;
-    right: 0.5rem;
-    display: flex;
-    justify-content: center;
-    background-color: rgba(177, 177, 177, 0.9);
-    border-radius: 4px;
-    padding: 8px 12px;
-    min-height: 30px;
-}
-
-.subtitle-segment {
-    font-size: 16px;
-    color: var(--text-color);
-    -webkit-text-stroke: 0.5px #313131;
-}
-</style>

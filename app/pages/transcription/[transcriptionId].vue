@@ -15,6 +15,14 @@ const transcriptionId = route.params.transcriptionId as string;
 const { transcription } = useTranscription(transcriptionId);
 const { segments } = useSegments(transcriptionId);
 
+// single source of truth for speaker order and colors on this page —
+// persists each speaker's stable lane/color slot
+provideSpeakerRegistry(transcription, () => segments.value ?? []);
+
+// fresh document, fresh playback position (the shared time otherwise
+// survives across mode switches on purpose)
+usePlaybackTime().value = 0;
+
 const isTranscriptionLoading = computed(
     () => !transcription.value && !segments.value,
 );
@@ -30,61 +38,28 @@ onCommand<ChangeEditorModeCommand>(
     },
 );
 
-// Animation variants
-const pageTransition = {
-    type: "spring" as const,
-    stiffness: 200,
-    damping: 25,
-};
 </script>
 
 <template>
     <Onboarding />
 
-    <HContainer class="grow min-h-125">
-        <template #top>
-            <div class="lg:hidden mb-2 w-full">
-                <EditorModeSelector v-model="editorMode" id-prefix="mobile-" />
-            </div>
-            <div
-                class="w-full flex flex-wrap justify-between items-center gap-2"
-            >
-                <!-- Transcription Info Portal Target (left-aligned) -->
-                <div class="flex-1 min-w-0">
-                    <TranscriptionInfoView
-                        v-if="transcription"
-                        :transcription="transcription"
-                    />
-                </div>
+    <Teleport defer to="#appbar-context">
+        <ClientOnly>
+            <TranscriptionInfoView
+                v-if="transcription"
+                :transcription="transcription"
+            />
+        </ClientOnly>
+    </Teleport>
 
-                <!-- Center: Mode selector -->
-                <div
-                    class="hidden lg:flex items-center justify-center shrink-0 gap-2"
-                >
-                    <EditorModeSelector
-                        v-model="editorMode"
-                        id-prefix="desktop-"
-                    />
-                </div>
-
-                <!-- Export Portal Target (right-aligned) -->
-                <div class="flex-1 min-w-0 flex justify-end">
-                    <ExportToolbar
-                        v-if="transcription && segments"
-                        :transcription="transcription"
-                        :segments="segments"
-                    />
-                </div>
-            </div>
+    <div class="flex min-h-0 grow flex-col overflow-hidden">
+        <template v-if="isTranscriptionLoading">
+            <LoadingView :loading-text="t('transcription.loading')" />
         </template>
-        <template #default>
-            <template v-if="isTranscriptionLoading">
-                <LoadingView :loadingText="t('transcription.loading')" />
-            </template>
-            <template v-else-if="transcription && segments">
-                <UseMainContent />
-            </template>
-            <template v-else>
+        <template v-else-if="transcription && segments">
+            <UseMainContent />
+        </template>
+        <template v-else>
                 <motion.div
                     :animate="{ opacity: 1, scale: 1 }"
                     :initial="{ opacity: 0, scale: 0.95 }"
@@ -92,46 +67,59 @@ const pageTransition = {
                     class="flex flex-col items-center justify-center min-h-[60vh] p-8"
                 >
                     <div
-                        class="w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4"
+                        class="w-20 h-20 rounded-2xl bg-elevated flex items-center justify-center mb-4"
                     >
                         <UIcon
                             name="i-lucide-file-x"
-                            class="w-10 h-10 text-gray-400 dark:text-gray-500"
+                            class="w-10 h-10 text-dimmed"
                         />
                     </div>
                     <p
-                        class="text-gray-500 dark:text-gray-400 text-lg font-medium"
+                        class="text-muted text-lg font-medium"
                     >
                         {{
-                            t("transcription.notFound") ||
-                            "Transcription not found"
+                            t("transcription.notFound")
                         }}
                     </p>
                 </motion.div>
             </template>
-        </template>
-    </HContainer>
+    </div>
 
-    <DefineMainContent id="does-this-work">
+    <DefineMainContent>
         <template v-if="transcription && segments">
-            <motion.div
-                id="main-content"
-                :animate="{ opacity: 1, y: 0 }"
-                :initial="{ opacity: 0, y: 20 }"
-                :transition="pageTransition"
-                class="flex flex-col p-2 sm:p-4 grow"
-            >
-                <!-- Content Area with Mode Transition -->
+            <div id="main-content" class="flex min-h-0 grow flex-col">
+                <!-- toolbar: mode tabs on the left, the active mode's tools
+                     teleport into the right side -->
+                <div
+                    class="flex flex-wrap items-center gap-3 border-b border-default bg-default px-3.5 py-1.5"
+                >
+                    <EditorModeSelector v-model="editorMode" />
+                    <div class="grow" />
+                    <div
+                        id="editor-toolbar-tools"
+                        class="flex flex-wrap items-center gap-3.5"
+                    />
+                    <ExportToolbar
+                        :transcription="transcription"
+                        :segments="segments"
+                    />
+                </div>
+
+                <!-- Content Area with Mode Transition: opacity only — any
+                     y-offset shifts the fixed toolrow/dock frame -->
                 <motion.div
-                    class="grow flex flex-col"
+                    class="flex min-h-0 grow flex-col"
                     :key="editorMode"
-                    :animate="{ opacity: 1, y: 0 }"
-                    :initial="{ opacity: 0, y: 10 }"
+                    :animate="{ opacity: 1 }"
+                    :initial="{ opacity: 0 }"
                     :transition="{ duration: 0.25, ease: 'easeOut' }"
                 >
                     <!-- Viewer Mode -->
                     <template v-if="editorMode === 'view'">
-                        <TranscriptionViewer :segments="segments" />
+                        <TranscriptionViewer
+                            :transcription="transcription"
+                            :segments="segments"
+                        />
                     </template>
 
                     <template v-else-if="editorMode === 'summary'">
@@ -141,16 +129,9 @@ const pageTransition = {
                         />
                     </template>
 
-                    <!-- Editor Mode -->
+                    <!-- Editor Mode (script-style TipTap editor, former
+                         "document" mode — the modes were consolidated) -->
                     <template v-else-if="editorMode === 'edit'">
-                        <TranscriptionEditView
-                            :transcription="transcription"
-                            :segments="segments"
-                        />
-                    </template>
-
-                    <!-- Document Mode (script-style TipTap editor) -->
-                    <template v-else-if="editorMode === 'document'">
                         <TranscriptDocumentView
                             :transcription="transcription"
                             :segments="segments"
@@ -165,7 +146,7 @@ const pageTransition = {
                         />
                     </template>
                 </motion.div>
-            </motion.div>
+            </div>
         </template>
     </DefineMainContent>
 </template>

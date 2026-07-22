@@ -13,41 +13,12 @@ const errorMessage = ref<string>();
 const { extractAudio } = useAudioExtract();
 const { t } = useI18n();
 
-type ProgressSteps = [MediaProgress, MediaProgress, MediaProgress, MediaProgress];
-
-// Fresh objects on every (re)start so a retry never inherits the finished
-// state of the previous attempt.
-function createStartProgression(): ProgressSteps {
-    return [
-        {
-            icon: "i-lucide-file",
-            message: isVideoFile(input.value.media)
-                ? t("upload.extractingAudio")
-                : t("upload.preparingAudio"),
-            progress: 0,
-        },
-        {
-            icon: "i-lucide-upload-cloud",
-            message: t("upload.uploadingMedia"),
-            progress: 0,
-        },
-        {
-            icon: "i-lucide-cpu",
-            message: t("task.status.pending"),
-            progress: 0,
-        },
-        {
-            icon: "i-lucide-sparkles",
-            message: t("task.postProcessing"),
-            progress: 0,
-        },
-    ];
-}
-
-const progressions = ref<ProgressSteps>(createStartProgression());
 const logger = useLogger();
 const { addTask, deleteTask } = useTasks();
-const { pollTaskStatus, applyTaskResult } = useTaskListener();
+const { createProgressSteps, pollTaskStatus, applyTaskResult } =
+    useTaskListener();
+
+const progressions = ref(createProgressSteps(input.value.media));
 
 onMounted(() => {
     processMedia();
@@ -56,7 +27,9 @@ onMounted(() => {
 async function processMedia() {
     try {
         errorMessage.value = undefined;
-        progressions.value = createStartProgression();
+        // Fresh objects on every (re)start so a retry never inherits the
+        // finished state of the previous attempt.
+        progressions.value = createProgressSteps(input.value.media);
         // The re-encode only shrinks the upload; playback and export always
         // use the original file.
         const processedFile = await preprocessMedia(progressions.value[0]);
@@ -185,18 +158,15 @@ async function waitForTask(
 </script>
 
 <template>
-    <div class="flex flex-col items-center justify-center py-12 px-6 max-w-[95vw]">
-        <div v-if="!errorMessage">
-            <!-- Media File Card with Upload Animation -->
-            <div class="relative w-full max-w-lg">
-                <MediaProgressView :media="input.media" :media-name="input.media.name" :progress-steps="progressions" />
-            </div>
+    <div class="flex w-full flex-col items-center justify-center">
+        <div v-if="!errorMessage" class="w-full">
+            <MediaProgressView :media="input.media" :media-name="input.media.name" :progress-steps="progressions" />
         </div>
 
         <!-- Error Message Display -->
         <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
             :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
-            class="mt-8 max-w-md w-full flex flex-col gap-2 justify-center">
+            class="mt-8 flex w-full flex-col justify-center gap-2">
             <UAlert icon="i-lucide-alert-circle" color="error" :title="t('upload.error')" :description="errorMessage">
             </UAlert>
 
