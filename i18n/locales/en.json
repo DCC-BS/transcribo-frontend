@@ -574,7 +574,9 @@
             "noOtherSpeakers": "No other speakers",
             "jumpToNext": "Jump to next appearance",
             "time": "Time",
-            "scrollHorizontally": "Scroll horizontally"
+            "scrollHorizontally": "Scroll horizontally",
+            "deleteSpeaker": "Delete speaker",
+            "deleteSpeakerConfirm": "All segments of \"{speaker}\" will be deleted. Continue?"
         }
     },
     "footer": {

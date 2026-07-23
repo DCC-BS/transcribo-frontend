@@ -1,5 +1,5 @@
 import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
-import type { StoredSegment } from "~/types/storedSegments";
+import { db } from "~/stores/db";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { SummaryResponseSchema } from "~/types/summarizeResponse";
 import type { SummarizeRequest, SummaryType } from "~~/shared/types/summary";
@@ -13,8 +13,13 @@ export function useTranscriptionSummary() {
     /**
      * Get the complete text from all segments
      */
-    function getTranscriptionText(segments: StoredSegment[]): string {
-        // Helper method to extract text from segments
+    async function getTranscriptionText(
+        transcriptionId: string,
+    ): Promise<string> {
+        const segments = await db.segments
+            .where("transcriptionId")
+            .equals(transcriptionId)
+            .sortBy("start");
         return segments.map((segment) => segment.text).join(" ");
     }
 
@@ -59,7 +64,6 @@ export function useTranscriptionSummary() {
      */
     async function generateSummary(
         transcription: StoredTranscription,
-        segments: StoredSegment[],
         type: SummaryType,
         language?: string,
     ): Promise<string | null> {
@@ -80,7 +84,7 @@ export function useTranscriptionSummary() {
                 transcription.summary = undefined;
             }
 
-            const transcriptText = getTranscriptionText(segments);
+            const transcriptText = await getTranscriptionText(transcription.id);
 
             // Validate and sanitize transcript text
             const sanitizedText =

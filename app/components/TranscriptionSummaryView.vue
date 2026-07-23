@@ -2,12 +2,10 @@
 import { useClipboard, useStorage } from "@vueuse/core";
 import { match } from "ts-pattern";
 import type { SummaryType } from "#shared/types/summary";
-import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface Props {
     transcription: StoredTranscription;
-    segments: StoredSegment[];
 }
 
 const props = defineProps<Props>();
@@ -62,7 +60,6 @@ async function handleGenerateSummary(): Promise<void> {
     try {
         await generateSummary(
             props.transcription,
-            props.segments,
             summaryType.value,
             language,
         );

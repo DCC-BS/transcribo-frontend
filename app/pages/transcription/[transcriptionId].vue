@@ -125,7 +125,6 @@ onCommand<ChangeEditorModeCommand>(
                     <template v-else-if="editorMode === 'summary'">
                         <TranscriptionSummaryView
                             :transcription="transcription"
-                            :segments="segments"
                         />
                     </template>
 

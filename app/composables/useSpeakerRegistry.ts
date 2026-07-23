@@ -109,12 +109,19 @@ const [provideSpeakerRegistry, injectSpeakerRegistry] = createInjectionState(
             return true;
         }
 
+        function removeEmptySpeaker(id: string): void {
+            sessionIds.value = sessionIds.value.filter(
+                (sessionId) => sessionId !== id,
+            );
+        }
+
         return {
             speakerIds,
             displayName,
             speakerColors,
             getSpeakerColor,
             addSpeaker,
+            removeEmptySpeaker,
         };
     },
 );

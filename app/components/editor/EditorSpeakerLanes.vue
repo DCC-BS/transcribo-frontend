@@ -30,6 +30,7 @@ const emit = defineEmits<(event: "seek", seconds: number) => void>();
 
 const { t } = useI18n();
 const { executeCommand } = useCommandBus();
+const { openDialog } = useDialog();
 const { renameSpeaker } = useSpeakerRename(
     () => props.transcription.id,
     () => props.segments,
@@ -40,6 +41,7 @@ const {
     displayName,
     speakerColors,
     addSpeaker,
+    removeEmptySpeaker,
 } = useSpeakerRegistry();
 
 // --- resizable speaker column (drag the split next to the lane track) -------
@@ -367,6 +369,37 @@ async function moveSegmentsTo(target: string): Promise<void> {
     laneMenu.value = undefined;
 }
 
+function requestDeleteSpeaker(): void {
+    const speaker = laneMenu.value?.speaker;
+    laneMenu.value = undefined;
+    if (!speaker) {
+        return;
+    }
+    const segmentIds = (segmentsBySpeaker.value.get(speaker) ?? []).map(
+        (segment) => segment.id,
+    );
+    if (segmentIds.length === 0) {
+        return;
+    }
+    openDialog({
+        title: t("editor.lanes.deleteSpeaker"),
+        message: t("editor.lanes.deleteSpeakerConfirm", {
+            speaker: displayName(speaker),
+        }),
+        onSubmit: () => {
+            void deleteSpeakerSegments(speaker, segmentIds);
+        },
+    });
+}
+
+async function deleteSpeakerSegments(
+    speaker: string,
+    segmentIds: string[],
+): Promise<void> {
+    await executeCommand(new DeleteSegmentsCommand(segmentIds));
+    removeEmptySpeaker(speaker);
+}
+
 const editingSpeaker = ref<string>();
 const editName = ref("");
 const renameInput = ref<HTMLInputElement>();
@@ -562,7 +595,9 @@ async function confirmAddSpeaker(): Promise<void> {
             :x="laneMenu.x"
             :y="laneMenu.y"
             :current-speaker="laneMenu.speaker"
+            deletable
             @select="moveSegmentsTo"
+            @delete="requestDeleteSpeaker"
             @close="laneMenu = undefined"
         />
     </div>

@@ -6,10 +6,13 @@ const props = defineProps<{
     y: number;
     currentSpeaker: string;
     disabledFor?: (target: string) => boolean;
+    /** Show a "delete speaker" action at the bottom (lane ⋮ menu only). */
+    deletable?: boolean;
 }>();
 
 const emit = defineEmits<{
     select: [target: string];
+    delete: [];
     close: [];
 }>();
 
@@ -50,6 +53,17 @@ const targets = computed(() =>
                     {{ displayName(target) }}
                 </button>
             </div>
+            <template v-if="deletable">
+                <div class="my-1 border-t border-default" />
+                <button
+                    type="button"
+                    class="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-error hover:bg-error/10"
+                    @click="emit('delete')"
+                >
+                    <UIcon name="i-lucide-trash-2" class="size-4 flex-none" />
+                    {{ t("editor.lanes.deleteSpeaker") }}
+                </button>
+            </template>
         </div>
     </Teleport>
 </template>

@@ -2,14 +2,18 @@
 import { Extension } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Editor, EditorContent } from "@tiptap/vue-3";
-import { useEventListener, useStyleTag } from "@vueuse/core";
+import {
+    onClickOutside,
+    useDebounceFn,
+    useEventListener,
+    useStyleTag,
+} from "@vueuse/core";
 import {
     DeleteSegmentCommand,
     DeleteSegmentsCommand,
     InsertSegmentCommand,
     RenameSpeakerCommand,
     SeekToSecondsCommand,
-    UpdateSegmentCommand,
     UpdateSegmentsCommand,
 } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
@@ -157,14 +161,22 @@ const editor = new Editor({
 });
 
 onUnmounted(() => {
-    clearTimeout(syncTimer);
     void captureFromBaseline();
     editor.destroy();
 });
 
 watch(
     [() => props.segments, () => props.mergeSegments],
-    ([segments]) => {
+    async () => {
+        if (isDirty || flushPromise) {
+            await flushTextEdits();
+            await nextTick();
+            if (isDirty) {
+                return;
+            }
+        }
+
+        const segments = props.segments;
         // Skip the rebuild when the incoming change is the echo of our own
         // text sync — rebuilding would destroy the caret mid-typing.
         if (docReflectsSegments(segments, props.mergeSegments)) {
@@ -177,11 +189,13 @@ watch(
                 displayName,
                 props.mergeSegments,
             ),
+            { emitUpdate: false },
         );
         refreshKeywordHighlights();
         if (pendingFocusSegmentId.value) {
-            focusSegment(pendingFocusSegmentId.value);
-            pendingFocusSegmentId.value = null;
+            if (focusSegment(pendingFocusSegmentId.value)) {
+                pendingFocusSegmentId.value = null;
+            }
         }
     },
     { deep: true },
@@ -189,11 +203,14 @@ watch(
 
 // --- Inline editing: sync doc → segments, capture words silently ------------
 
-let syncTimer: ReturnType<typeof setTimeout> | undefined;
+let isDirty = false;
+let flushPromise: Promise<void> | undefined;
+
+const flushTextEditsDebounced = useDebounceFn(flushTextEdits, 600);
 
 function scheduleTextSync(): void {
-    clearTimeout(syncTimer);
-    syncTimer = setTimeout(() => void flushTextEdits(), 600);
+    isDirty = true;
+    void flushTextEditsDebounced();
 }
 
 /**
@@ -254,15 +271,47 @@ function docReflectsSegments(
 }
 
 async function flushTextEdits(): Promise<void> {
+    if (flushPromise) {
+        await flushPromise;
+        return;
+    }
+
+    flushPromise = flushDirtyTextEdits();
+    try {
+        await flushPromise;
+    } finally {
+        flushPromise = undefined;
+    }
+}
+
+async function flushDirtyTextEdits(): Promise<void> {
+    while (isDirty) {
+        isDirty = false;
+        await persistCurrentTextEdits();
+    }
+}
+
+async function persistCurrentTextEdits(): Promise<void> {
     const docTexts = readDocSegmentTexts();
+    const editingSessionSegmentIds = new Set([
+        ...captureBaseline.keys(),
+        ...docTexts.keys(),
+    ]);
     const { deletedSegmentIds, textUpdates } = planTranscriptEdits(
-        props.segments,
+        props.segments.filter((segment) =>
+            editingSessionSegmentIds.has(segment.id),
+        ),
         docTexts,
     );
 
-    for (const update of textUpdates) {
+    if (textUpdates.length > 0) {
         await executeCommand(
-            new UpdateSegmentCommand(update.segmentId, { text: update.text }),
+            new UpdateSegmentsCommand(
+                textUpdates.map((update) => ({
+                    segmentId: update.segmentId,
+                    updates: { text: update.text },
+                })),
+            ),
         );
     }
 
@@ -311,12 +360,17 @@ function onEditorFocusOut(event: FocusEvent): void {
     if (next && editorRoot.value?.contains(next)) {
         return;
     }
-    // make sure the final text state is synced, then diff the session once
-    clearTimeout(syncTimer);
-    void flushTextEdits().then(captureFromBaseline);
+    finishEditingSession();
 }
 
 useEventListener(editorRoot, "focusout", onEditorFocusOut);
+onClickOutside(editorRoot, finishEditingSession);
+
+function finishEditingSession(): void {
+    // Focus has left the editor: persist immediately. The VueUse debounce is
+    // only a fallback while the user remains in the editor.
+    void flushTextEdits().then(captureFromBaseline);
+}
 
 async function captureEditedWords(
     segmentId: string,
@@ -661,10 +715,14 @@ async function insertSegmentAfter(afterId: string): Promise<void> {
     const undo = command.$undoCommand;
     if (undo instanceof DeleteSegmentCommand) {
         pendingFocusSegmentId.value = undo.segmentId;
+        await nextTick();
+        if (focusSegment(undo.segmentId)) {
+            pendingFocusSegmentId.value = null;
+        }
     }
 }
 
-function focusSegment(segmentId: string): void {
+function focusSegment(segmentId: string): boolean {
     let pos: number | null = null;
     editor.state.doc.descendants((node, nodePos) => {
         if (
@@ -678,7 +736,9 @@ function focusSegment(segmentId: string): void {
     });
     if (pos !== null) {
         editor.chain().focus().setTextSelection(pos).run();
+        return true;
     }
+    return false;
 }
 
 // --- Click: seek the player / open the speaker menu -------------------------

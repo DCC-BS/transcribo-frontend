@@ -574,7 +574,9 @@
             "noOtherSpeakers": "Keine anderen Sprecher",
             "jumpToNext": "Zum nächsten Auftritt springen",
             "time": "Zeit",
-            "scrollHorizontally": "Horizontal scrollen"
+            "scrollHorizontally": "Horizontal scrollen",
+            "deleteSpeaker": "Sprecher löschen",
+            "deleteSpeakerConfirm": "Alle Segmente von „{speaker}“ werden gelöscht. Fortfahren?"
         }
     },
     "footer": {
