@@ -25,9 +25,11 @@ async function switchToMode(mode: "view" | "summary" | "edit" | "statistics") {
 
 /*
     The lanes and the segment button only exist while the dock is expanded,
-    and it starts collapsed on phones. This has to run on the steps that point
-    at them, not earlier when the editor is entered: EditorDock re-collapses
-    itself on mount below 640px, which would undo an earlier expansion.
+    and it starts collapsed on phones. This runs one step before they are
+    pointed at, which is the only window that works: driver.js resolves a
+    step's element before running its own onHighlightStarted, so expanding
+    there would come too late — and expanding any earlier is undone by
+    EditorDock re-collapsing itself when it mounts below 640px.
 */
 function expandDock(): void {
     dockCompact.value = false;
@@ -137,6 +139,7 @@ function createDriver() {
             },
             {
                 element: "#transcript-document",
+                onHighlightStarted: expandDock,
                 popover: {
                     title: t("onboarding.editTranscriptions.title"),
                     description: t("onboarding.editTranscriptions.description"),
@@ -146,7 +149,6 @@ function createDriver() {
             },
             {
                 element: "#editor-lanes",
-                onHighlightStarted: expandDock,
                 popover: {
                     title: t("onboarding.speakerLanes.title"),
                     description: t("onboarding.speakerLanes.description"),
@@ -156,7 +158,6 @@ function createDriver() {
             },
             {
                 element: "#dock-add-segment",
-                onHighlightStarted: expandDock,
                 popover: {
                     title: t("onboarding.addTranscription.title"),
                     description: t("onboarding.addTranscription.description"),

@@ -7,6 +7,8 @@ const emit =
 const { t } = useI18n();
 
 const uploadFile = ref<File>();
+const audioActive = ref(false);
+const meetingActive = ref(false);
 
 watch(uploadFile, () => {
     if (uploadFile.value) {
@@ -16,6 +18,17 @@ watch(uploadFile, () => {
 
 function onRecodingComplete(audio: Blob) {
     const file = new File([audio], "Aufnahme.mp3", { type: "audio/mpeg" });
+    emit("onMediaSelected", { media: file });
+}
+
+function onMeetingRecorded(audio: Blob) {
+    // the recorder reports e.g. "audio/webm;codecs=opus" — the codec suffix
+    // is dropped so the file carries a plain media type
+    const mediaType = audio.type.split(";")[0] || "audio/webm";
+    const extension = mediaType.endsWith("ogg") ? "ogg" : "webm";
+    const file = new File([audio], `Meeting.${extension}`, {
+        type: mediaType,
+    });
     emit("onMediaSelected", { media: file });
 }
 
@@ -80,9 +93,20 @@ const acceptedMedia = [
                 :subtitle="t('pages.index.recordDescription')"
             />
             <div class="grid min-h-47.5 flex-1 place-items-center">
-                <AudioRecordingView
-                    @on-recording-complete="onRecodingComplete"
-                />
+                <!-- only one recorder at a time: the other is hidden while
+                     a recording is running -->
+                <div class="flex flex-col items-center gap-4">
+                    <AudioRecordingView
+                        v-if="!meetingActive"
+                        v-model:active="audioActive"
+                        @on-recording-complete="onRecodingComplete"
+                    />
+                    <MeetingRecordingView
+                        v-if="!audioActive"
+                        v-model:active="meetingActive"
+                        @on-recording-complete="onMeetingRecorded"
+                    />
+                </div>
             </div>
         </UCard>
     </div>

@@ -570,5 +570,19 @@
             "object": "Term",
             "institution": "Institution"
         }
+    },
+    "meeting": {
+        "record": "Record Meeting",
+        "hint": "Records your microphone together with the sound of a shared screen or tab.",
+        "audioOnly": "Only the audio is recorded — the screen content is never captured.",
+        "errors": {
+            "permission-denied": "Recording was cancelled. Microphone and screen sharing are both required.",
+            "no-screen-audio": "The selected screen was shared without sound. Share a tab or window again and tick “Share audio”.",
+            "failed": "The recording could not be started."
+        },
+        "unsupported": {
+            "browser": "Recording screen audio is not supported in this browser. Use Chrome or Edge on Windows.",
+            "platform": "On this operating system the browser can only share the audio of a browser tab, not the sound of apps like Teams."
+        }
     }
 }

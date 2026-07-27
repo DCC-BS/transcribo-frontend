@@ -320,12 +320,17 @@ function readTheme(): void {
 }
 
 function updateWidth(): void {
-    if (viewport.value) {
-        baseTrackWidth.value = Math.max(
-            viewport.value.clientWidth - props.labelWidth,
-            250,
-        );
+    if (!viewport.value) {
+        return;
     }
+    // A pixel of slack, floored: at 1x zoom the track would otherwise measure
+    // exactly the viewport, and a fractional layout width (display scaling on
+    // Windows) rounds it just past the edge — enough for a horizontal
+    // scrollbar on a track that has nothing to scroll.
+    baseTrackWidth.value = Math.max(
+        Math.floor(viewport.value.clientWidth - props.labelWidth - 1),
+        250,
+    );
 }
 
 function scrollActiveSpeakerIntoView(

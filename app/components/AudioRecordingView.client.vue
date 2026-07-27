@@ -3,6 +3,9 @@ import type { AudioRecorder } from "#components";
 
 const emit = defineEmits<(e: "onRecordingComplete", file: Blob) => void>();
 
+/** Lets the parent hide the other recorder while this one is busy. */
+const active = defineModel<boolean>("active", { default: false });
+
 const { t } = useI18n();
 
 const appLogger = useLogger();
@@ -37,6 +40,7 @@ function emitAudio(): void {
 
 function startRecording(): void {
     shouldRecord.value = true;
+    active.value = true;
 }
 
 const audioSessionActions = computed(() => [

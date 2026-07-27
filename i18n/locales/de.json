@@ -570,5 +570,19 @@
             "object": "Begriff",
             "institution": "Institution"
         }
+    },
+    "meeting": {
+        "record": "Meeting aufnehmen",
+        "hint": "Nimmt Ihr Mikrofon zusammen mit dem Ton eines geteilten Bildschirms oder Tabs auf.",
+        "audioOnly": "Es wird nur der Ton aufgezeichnet – der Bildschirminhalt wird nicht gespeichert.",
+        "errors": {
+            "permission-denied": "Die Aufnahme wurde abgebrochen. Mikrofon und Bildschirmfreigabe werden beide benötigt.",
+            "no-screen-audio": "Der gewählte Bildschirm wurde ohne Ton geteilt. Teilen Sie einen Tab oder ein Fenster erneut und aktivieren Sie „Ton teilen“.",
+            "failed": "Die Aufnahme konnte nicht gestartet werden."
+        },
+        "unsupported": {
+            "browser": "Die Aufnahme des Bildschirmtons wird in diesem Browser nicht unterstützt. Verwenden Sie Chrome oder Edge unter Windows.",
+            "platform": "Unter diesem Betriebssystem kann der Browser nur den Ton eines Browser-Tabs teilen, nicht den Ton von Programmen wie Teams."
+        }
     }
 }
