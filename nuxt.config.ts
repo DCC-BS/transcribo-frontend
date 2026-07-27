@@ -67,6 +67,7 @@ export default defineNuxtConfig({
                 "zod",
                 "@mohtasham/md-to-docx",
                 "@tiptap/core",
+                "@tiptap/pm/model",
                 "@tiptap/pm/state",
                 "@tiptap/pm/view",
                 "@tiptap/vue-3",

@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+// imported for the template ref's type only; the tag itself is auto-imported
+import type TranscriptDocumentEditorComponent from "~/components/transcriptDocument/TranscriptDocumentEditor.client.vue";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
@@ -18,9 +20,10 @@ const autoScrollEnabled = ref(true);
 const mergeSegments = ref(true);
 const keywordHighlightEnabled = ref(false);
 const showVideo = ref(false);
-const transcriptDocumentEditor = ref<{
-    insertSegmentAt: (start: number, end: number) => Promise<void>;
-}>();
+const transcriptDocumentEditor =
+    useTemplateRef<InstanceType<typeof TranscriptDocumentEditorComponent>>(
+        "transcriptDocumentEditor",
+    );
 
 function insertSegmentFromPlaybar(start: number, end: number): void {
     void transcriptDocumentEditor.value?.insertSegmentAt(start, end);

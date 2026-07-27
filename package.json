@@ -34,7 +34,6 @@
         "@nuxtjs/i18n": "10.4.0",
         "@nuxtjs/mdc": "0.22.0",
         "@tiptap/pm": "^3.27.3",
-        "@tiptap/starter-kit": "^3.27.3",
         "@tiptap/vue-3": "^3.27.3",
         "@vite-pwa/nuxt": "1.1.1",
         "@vueuse/core": "^14.3.0",

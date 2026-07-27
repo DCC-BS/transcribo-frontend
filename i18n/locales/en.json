@@ -85,20 +85,9 @@
         "settings": "Settings",
         "language": "Language"
     },
-    "audioRecorder": {
-        "useRecording": "Use this recording",
-        "makeSureMicrophoneIsProperlyConnected": "Make sure your microphone is properly connected",
-        "checkBrowserPermissionsForMicrophoneAccess": "Check browser permissions for microphone access",
-        "tryUsingDifferentBrowser": "Try using a different browser",
-        "restartDeviceIfIssuePersists": "Restart your device if the issue persists"
-    },
-    "timeline": {
-        "noTranscription": "No transcription available"
-    },
     "media": {
         "play": "Play",
         "pause": "Pause",
-        "addSegment": "Add Segment",
         "downloadMedia": "Download Media",
         "noMedia": "No media file available",
         "recordings": "Audio Recordings"
@@ -110,27 +99,18 @@
         "failedDescription": "Something went wrong during the transcription process. Please try again with a different file.",
         "goBack": "Go Back"
     },
-    "speaker": {
-        "jumpToFirstAppearance": "Jump to first appearance",
-        "delete": "Delete Speaker",
-        "deleteTitle": "Delete Speaker",
-        "deleteMessage": "All segments from \"{speaker}\" will be reassigned. Select which speaker should receive these segments:",
-        "reassignTo": "Reassign to speaker"
-    },
     "transcription": {
         "noSpeaker": "unknown",
         "placeholderSpeakerName": "Speaker name",
         "loading": "Loading...",
         "notFound": "Transcription not found or failed to load",
         "noTranscriptionsFound": "No transcriptions found",
-        "untitled": "Untitled",
         "info": "Transcription Info",
         "nameLabel": "Name",
         "namePlaceholder": "Transcription name",
         "autoScrollOn": "Auto-scroll ON",
         "autoScrollOff": "Auto-scroll OFF",
         "tab": "Transcription",
-        "timelineTab": "Timeline",
         "delete": {
             "title": "Delete Transcription",
             "confirmation": "Are you sure you want to delete this transcription?"
@@ -237,8 +217,7 @@
         "renameSpeaker": "Rename Speaker: \"{oldName}\" → \"{newName}\"",
         "mergeSpeaker": "Merge Speaker: \"{removedSpeaker}\" → \"{targetSpeaker}\"",
         "unmergeSpeaker": "Unmerge Speaker: restore \"{speaker}\" on {count} segments",
-        "restoreSegment": "Restore Segment",
-        "playFromSeconds": "Play from {seconds} seconds"
+        "restoreSegment": "Restore Segment"
     },
     "viewer": {
         "mode": "View Mode",
@@ -254,8 +233,7 @@
         "summary": "Summary",
         "editor": "Editor",
         "statistics": "Statistics",
-        "switch": "Switch Mode",
-        "document": "Document"
+        "switch": "Switch Mode"
     },
     "statistics": {
         "title": "Speaker Statistics",
@@ -541,10 +519,6 @@
             "description": "You're ready to use Transcribo! Click the help button anytime to see this tour again."
         }
     },
-    "documentEditor": {
-        "speakerChange": "Change speaker for this passage",
-        "speakerRename": "Rename everywhere"
-    },
     "editor": {
         "toolrow": {
             "highlightKeywords": "Highlight keywords",
@@ -571,19 +545,10 @@
             "rename": "Rename",
             "resizeSpeakerColumn": "Drag to resize the speaker column",
             "moveSegmentsTo": "Move segments to",
-            "noOtherSpeakers": "No other speakers",
             "jumpToNext": "Jump to next appearance",
-            "time": "Time",
-            "scrollHorizontally": "Scroll horizontally",
             "deleteSpeaker": "Delete speaker",
             "deleteSpeakerConfirm": "All segments of \"{speaker}\" will be deleted. Continue?"
         }
-    },
-    "footer": {
-        "logoAlt": "Data Science and Artificial Intelligence",
-        "title": "Data Science and AI",
-        "subtitle": "Developed with ♥ by DCC - Data Competence Center",
-        "help": "Help"
     },
     "vocabulary": {
         "title": "Vocabulary",

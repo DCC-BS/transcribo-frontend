@@ -7,7 +7,6 @@ import type { Segment, TranscriptionResponse } from "./transcriptionResponse";
 export const Cmds = {
     TranscriptionFinishedCommand: "TranscriptionFinishedCommand",
     SeekToSecondsCommand: "SeekToSecondsCommand",
-    PlayFromSecondsCommand: "PlayFromSecondsCommand",
     TogglePlayCommand: "TogglePlayCommand",
     InsertSegmentCommand: "InsertSegmentCommand",
     DeleteSegmentCommand: "DeleteSegmentCommand",
@@ -97,29 +96,6 @@ export class SeekToSecondsCommand implements ICommand {
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
         return t("commands.seekToSeconds", {
-            seconds: this.seconds.toFixed(2),
-        });
-    }
-}
-
-export class PlayFromSecondsCommand implements ICommand {
-    readonly $type = "PlayFromSecondsCommand";
-
-    constructor(public seconds: number) {}
-
-    /**
-     * Returns a string representation of the command
-     */
-    toString(): string {
-        return `Play From: ${this.seconds.toFixed(2)} seconds`;
-    }
-
-    /**
-     * Returns a localized string representation of the command
-     * @param t - Translation function from useI18n
-     */
-    toLocaleString(t: (key: string, params?: object) => string): string {
-        return t("commands.playFromSeconds", {
             seconds: this.seconds.toFixed(2),
         });
     }

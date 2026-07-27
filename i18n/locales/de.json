@@ -85,20 +85,9 @@
         "settings": "Einstellungen",
         "language": "Sprache"
     },
-    "audioRecorder": {
-        "useRecording": "Diese Aufnahme verwenden",
-        "makeSureMicrophoneIsProperlyConnected": "Stelle sicher, dass dein Mikrofon ordnungsgemäss verbunden ist",
-        "checkBrowserPermissionsForMicrophoneAccess": "Überprüfe die Browser-Berechtigungen für Mikrofonzugriff",
-        "tryUsingDifferentBrowser": "Versuche einen anderen Browser",
-        "restartDeviceIfIssuePersists": "Starte dein Gerät neu, wenn das Problem besteht"
-    },
-    "timeline": {
-        "noTranscription": "Keine Transkription verfügbar"
-    },
     "media": {
         "play": "Abspielen",
         "pause": "Pause",
-        "addSegment": "Segment hinzufügen",
         "downloadMedia": "Medien herunterladen",
         "noMedia": "Keine Mediendatei verfügbar",
         "recordings": "Audio-Aufnahmen"
@@ -110,27 +99,18 @@
         "failedDescription": "Während der Transkription ist ein Fehler aufgetreten. Bitte versuche es mit einer anderen Datei erneut.",
         "goBack": "Zurück"
     },
-    "speaker": {
-        "jumpToFirstAppearance": "Zum ersten Auftreten springen",
-        "delete": "Sprecher löschen",
-        "deleteTitle": "Sprecher löschen",
-        "deleteMessage": "Alle Segmente von \"{speaker}\" werden neu zugewiesen. Wähle, welchem Sprecher diese Segmente zugewiesen werden sollen:",
-        "reassignTo": "Zuweisen an Sprecher"
-    },
     "transcription": {
         "noSpeaker": "unbekannt",
         "placeholderSpeakerName": "Sprechername",
         "loading": "Lädt...",
         "notFound": "Transkription nicht gefunden oder konnte nicht geladen werden",
         "noTranscriptionsFound": "Keine Transkriptionen gefunden",
-        "untitled": "Ohne Titel",
         "info": "Transkriptions-Info",
         "nameLabel": "Name",
         "namePlaceholder": "Transkriptionsname",
         "autoScrollOn": "Auto-Scroll AN",
         "autoScrollOff": "Auto-Scroll AUS",
         "tab": "Transkription",
-        "timelineTab": "Zeitleiste",
         "delete": {
             "title": "Transkription löschen",
             "confirmation": "Bist du sicher, dass du diese Transkription löschen möchtest?"
@@ -237,8 +217,7 @@
         "renameSpeaker": "Sprecher umbenennen: \"{oldName}\" → \"{newName}\"",
         "mergeSpeaker": "Sprecher zusammenführen: \"{removedSpeaker}\" → \"{targetSpeaker}\"",
         "unmergeSpeaker": "Sprecher trennen: \"{speaker}\" auf {count} Segmenten wiederherstellen",
-        "restoreSegment": "Segment wiederherstellen",
-        "playFromSeconds": "Abspielen ab {seconds} Sekunden"
+        "restoreSegment": "Segment wiederherstellen"
     },
     "viewer": {
         "mode": "Ansichtsmodus",
@@ -254,8 +233,7 @@
         "summary": "Zusammenfassung",
         "editor": "Editor",
         "statistics": "Statistik",
-        "switch": "Modus wechseln",
-        "document": "Dokument"
+        "switch": "Modus wechseln"
     },
     "statistics": {
         "title": "Sprecher-Statistik",
@@ -541,10 +519,6 @@
             "description": "Du bist bereit, Transcribo zu nutzen! Klicke jederzeit auf den Hilfe-Button, um diese Tour erneut zu starten."
         }
     },
-    "documentEditor": {
-        "speakerChange": "Sprecher für diesen Abschnitt ändern",
-        "speakerRename": "Überall umbenennen"
-    },
     "editor": {
         "toolrow": {
             "highlightKeywords": "Schlüsselbegriffe hervorheben",
@@ -571,19 +545,10 @@
             "rename": "Umbenennen",
             "resizeSpeakerColumn": "Ziehen, um die Sprecherspalte zu verbreitern",
             "moveSegmentsTo": "Segmente verschieben zu",
-            "noOtherSpeakers": "Keine anderen Sprecher",
             "jumpToNext": "Zum nächsten Auftritt springen",
-            "time": "Zeit",
-            "scrollHorizontally": "Horizontal scrollen",
             "deleteSpeaker": "Sprecher löschen",
             "deleteSpeakerConfirm": "Alle Segmente von „{speaker}“ werden gelöscht. Fortfahren?"
         }
-    },
-    "footer": {
-        "logoAlt": "Datenwissenschaften und Künstliche Intelligenz",
-        "title": "Datenwissenschaften und KI",
-        "subtitle": "Developed with ♥ by DCC - Data Competence Center",
-        "help": "Hilfe"
     },
     "vocabulary": {
         "title": "Wortschatz",

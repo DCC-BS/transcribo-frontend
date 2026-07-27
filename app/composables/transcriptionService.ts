@@ -15,7 +15,6 @@ import {
     UpdateSegmentCommand,
     UpdateSegmentsCommand,
 } from "~/types/commands";
-import type { StoredSegment } from "~/types/storedSegments";
 import { nextSpeakerName } from "~/utils/speakerUtils";
 
 // Default length of a freshly created segment, in seconds.
@@ -48,6 +47,7 @@ export const useTranscriptionCommandHandler = () => {
     const {
         getSegment,
         deleteSegment,
+        deleteSegments,
         updateSegment,
         updateSegments,
         putSegment,
@@ -83,15 +83,10 @@ export const useTranscriptionCommandHandler = () => {
     onCommand<DeleteSegmentsCommand>(
         Cmds.DeleteSegmentsCommand,
         async (command) => {
-            const segments = (
-                await db.segments.bulkGet(command.segmentIds)
-            ).filter((segment): segment is StoredSegment => !!segment);
-            if (segments.length === 0) {
-                return;
+            const segments = await deleteSegments(command.segmentIds);
+            if (segments.length > 0) {
+                command.setUndoCommand(new RestoreSegmentsCommand(segments));
             }
-            command.setUndoCommand(new RestoreSegmentsCommand(segments));
-            await db.segments.bulkDelete(command.segmentIds);
-            await updateTranscription(segments[0]?.transcriptionId ?? "", {});
         },
     );
 

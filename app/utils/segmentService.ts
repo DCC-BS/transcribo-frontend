@@ -6,7 +6,7 @@ import {
 } from "~/types/storedSegments";
 import type { Segment } from "~/types/transcriptionResponse";
 
-export function toStoredSegmentRecords(
+function toStoredSegmentRecords(
     segments: readonly StoredSegment[],
 ): StoredSegment[] {
     return segments.map((segment) => StoredSegmentSchema.parse(segment));
@@ -126,6 +126,31 @@ export function getSegmentService() {
         );
     }
 
+    /** Removes several segments and returns them, so the caller can undo. */
+    async function deleteSegments(ids: string[]): Promise<StoredSegment[]> {
+        return db.transaction(
+            "rw",
+            db.segments,
+            db.transcriptions,
+            async () => {
+                const segments = (await db.segments.bulkGet(ids)).filter(
+                    (segment): segment is StoredSegment => !!segment,
+                );
+                if (segments.length === 0) {
+                    return segments;
+                }
+                await db.segments.bulkDelete(ids);
+                const transcriptionIds = new Set(
+                    segments.map((segment) => segment.transcriptionId),
+                );
+                for (const transcriptionId of transcriptionIds) {
+                    await updateTranscriptionUpdatedAt(transcriptionId);
+                }
+                return segments;
+            },
+        );
+    }
+
     async function deleteSegment(id: string) {
         const segment = await getSegment(id);
         await db.segments.delete(id);
@@ -144,5 +169,6 @@ export function getSegmentService() {
         updateSegment,
         updateSegments,
         deleteSegment,
+        deleteSegments,
     };
 }

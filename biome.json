@@ -15,7 +15,6 @@
             "!!tests",
             "!env.d.ts",
             "!public",
-            "!_mockups",
             "!.claude"
         ]
     },

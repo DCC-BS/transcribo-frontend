@@ -752,45 +752,16 @@ async function insertSegmentAfter(afterId: string): Promise<void> {
     );
 }
 
-function distanceToSegment(time: number, segment: StoredSegment): number {
-    return Math.min(
-        Math.abs(time - segment.start),
-        Math.abs(time - segment.end),
-    );
-}
-
 /** Insert at the playhead rather than next to an existing segment. */
 async function insertSegmentAt(start: number, end: number): Promise<void> {
     await finishEditingSession();
-
-    const anchor =
-        props.segments.find(
-            (segment) => start >= segment.start && start < segment.end,
-        ) ??
-        props.segments.reduce<StoredSegment | undefined>(
-            (nearest, segment) =>
-                !nearest ||
-                distanceToSegment(start, segment) <
-                    distanceToSegment(start, nearest)
-                    ? segment
-                    : nearest,
-            undefined,
-        );
-
     await createSegment(
-        anchor
-            ? new InsertSegmentCommand(
-                  props.transcription.id,
-                  anchor.id,
-                  { start, end },
-                  "after",
-              )
-            : new AddSegmentCommand({
-                  transcriptionId: props.transcription.id,
-                  start,
-                  end,
-                  text: "",
-              }),
+        new AddSegmentCommand({
+            transcriptionId: props.transcription.id,
+            start,
+            end,
+            text: "",
+        }),
     );
 }
 

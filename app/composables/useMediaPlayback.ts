@@ -1,7 +1,6 @@
 import { useEventListener } from "@vueuse/core";
 import {
     Cmds,
-    type PlayFromSecondsCommand,
     type SeekToSecondsCommand,
     type TogglePlayCommand,
 } from "~/types/commands";
@@ -10,9 +9,9 @@ import type { StoredTranscription } from "~/types/storedTranscription";
 /*
     Media playback engine shared by the viewer playbar and the editor dock:
     owns the <audio>/<video> element refs, play/pause/seek/rate state and
-    the playback command handlers (TogglePlay, SeekToSeconds,
-    PlayFromSeconds) plus the global Space shortcut. The component using it
-    binds `videoElement`/`audioElement` to its media tags and mirrors
+    the playback command handlers (TogglePlay, SeekToSeconds) plus the
+    global Space shortcut. The component using it binds
+    `videoElement`/`audioElement` to its media tags and mirrors
     `currentTime`.
 */
 export function useMediaPlayback(
@@ -235,17 +234,6 @@ export function useMediaPlayback(
             document.activeElement.blur();
         }
     });
-
-    onCommand<PlayFromSecondsCommand>(
-        Cmds.PlayFromSecondsCommand,
-        async (cmd) => {
-            seekTo(cmd.seconds);
-            const el = mediaEl();
-            if (el?.paused && !hasTimelineOnlyPosition) {
-                el.play();
-            }
-        },
-    );
 
     return {
         mediaFile,
