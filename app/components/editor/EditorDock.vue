@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { AddSegmentCommand } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { formatTime } from "~/utils/time";
@@ -21,18 +20,22 @@ const emit = defineEmits<{
     togglePlay: [];
     seek: [seconds: number];
     setRate: [rate: number];
+    addSegment: [start: number, end: number];
 }>();
 
 const showVideo = defineModel<boolean>("showVideo", { default: false });
 
 const { t } = useI18n();
-const { executeCommand } = useCommandBus();
+const { speakerIds } = useSpeakerRegistry();
 
 const zoom = ref(1);
 const compact = ref(false);
 
-function toggleVideo(): void {
+function toggleVideo(event: MouseEvent): void {
     showVideo.value = !showVideo.value;
+    if (event.currentTarget instanceof HTMLButtonElement) {
+        event.currentTarget.blur();
+    }
 }
 
 function expandLanes(): void {
@@ -60,7 +63,7 @@ const lanesHeight = useLocalStorage<number>(
 );
 
 const maxLanesHeight = computed(
-    () => getUniqueSpeakers(props.segments).size * LANE_ROW + RULER,
+    () => speakerIds.value.length * LANE_ROW + RULER,
 );
 
 function beginDockResize(event: PointerEvent): void {
@@ -94,21 +97,12 @@ const zoomExp = computed({
 });
 
 
-async function addSegmentAtPlayhead(): Promise<void> {
-    // A new segment is placed at the playhead as its own new speaker (named
-    // by the command handler), so it never overlaps and needs no gap search.
+function requestSegmentAtPlayhead(): void {
     const start = props.currentTime;
     const end = props.duration
         ? Math.min(start + 2, props.duration)
         : start + 2;
-    await executeCommand(
-        new AddSegmentCommand({
-            transcriptionId: props.transcription.id,
-            start,
-            end,
-            text: "",
-        }),
-    );
+    emit("addSegment", start, end);
 }
 
 </script>
@@ -226,7 +220,7 @@ async function addSegmentAtPlayhead(): Promise<void> {
                     color="neutral"
                     size="xs"
                     :title="t('editor.dock.addSegment')"
-                    @click="addSegmentAtPlayhead"
+                    @click="requestSegmentAtPlayhead"
                 >
                     <span class="hidden md:inline">
                         {{ t("editor.dock.segment") }}

@@ -104,6 +104,7 @@ function onMediaConfigure(payload: MediaConfigureData) {
             <MediaProcessingView
                 v-if="step === 3 && mediaPreviewData"
                 v-model:input="mediaPreviewData"
+                class="mx-auto w-full md:w-2/3"
             />
         </div>
     </div>

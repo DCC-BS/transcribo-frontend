@@ -92,6 +92,7 @@ export type TranscriptCorrection = z.infer<typeof TranscriptCorrectionSchema>;
  */
 export const TranscriptionResponseSchema = z.object({
     segments: z.array(SegmentSchema),
+    title: z.string().nullable().optional(),
     speaker_assignments: z
         .array(SpeakerNameAssignmentSchema)
         .nullable()

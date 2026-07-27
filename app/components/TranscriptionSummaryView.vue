@@ -141,11 +141,22 @@ async function handleGenerateSummary(): Promise<void> {
                 />
 
                 <UCard :ui="{ body: 'p-8 sm:p-12' }">
-            <div
-                v-if="props.transcription.summary && !isSummaryGenerating"
-                class="mb-4 flex items-center gap-3 border-b border-default pb-3"
-            >
-                        <div class="flex-1" />
+                    <div
+                        v-if="
+                            props.transcription.summary &&
+                            !isSummaryGenerating
+                        "
+                        class="mb-4 flex items-center gap-3 border-b border-default pb-3"
+                    >
+                        <h3
+                            class="min-w-0 flex-1 truncate text-[0.95rem] font-semibold text-default"
+                            :title="props.transcription.name"
+                        >
+                            {{
+                                props.transcription.name ||
+                                t("transcription.info")
+                            }}
+                        </h3>
                         <div
                             v-if="props.transcription.summary"
                             class="flex items-center gap-1"

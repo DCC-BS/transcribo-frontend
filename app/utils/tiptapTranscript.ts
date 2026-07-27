@@ -271,6 +271,67 @@ export function buildTranscriptDocContent(
     };
 }
 
+// --- Segment ownership -------------------------------------------------
+
+/** Id of the segment a node at `index` extends: the preceding one, else the
+ *  following one — typing after a segment continues that segment. */
+function adjacentSegmentId(
+    turn: ProseMirrorNode,
+    index: number,
+): string | null {
+    const previous = index > 0 ? turn.child(index - 1) : null;
+    const next = index + 1 < turn.childCount ? turn.child(index + 1) : null;
+    return (
+        (previous?.attrs.segmentId as string | null) ??
+        (next?.attrs.segmentId as string | null) ??
+        null
+    );
+}
+
+/**
+ * Enforces the invariant that every `transcriptSegment` names the stored
+ * segment it belongs to.
+ *
+ * `segmentId` is a foreign key and has no meaningful attribute default, yet
+ * ProseMirror creates nodes with defaults on its own: a newly inserted
+ * segment is still empty, the caret cannot rest inside an empty inline node
+ * and resolves out to the `speakerTurn`, whose `transcriptSegment+` content
+ * makes the next keystroke get wrapped in a fresh, id-less segment. Text
+ * there belongs to no database row and is dropped by the next rebuild.
+ *
+ * Adopting such a node costs one attribute write; text and caret stay put
+ * and the segment spans two nodes until the next rebuild collapses them.
+ */
+export function createSegmentOwnershipPlugin(): Plugin {
+    return new Plugin({
+        appendTransaction(transactions, _oldState, newState) {
+            if (!transactions.some((transaction) => transaction.docChanged)) {
+                return null;
+            }
+
+            const { tr } = newState;
+            newState.doc.descendants((node, pos, parent, index) => {
+                if (node.type.name !== "transcriptSegment") {
+                    return true;
+                }
+                if (node.attrs.segmentId || !parent) {
+                    return false;
+                }
+                const segmentId = adjacentSegmentId(parent, index);
+                if (segmentId) {
+                    tr.setNodeMarkup(pos, undefined, {
+                        ...node.attrs,
+                        segmentId,
+                    });
+                }
+                return false;
+            });
+
+            return tr.steps.length > 0 ? tr : null;
+        },
+    });
+}
+
 // --- Playhead plugin ---------------------------------------------------
 
 export interface PlayheadPosition {

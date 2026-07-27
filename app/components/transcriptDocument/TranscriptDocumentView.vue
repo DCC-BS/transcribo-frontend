@@ -18,6 +18,13 @@ const autoScrollEnabled = ref(true);
 const mergeSegments = ref(true);
 const keywordHighlightEnabled = ref(false);
 const showVideo = ref(false);
+const transcriptDocumentEditor = ref<{
+    insertSegmentAt: (start: number, end: number) => Promise<void>;
+}>();
+
+function insertSegmentFromPlaybar(start: number, end: number): void {
+    void transcriptDocumentEditor.value?.insertSegmentAt(start, end);
+}
 
 const {
     mediaFile,
@@ -165,6 +172,7 @@ watch(
             >
                 <div class="mx-auto max-w-210 px-5 pb-10">
                     <TranscriptDocumentEditor
+                        ref="transcriptDocumentEditor"
                         :transcription="props.transcription"
                         :segments="props.segments"
                         :current-time="currentTime"
@@ -191,6 +199,7 @@ watch(
             @toggle-play="togglePlay"
             @seek="seekTo"
             @set-rate="(rate) => (playbackRate = rate)"
+            @add-segment="insertSegmentFromPlaybar"
         />
     </div>
 </template>

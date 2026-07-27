@@ -79,6 +79,13 @@ const segmentsBySpeaker = computed(() => {
     return map;
 });
 
+const timelineDuration = computed(() =>
+    props.segments.reduce(
+        (latestEnd, segment) => Math.max(latestEnd, segment.end),
+        props.duration,
+    ),
+);
+
 // A merged block must keep its members when it moves across other speakers in
 // time. Rebuilding turns solely from chronological order would split that block
 // as soon as another speaker falls between two of its member segments.
@@ -521,7 +528,7 @@ async function confirmAddSpeaker(): Promise<void> {
             :auto-scroll="props.autoScroll"
             :blocks="blocks"
             :current-time="props.currentTime"
-            :duration="props.duration"
+            :duration="timelineDuration"
             :viewport-height="props.viewportHeight ?? 4 * 44 + 27"
             :speaker-colors="speakerColors"
             @seek="emit('seek', $event)"

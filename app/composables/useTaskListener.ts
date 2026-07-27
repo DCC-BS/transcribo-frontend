@@ -10,6 +10,7 @@ import {
 } from "~/types/storedTasks";
 import type { Speaker } from "~/types/storedTranscription";
 import type { TranscriptionResponse } from "~/types/transcriptionResponse";
+import { resolveTranscriptionTitle } from "~/utils/resolveTranscriptionTitle";
 import { isVideoFile } from "~/utils/videoUtils";
 
 export function useTaskListener() {
@@ -257,7 +258,7 @@ export function useTaskListener() {
                 const newTranscription = await addTranscription({
                     mediaFile: mediaFile,
                     mediaFileName: mediaName,
-                    name: mediaName ?? t("transcription.untitled"),
+                    name: resolveTranscriptionTitle(result.title, mediaName),
                     keywords,
                     speakers,
                 });

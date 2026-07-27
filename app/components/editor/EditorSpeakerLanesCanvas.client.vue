@@ -19,6 +19,7 @@ const RULER_HEIGHT = 27;
 const MIN_BLOCK_SECONDS = 0.2;
 const PREFERRED_BLOCK_WIDTH = 14;
 const BLOCK_GAP = 1.5;
+const RULER_LABEL_WIDTH = 56;
 const ZOOM_MIN = 0.125;
 const ZOOM_MAX = 8;
 
@@ -149,11 +150,21 @@ const rulerTicks = computed(() => {
     const rawStep = props.duration / Math.max(8 * zoom.value, 1);
     const steps = [1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800];
     const step = steps.find((candidate) => candidate >= rawStep) ?? 3600;
-    const ticks: { time: number; x: number; label: string }[] = [];
+    const ticks: {
+        time: number;
+        x: number;
+        labelX: number;
+        label: string;
+    }[] = [];
     for (let time = step; time < props.duration; time += step) {
+        const x = timeToX(time);
         ticks.push({
             time,
-            x: timeToX(time),
+            x,
+            labelX: Math.min(
+                Math.max(x - RULER_LABEL_WIDTH / 2, 0),
+                Math.max(trackWidth.value - RULER_LABEL_WIDTH, 0),
+            ),
             label: `${formatTime(time, { milliseconds: false })}s`,
         });
     }
@@ -942,9 +953,9 @@ onBeforeUnmount(() => clearTimeout(dragCommitTimeout));
                                 />
                                 <v-text
                                     :config="{
-                                        x: tick.x - 28,
+                                        x: tick.labelX,
                                         y: 7,
-                                        width: 56,
+                                        width: RULER_LABEL_WIDTH,
                                         text: tick.label,
                                         align: 'center',
                                         fontSize: 11,

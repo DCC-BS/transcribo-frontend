@@ -38,7 +38,7 @@ async function handleNameChange() {
         :transition="{ ...pageTransition, delay: staggerDelay }">
         <UPopover v-model:open="isInfoExpanded" :ui="{ content: 'p-0 min-w-72' }">
             <UButton id="transcription-info-button" variant="ghost" color="neutral" size="sm" class="gap-1.5">
-                <span class="truncate max-w-32 sm:max-w-56 text-[0.9rem] font-semibold text-default">{{
+                <span class="truncate max-w-48 sm:max-w-80 lg:max-w-120 xl:max-w-160 text-[0.9rem] font-semibold text-default">{{
                     props.transcription.name || t("transcription.info")
                 }}</span>
                 <template #trailing>

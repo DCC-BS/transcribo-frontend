@@ -9,6 +9,7 @@ import {
     useStyleTag,
 } from "@vueuse/core";
 import {
+    AddSegmentCommand,
     DeleteSegmentCommand,
     DeleteSegmentsCommand,
     InsertSegmentCommand,
@@ -25,6 +26,7 @@ import {
     buildTranscriptTurns,
     createKeywordHighlightPlugin,
     createPlayheadPlugin,
+    createSegmentOwnershipPlugin,
     keywordPluginKey,
     playheadPluginKey,
     SpeakerTurnNode,
@@ -119,10 +121,14 @@ useStyleTag(
     ),
 );
 
-const decorationsExtension = Extension.create({
-    name: "transcriptDecorations",
+const transcriptExtension = Extension.create({
+    name: "transcriptBehaviour",
     addProseMirrorPlugins() {
-        return [createPlayheadPlugin(), createKeywordHighlightPlugin()];
+        return [
+            createSegmentOwnershipPlugin(),
+            createPlayheadPlugin(),
+            createKeywordHighlightPlugin(),
+        ];
     },
     addKeyboardShortcuts() {
         // Segment texts are single flowing lines — Enter must not split the
@@ -140,7 +146,7 @@ const editor = new Editor({
         TranscriptTextNode,
         SpeakerTurnNode,
         TranscriptSegmentNode,
-        decorationsExtension,
+        transcriptExtension,
     ],
     content: buildTranscriptDocContent(
         props.segments,
@@ -161,7 +167,9 @@ const editor = new Editor({
 });
 
 onUnmounted(() => {
-    void captureFromBaseline();
+    // A mode switch can tear the editor down before the debounce ran and
+    // without a focusout, so the session runs on a doc taken before destroy().
+    void finishEditingSession(editor.state.doc);
     editor.destroy();
 });
 
@@ -215,25 +223,31 @@ function scheduleTextSync(): void {
 
 /**
  * Segment texts as present in the given document (defaults to the current
- * one). All but the last segment of a turn carry the join-space appended
- * by the builder; it is stripped again here so the round trip is loss-free.
+ * one). A segment can momentarily span several adjacent nodes, so the pieces
+ * are concatenated. All but the last segment of a turn carry the join-space
+ * appended by the builder; stripping it per segment rather than per node
+ * keeps a typed trailing space inside a split segment intact.
  */
 function readDocSegmentTexts(
     doc: ProseMirrorNode = editor.state.doc,
 ): Map<string, string> {
     const texts = new Map<string, string>();
     doc.forEach((turn) => {
-        turn.forEach((segmentNode, _offset, index) => {
+        const ids: string[] = [];
+        turn.forEach((segmentNode) => {
             const id = segmentNode.attrs.segmentId as string | null;
             if (!id) {
                 return;
             }
-            let text = segmentNode.textContent;
-            if (index < turn.childCount - 1 && text.endsWith(" ")) {
-                text = text.slice(0, -1);
+            const collected = texts.get(id);
+            if (collected === undefined) {
+                ids.push(id);
             }
-            texts.set(id, text);
+            texts.set(id, (collected ?? "") + segmentNode.textContent);
         });
+        for (const id of ids.slice(0, -1)) {
+            texts.set(id, (texts.get(id) ?? "").replace(/ $/, ""));
+        }
     });
     return texts;
 }
@@ -270,13 +284,13 @@ function docReflectsSegments(
     return matches;
 }
 
-async function flushTextEdits(): Promise<void> {
+async function flushTextEdits(doc?: ProseMirrorNode): Promise<void> {
     if (flushPromise) {
         await flushPromise;
         return;
     }
 
-    flushPromise = flushDirtyTextEdits();
+    flushPromise = flushDirtyTextEdits(doc);
     try {
         await flushPromise;
     } finally {
@@ -284,15 +298,17 @@ async function flushTextEdits(): Promise<void> {
     }
 }
 
-async function flushDirtyTextEdits(): Promise<void> {
+async function flushDirtyTextEdits(doc?: ProseMirrorNode): Promise<void> {
     while (isDirty) {
         isDirty = false;
-        await persistCurrentTextEdits();
+        await persistCurrentTextEdits(doc);
     }
 }
 
-async function persistCurrentTextEdits(): Promise<void> {
-    const docTexts = readDocSegmentTexts();
+async function persistCurrentTextEdits(
+    doc: ProseMirrorNode = editor.state.doc,
+): Promise<void> {
+    const docTexts = readDocSegmentTexts(doc);
     const editingSessionSegmentIds = new Set([
         ...captureBaseline.keys(),
         ...docTexts.keys(),
@@ -337,11 +353,13 @@ function snapshotCaptureBaseline(beforeDoc: ProseMirrorNode): void {
     }
 }
 
-async function captureFromBaseline(): Promise<void> {
+async function captureFromBaseline(
+    doc: ProseMirrorNode = editor.state.doc,
+): Promise<void> {
     if (captureBaseline.size === 0) {
         return;
     }
-    const docTexts = readDocSegmentTexts();
+    const docTexts = readDocSegmentTexts(doc);
     const baseline = new Map(captureBaseline);
     captureBaseline.clear();
     for (const [segmentId, oldText] of baseline) {
@@ -364,12 +382,16 @@ function onEditorFocusOut(event: FocusEvent): void {
 }
 
 useEventListener(editorRoot, "focusout", onEditorFocusOut);
-onClickOutside(editorRoot, finishEditingSession);
+onClickOutside(editorRoot, () => finishEditingSession());
 
-function finishEditingSession(): void {
-    // Focus has left the editor: persist immediately. The VueUse debounce is
-    // only a fallback while the user remains in the editor.
-    void flushTextEdits().then(captureFromBaseline);
+/**
+ * Focus has left the editor: persist immediately. The VueUse debounce is
+ * only a fallback while the user remains in the editor. `doc` defaults to the
+ * live document; teardown passes a snapshot taken before `editor.destroy()`.
+ */
+async function finishEditingSession(doc?: ProseMirrorNode): Promise<void> {
+    await flushTextEdits(doc);
+    await captureFromBaseline(doc);
 }
 
 async function captureEditedWords(
@@ -701,26 +723,78 @@ watch(
 // and clicking out simply syncs the typed text back like any other edit.
 const pendingFocusSegmentId = ref<string | null>(null);
 
-async function insertSegmentAfter(afterId: string): Promise<void> {
-    // the command handler assigns a unique new speaker and clean timing
-    const command = new InsertSegmentCommand(
-        props.transcription.id,
-        afterId,
-        {},
-        "after",
-    );
+/**
+ * Runs a creation command and focuses the segment the handler reports back
+ * through its undo command (it leaves an EmptyCommand when there was no room
+ * to insert). Callers settle pending typing first, so the rebuild the new
+ * segment triggers starts from an already-persisted document.
+ */
+async function createSegment(
+    command: AddSegmentCommand | InsertSegmentCommand,
+): Promise<void> {
     await executeCommand(command);
-    // the handler stores the created segment's id in the undo command
-    // (and leaves an EmptyCommand when there was no room to insert)
     const undo = command.$undoCommand;
-    if (undo instanceof DeleteSegmentCommand) {
-        pendingFocusSegmentId.value = undo.segmentId;
-        await nextTick();
-        if (focusSegment(undo.segmentId)) {
-            pendingFocusSegmentId.value = null;
-        }
+    if (!(undo instanceof DeleteSegmentCommand)) {
+        return;
+    }
+    pendingFocusSegmentId.value = undo.segmentId;
+    await nextTick();
+    if (focusSegment(undo.segmentId)) {
+        pendingFocusSegmentId.value = null;
     }
 }
+
+async function insertSegmentAfter(afterId: string): Promise<void> {
+    await finishEditingSession();
+    // the command handler assigns a unique new speaker and clean timing
+    await createSegment(
+        new InsertSegmentCommand(props.transcription.id, afterId, {}, "after"),
+    );
+}
+
+function distanceToSegment(time: number, segment: StoredSegment): number {
+    return Math.min(
+        Math.abs(time - segment.start),
+        Math.abs(time - segment.end),
+    );
+}
+
+/** Insert at the playhead rather than next to an existing segment. */
+async function insertSegmentAt(start: number, end: number): Promise<void> {
+    await finishEditingSession();
+
+    const anchor =
+        props.segments.find(
+            (segment) => start >= segment.start && start < segment.end,
+        ) ??
+        props.segments.reduce<StoredSegment | undefined>(
+            (nearest, segment) =>
+                !nearest ||
+                distanceToSegment(start, segment) <
+                    distanceToSegment(start, nearest)
+                    ? segment
+                    : nearest,
+            undefined,
+        );
+
+    await createSegment(
+        anchor
+            ? new InsertSegmentCommand(
+                  props.transcription.id,
+                  anchor.id,
+                  { start, end },
+                  "after",
+              )
+            : new AddSegmentCommand({
+                  transcriptionId: props.transcription.id,
+                  start,
+                  end,
+                  text: "",
+              }),
+    );
+}
+
+defineExpose({ insertSegmentAt });
 
 function focusSegment(segmentId: string): boolean {
     let pos: number | null = null;
