@@ -29,7 +29,7 @@ const { t } = useI18n();
 const { speakerIds } = useSpeakerRegistry();
 
 const zoom = ref(1);
-const compact = ref(false);
+const compact = useEditorDockCompact();
 
 function toggleVideo(event: MouseEvent): void {
     showVideo.value = !showVideo.value;

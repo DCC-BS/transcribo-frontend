@@ -1,13 +1,5 @@
 <script setup lang="ts">
-import { ShowOnboardingCommand } from "~/types/commands";
-
 const { t } = useI18n();
-const { executeCommand } = useCommandBus();
-const { currentRoute } = useRouter();
-
-const isInEditor = computed(
-    () => currentRoute.value.path.match(/transcription\/.+/) !== null,
-);
 </script>
 
 <template>
@@ -41,17 +33,6 @@ const isInEditor = computed(
                     class="justify-start"
                 >
                     {{ t("vocabulary.title") }}
-                </UButton>
-                <UButton
-                    v-if="isInEditor"
-                    id="help-button"
-                    icon="i-lucide-circle-help"
-                    variant="ghost"
-                    color="neutral"
-                    class="justify-start"
-                    @click="executeCommand(new ShowOnboardingCommand())"
-                >
-                    {{ t("onboarding.help") }}
                 </UButton>
                 <DisclaimerButton variant="ghost" />
             </div>

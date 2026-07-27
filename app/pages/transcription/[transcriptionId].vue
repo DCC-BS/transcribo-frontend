@@ -41,7 +41,9 @@ onCommand<ChangeEditorModeCommand>(
 </script>
 
 <template>
-    <Onboarding />
+    <!-- only once the data is in: the tour points at transcript DOM that
+         does not exist while the page is still loading -->
+    <Onboarding v-if="transcription && segments" />
 
     <Teleport defer to="#appbar-context">
         <ClientOnly>

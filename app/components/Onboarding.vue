@@ -17,12 +17,20 @@ const { executeCommand, onCommand } = useCommandBus();
 
 const ONBOARDING_KEY = "transcribo-onboarding-completed";
 
+const dockCompact = useEditorDockCompact();
+
 async function switchToMode(mode: "view" | "summary" | "edit" | "statistics") {
     await executeCommand(new ChangeEditorModeCommand(mode));
 }
 
-function getSelector(baseId: string): string {
-    return `#${baseId}`;
+/*
+    The lanes and the segment button only exist while the dock is expanded,
+    and it starts collapsed on phones. This has to run on the steps that point
+    at them, not earlier when the editor is entered: EditorDock re-collapses
+    itself on mount below 640px, which would undo an earlier expansion.
+*/
+function expandDock(): void {
+    dockCompact.value = false;
 }
 
 function createDriver() {
@@ -65,7 +73,7 @@ function createDriver() {
                 },
             },
             {
-                element: getSelector("editor-mode-selector"),
+                element: "#editor-mode-selector",
                 popover: {
                     title: t("onboarding.modes.title"),
                     description: t("onboarding.modes.description"),
@@ -74,7 +82,7 @@ function createDriver() {
                 },
             },
             {
-                element: getSelector("mode-view"),
+                element: ".mode-view",
                 popover: {
                     title: t("onboarding.viewerIntro.title"),
                     description: t("onboarding.viewerIntro.description"),
@@ -95,7 +103,7 @@ function createDriver() {
                 },
             },
             {
-                element: getSelector("mode-summary"),
+                element: ".mode-summary",
                 onHighlightStarted: async () => await switchToMode("summary"),
                 popover: {
                     title: t("onboarding.summary.title"),
@@ -114,7 +122,7 @@ function createDriver() {
                 },
             },
             {
-                element: getSelector("mode-edit"),
+                element: ".mode-edit",
                 onHighlightStarted: () => switchToMode("edit"),
                 popover: {
                     onPrevClick: async () => {
@@ -138,6 +146,7 @@ function createDriver() {
             },
             {
                 element: "#editor-lanes",
+                onHighlightStarted: expandDock,
                 popover: {
                     title: t("onboarding.speakerLanes.title"),
                     description: t("onboarding.speakerLanes.description"),
@@ -147,6 +156,7 @@ function createDriver() {
             },
             {
                 element: "#dock-add-segment",
+                onHighlightStarted: expandDock,
                 popover: {
                     title: t("onboarding.addTranscription.title"),
                     description: t("onboarding.addTranscription.description"),
@@ -164,7 +174,7 @@ function createDriver() {
                 },
             },
             {
-                element: getSelector("mode-statistics"),
+                element: ".mode-statistics",
                 onHighlightStarted: () => switchToMode("statistics"),
                 popover: {
                     onPrevClick: async () => {
