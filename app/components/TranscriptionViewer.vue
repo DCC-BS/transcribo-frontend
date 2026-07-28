@@ -2,9 +2,14 @@
 import { SeekToSecondsCommand } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
+import { clamp } from "~/utils/math";
 import { formatTime } from "~/utils/time";
 import { buildTranscriptTurns } from "~/utils/tiptapTranscript";
-import { charOffsetAtTime, timeAtCharOffset } from "~/utils/transcriptDoc";
+import {
+    charOffsetAtTime,
+    timeAtCharOffset,
+    wordBoundsAt,
+} from "~/utils/transcriptDoc";
 
 interface InputProps {
     transcription: StoredTranscription;
@@ -135,39 +140,34 @@ const activeWord = computed(() => {
     if (!member) {
         return null;
     }
-    const inner = Math.min(
-        Math.max(charOffsetAtTime(member.segment, currentTime.value), 0),
+    const inner = clamp(
+        charOffsetAtTime(member.segment, currentTime.value),
+        0,
         member.segment.text.length,
     );
     const text = block.text;
-    const offset = Math.min(member.offset + inner, text.length);
-    let start = offset;
-    while (start > 0 && !/\s/.test(text[start - 1] ?? " ")) {
-        start--;
-    }
-    let end = offset;
-    while (end < text.length && !/\s/.test(text[end] ?? " ")) {
-        end++;
-    }
+    const { start, end } = wordBoundsAt(text, member.offset + inner);
     if (end <= start) {
         return null;
     }
     return { block, start, end };
 });
 
-function karaokeParts(
-    block: DisplayBlock,
-): { before: string; word: string; after: string } | null {
+// Only ever one block is karaoke-stained, so the slices are cut once per
+// playback tick instead of per rendered block.
+const activeKaraoke = computed(() => {
     const active = activeWord.value;
-    if (!active || active.block !== block) {
+    if (!active) {
         return null;
     }
+    const { block } = active;
     return {
+        block,
         before: block.text.slice(0, active.start),
         word: block.text.slice(active.start, active.end),
         after: block.text.slice(active.end),
     };
-}
+});
 
 // Editor-style karaoke staining for whole blocks: everything after the
 // playback position is dimmed, everything before keeps the full color.
@@ -428,12 +428,12 @@ async function seekFromClick(
                         "
                         @click="seekFromClick(segment, $event)"
                     >
-                        <template v-if="karaokeParts(segment)">{{
-                            karaokeParts(segment)?.before
+                        <template v-if="activeKaraoke?.block === segment">{{
+                            activeKaraoke.before
                         }}<span class="viewer-w-current">{{
-                            karaokeParts(segment)?.word
+                            activeKaraoke.word
                         }}</span><span class="viewer-w-upcoming">{{
-                            karaokeParts(segment)?.after
+                            activeKaraoke.after
                         }}</span></template>
                         <template v-else>{{ segment.text }}</template>
                     </p>

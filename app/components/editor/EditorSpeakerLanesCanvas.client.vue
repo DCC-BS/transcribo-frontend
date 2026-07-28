@@ -12,6 +12,7 @@ import type {
     EditorLaneChange,
     EditorLaneContextMenu,
 } from "~/types/editorTimeline";
+import { clamp, clamp01 } from "~/utils/math";
 import { formatTime } from "~/utils/time";
 
 const LANE_HEIGHT = 44;
@@ -237,9 +238,15 @@ function blockGeometry(block: EditorLaneBlock): BlockGeometry {
     };
 }
 
+// Lane row per speaker, looked up once instead of scanning the speaker list
+// for every block on every drag/hover frame.
+const speakerLane = computed(
+    () => new Map(props.speakers.map((speaker, index) => [speaker, index])),
+);
+
 const blockConfigs = computed(() =>
     props.blocks.map((block) => {
-        const speakerIndex = Math.max(props.speakers.indexOf(block.speaker), 0);
+        const speakerIndex = speakerLane.value.get(block.speaker) ?? 0;
         const geometry = blockGeometry(block);
         const speakerColor =
             props.speakerColors[block.speaker] ?? theme.primary;
@@ -426,7 +433,7 @@ function xToTime(x: number): number {
     if (trackWidth.value <= 0 || props.duration <= 0) {
         return 0;
     }
-    return Math.min(Math.max(x / trackWidth.value, 0), 1) * props.duration;
+    return clamp01(x / trackWidth.value) * props.duration;
 }
 
 function blockForId(blockId: string): EditorLaneBlock | undefined {
@@ -503,7 +510,7 @@ function boundDrag(
     const minX = timeToX(minStart);
     const maxX = Math.max(timeToX(maxEnd) - blockWidth, minX);
     const bounded = {
-        x: Math.min(Math.max(position.x, minX), maxX),
+        x: clamp(position.x, minX, maxX),
         y: sourceIndex * LANE_HEIGHT + 8,
     };
     dragPreview.value = {
@@ -533,6 +540,10 @@ function boundResize(
     const minWidth = Math.max(timeToX(MIN_BLOCK_SECONDS), 3);
     const leftLimit = timeToX(firstEnd) - minWidth;
     const rightLimit = timeToX(lastStart) + minWidth;
+    // Not clamp(): each edge obeys the lane bound AND must leave the
+    // outermost member segment visible, and those two can conflict. The
+    // nesting order makes the member-segment limit win; the minWidth guard
+    // below then rejects the resize outright.
     const x = Math.min(Math.max(newBox.x, minX), leftLimit);
     const right = Math.max(
         Math.min(newBox.x + newBox.width, maxX),
@@ -763,7 +774,7 @@ watch(zoom, async (next, previous) => {
 });
 
 watch(zoom, (value) => {
-    const clamped = Math.min(Math.max(value, ZOOM_MIN), ZOOM_MAX);
+    const clamped = clamp(value, ZOOM_MIN, ZOOM_MAX);
     if (clamped !== value) {
         zoom.value = clamped;
     }

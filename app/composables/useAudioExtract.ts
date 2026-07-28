@@ -1,5 +1,6 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
+import { clamp } from "~/utils/math";
 
 function toBlob(data: Uint8Array | string, mimeType: string): Blob {
     if (typeof data === "string") {
@@ -45,7 +46,7 @@ export const useAudioExtract = () => {
         const inputFileName = `input.${ext}`;
 
         const handleProgress = ({ progress }: { progress: number }) => {
-            onProgress?.(Math.min(Math.max(progress * 100, 0), 100));
+            onProgress?.(clamp(progress * 100, 0, 100));
         };
         if (onProgress) {
             ffmpeg.on("progress", handleProgress);

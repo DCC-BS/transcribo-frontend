@@ -4,6 +4,7 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { StoredSegment } from "~/types/storedSegments";
 import { formatTime } from "~/utils/time";
+import { wordBoundsAt } from "~/utils/transcriptDoc";
 
 /*
     TipTap building blocks for the read-only script-style transcript viewer:
@@ -398,24 +399,10 @@ export function createPlayheadPlugin(): Plugin<PlayheadPosition> {
 
                     // expand the interpolated char offset to word boundaries
                     const text = node.textContent;
-                    const offset = Math.min(
-                        Math.max(playhead.charOffset, 0),
-                        text.length,
+                    const { start: wordStart, end: wordEnd } = wordBoundsAt(
+                        text,
+                        playhead.charOffset,
                     );
-                    let wordStart = offset;
-                    while (
-                        wordStart > 0 &&
-                        !/\s/.test(text[wordStart - 1] ?? " ")
-                    ) {
-                        wordStart--;
-                    }
-                    let wordEnd = offset;
-                    while (
-                        wordEnd < text.length &&
-                        !/\s/.test(text[wordEnd] ?? " ")
-                    ) {
-                        wordEnd++;
-                    }
 
                     if (wordStart > 0) {
                         decorations.push(

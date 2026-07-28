@@ -1,4 +1,5 @@
 import type { StoredSegment } from "~/types/storedSegments";
+import { clamp, clamp01 } from "~/utils/math";
 
 /*
     Time <-> character offset interpolation for the script-style transcript
@@ -19,7 +20,7 @@ export function timeAtCharOffset(
     if (length <= 0) {
         return segment.start;
     }
-    const progress = Math.min(Math.max(charOffset / length, 0), 1);
+    const progress = clamp01(charOffset / length);
     return segment.start + progress * (segment.end - segment.start);
 }
 
@@ -37,4 +38,28 @@ export function charOffsetAtTime(
         currentTime,
     );
     return Math.round(progress * segment.text.length);
+}
+
+/**
+ * The word surrounding a character offset, as [start, end) indices.
+ *
+ * The interpolated playhead offset lands mid-word; every surface that
+ * stains the current word — the document decorations, the viewer karaoke
+ * and the auto-scroll anchor — expands it the same way, so they always
+ * agree on where the word begins and ends.
+ */
+export function wordBoundsAt(
+    text: string,
+    offset: number,
+): { start: number; end: number } {
+    const index = clamp(offset, 0, text.length);
+    let start = index;
+    while (start > 0 && !/\s/.test(text[start - 1] ?? " ")) {
+        start--;
+    }
+    let end = index;
+    while (end < text.length && !/\s/.test(text[end] ?? " ")) {
+        end++;
+    }
+    return { start, end };
 }

@@ -12,6 +12,8 @@ import type {
 } from "~/types/editorTimeline";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
+import { describeLaneChange, laneAcceptsBlock } from "~/utils/laneGeometry";
+import { clamp } from "~/utils/math";
 import { buildTranscriptTurns } from "~/utils/tiptapTranscript";
 
 const props = defineProps<{
@@ -205,17 +207,11 @@ async function applyLaneChange(change: EditorLaneChange): Promise<void> {
         return;
     }
 
-    const startDelta = change.start - block.start;
-    const endDelta = change.end - block.end;
-    const isMove =
-        change.targetSpeaker !== undefined ||
-        Math.abs(startDelta - endDelta) < 0.001;
+    const { startDelta, isMove, isNoop, movedStart, movedEnd } =
+        describeLaneChange(block, change);
 
     if (isMove) {
-        if (
-            Math.abs(startDelta) < 0.001 &&
-            (!change.targetSpeaker || change.targetSpeaker === block.speaker)
-        ) {
+        if (isNoop) {
             return;
         }
         await executeCommand(
@@ -243,25 +239,21 @@ async function applyLaneChange(change: EditorLaneChange): Promise<void> {
     if (first.id === last.id) {
         await executeCommand(
             new UpdateSegmentCommand(first.id, {
-                ...(Math.abs(startDelta) >= 0.001
-                    ? { start: change.start }
-                    : {}),
-                ...(Math.abs(endDelta) >= 0.001
-                    ? { end: change.end }
-                    : {}),
+                ...(movedStart ? { start: change.start } : {}),
+                ...(movedEnd ? { end: change.end } : {}),
             }),
         );
         return;
     }
 
     const updates: ConstructorParameters<typeof UpdateSegmentsCommand>[0] = [];
-    if (Math.abs(startDelta) >= 0.001) {
+    if (movedStart) {
         updates.push({
             segmentId: first.id,
             updates: { start: change.start },
         });
     }
-    if (Math.abs(endDelta) >= 0.001) {
+    if (movedEnd) {
         updates.push({
             segmentId: last.id,
             updates: { end: change.end },
@@ -290,8 +282,8 @@ function clampMenuPosition(x: number, y: number): { x: number; y: number } {
     const menuWidth = 248;
     const menuHeight = 290;
     return {
-        x: Math.max(Math.min(x, window.innerWidth - menuWidth), 8),
-        y: Math.max(Math.min(y, window.innerHeight - menuHeight), 8),
+        x: clamp(x, 8, window.innerWidth - menuWidth),
+        y: clamp(y, 8, window.innerHeight - menuHeight),
     };
 }
 
@@ -333,12 +325,7 @@ async function moveBlockTo(target: string): Promise<void> {
 }
 
 function canMoveBlockTo(block: EditorLaneBlock, target: string): boolean {
-    return blocks.value.every(
-        (other) =>
-            other.speaker !== target ||
-            other.start >= block.end ||
-            other.end <= block.start,
-    );
+    return laneAcceptsBlock(blocks.value, block, target);
 }
 
 function blockMenuDisabledFor(target: string): boolean {

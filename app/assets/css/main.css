@@ -58,8 +58,9 @@
     --shadow-md: 0 6px 18px rgb(0 0 0 / 0.09);
 }
 
-/* colorMode is disabled (nuxt.config ui.colorMode:false); dark styling
-   follows the OS preference. .dark kept for any explicit-class usage. */
+/* colorMode is disabled (nuxt.config ui.colorMode:false) and the `dark`
+   variant is media-based (see @custom-variant above), so dark styling
+   follows the OS preference only — no .dark class is ever applied. */
 @media (prefers-color-scheme: dark) {
     :root {
         --ui-primary: #c196dc;
@@ -90,36 +91,6 @@
         --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
         --shadow-md: 0 6px 20px rgb(0 0 0 / 0.5);
     }
-}
-
-.dark {
-    --ui-primary: #c196dc;
-    --ui-on-primary: #241436;
-    --ui-primary-soft: #3a2749;
-    --ui-primary-strong: #d7bdea;
-    --ui-secondary: #29c9a9;
-    --ui-secondary-soft: #0b342b;
-    --ui-warning: #ffbb1a;
-    --ui-warning-soft: #3a2e10;
-
-    --ui-bg: #171522;
-    --ui-bg-muted: #1d1b2a;
-    --ui-bg-elevated: #262336;
-    --ui-border: #343047;
-    --ui-text: #eae7f2;
-    --ui-text-muted: #a49fb8;
-    --ui-text-dimmed: #6e6987;
-    --ui-text-highlighted: #f6f4fb;
-    --ui-text-toned: #c9c4d8;
-    --ui-text-inverted: #171522;
-    --ui-bg-accented: #2e2a40;
-    --ui-bg-inverted: #eae7f2;
-    --ui-border-muted: #2b2739;
-    --ui-border-accented: #3f3a55;
-    --ui-border-inverted: #eae7f2;
-
-    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-    --shadow-md: 0 6px 20px rgb(0 0 0 / 0.5);
 }
 
 body {

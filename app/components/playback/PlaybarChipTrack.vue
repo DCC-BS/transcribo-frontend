@@ -4,6 +4,8 @@
     chip as on the editor lanes' time bar, so every playbar scrubs the
     same way. Click seeks, dragging the chip scrubs continuously.
 */
+import { clamp01 } from "~/utils/math";
+
 const props = defineProps<{
     currentTime: number;
     duration: number;
@@ -25,7 +27,7 @@ function timeAtClientX(clientX: number): number {
         return 0;
     }
     const ratio = (clientX - rect.left) / rect.width;
-    return Math.min(Math.max(ratio, 0), 1) * props.duration;
+    return clamp01(ratio) * props.duration;
 }
 
 function onPointerDown(event: PointerEvent): void {

@@ -8,6 +8,8 @@
     tick regardless). Do not reintroduce a size gate — enforced by
     tests/unit/segmentProgress.test.ts.
 */
+import { clamp01 } from "~/utils/math";
+
 export function calculateSegmentProgress(
     start: number,
     end: number,
@@ -17,5 +19,5 @@ export function calculateSegmentProgress(
     if (range <= 0) {
         return 0;
     }
-    return Math.min(Math.max((currentTime - start) / range, 0), 1);
+    return clamp01((currentTime - start) / range);
 }

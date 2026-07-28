@@ -91,7 +91,7 @@ export function useTranscriptionSummary() {
                 validateAndSanitizeTranscriptText(transcriptText);
 
             const requestBody: SummarizeRequest = {
-                transcript: sanitizedText,
+                text: sanitizedText,
                 summary_type: type,
             };
 

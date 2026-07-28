@@ -13,14 +13,11 @@ import {
     DeleteSegmentCommand,
     DeleteSegmentsCommand,
     InsertSegmentCommand,
-    RenameSpeakerCommand,
     SeekToSecondsCommand,
     UpdateSegmentsCommand,
 } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import type { Keyword } from "~/types/transcriptionResponse";
-import { replaceTermInSegmentTexts } from "~/utils/segmentTextReplace";
 import {
     buildTranscriptDocContent,
     buildTranscriptTurns,
@@ -34,7 +31,11 @@ import {
     TranscriptSegmentNode,
     TranscriptTextNode,
 } from "~/utils/tiptapTranscript";
-import { charOffsetAtTime, timeAtCharOffset } from "~/utils/transcriptDoc";
+import {
+    charOffsetAtTime,
+    timeAtCharOffset,
+    wordBoundsAt,
+} from "~/utils/transcriptDoc";
 import { planTranscriptEdits } from "~/utils/transcriptEdits";
 
 /*
@@ -65,11 +66,13 @@ const props = withDefaults(defineProps<TranscriptDocumentEditorProps>(), {
 
 const { t } = useI18n();
 const { executeCommand } = useCommandBus();
-const { updateTranscription } = getTranscriptionService();
 
 const editorRoot = ref<HTMLElement>();
 
 const { speakerIds, displayName, speakerColors } = useSpeakerRegistry();
+const { findKeyword, renameKeyword } = useKeywordRename(
+    () => props.transcription,
+);
 
 /*
     Speaker colors are applied via CSS rules keyed on the turn's
@@ -187,7 +190,7 @@ watch(
         const segments = props.segments;
         // Skip the rebuild when the incoming change is the echo of our own
         // text sync — rebuilding would destroy the caret mid-typing.
-        if (docReflectsSegments(segments, props.mergeSegments)) {
+        if (docReflectsSegments()) {
             refreshKeywordHighlights();
             return;
         }
@@ -252,12 +255,18 @@ function readDocSegmentTexts(
     return texts;
 }
 
-/** True when the document already mirrors the given segments exactly. */
-function docReflectsSegments(
-    segments: StoredSegment[],
-    mergeSegments: boolean,
-): boolean {
-    const turns = buildTranscriptTurns(segments, mergeSegments);
+/*
+    Grouping depends only on the segments, never on the playback position,
+    so it lives in its own computed: the currentTime tick no longer rebuilds
+    the whole turn list, and the segment watcher below reuses the same one.
+*/
+const transcriptTurns = computed(() =>
+    buildTranscriptTurns(props.segments, props.mergeSegments),
+);
+
+/** True when the document already mirrors the current segments exactly. */
+function docReflectsSegments(): boolean {
+    const turns = transcriptTurns.value;
     const doc = editor.state.doc;
     if (doc.childCount !== turns.length) {
         return false;
@@ -407,13 +416,16 @@ async function captureEditedWords(
 
     const keyword = findKeyword(edited.replaced);
     if (keyword) {
-        await propagateKeywordEdit(
-            segmentId,
-            oldText,
-            docTexts,
-            keyword,
-            edited.term,
-        );
+        // The rename has to search the texts as they were before this edit,
+        // otherwise the term is already gone from the segment just typed in.
+        const sourceSegments = props.segments.map((segment) => ({
+            ...segment,
+            text:
+                segment.id === segmentId
+                    ? oldText
+                    : (docTexts.get(segment.id) ?? segment.text),
+        }));
+        await renameKeyword(keyword, edited.term, sourceSegments);
         return;
     }
 
@@ -422,76 +434,6 @@ async function captureEditedWords(
         "object",
         "",
         edited.replaced,
-    );
-}
-
-function normalizeTerm(term: string): string {
-    return term.trim().toLocaleLowerCase();
-}
-
-function findKeyword(term: string | undefined): Keyword | undefined {
-    if (!term) {
-        return undefined;
-    }
-    const normalizedTerm = normalizeTerm(term);
-    return props.transcription.keywords?.find(
-        (keyword) => normalizeTerm(keyword.term) === normalizedTerm,
-    );
-}
-
-async function propagateKeywordEdit(
-    editedSegmentId: string,
-    oldEditedText: string,
-    docTexts: ReadonlyMap<string, string>,
-    keyword: Keyword,
-    newTerm: string,
-): Promise<void> {
-    const sourceSegments = props.segments.map((segment) => ({
-        ...segment,
-        text:
-            segment.id === editedSegmentId
-                ? oldEditedText
-                : (docTexts.get(segment.id) ?? segment.text),
-    }));
-
-    await replaceTermInSegmentTexts(
-        sourceSegments,
-        keyword.term,
-        newTerm,
-        executeCommand,
-    );
-
-    const matchingSpeakerId = speakerIds.value.find(
-        (speakerId) =>
-            normalizeTerm(displayName(speakerId)) ===
-            normalizeTerm(keyword.term),
-    );
-    if (matchingSpeakerId) {
-        await executeCommand(
-            new RenameSpeakerCommand(
-                props.transcription.id,
-                matchingSpeakerId,
-                displayName(matchingSpeakerId),
-                newTerm,
-            ),
-        );
-    }
-
-    const renamedKeywords = (props.transcription.keywords ?? []).map(
-        (entry) =>
-            normalizeTerm(entry.term) === normalizeTerm(keyword.term)
-                ? { ...entry, term: newTerm }
-                : entry,
-    );
-    await updateTranscription(props.transcription.id, {
-        keywords: renamedKeywords,
-    });
-
-    await getVocabularyService().rememberTerm(
-        newTerm,
-        keyword.type,
-        keyword.description,
-        keyword.term,
     );
 }
 
@@ -534,10 +476,7 @@ function locateSegmentAt(
 }
 
 const activeSegment = computed(() => {
-    for (const turn of buildTranscriptTurns(
-        props.segments,
-        props.mergeSegments,
-    )) {
+    for (const turn of transcriptTurns.value) {
         const first = turn.segments[0];
         const last = turn.segments[turn.segments.length - 1];
         if (
@@ -578,11 +517,7 @@ const scrollAnchorSegment = computed(() => {
 });
 
 function wordStartAt(text: string, offset: number): number {
-    let index = Math.min(Math.max(offset, 0), text.length);
-    while (index > 0 && !/\s/.test(text[index - 1] ?? " ")) {
-        index--;
-    }
-    return index;
+    return wordBoundsAt(text, offset).start;
 }
 
 let lastPlayheadKey = "";

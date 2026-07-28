@@ -23,8 +23,11 @@ export function useMediaPlayback(
     const videoElement = ref<HTMLVideoElement | null>(null);
     const audioElement = ref<HTMLAudioElement | null>(null);
     const isPlaying = ref<boolean>(false);
-    const isVideoFile = ref<boolean>(false);
     const playbackRate = ref<number>(1);
+
+    const isVideoFile = computed(
+        () => mediaFile.value?.type.startsWith("video/") ?? false,
+    );
 
     const { onCommand } = useCommandBus();
 
@@ -61,7 +64,6 @@ export function useMediaPlayback(
 
         mediaFile.value = stored.mediaFile;
         mediaSrc.value = URL.createObjectURL(mediaFile.value);
-        isVideoFile.value = mediaFile.value.type.startsWith("video/");
         isPlaying.value = false;
         nextTick(() => updatePlaybackRate(playbackRate.value));
     }

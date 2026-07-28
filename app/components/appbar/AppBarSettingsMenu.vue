@@ -17,14 +17,6 @@ const { t } = useI18n();
                 >
                     {{ t("navigation.settings") }}
                 </div>
-                <div class="flex items-center justify-between px-2.5 py-1">
-                    <span class="flex items-center gap-2.5">
-                        <UIcon name="i-lucide-globe" class="size-4" />
-                        {{ t("navigation.language") }}
-                    </span>
-                    <LanguageSelect />
-                </div>
-                <USeparator />
                 <UButton
                     to="/vocabulary"
                     icon="i-lucide-book-a"
@@ -34,7 +26,6 @@ const { t } = useI18n();
                 >
                     {{ t("vocabulary.title") }}
                 </UButton>
-                <DisclaimerButton variant="ghost" />
             </div>
         </template>
     </UPopover>

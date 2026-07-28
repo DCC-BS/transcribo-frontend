@@ -36,6 +36,9 @@ export function useMediaDuration(
             audio.onloadedmetadata = null;
         };
         audio.onerror = () => {
+            // Clear the key so a later attempt probes again instead of
+            // leaving the duration pinned at 0 for this media forever.
+            probedMediaKey = "";
             URL.revokeObjectURL(audioSrc);
         };
     }
