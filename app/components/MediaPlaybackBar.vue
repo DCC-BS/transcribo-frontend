@@ -38,6 +38,9 @@ const currentSegments = computed(() => {
     );
 });
 
+/**
+ * Toggles the expanded playback bar.
+ */
 function toggleExpanded(): void {
     isExpanded.value = !isExpanded.value;
 }

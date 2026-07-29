@@ -21,6 +21,12 @@ const pct = computed(() =>
     props.duration > 0 ? (props.currentTime / props.duration) * 100 : 0,
 );
 
+/**
+ * Playback time under a horizontal client coordinate.
+ *
+ * @param clientX - Client x coordinate.
+ * @returns Time in seconds.
+ */
 function timeAtClientX(clientX: number): number {
     const rect = track.value?.getBoundingClientRect();
     if (!rect || props.duration <= 0) {
@@ -30,6 +36,11 @@ function timeAtClientX(clientX: number): number {
     return clamp01(ratio) * props.duration;
 }
 
+/**
+ * Starts a scrub drag, seeking continuously until the pointer is released.
+ *
+ * @param event - The pointer event starting the drag.
+ */
 function onPointerDown(event: PointerEvent): void {
     event.preventDefault();
     dragging.value = true;

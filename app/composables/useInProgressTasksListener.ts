@@ -11,6 +11,12 @@ import {
 // running fine; only surface an error after this many failed polls in a row.
 const FAILURE_THRESHOLD = 3;
 
+/**
+ * Polls all unfinished transcription tasks every 10 seconds, imports their
+ * results once complete and exposes any errors worth showing the user.
+ *
+ * @returns The unfinished tasks and the collected task errors, both reactive.
+ */
 export function useInProgressTasksListener() {
     const { getTask, updateTaskStatus, deleteTask } = useTasks();
     const { applyTaskResult } = useTaskListener();
@@ -54,6 +60,9 @@ export function useInProgressTasksListener() {
         }
     });
 
+    /**
+     * Polls the status of every in-progress task once.
+     */
     async function updateTasks() {
         for (const task of unfinishedTasks.value.filter(
             (t) => t.status.status === TaskStatusEnum.IN_PROGRESS,
@@ -81,6 +90,13 @@ export function useInProgressTasksListener() {
         }
     }
 
+    /**
+     * Records a failed poll, surfacing an error only once the task is known to
+     * be gone or {@link FAILURE_THRESHOLD} consecutive polls have failed.
+     *
+     * @param task - The task that failed to poll.
+     * @param e - The thrown error.
+     */
     function handleTaskError(task: StoredTask, e: unknown) {
         const taskId = task.id;
         logger.error(e, `Background poll for task ${taskId} failed`);
@@ -115,6 +131,12 @@ export function useInProgressTasksListener() {
         }
     }
 
+    /**
+     * Imports a finished task's transcription and removes the task.
+     *
+     * @param task - The completed task.
+     * @throws When the task's media file or result is missing.
+     */
     async function processCompletedTask(task: StoredTask) {
         const transcriptionResponse = await fetchTaskResultWithVocabulary(
             task.id,

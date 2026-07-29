@@ -11,6 +11,12 @@ const SPEAKER_PALETTE = [
 
 const FALLBACK_COLOR = new RGBColor(115, 115, 115);
 
+/**
+ * Parses a `#rrggbb` string into a color.
+ *
+ * @param hex - The hex color string.
+ * @returns The parsed color, or the neutral fallback for malformed input.
+ */
 function hexToRgb(hex: string): RGBColor {
     const match = hex.match(/^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i);
     if (!match) {
@@ -23,6 +29,12 @@ function hexToRgb(hex: string): RGBColor {
     );
 }
 
+/**
+ * Assigns a stable palette color to each speaker, in order of appearance.
+ *
+ * @param speakers - Reactive list of speaker labels; falsy entries are ignored.
+ * @returns A lookup function and the speaker-to-color map.
+ */
 export function useSpeakerColor(speakers: Ref<(string | undefined)[]>) {
     const speakerSet = computed(() =>
         Array.from(
@@ -46,6 +58,12 @@ export function useSpeakerColor(speakers: Ref<(string | undefined)[]>) {
         ),
     );
 
+    /**
+     * Color assigned to a speaker.
+     *
+     * @param speaker - Speaker label.
+     * @returns The speaker's color, or the neutral fallback when unknown.
+     */
     function getSpeakerColor(speaker: string | undefined): RGBColor {
         if (!speaker) {
             return FALLBACK_COLOR;

@@ -48,6 +48,9 @@ const languageOptions = useLanguageOptions();
 
 const summaryError = ref<string | null>(null);
 
+/**
+ * Generates the summary in the selected type and language, showing any failure inline.
+ */
 async function handleGenerateSummary(): Promise<void> {
     if (isSummaryGenerating.value || !props.transcription) return;
 

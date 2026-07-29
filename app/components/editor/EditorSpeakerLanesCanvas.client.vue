@@ -172,6 +172,13 @@ const rulerTicks = computed(() => {
     return ticks;
 });
 
+/**
+ * Applies an alpha channel to a hex or `rgb()` color.
+ *
+ * @param color - The source color.
+ * @param alpha - Alpha between 0 and 1.
+ * @returns The color as `rgba(...)`.
+ */
 function withAlpha(color: string, alpha: number): string {
     const hex = color.match(/^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i);
     if (hex) {
@@ -190,6 +197,12 @@ interface BlockGeometry {
     hasOverlap: boolean;
 }
 
+/**
+ * Canvas geometry of a block, preferring the live drag preview.
+ *
+ * @param block - The block to place.
+ * @returns Position and size in canvas pixels.
+ */
 function blockGeometry(block: EditorLaneBlock): BlockGeometry {
     const preview =
         dragPreview.value?.blockId === block.id
@@ -312,6 +325,9 @@ const transformerConfig = computed(() => ({
     ) => boundResize(oldBox, newBox),
 }));
 
+/**
+ * Re-reads the canvas colors from the current CSS theme.
+ */
 function readTheme(): void {
     const styles = getComputedStyle(document.documentElement);
     function value(name: string, fallback: string): string {
@@ -326,6 +342,9 @@ function readTheme(): void {
     theme.error = value("--ui-error", theme.error);
 }
 
+/**
+ * Recomputes the track width from the viewport and the current zoom.
+ */
 function updateWidth(): void {
     if (!viewport.value) {
         return;
@@ -340,6 +359,11 @@ function updateWidth(): void {
     );
 }
 
+/**
+ * Scrolls the lane of the active speaker into view, when auto-scroll is on.
+ *
+ * @param behavior - Scroll behavior.
+ */
 function scrollActiveSpeakerIntoView(
     behavior: ScrollBehavior = "smooth",
 ): void {
@@ -422,6 +446,12 @@ onMounted(() => {
     updateWidth();
 });
 
+/**
+ * Converts a playback time to a canvas x coordinate.
+ *
+ * @param seconds - Time in seconds.
+ * @returns The x coordinate.
+ */
 function timeToX(seconds: number): number {
     if (props.duration <= 0) {
         return 0;
@@ -429,6 +459,12 @@ function timeToX(seconds: number): number {
     return (seconds / props.duration) * trackWidth.value;
 }
 
+/**
+ * Converts a canvas x coordinate to a playback time.
+ *
+ * @param x - The x coordinate.
+ * @returns Time in seconds, clamped to the media duration.
+ */
 function xToTime(x: number): number {
     if (trackWidth.value <= 0 || props.duration <= 0) {
         return 0;
@@ -436,10 +472,22 @@ function xToTime(x: number): number {
     return clamp01(x / trackWidth.value) * props.duration;
 }
 
+/**
+ * Looks up a block by id.
+ *
+ * @param blockId - Block id.
+ * @returns The block, or `undefined`.
+ */
 function blockForId(blockId: string): EditorLaneBlock | undefined {
     return props.blocks.find((block) => block.id === blockId);
 }
 
+/**
+ * How far a block may grow before it hits its lane neighbours.
+ *
+ * @param block - The block being edited.
+ * @returns The earliest start and latest end it may take.
+ */
 function laneBounds(block: EditorLaneBlock): {
     minStart: number;
     maxEnd: number;
@@ -460,6 +508,15 @@ function laneBounds(block: EditorLaneBlock): {
     return { minStart, maxEnd };
 }
 
+/**
+ * Whether a time range in a lane is free.
+ *
+ * @param speaker - Lane to check.
+ * @param start - Range start in seconds.
+ * @param end - Range end in seconds.
+ * @param ignoredBlockId - Block to ignore, usually the dragged one.
+ * @returns `true` when nothing overlaps.
+ */
 function slotFree(
     speaker: string,
     start: number,
@@ -474,6 +531,13 @@ function slotFree(
     );
 }
 
+/**
+ * Constrains a drag to valid lanes and free time slots.
+ *
+ * @param block - The dragged block.
+ * @param position - The proposed canvas position.
+ * @returns The allowed position.
+ */
 function boundDrag(
     block: EditorLaneBlock,
     position: { x: number; y: number },
@@ -521,6 +585,13 @@ function boundDrag(
     return bounded;
 }
 
+/**
+ * Constrains a resize to the block's lane bounds and a minimum width.
+ *
+ * @param oldBox - Box before the resize step.
+ * @param newBox - Proposed box.
+ * @returns The allowed box.
+ */
 function boundResize(
     oldBox: { x: number; width: number },
     newBox: { x: number; width: number },
@@ -555,6 +626,12 @@ function boundResize(
     return { ...newBox, x, width: right - x };
 }
 
+/**
+ * Selects a block and attaches the resize handles to it.
+ *
+ * @param block - The clicked block.
+ * @param event - The Konva click event.
+ */
 function selectBlock(
     block: EditorLaneBlock,
     event: KonvaEventObject<MouseEvent>,
@@ -565,18 +642,34 @@ function selectBlock(
     emit("seek", block.start);
 }
 
+/**
+ * Clears the selection when the click landed on empty canvas.
+ *
+ * @param event - The Konva click event.
+ */
 function clearSelection(event: KonvaEventObject<MouseEvent>): void {
     if (event.target === event.currentTarget) {
         clearSelectedBlock();
     }
 }
 
+/**
+ * Clears the selection when the pointer goes down outside the canvas.
+ *
+ * @param event - The pointer event.
+ */
 function onViewportPointerDown(event: PointerEvent): void {
     if (!(event.target instanceof HTMLCanvasElement)) {
         clearSelectedBlock();
     }
 }
 
+/**
+ * Turns a finished drag into a lane change for the parent.
+ *
+ * @param block - The dragged block.
+ * @param event - The Konva drag event.
+ */
 function onBlockDragEnd(
     block: EditorLaneBlock,
     event: KonvaEventObject<DragEvent>,
@@ -607,6 +700,11 @@ function onBlockDragEnd(
     clearSelectedBlock();
 }
 
+/**
+ * Turns a finished resize into a lane change for the parent.
+ *
+ * @param block - The resized block.
+ */
 function onTransformEnd(block: EditorLaneBlock): void {
     const rect = selectedRect.value;
     if (!rect) {
@@ -619,11 +717,20 @@ function onTransformEnd(block: EditorLaneBlock): void {
     clearSelectedBlock();
 }
 
+/**
+ * Drops the current block selection.
+ */
 function clearSelectedBlock(): void {
     selectedBlockId.value = undefined;
     selectedRect.value = undefined;
 }
 
+/**
+ * Emits the block context menu request at the pointer position.
+ *
+ * @param block - The block under the pointer.
+ * @param event - The Konva pointer event.
+ */
 function openContextMenu(
     block: EditorLaneBlock,
     event: KonvaEventObject<PointerEvent>,
@@ -636,6 +743,11 @@ function openContextMenu(
     });
 }
 
+/**
+ * Seeks when the user clicks empty canvas.
+ *
+ * @param event - The Konva click event.
+ */
 function seekFromStage(event: KonvaEventObject<MouseEvent>): void {
     clearSelectedBlock();
     if (event.target !== event.currentTarget) {
@@ -647,6 +759,11 @@ function seekFromStage(event: KonvaEventObject<MouseEvent>): void {
     }
 }
 
+/**
+ * Seeks when the user clicks the time ruler.
+ *
+ * @param _event - The Konva click event; the pointer is read from the stage.
+ */
 function seekFromRuler(_event: KonvaEventObject<MouseEvent>): void {
     clearSelectedBlock();
     const stage = rulerStage.value?.getNode();
@@ -656,6 +773,12 @@ function seekFromRuler(_event: KonvaEventObject<MouseEvent>): void {
     }
 }
 
+/**
+ * Lets a wheel event over the speaker labels scroll them vertically.
+ *
+ * @param event - The wheel event.
+ * @returns `true` when the event was consumed as a label scroll.
+ */
 function scrollSpeakerLabels(event: WheelEvent): boolean {
     const element = viewport.value;
     const target = event.target;
@@ -679,6 +802,11 @@ function scrollSpeakerLabels(event: WheelEvent): boolean {
     return true;
 }
 
+/**
+ * Scrolls the track so a playback time sits in the middle of the viewport.
+ *
+ * @param time - Time in seconds.
+ */
 function centerTimeInView(time: number): void {
     const element = viewport.value;
     if (!element || element.scrollWidth <= element.clientWidth) {
@@ -697,6 +825,11 @@ function centerTimeInView(time: number): void {
     );
 }
 
+/**
+ * Zooms the timeline on wheel input, unless the labels consumed the event.
+ *
+ * @param event - The wheel event.
+ */
 function onWheel(event: WheelEvent): void {
     if (scrollSpeakerLabels(event)) {
         return;

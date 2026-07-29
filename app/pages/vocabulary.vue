@@ -39,6 +39,9 @@ const typeOptions = KeywordTypeSchema.options.map((value) => ({
 const newTerm = ref("");
 const newType = ref<KeywordType>("object");
 
+/**
+ * Adds the entered term to the vocabulary and clears the input.
+ */
 async function addEntry(): Promise<void> {
     const term = newTerm.value.trim();
     if (!term) {
@@ -54,11 +57,19 @@ async function addEntry(): Promise<void> {
 const editingTerm = ref<string | null>(null);
 const editTermInput = ref("");
 
+/**
+ * Opens the inline rename field for an entry.
+ *
+ * @param entry - The entry to rename.
+ */
 function beginEdit(entry: StoredVocabularyEntry): void {
     editingTerm.value = entry.term;
     editTermInput.value = entry.term;
 }
 
+/**
+ * Persists the inline rename; blank or unchanged names are discarded.
+ */
 async function confirmEdit(): Promise<void> {
     const original = editingTerm.value;
     const renamed = editTermInput.value.trim();
@@ -68,6 +79,12 @@ async function confirmEdit(): Promise<void> {
     editingTerm.value = null;
 }
 
+/**
+ * Changes an entry's keyword type.
+ *
+ * @param entry - The entry to update.
+ * @param type - The new keyword type.
+ */
 async function changeType(
     entry: StoredVocabularyEntry,
     type: KeywordType,
@@ -75,6 +92,11 @@ async function changeType(
     await vocabulary.updateTerm(entry.term, { type });
 }
 
+/**
+ * Deletes an entry and confirms it with a toast.
+ *
+ * @param entry - The entry to delete.
+ */
 async function removeEntry(entry: StoredVocabularyEntry): Promise<void> {
     await vocabulary.deleteTerm(entry.term);
     showToast(t("vocabulary.deleted", { term: entry.term }), "info");

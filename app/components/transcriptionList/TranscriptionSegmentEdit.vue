@@ -41,6 +41,11 @@ watch(
     },
 );
 
+/**
+ * Persists changed segment fields as an undoable command.
+ *
+ * @param updates - Fields to change.
+ */
 function applyUpdates(updates: Partial<StoredSegment>): void {
     executeCommand(new UpdateSegmentCommand(props.segment.id, updates));
 }
@@ -100,18 +105,39 @@ const progress = computed(() =>
         : 0,
 );
 
+/**
+ * Deletes a segment.
+ *
+ * @param segment - Segment to delete.
+ */
 function removeSegment(segment: StoredSegment): void {
     executeCommand(new DeleteSegmentCommand(segment.id));
 }
 
+/**
+ * Seeks playback.
+ *
+ * @param time - Target time in seconds.
+ */
 function seekTo(time: number): void {
     executeCommand(new SeekToSecondsCommand(time));
 }
 
+/**
+ * Assigns a newly created speaker to this segment.
+ *
+ * @param newSpeaker - The new speaker id.
+ */
 function handleCreateSpeaker(newSpeaker: string): void {
     speaker.value = newSpeaker;
 }
 
+/**
+ * Rounds a time to two decimals for the number inputs.
+ *
+ * @param value - Time in seconds.
+ * @returns The rounded value.
+ */
 function roundToTwoDecimals(value: number): number {
     return Math.round(value * 100) / 100;
 }

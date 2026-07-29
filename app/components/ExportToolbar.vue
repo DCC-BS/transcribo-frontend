@@ -42,6 +42,9 @@ const exportOptions = computed<ExportOptions>(() => ({
 }));
 
 // Functions to handle exports
+/**
+ * Exports the transcript as plain text with the selected options.
+ */
 function handleTextExport(): void {
     exportAsText({
         ...exportOptions.value,
@@ -49,6 +52,9 @@ function handleTextExport(): void {
     });
 }
 
+/**
+ * Exports the transcript as an SRT subtitle file.
+ */
 function handleSubtitleExport(): void {
     exportAsSrt(
         props.transcription,
@@ -57,10 +63,16 @@ function handleSubtitleExport(): void {
     );
 }
 
+/**
+ * Exports the transcript as JSON, preserving all metadata.
+ */
 function handleJsonExport(): void {
     exportAsJson(props.transcription, namedSegments.value);
 }
 
+/**
+ * Exports the transcript as a Word document.
+ */
 async function handleDocxExport(): Promise<void> {
     await exportAsDocx(exportOptions.value);
 }

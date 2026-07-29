@@ -52,6 +52,11 @@ const LABEL_WIDTH_MIN = 128;
 const LABEL_WIDTH_MAX = 400;
 const labelWidth = useLocalStorage<number>("editor-lanes-label-width", 190);
 
+/**
+ * Starts a pointer drag that resizes the speaker label column.
+ *
+ * @param event - The pointer event starting the drag.
+ */
 function beginLabelResize(event: PointerEvent): void {
     event.preventDefault();
     const startX = event.clientX;
@@ -93,6 +98,9 @@ const timelineDuration = computed(() =>
 // as soon as another speaker falls between two of its member segments.
 const mergeGroupBySegmentId = new Map<string, string>();
 
+/**
+ * Rebuilds the segment-to-turn mapping so lane blocks match the merged turns shown in the document editor.
+ */
 function initializeMergeGroups(): void {
     mergeGroupBySegmentId.clear();
     for (const turn of buildTranscriptTurns(props.segments, true)) {
@@ -173,6 +181,12 @@ const blocks = computed<EditorLaneBlock[]>(() => {
     return result;
 });
 
+/**
+ * Looks up a lane block.
+ *
+ * @param blockId - Block id.
+ * @returns The block, or `undefined` when it is gone.
+ */
 function blockForId(blockId: string): EditorLaneBlock | undefined {
     return blocks.value.find((block) => block.id === blockId);
 }
@@ -188,6 +202,11 @@ const activeSpeaker = computed(() => activeBlock.value?.speaker);
 
 // Delete key on a selected block: remove every segment it holds (one in
 // unmerged mode, the whole merged run otherwise).
+/**
+ * Deletes a whole lane block as one undoable command.
+ *
+ * @param blockId - Block to delete.
+ */
 async function deleteBlock(blockId: string): Promise<void> {
     const block = blockForId(blockId);
     if (!block) {
@@ -201,6 +220,11 @@ async function deleteBlock(blockId: string): Promise<void> {
     );
 }
 
+/**
+ * Applies a finished lane drag — move, resize or speaker change — to the underlying segments.
+ *
+ * @param change - The change the canvas reported.
+ */
 async function applyLaneChange(change: EditorLaneChange): Promise<void> {
     const block = blockForId(change.blockId);
     if (!block) {
@@ -266,6 +290,11 @@ async function applyLaneChange(change: EditorLaneChange): Promise<void> {
 
 // Jump per block, not per segment: with merging on, a merged run counts as
 // one stop and the jump lands on its first timestamp.
+/**
+ * Seeks to the speaker's next block after the playhead, wrapping to their first one.
+ *
+ * @param speaker - Speaker id.
+ */
 function jumpToNext(speaker: string): void {
     const sorted = blocks.value
         .filter((block) => block.speaker === speaker)
@@ -278,6 +307,13 @@ function jumpToNext(speaker: string): void {
     }
 }
 
+/**
+ * Keeps a context menu inside the viewport.
+ *
+ * @param x - Desired client x.
+ * @param y - Desired client y.
+ * @returns The clamped position.
+ */
 function clampMenuPosition(x: number, y: number): { x: number; y: number } {
     const menuWidth = 248;
     const menuHeight = 290;
@@ -293,6 +329,11 @@ const blockMenu = ref<{
     y: number;
 }>();
 
+/**
+ * Opens the context menu for a lane block.
+ *
+ * @param menu - Block id and pointer position from the canvas.
+ */
 function openBlockMenu(menu: EditorLaneContextMenu): void {
     const block = blockForId(menu.blockId);
     if (!block) {
@@ -304,6 +345,11 @@ function openBlockMenu(menu: EditorLaneContextMenu): void {
     };
 }
 
+/**
+ * Moves the block from the open menu to another speaker lane.
+ *
+ * @param target - Target speaker id.
+ */
 async function moveBlockTo(target: string): Promise<void> {
     const block = blockMenu.value?.block;
     blockMenu.value = undefined;
@@ -324,10 +370,23 @@ async function moveBlockTo(target: string): Promise<void> {
     );
 }
 
+/**
+ * Whether a block fits into a lane without overlapping.
+ *
+ * @param block - The block to move.
+ * @param target - Target speaker id.
+ * @returns `true` when the lane has room.
+ */
 function canMoveBlockTo(block: EditorLaneBlock, target: string): boolean {
     return laneAcceptsBlock(blocks.value, block, target);
 }
 
+/**
+ * Whether the menu entry for a target lane should be disabled.
+ *
+ * @param target - Target speaker id.
+ * @returns `true` when the block cannot be moved there.
+ */
 function blockMenuDisabledFor(target: string): boolean {
     const block = blockMenu.value?.block;
     return block ? !canMoveBlockTo(block, target) : false;
@@ -335,6 +394,12 @@ function blockMenuDisabledFor(target: string): boolean {
 
 const laneMenu = ref<{ speaker: string; x: number; y: number }>();
 
+/**
+ * Toggles the context menu of a speaker lane.
+ *
+ * @param speaker - Speaker id.
+ * @param event - The click event, used to position the menu.
+ */
 function openLaneMenu(speaker: string, event: MouseEvent): void {
     if (laneMenu.value?.speaker === speaker) {
         laneMenu.value = undefined;
@@ -347,6 +412,11 @@ function openLaneMenu(speaker: string, event: MouseEvent): void {
     };
 }
 
+/**
+ * Merges all segments of the menu's speaker into another speaker.
+ *
+ * @param target - Speaker to merge into.
+ */
 async function moveSegmentsTo(target: string): Promise<void> {
     const source = laneMenu.value?.speaker;
     if (!source || source === target) {
@@ -363,6 +433,9 @@ async function moveSegmentsTo(target: string): Promise<void> {
     laneMenu.value = undefined;
 }
 
+/**
+ * Asks for confirmation before deleting a speaker's segments.
+ */
 function requestDeleteSpeaker(): void {
     const speaker = laneMenu.value?.speaker;
     laneMenu.value = undefined;
@@ -386,6 +459,12 @@ function requestDeleteSpeaker(): void {
     });
 }
 
+/**
+ * Deletes a speaker's segments and drops the now empty speaker.
+ *
+ * @param speaker - Speaker id.
+ * @param segmentIds - Segments to delete.
+ */
 async function deleteSpeakerSegments(
     speaker: string,
     segmentIds: string[],
@@ -398,6 +477,11 @@ const editingSpeaker = ref<string>();
 const editName = ref("");
 const renameInput = ref<HTMLInputElement>();
 
+/**
+ * Opens the inline rename field for a speaker.
+ *
+ * @param speaker - Speaker id.
+ */
 function startRename(speaker: string): void {
     editingSpeaker.value = speaker;
     editName.value = displayName(speaker);
@@ -407,6 +491,9 @@ function startRename(speaker: string): void {
     });
 }
 
+/**
+ * Persists the inline rename; blank names are discarded.
+ */
 async function commitRename(): Promise<void> {
     const speakerId = editingSpeaker.value;
     const renamed = editName.value.trim();
@@ -424,6 +511,9 @@ onClickOutside(addSpeakerElement, () => {
     addSpeakerOpen.value = false;
 });
 
+/**
+ * Toggles the "add speaker" field and focuses it when opening.
+ */
 function toggleAddSpeaker(): void {
     addSpeakerName.value = "";
     addSpeakerOpen.value = !addSpeakerOpen.value;
@@ -434,10 +524,16 @@ function toggleAddSpeaker(): void {
     }
 }
 
+/**
+ * Closes the "add speaker" field.
+ */
 function closeAddSpeaker(): void {
     addSpeakerOpen.value = false;
 }
 
+/**
+ * Creates the entered speaker and closes the field on success.
+ */
 async function confirmAddSpeaker(): Promise<void> {
     if (await addSpeaker(addSpeakerName.value)) {
         addSpeakerOpen.value = false;

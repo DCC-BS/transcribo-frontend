@@ -18,6 +18,9 @@ const props = defineProps<{
 const chipEl = ref<HTMLElement>();
 const halfWidth = ref(22);
 
+/**
+ * Re-measures the chip so it can be centered on the playhead.
+ */
 function measure(): void {
     if (chipEl.value) {
         halfWidth.value = chipEl.value.offsetWidth / 2;

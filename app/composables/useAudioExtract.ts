@@ -2,6 +2,14 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import { clamp } from "~/utils/math";
 
+/**
+ * Wraps ffmpeg output in a blob.
+ *
+ * @param data - Raw ffmpeg file data.
+ * @param mimeType - Mime type of the resulting blob.
+ * @returns The blob.
+ * @throws When ffmpeg returned text instead of binary data.
+ */
 function toBlob(data: Uint8Array | string, mimeType: string): Blob {
     if (typeof data === "string") {
         throw new Error("Failed to convert audio: data is a string");
@@ -12,16 +20,34 @@ function toBlob(data: Uint8Array | string, mimeType: string): Blob {
     return new Blob([uint8], { type: mimeType });
 }
 
+/**
+ * Extracts a file name's extension.
+ *
+ * @param fileName - The file name.
+ * @returns The extension without the dot, or an empty string when there is none.
+ */
 function extension(fileName: string): string {
     const lastDotIndex = fileName.lastIndexOf(".");
     return lastDotIndex > 0 ? fileName.substring(lastDotIndex + 1) : "";
 }
 
+/**
+ * Removes a file name's extension.
+ *
+ * @param fileName - The file name.
+ * @returns The file name without its extension.
+ */
 function stripExtension(fileName: string): string {
     const lastDotIndex = fileName.lastIndexOf(".");
     return lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
 }
 
+/**
+ * ffmpeg-backed audio extraction for uploads, terminating the worker when the
+ * owning component unmounts.
+ *
+ * @returns The extraction function.
+ */
 export const useAudioExtract = () => {
     const ffmpeg = new FFmpeg();
 
@@ -29,11 +55,18 @@ export const useAudioExtract = () => {
         ffmpeg.terminate();
     });
 
-    // Transcode any audio/video to mono 32 kbit/s Opus (drops video, shrinks
-    // upload). Opus is used instead of low-sample-rate MP3 because 16 kHz MP3
-    // introduces artifacts that make the Whisper worker's VAD/diarization skip
-    // whole passages; Opus at 32k keeps transcription quality on par with the
-    // untouched original at a quarter of the size.
+    /**
+     * Transcodes any audio/video to mono 32 kbit/s Opus (drops video, shrinks
+     * upload). Opus is used instead of low-sample-rate MP3 because 16 kHz MP3
+     * introduces artifacts that make the Whisper worker's VAD/diarization skip
+     * whole passages; Opus at 32k keeps transcription quality on par with the
+     * untouched original at a quarter of the size.
+     *
+     * @param mediaFile - The source audio or video file.
+     * @param onProgress - Optional callback receiving progress in percent.
+     * @returns The extracted audio blob and its file name.
+     * @throws When ffmpeg fails to transcode the file.
+     */
     async function extractAudio(
         mediaFile: File,
         onProgress?: (percent: number) => void,

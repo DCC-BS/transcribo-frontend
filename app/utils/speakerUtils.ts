@@ -1,5 +1,12 @@
 import type { Segment } from "~/types/transcriptionResponse";
 
+/**
+ * Collects the distinct speakers appearing in the given segments.
+ *
+ * @param segments - Segments to scan.
+ * @returns The speaker labels, with unassigned segments counted as
+ * `"unknown"`.
+ */
 export function getUniqueSpeakers(segments: Segment[]): Set<string> {
     return new Set(segments.map((segment) => segment.speaker ?? "unknown"));
 }

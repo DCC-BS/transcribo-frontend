@@ -9,7 +9,18 @@ import type { Keyword, KeywordType } from "~/types/transcriptionResponse";
 */
 const MAX_VOCABULARY_ENTRIES = 100;
 
+/**
+ * Vocabulary persistence layer on top of the IndexedDB store, keeping the
+ * entry count bounded via LRU eviction.
+ *
+ * @returns The vocabulary service operations.
+ */
 export function getVocabularyService() {
+    /**
+     * Reads the whole vocabulary in the shape the transcription API expects.
+     *
+     * @returns The stored terms as keywords.
+     */
     async function getVocabularyAsKeywords(): Promise<Keyword[]> {
         const entries = await db.vocabulary.toArray();
         return entries.map((entry) => ({
@@ -19,11 +30,16 @@ export function getVocabularyService() {
         }));
     }
 
-    /*
-        Remembers the confirmed spelling of a term. `replaces` is the previous
-        spelling the user renamed away from: its entry is removed so repeated
-        edits keep only the final term, not every intermediate state.
-    */
+    /**
+     * Remembers the confirmed spelling of a term.
+     *
+     * @param term - The confirmed spelling.
+     * @param type - Keyword type of the term.
+     * @param description - Optional description shown in the vocabulary page.
+     * @param replaces - The previous spelling the user renamed away from; its
+     * entry is removed so repeated edits keep only the final term, not every
+     * intermediate state.
+     */
     async function rememberTerm(
         term: string,
         type: KeywordType,
@@ -58,10 +74,12 @@ export function getVocabularyService() {
         });
     }
 
-    /*
-        Marks the given terms as used in a finished transcription so LRU
-        eviction keeps the vocabulary that is actually still relevant.
-    */
+    /**
+     * Marks the given terms as used in a finished transcription so LRU
+     * eviction keeps the vocabulary that is actually still relevant.
+     *
+     * @param terms - Terms that appeared in the transcription.
+     */
     async function touchTerms(terms: string[]): Promise<void> {
         if (terms.length === 0) {
             return;
@@ -75,6 +93,10 @@ export function getVocabularyService() {
             });
     }
 
+    /**
+     * Drops the least recently used entries once the vocabulary exceeds
+     * {@link MAX_VOCABULARY_ENTRIES}.
+     */
     async function evictOverflow(): Promise<void> {
         const count = await db.vocabulary.count();
         const overflow = count - MAX_VOCABULARY_ENTRIES;
@@ -90,15 +112,25 @@ export function getVocabularyService() {
 
     // --- management (vocabulary settings page) --------------------------
 
+    /**
+     * Removes a term from the vocabulary.
+     *
+     * @param term - The term to delete.
+     */
     async function deleteTerm(term: string): Promise<void> {
         await db.vocabulary.delete(term);
     }
 
-    /*
-        Rename keeps the entry's history (edit count, timestamps); changing
-        only the type updates in place. Renaming onto an already existing
-        term merges the two histories instead of overwriting the target.
-    */
+    /**
+     * Updates a vocabulary entry.
+     *
+     * Renaming keeps the entry's history (edit count, timestamps); changing
+     * only the type updates in place. Renaming onto an already existing term
+     * merges the two histories instead of overwriting the target.
+     *
+     * @param originalTerm - The entry to update.
+     * @param updates - New term and/or type.
+     */
     async function updateTerm(
         originalTerm: string,
         updates: { term?: string; type?: KeywordType },

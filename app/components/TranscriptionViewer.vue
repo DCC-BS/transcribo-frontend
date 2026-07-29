@@ -46,6 +46,12 @@ interface DisplayBlock {
     members: { segment: StoredSegment; offset: number }[];
 }
 
+/**
+ * Projects a stored segment onto the block shape the viewer renders.
+ *
+ * @param segment - The stored segment.
+ * @returns The display block.
+ */
 function toDisplayBlock(segment: StoredSegment): DisplayBlock {
     return {
         id: segment.id,
@@ -84,6 +90,12 @@ const displayedSegments = computed<DisplayBlock[]>(() => {
     return blocks;
 });
 
+/**
+ * Whether playback is currently inside a block.
+ *
+ * @param block - The block to test.
+ * @returns `true` while the playhead is within the block.
+ */
 function isActive(block: DisplayBlock): boolean {
     return currentTime.value >= block.start && currentTime.value < block.end;
 }
@@ -103,6 +115,12 @@ const anchorBlockId = computed(() => {
     return (anchor ?? displayedSegments.value[0])?.id ?? null;
 });
 
+/**
+ * Scrolls a block into view.
+ *
+ * @param id - Block to scroll to; `null` does nothing.
+ * @param smooth - Whether to animate the scroll.
+ */
 function scrollToBlock(id: string | null, smooth: boolean): void {
     if (!id) {
         return;
@@ -171,6 +189,12 @@ const activeKaraoke = computed(() => {
 
 // Editor-style karaoke staining for whole blocks: everything after the
 // playback position is dimmed, everything before keeps the full color.
+/**
+ * Karaoke styling for a block relative to the playhead.
+ *
+ * @param block - The block to style.
+ * @returns The CSS class, or an empty string for played blocks.
+ */
 function blockKaraokeClass(block: DisplayBlock): string {
     if (block.start > currentTime.value) {
         return "viewer-w-upcoming";
@@ -191,6 +215,13 @@ interface CaretHit {
     offset: number;
 }
 
+/**
+ * Resolves a viewport point to a text position, across browser APIs.
+ *
+ * @param x - Client x coordinate.
+ * @param y - Client y coordinate.
+ * @returns The text node and offset, or `null` when there is no text.
+ */
 function caretAtPoint(x: number, y: number): CaretHit | null {
     const doc = document as Document & {
         caretPositionFromPoint?: (
@@ -211,6 +242,12 @@ function caretAtPoint(x: number, y: number): CaretHit | null {
         : null;
 }
 
+/**
+ * Bounding box of the line box a caret hit sits on.
+ *
+ * @param hit - The resolved caret position.
+ * @returns The rect, or `null` for non-text nodes.
+ */
 function caretLineRect(hit: CaretHit): DOMRect | null {
     if (hit.node.nodeType !== Node.TEXT_NODE) {
         return null;
@@ -221,6 +258,12 @@ function caretLineRect(hit: CaretHit): DOMRect | null {
     return range.getClientRects()[0] ?? null;
 }
 
+/**
+ * Character offset within a block for a click position.
+ *
+ * @param event - The click event.
+ * @returns The offset into the block's text.
+ */
 function charOffsetFromPoint(event: MouseEvent): number {
     /*
         caretPositionFromPoint snaps to the NEAREST text position — with the
@@ -289,6 +332,12 @@ function charOffsetFromPoint(event: MouseEvent): number {
 // Jump only — whether it is playing or paused stays as it is. The merged
 // offset is mapped back into the raw member segment, the exact inverse of
 // the karaoke interpolation.
+/**
+ * Seeks playback to the word the user clicked on.
+ *
+ * @param block - The clicked block.
+ * @param event - The click event.
+ */
 async function seekFromClick(
     block: DisplayBlock,
     event: MouseEvent,

@@ -25,6 +25,12 @@ const transcriptDocumentEditor =
         "transcriptDocumentEditor",
     );
 
+/**
+ * Inserts a segment for the range picked on the playback bar.
+ *
+ * @param start - Start time in seconds.
+ * @param end - End time in seconds.
+ */
 function insertSegmentFromPlaybar(start: number, end: number): void {
     void transcriptDocumentEditor.value?.insertSegmentAt(start, end);
 }

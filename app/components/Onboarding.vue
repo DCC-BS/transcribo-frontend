@@ -19,6 +19,11 @@ const ONBOARDING_KEY = "transcribo-onboarding-completed";
 
 const dockCompact = useEditorDockCompact();
 
+/**
+ * Switches the editor to the mode the next tour step needs.
+ *
+ * @param mode - The editor mode to activate.
+ */
 async function switchToMode(mode: "view" | "summary" | "edit" | "statistics") {
     await executeCommand(new ChangeEditorModeCommand(mode));
 }
@@ -35,6 +40,11 @@ function expandDock(): void {
     dockCompact.value = false;
 }
 
+/**
+ * Builds the guided tour with all of its steps.
+ *
+ * @returns The configured driver instance.
+ */
 function createDriver() {
     return driver({
         showProgress: true,
@@ -220,6 +230,9 @@ function createDriver() {
 
 const driverObj = ref<Driver>();
 
+/**
+ * Starts the guided tour from the first step.
+ */
 function start(): void {
     driverObj.value = createDriver();
     emit("start");
@@ -227,10 +240,18 @@ function start(): void {
     driverObj.value?.drive();
 }
 
+/**
+ * Whether the user has already finished the tour.
+ *
+ * @returns `true` when the tour was completed before.
+ */
 function isCompleted(): boolean {
     return localStorage.getItem(ONBOARDING_KEY) === "true";
 }
 
+/**
+ * Forgets that the tour was completed, so it can run again.
+ */
 function reset(): void {
     localStorage.removeItem(ONBOARDING_KEY);
 }

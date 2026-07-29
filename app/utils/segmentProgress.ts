@@ -10,6 +10,14 @@
 */
 import { clamp01 } from "~/utils/math";
 
+/**
+ * Playback progress within a segment, used to size the overlay bar.
+ *
+ * @param start - Segment start time in seconds.
+ * @param end - Segment end time in seconds.
+ * @param currentTime - Current playback time in seconds.
+ * @returns Progress clamped to [0, 1]; `0` for empty or inverted ranges.
+ */
 export function calculateSegmentProgress(
     start: number,
     end: number,

@@ -13,6 +13,12 @@ import type { TranscriptionResponse } from "~/types/transcriptionResponse";
 import { resolveTranscriptionTitle } from "~/utils/resolveTranscriptionTitle";
 import { isVideoFile } from "~/utils/videoUtils";
 
+/**
+ * Drives a transcription task from submission to stored transcription:
+ * progress reporting, status polling and importing the finished result.
+ *
+ * @returns The task-listener operations.
+ */
 export function useTaskListener() {
     const { deleteTask } = useTasks();
     const { addTranscription } = getTranscriptionService();
@@ -21,8 +27,14 @@ export function useTaskListener() {
     const { t } = useI18n();
     const logger = useLogger();
 
-    // The four steps of the transcription flow as shown in MediaProgressView:
-    // preprocess, upload, transcribe, post-process.
+    /**
+     * The four steps of the transcription flow as shown in MediaProgressView:
+     * preprocess, upload, transcribe, post-process.
+     *
+     * @param media - The media being transcribed; decides the wording of the
+     * first step.
+     * @returns The four progress steps, all at zero.
+     */
     function createProgressSteps(
         media: File | Blob,
     ): [MediaProgress, MediaProgress, MediaProgress, MediaProgress] {
@@ -52,6 +64,12 @@ export function useTaskListener() {
         ];
     }
 
+    /**
+     * Renders a task status as a progress step.
+     *
+     * @param status - The polled task status.
+     * @returns The matching progress step.
+     */
     function createProgress(status: TaskStatus): MediaProgress {
         return {
             icon: "i-lucide-cpu",
@@ -60,6 +78,12 @@ export function useTaskListener() {
         };
     }
 
+    /**
+     * Maps a task status onto a percentage.
+     *
+     * @param taskStatus - The polled task status.
+     * @returns Progress in percent.
+     */
     function calculateProgress(taskStatus: TaskStatus) {
         return match(taskStatus.status)
             .returnType<number>()
@@ -73,6 +97,17 @@ export function useTaskListener() {
             .otherwise(() => 0);
     }
 
+    /**
+     * Polls a task every 5 seconds until it leaves the in-progress state, then
+     * fetches its result. Failures are logged and reported as a failed step
+     * rather than thrown.
+     *
+     * @param taskId - Task to poll.
+     * @param onProgressUpdate - Receives each progress update.
+     * @param onComplete - Receives the finished transcription.
+     * @param onPostProcessing - Optional separate channel for the LLM
+     * post-processing step; defaults to `onProgressUpdate`.
+     */
     async function pollTaskStatus(
         taskId: string,
         onProgressUpdate: (progress: MediaProgress) => void,
@@ -135,6 +170,13 @@ export function useTaskListener() {
         }
     }
 
+    /**
+     * Fetches a task's status once.
+     *
+     * @param taskId - Task to query.
+     * @returns The status; a failed status when the request errored (the error
+     * is shown to the user).
+     */
     async function fetchTaskStatus(taskId: string): Promise<TaskStatus> {
         const newStatus = await apiFetch(`/api/transcribe/${taskId}/status`, {
             schema: TaskStatusSchema,
@@ -153,6 +195,13 @@ export function useTaskListener() {
         return newStatus;
     }
 
+    /**
+     * Fetches a finished task's transcription.
+     *
+     * @param taskId - Task to read.
+     * @returns The transcription response.
+     * @throws When the request fails; the error is also shown to the user.
+     */
     async function fetchTaskResult(
         taskId: string,
     ): Promise<TranscriptionResponse> {
@@ -171,9 +220,15 @@ export function useTaskListener() {
         }
     }
 
-    /*
-        This will store the transcription and removes the task from the storage.
-    */
+    /**
+     * Stores a finished transcription with its segments, speaker roster and
+     * proposed vocabulary, and removes the task from storage.
+     *
+     * @param taskId - The completed task.
+     * @param result - The transcription response to import.
+     * @param mediaFile - The recorded or uploaded media to keep with it.
+     * @param mediaName - File name of that media.
+     */
     async function applyTaskResult(
         taskId: string,
         result: TranscriptionResponse,
@@ -197,6 +252,12 @@ export function useTaskListener() {
             }
         }
 
+        /**
+         * Normalizes a diarization label into a stable roster key.
+         *
+         * @param speaker - Raw speaker label from the response.
+         * @returns The upper-cased key, or the "no speaker" placeholder.
+         */
         function speakerKey(speaker: string | null | undefined): string {
             return (
                 speaker?.trim().toUpperCase() || t("transcription.noSpeaker")

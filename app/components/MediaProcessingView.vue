@@ -24,6 +24,9 @@ onMounted(() => {
     processMedia();
 });
 
+/**
+ * Runs the whole upload flow — preprocess, upload, transcribe, post-process — reporting each step's progress and surfacing failures as a retryable error.
+ */
 async function processMedia() {
     try {
         errorMessage.value = undefined;
@@ -55,6 +58,12 @@ async function processMedia() {
     }
 }
 
+/**
+ * Extracts mono audio from the selected media.
+ *
+ * @param progress - Progress step to update while extracting.
+ * @returns The extracted audio as an upload-ready file.
+ */
 async function preprocessMedia(progress: MediaProgress) {
     const isVideo = isVideoFile(input.value.media);
 
@@ -77,6 +86,14 @@ async function preprocessMedia(progress: MediaProgress) {
     return audioFile;
 }
 
+/**
+ * Uploads the processed audio and creates the transcription task.
+ *
+ * @param processedFile - The audio to upload.
+ * @param storedMedia - The original media kept with the task.
+ * @param progress - Progress step to update while uploading.
+ * @returns The created task's status.
+ */
 async function uploadFile(
     processedFile: File,
     storedMedia: File,
@@ -118,6 +135,14 @@ async function uploadFile(
     return response;
 }
 
+/**
+ * Waits for the task to finish and stores the resulting transcription.
+ *
+ * @param task - The submitted task.
+ * @param storedMedia - The original media kept with the transcription.
+ * @param transcriptionProgress - Progress step for the transcription itself.
+ * @param postProcessingProgress - Progress step for the LLM post-processing.
+ */
 async function waitForTask(
     task: TaskStatus,
     storedMedia: File,

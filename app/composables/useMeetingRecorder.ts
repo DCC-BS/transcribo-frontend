@@ -17,6 +17,12 @@ const MIME_TYPES = [
     "audio/ogg;codecs=opus",
 ];
 
+/**
+ * Picks the first recording container the browser supports.
+ *
+ * @returns The mime type to record with, or `undefined` to let the browser
+ * decide.
+ */
 function pickMimeType(): string | undefined {
     return MIME_TYPES.find((type) => MediaRecorder.isTypeSupported(type));
 }
@@ -34,6 +40,11 @@ export type MeetingRecorderUnsupported = "browser" | "platform";
       ChromeOS. On Linux and macOS it is limited to the audio of a browser
       tab, which is no use for a meeting held in a desktop app like Teams.
 */
+/**
+ * Decides whether meeting recording can be offered at all.
+ *
+ * @returns Why the feature is unavailable, or `null` when it can be used.
+ */
 function detectUnsupported(): MeetingRecorderUnsupported | null {
     if (typeof navigator === "undefined") {
         return "browser";
@@ -51,6 +62,13 @@ export type MeetingRecorderError =
     | "no-screen-audio"
     | "failed";
 
+/**
+ * Records a meeting as one audio track: microphone mixed with shared-screen
+ * audio. Devices are released again when the surrounding scope is disposed.
+ *
+ * @returns Recording state (support, progress, elapsed time, live stream,
+ * error) plus `start` and `stop`.
+ */
 export function useMeetingRecorder() {
     const mic = useUserMedia({ constraints: { audio: true, video: false } });
     // video: true is required — browsers refuse to share audio on its own
@@ -89,8 +107,11 @@ export function useMeetingRecorder() {
     );
 
     /**
-     * Mixes both streams down to one audio-only stream. The AudioContext is
-     * kept so it can be closed again when the recording ends.
+     * Mixes the given streams down to one audio-only stream. The AudioContext
+     * is kept so it can be closed again when the recording ends.
+     *
+     * @param streams - Source streams; tracks without audio are ignored.
+     * @returns The mixed audio-only stream.
      */
     function mixToSingleStream(streams: MediaStream[]): MediaStream {
         audioContext = new AudioContext();
@@ -105,6 +126,9 @@ export function useMeetingRecorder() {
         return destination.stream;
     }
 
+    /**
+     * Stops microphone and screen capture and tears down the audio graph.
+     */
     function releaseDevices(): void {
         mic.stop();
         screen.stop();
@@ -114,9 +138,10 @@ export function useMeetingRecorder() {
     }
 
     /**
-     * Starts microphone + screen capture and records the mix. Resolves with
-     * the recorded audio once `stop()` is called, or `undefined` if the
-     * recording could not be started — `error` says why.
+     * Starts microphone and screen capture and records the mix.
+     *
+     * @returns The recorded audio once {@link stop} is called, or `undefined`
+     * when the recording could not be started — `error` says why.
      */
     async function start(): Promise<Blob | undefined> {
         if (isRecording.value || isStarting.value) {
@@ -207,14 +232,16 @@ export function useMeetingRecorder() {
         }
     }
 
-    /*
-        Releases the devices unconditionally, not just while recording: the
-        screen share is granted before the recorder exists, and unlike
-        useUserMedia, VueUse's useDisplayMedia registers no scope-dispose
-        cleanup of its own. Tearing down between the picker and the first
-        chunk would otherwise leave the capture — and the browser's "sharing
-        your screen" bar — running.
-    */
+    /**
+     * Ends the recording and releases the devices.
+     *
+     * Devices are released unconditionally, not just while recording: the
+     * screen share is granted before the recorder exists, and unlike
+     * useUserMedia, VueUse's useDisplayMedia registers no scope-dispose
+     * cleanup of its own. Tearing down between the picker and the first chunk
+     * would otherwise leave the capture — and the browser's "sharing your
+     * screen" bar — running.
+     */
     function stop(): void {
         if (isRecording.value) {
             isRecording.value = false;

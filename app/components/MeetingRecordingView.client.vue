@@ -25,6 +25,9 @@ watchEffect(() => {
     active.value = isRecording.value || isStarting.value;
 });
 
+/**
+ * Runs a meeting recording and emits the audio once it is stopped.
+ */
 async function record(): Promise<void> {
     const audio = await start();
     if (audio) {

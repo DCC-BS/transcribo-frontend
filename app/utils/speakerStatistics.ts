@@ -6,6 +6,14 @@ export interface SpeakerStatistics {
     percentage: number;
 }
 
+/**
+ * Aggregates speaking time per speaker.
+ *
+ * @param segments - Diarized segments; segments without a speaker are counted
+ * as `"unknown"`.
+ * @returns Per-speaker duration and share of total speaking time, longest
+ * first.
+ */
 export function computeSpeakerStatistics(
     segments: Segment[],
 ): SpeakerStatistics[] {

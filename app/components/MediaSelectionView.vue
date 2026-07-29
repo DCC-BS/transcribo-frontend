@@ -16,11 +16,21 @@ watch(uploadFile, () => {
     }
 });
 
+/**
+ * Wraps a microphone recording in a file and selects it for upload.
+ *
+ * @param audio - The recorded audio.
+ */
 function onRecodingComplete(audio: Blob) {
     const file = new File([audio], "Aufnahme.mp3", { type: "audio/mpeg" });
     emit("onMediaSelected", { media: file });
 }
 
+/**
+ * Wraps a meeting recording in a file and selects it for upload.
+ *
+ * @param audio - The recorded audio.
+ */
 function onMeetingRecorded(audio: Blob) {
     // the recorder reports e.g. "audio/webm;codecs=opus" — the codec suffix
     // is dropped so the file carries a plain media type

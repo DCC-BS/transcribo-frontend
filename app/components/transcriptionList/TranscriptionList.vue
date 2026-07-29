@@ -58,6 +58,12 @@ const currentSegmentId = computed(() => {
     return current?.id;
 });
 
+/**
+ * Registers a segment's element so it can be scrolled to.
+ *
+ * @param id - Segment id.
+ * @param el - The element or component instance, if mounted.
+ */
 function setSegmentRef(id: string, el: unknown): void {
     if (!el) {
         return;
@@ -73,6 +79,12 @@ function setSegmentRef(id: string, el: unknown): void {
     }
 }
 
+/**
+ * Whether a segment is the one currently playing.
+ *
+ * @param segmentId - Segment id.
+ * @returns `true` for the active segment.
+ */
 function isSegmentActive(segmentId: string): boolean {
     return currentSegmentId.value === segmentId;
 }
@@ -122,6 +134,11 @@ watch(currentSegmentId, async (newId, oldId) => {
     segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
+/**
+ * Inserts a new segment after the given one.
+ *
+ * @param segment - Segment to insert after.
+ */
 async function addSegmentAfter(segment: StoredSegment) {
     await executeCommand(
         new InsertSegmentCommand(
@@ -133,6 +150,9 @@ async function addSegmentAfter(segment: StoredSegment) {
     );
 }
 
+/**
+ * Inserts a new segment at the very beginning of the transcript.
+ */
 async function addSegmentAtZero() {
     const speaker = speakers.value[0] ?? "SPEAKER_1";
 

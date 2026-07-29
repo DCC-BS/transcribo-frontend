@@ -30,6 +30,12 @@ const speakingPercentage = computed(() => {
     return (totalSpeakingTime.value / mediaDuration.value) * 100;
 });
 
+/**
+ * CSS color of a speaker, ready for a style binding.
+ *
+ * @param speaker - Speaker id.
+ * @returns An `rgb(...)` color string.
+ */
 function getSpeakerColorStyle(speaker: string): string {
     const color = getSpeakerColor(speaker);
     return `rgb(${Math.round(color.r)}, ${Math.round(color.g)}, ${Math.round(color.b)})`;

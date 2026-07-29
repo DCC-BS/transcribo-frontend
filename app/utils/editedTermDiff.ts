@@ -20,6 +20,15 @@ export interface EditedTerm {
     replaced?: string;
 }
 
+/**
+ * Reduces one editing session on a segment text to the vocabulary term it
+ * taught us, or `null` when the edit carries no spelling information.
+ *
+ * @param oldText - The segment text before the editing session.
+ * @param newText - The segment text after the editing session.
+ * @returns The captured term (with the spelling it replaced, when known), or
+ * `null` for rephrasings and punctuation-only edits.
+ */
 export function diffEditedTerm(
     oldText: string,
     newText: string,

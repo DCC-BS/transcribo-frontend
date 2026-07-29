@@ -20,6 +20,11 @@ onUnmounted(() => {
     window.removeEventListener("keydown", handleKeyDown);
 });
 
+/**
+ * Global undo/redo shortcuts (Ctrl+Z / Ctrl+Y).
+ *
+ * @param event - The keyboard event.
+ */
 function handleKeyDown(event: KeyboardEvent) {
     if (event.key === "z" && event.ctrlKey && canUndo.value) {
         undo();

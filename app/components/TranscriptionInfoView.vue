@@ -20,6 +20,9 @@ watch(() => props.transcription.name, () => {
     newName.value = props.transcription.name;
 });
 
+/**
+ * Persists a changed transcription title as an undoable command.
+ */
 async function handleNameChange() {
     if (newName.value !== props.transcription.name) {
         await executeCommand(

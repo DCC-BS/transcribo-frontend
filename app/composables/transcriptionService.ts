@@ -33,13 +33,24 @@ async function nextFreeSpeakerId(
     ]);
 }
 
-// A 2s window starting at `anchor` (never before 0). New segments get their
-// own new speaker, so they never overlap themselves and need no gap search.
+/**
+ * A {@link SEGMENT_LENGTH}-second window starting at `anchor` (never before 0).
+ * New segments get their own new speaker, so they never overlap themselves and
+ * need no gap search.
+ *
+ * @param anchor - Desired start time in seconds.
+ * @returns Start and end time of the new segment.
+ */
 function segmentWindow(anchor: number): { start: number; end: number } {
     const start = Math.max(anchor, 0);
     return { start, end: start + SEGMENT_LENGTH };
 }
 
+/**
+ * Registers the command-bus handlers that apply transcription edits (segment
+ * create/update/delete, speaker rename/merge, title change) to the store,
+ * including their undo counterparts.
+ */
 export const useTranscriptionCommandHandler = () => {
     const logger = useLogger();
     const { onCommand } = useCommandBus();

@@ -183,6 +183,16 @@ const HARD_SPLIT_CHARS = 9 * CHARS_PER_LINE;
 const SPLIT_PAUSE_SECONDS = 2.5;
 const SENTENCE_END = /[.!?…]["')\]]?$/;
 
+/**
+ * Decides whether a speaker turn should start a new paragraph before the next
+ * segment: hard-wrapped by length, otherwise at a sentence end or a noticeable
+ * pause once the paragraph is long enough.
+ *
+ * @param paragraphLength - Characters accumulated in the current paragraph.
+ * @param lastSegment - Last segment already in the paragraph.
+ * @param next - Segment about to be appended.
+ * @returns `true` when the paragraph should be broken.
+ */
 function shouldBreakParagraph(
     paragraphLength: number,
     lastSegment: StoredSegment,
@@ -234,6 +244,15 @@ export function buildTranscriptTurns(
     return turns;
 }
 
+/**
+ * Builds the ProseMirror document for the transcript editor.
+ *
+ * @param segments - Segments in playback order.
+ * @param displayName - Resolves a speaker id to its display name.
+ * @param mergeSegments - Whether consecutive segments of one speaker are
+ * merged into shared turns.
+ * @returns The document node content.
+ */
 export function buildTranscriptDocContent(
     segments: StoredSegment[],
     displayName: (speakerId: string | undefined) => string,
@@ -441,6 +460,14 @@ export function createPlayheadPlugin(): Plugin<PlayheadPosition> {
 
 export const keywordPluginKey = new PluginKey<string[]>("transcriptKeywords");
 
+/**
+ * Builds inline decorations marking every whole-word occurrence of the given
+ * vocabulary terms.
+ *
+ * @param doc - The current document.
+ * @param terms - Terms to highlight.
+ * @returns The decoration set; empty when there is nothing to highlight.
+ */
 function buildKeywordDecorations(
     doc: ProseMirrorNode,
     terms: string[],
@@ -483,6 +510,12 @@ function buildKeywordDecorations(
     return DecorationSet.create(doc, decorations);
 }
 
+/**
+ * ProseMirror plugin highlighting vocabulary terms. The term list is set by
+ * dispatching a transaction with {@link keywordPluginKey} metadata.
+ *
+ * @returns The plugin.
+ */
 export function createKeywordHighlightPlugin(): Plugin {
     return new Plugin({
         key: keywordPluginKey,

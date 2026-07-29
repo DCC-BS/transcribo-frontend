@@ -31,6 +31,11 @@ const { speakerIds } = useSpeakerRegistry();
 const zoom = ref(1);
 const compact = useEditorDockCompact();
 
+/**
+ * Toggles the video panel, dropping focus so the button stops looking pressed.
+ *
+ * @param event - The click event.
+ */
 function toggleVideo(event: MouseEvent): void {
     showVideo.value = !showVideo.value;
     if (event.currentTarget instanceof HTMLButtonElement) {
@@ -38,10 +43,16 @@ function toggleVideo(event: MouseEvent): void {
     }
 }
 
+/**
+ * Expands the speaker lanes to full height.
+ */
 function expandLanes(): void {
     compact.value = false;
 }
 
+/**
+ * Collapses the speaker lanes.
+ */
 function collapseLanes(): void {
     compact.value = true;
 }
@@ -66,6 +77,11 @@ const maxLanesHeight = computed(
     () => speakerIds.value.length * LANE_ROW + RULER,
 );
 
+/**
+ * Starts a pointer drag that resizes the lanes area; dragging up enlarges it, capped once every speaker is visible.
+ *
+ * @param event - The pointer event starting the drag.
+ */
 function beginDockResize(event: PointerEvent): void {
     event.preventDefault();
     const startY = event.clientY;
@@ -87,8 +103,9 @@ function beginDockResize(event: PointerEvent): void {
     );
 }
 
-// Exponential zoom slider: value is log2(zoom), so 1× sits exactly in the
-// middle between - and + (range 0.125×–8×) and each step feels equal.
+/**
+ * Slider function to sit exactly in the middle when zooming.
+ */
 const zoomExp = computed({
     get: () => Math.log2(zoom.value),
     set: (value) => {
@@ -97,6 +114,9 @@ const zoomExp = computed({
 });
 
 
+/**
+ * Asks the parent to insert a two-second segment at the playhead, clipped to the media duration.
+ */
 function requestSegmentAtPlayhead(): void {
     const start = props.currentTime;
     const end = props.duration

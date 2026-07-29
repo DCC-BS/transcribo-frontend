@@ -71,6 +71,12 @@ onUnmounted(() => {
     URL.revokeObjectURL(mediaSource.value);
 });
 
+/**
+ * Renders a byte count in the largest fitting unit.
+ *
+ * @param bytes - Size in bytes.
+ * @returns The formatted size, e.g. `"12.5 MB"`.
+ */
 function formatFileSize(bytes: number): string {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
@@ -79,6 +85,9 @@ function formatFileSize(bytes: number): string {
     return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
+/**
+ * Hands the configured media and its task on to the next upload step.
+ */
 function onNext() {
     if (!task.value) {
         return;

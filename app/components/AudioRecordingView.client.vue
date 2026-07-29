@@ -25,6 +25,12 @@ const audioBlob = ref<Blob | undefined>(undefined);
 const userRecording = ref(false);
 const showAbandonedRecordings = ref(false);
 
+/**
+ * Takes over the finished recording and hands it to the parent.
+ *
+ * @param file - The recorded audio.
+ * @param _ - Unused mime type reported by the recorder.
+ */
 function onRecordingStopped(file: Blob, _: string) {
     isRecording.value = false;
     audioBlob.value = file;
@@ -32,12 +38,18 @@ function onRecordingStopped(file: Blob, _: string) {
     emitAudio();
 }
 
+/**
+ * Emits the recorded audio, if there is any.
+ */
 function emitAudio(): void {
     if (audioBlob.value) {
         emit("onRecordingComplete", audioBlob.value);
     }
 }
 
+/**
+ * Starts a new microphone recording.
+ */
 function startRecording(): void {
     shouldRecord.value = true;
     active.value = true;

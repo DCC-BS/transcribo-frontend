@@ -41,11 +41,21 @@ onMounted(async () => {
     }
 });
 
+/**
+ * Accepts the chosen media and advances to the preview step.
+ *
+ * @param data - The selected media.
+ */
 function onMediaSelected(data: MediaSelectionData) {
     mediaSelectionData.value = data;
     step.value = 2;
 }
 
+/**
+ * Accepts the upload configuration and advances to the processing step.
+ *
+ * @param payload - The configured upload.
+ */
 function onMediaConfigure(payload: MediaConfigureData) {
     mediaPreviewData.value = payload;
     step.value = 3;

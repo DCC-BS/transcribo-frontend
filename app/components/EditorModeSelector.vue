@@ -8,6 +8,12 @@ const { t } = useI18n();
 
 // The onboarding anchors on the `mode-<value>` trigger class: the label is
 // hidden on small screens, so an anchor on it would have no box there.
+/**
+ * Per-tab UI overrides, tagging the trigger for the onboarding tour.
+ *
+ * @param value - The editor mode the tab selects.
+ * @returns The tab's UI class overrides.
+ */
 function tabUi(value: string) {
     return { trigger: `mode-${value}`, label: "hidden sm:inline" };
 }

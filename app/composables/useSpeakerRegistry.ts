@@ -69,6 +69,12 @@ const [provideSpeakerRegistry, injectSpeakerRegistry] = createInjectionState(
                 );
         });
 
+        /**
+         * Display name of a speaker.
+         *
+         * @param id - Speaker id, or `undefined` for unassigned segments.
+         * @returns The stored name, falling back to the id itself.
+         */
         function displayName(id: string | undefined): string {
             if (!id) {
                 return "unknown";
@@ -94,7 +100,12 @@ const [provideSpeakerRegistry, injectSpeakerRegistry] = createInjectionState(
             ),
         );
 
-        /** Create a speaker: fresh key, given display name. */
+        /**
+         * Creates a speaker with a fresh key and the given display name.
+         *
+         * @param name - Display name; blank names are rejected.
+         * @returns `true` when the speaker was added.
+         */
         async function addSpeaker(name: string): Promise<boolean> {
             const trimmed = name.trim();
             const stored = toValue(transcription);
@@ -109,6 +120,11 @@ const [provideSpeakerRegistry, injectSpeakerRegistry] = createInjectionState(
             return true;
         }
 
+        /**
+         * Drops a session-only speaker that never received segments.
+         *
+         * @param id - Speaker id to forget.
+         */
         function removeEmptySpeaker(id: string): void {
             sessionIds.value = sessionIds.value.filter(
                 (sessionId) => sessionId !== id,
@@ -128,6 +144,12 @@ const [provideSpeakerRegistry, injectSpeakerRegistry] = createInjectionState(
 
 export { provideSpeakerRegistry };
 
+/**
+ * Injects the speaker registry provided by the transcription page.
+ *
+ * @returns The shared speaker registry.
+ * @throws When no ancestor called `provideSpeakerRegistry()`.
+ */
 export function useSpeakerRegistry() {
     const registry = injectSpeakerRegistry();
     if (!registry) {

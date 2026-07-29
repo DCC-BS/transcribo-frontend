@@ -219,6 +219,9 @@ let flushPromise: Promise<void> | undefined;
 
 const flushTextEditsDebounced = useDebounceFn(flushTextEdits, 600);
 
+/**
+ * Marks the document dirty and debounces a write of the changed segments.
+ */
 function scheduleTextSync(): void {
     isDirty = true;
     void flushTextEditsDebounced();
@@ -293,6 +296,11 @@ function docReflectsSegments(): boolean {
     return matches;
 }
 
+/**
+ * Writes pending text edits, joining an already running flush instead of starting a second one.
+ *
+ * @param doc - Document to read; defaults to the editor's current one.
+ */
 async function flushTextEdits(doc?: ProseMirrorNode): Promise<void> {
     if (flushPromise) {
         await flushPromise;
@@ -307,6 +315,11 @@ async function flushTextEdits(doc?: ProseMirrorNode): Promise<void> {
     }
 }
 
+/**
+ * Keeps writing until no further edit arrived while the last write ran.
+ *
+ * @param doc - Document to read; defaults to the editor's current one.
+ */
 async function flushDirtyTextEdits(doc?: ProseMirrorNode): Promise<void> {
     while (isDirty) {
         isDirty = false;
@@ -314,6 +327,11 @@ async function flushDirtyTextEdits(doc?: ProseMirrorNode): Promise<void> {
     }
 }
 
+/**
+ * Persists the segment texts that differ from the store as undoable commands.
+ *
+ * @param doc - Document to read; defaults to the editor's current one.
+ */
 async function persistCurrentTextEdits(
     doc: ProseMirrorNode = editor.state.doc,
 ): Promise<void> {
@@ -353,6 +371,11 @@ async function persistCurrentTextEdits(
 
 const captureBaseline = new Map<string, string>();
 
+/**
+ * Remembers the pre-edit segment texts that vocabulary capture diffs against. Does nothing while an editing session is already running.
+ *
+ * @param beforeDoc - The document as it was before the edit.
+ */
 function snapshotCaptureBaseline(beforeDoc: ProseMirrorNode): void {
     if (captureBaseline.size > 0) {
         return; // session already running — keep the pre-edit state
@@ -362,6 +385,11 @@ function snapshotCaptureBaseline(beforeDoc: ProseMirrorNode): void {
     }
 }
 
+/**
+ * Ends the editing session and captures the corrected spellings into the vocabulary.
+ *
+ * @param doc - Document to read; defaults to the editor's current one.
+ */
 async function captureFromBaseline(
     doc: ProseMirrorNode = editor.state.doc,
 ): Promise<void> {
@@ -380,6 +408,11 @@ async function captureFromBaseline(
     }
 }
 
+/**
+ * Ends the editing session when focus leaves the editor entirely.
+ *
+ * @param event - The focus event.
+ */
 function onEditorFocusOut(event: FocusEvent): void {
     // focus moved within the editor (e.g. between segments) — not a session
     // end
@@ -403,6 +436,14 @@ async function finishEditingSession(doc?: ProseMirrorNode): Promise<void> {
     await captureFromBaseline(doc);
 }
 
+/**
+ * Stores what one segment's edit taught us about spelling, and applies it to the other segments.
+ *
+ * @param segmentId - The edited segment.
+ * @param oldText - Text before the editing session.
+ * @param newText - Text after the editing session.
+ * @param docTexts - Current texts of all segments in the document.
+ */
 async function captureEditedWords(
     segmentId: string,
     oldText: string,
@@ -437,6 +478,12 @@ async function captureEditedWords(
     );
 }
 
+/**
+ * Looks up a segment.
+ *
+ * @param id - Segment id, or `null`.
+ * @returns The segment, or `undefined`.
+ */
 function segmentById(id: string | null): StoredSegment | undefined {
     return id
         ? props.segments.find((segment) => segment.id === id)
@@ -516,11 +563,23 @@ const scrollAnchorSegment = computed(() => {
     return anchor ?? first;
 });
 
+/**
+ * Start index of the word containing an offset.
+ *
+ * @param text - The segment text.
+ * @param offset - Character offset.
+ * @returns Index where the word begins.
+ */
 function wordStartAt(text: string, offset: number): number {
     return wordBoundsAt(text, offset).start;
 }
 
 let lastPlayheadKey = "";
+/**
+ * Redraws the karaoke decorations for the current playback position.
+ *
+ * @returns `true` when the decorations changed.
+ */
 function applyPlayheadDecorations(): boolean {
     const segment = activeSegment.value;
     const position = segment
@@ -540,6 +599,9 @@ function applyPlayheadDecorations(): boolean {
     return true;
 }
 
+/**
+ * Redraws the karaoke decorations and follows them with the scroll position.
+ */
 function syncPlayheadDecorations(): void {
     if (!applyPlayheadDecorations() || !props.autoScrollEnabled) {
         return;
@@ -562,6 +624,12 @@ watch(
     },
 );
 
+/**
+ * Scrolls the active karaoke word into the middle of the editor.
+ *
+ * @param behavior - Scroll behavior.
+ * @param force - Whether to scroll even when the word is already visible.
+ */
 function centerActiveKaraokeWord(
     behavior: ScrollBehavior = "auto",
     force = true,
@@ -633,6 +701,9 @@ onMounted(() => {
     });
 });
 
+/**
+ * Pushes the current vocabulary terms into the highlight plugin, or clears them when highlighting is switched off.
+ */
 function refreshKeywordHighlights(): void {
     // the highlight is a visual layer only — when switched off no terms are
     // decorated; silent capture of edited words is unaffected
@@ -679,6 +750,11 @@ async function createSegment(
     }
 }
 
+/**
+ * Inserts a new empty segment after the given one and focuses it.
+ *
+ * @param afterId - Segment to insert after.
+ */
 async function insertSegmentAfter(afterId: string): Promise<void> {
     await finishEditingSession();
     // the command handler assigns a unique new speaker and clean timing
@@ -702,6 +778,12 @@ async function insertSegmentAt(start: number, end: number): Promise<void> {
 
 defineExpose({ insertSegmentAt });
 
+/**
+ * Places the caret in a segment.
+ *
+ * @param segmentId - Segment to focus.
+ * @returns `true` when the segment was found.
+ */
 function focusSegment(segmentId: string): boolean {
     let pos: number | null = null;
     editor.state.doc.descendants((node, nodePos) => {
@@ -725,6 +807,11 @@ function focusSegment(segmentId: string): boolean {
 
 useEventListener(editorRoot, "click", handleClick);
 
+/**
+ * Routes clicks in the document to seeking or the speaker menu.
+ *
+ * @param event - The click event.
+ */
 function handleClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
     if (target?.closest(".transcript-document-menu")) {
@@ -782,6 +869,12 @@ interface SpeakerMenuState {
 
 const speakerMenu = ref<SpeakerMenuState | null>(null);
 
+/**
+ * Opens the speaker menu for a turn.
+ *
+ * @param event - The click event, used to position the menu.
+ * @param label - The clicked speaker label.
+ */
 function openSpeakerMenu(event: MouseEvent, label: HTMLElement): void {
     const turn = label.closest(".transcript-turn");
     if (!turn) {

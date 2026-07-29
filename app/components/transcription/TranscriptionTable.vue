@@ -16,6 +16,11 @@ const { openDialog } = useDialog();
 const rowGrid =
     "grid grid-cols-[minmax(0,1fr)_84px] items-center gap-3 sm:grid-cols-[minmax(0,1fr)_150px_150px_84px]";
 
+/**
+ * Asks for confirmation before deleting a transcription.
+ *
+ * @param transcriptionId - Transcription to delete.
+ */
 function handleDeleteClick(transcriptionId: string): void {
     openDialog({
         title: t("transcription.delete.title"),

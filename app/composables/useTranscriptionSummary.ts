@@ -4,6 +4,11 @@ import type { StoredTranscription } from "~/types/storedTranscription";
 import { SummaryResponseSchema } from "~/types/summarizeResponse";
 import type { SummarizeRequest, SummaryType } from "~~/shared/types/summary";
 
+/**
+ * Generates and stores LLM summaries for a transcription.
+ *
+ * @returns The generation function and a reactive in-progress flag.
+ */
 export function useTranscriptionSummary() {
     const { updateTranscription } = getTranscriptionService();
     const logger = useLogger();
@@ -11,7 +16,10 @@ export function useTranscriptionSummary() {
     const isSummaryGenerating = ref(false);
 
     /**
-     * Get the complete text from all segments
+     * Joins the text of all segments of a transcription, in playback order.
+     *
+     * @param transcriptionId - Transcription to read.
+     * @returns The full transcript text.
      */
     async function getTranscriptionText(
         transcriptionId: string,
@@ -24,7 +32,11 @@ export function useTranscriptionSummary() {
     }
 
     /**
-     * Helper function to validate and sanitize transcript text
+     * Trims the transcript text and rejects input the summarizer cannot use.
+     *
+     * @param text - Raw transcript text.
+     * @returns The trimmed text.
+     * @throws When the text is empty, too short or too large.
      */
     function validateAndSanitizeTranscriptText(text: string): string {
         if (!text || typeof text !== "string") {
@@ -60,7 +72,15 @@ export function useTranscriptionSummary() {
     }
 
     /**
-     * Generate and store a summary for the current transcription
+     * Generates a summary and stores it on the transcription.
+     *
+     * @param transcription - The transcription to summarize; its `summary` is
+     * updated in place.
+     * @param type - Which kind of summary to request.
+     * @param language - Optional target language for the summary.
+     * @returns The generated summary.
+     * @throws When a generation is already running, the transcript is
+     * unusable, or the API call fails.
      */
     async function generateSummary(
         transcription: StoredTranscription,
