@@ -28,10 +28,10 @@
         "@dcc-bs/event-system.bs.js": "^1.4.3",
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
-        "@iconify-json/lucide": "1.2.114",
+        "@iconify-json/lucide": "1.2.117",
         "@mohtasham/md-to-docx": "2.10.2",
         "@nuxt/ui": "4.9.0",
-        "@nuxtjs/i18n": "10.4.0",
+        "@nuxtjs/i18n": "10.4.1",
         "@nuxtjs/mdc": "0.22.0",
         "@tiptap/pm": "3.26.1",
         "@tiptap/vue-3": "3.26.1",
@@ -46,9 +46,9 @@
         "ts-pattern": "^5.9.0",
         "uuid": "^14.0.0",
         "varlock": "^1.6.1",
-        "vue": "3.5.38",
+        "vue": "3.5.39",
         "vue-konva": "3.4.0",
-        "vue-tsc": "3.3.5",
+        "vue-tsc": "3.3.7",
         "zod": "4.4.3"
     },
     "devDependencies": {
@@ -66,5 +66,9 @@
         "sass": "1.101.0",
         "typescript": "^6.0.3",
         "vitest": "^4.1.8"
+    },
+    "overrides": {
+        "vite": "7.3.6",
+        "vue": "3.5.39"
     }
 }
