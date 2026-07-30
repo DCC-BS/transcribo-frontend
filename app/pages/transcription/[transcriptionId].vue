@@ -43,7 +43,12 @@ onCommand<ChangeEditorModeCommand>(
 <template>
     <!-- only once the data is in: the tour points at transcript DOM that
          does not exist while the page is still loading -->
-    <Onboarding v-if="transcription && segments" />
+    <TranscriboOnboarding v-if="transcription && segments" />
+
+    <!-- restart lives here, not in the appbar: the tour only exists on this page -->
+    <Teleport defer to="#appbar-actions">
+        <OnboardingRestartButton v-if="transcription && segments" />
+    </Teleport>
 
     <Teleport defer to="#appbar-context">
         <ClientOnly>

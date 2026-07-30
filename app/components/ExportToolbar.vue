@@ -23,13 +23,11 @@ const namedSegments = computed(() =>
     })),
 );
 
-// Export options state
-const withSpeakers = useLocalStorage<boolean>("setting:show-speaker", true);
-const withTimestamps = useLocalStorage<boolean>(
-    "setting:show-timestamps",
-    false,
-);
-const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
+const {
+    showSpeakers: withSpeakers,
+    showTimestamps: withTimestamps,
+    mergeSegments,
+} = useTranscriptDisplaySettings();
 const withSummary = ref(false);
 
 const exportOptions = computed<ExportOptions>(() => ({

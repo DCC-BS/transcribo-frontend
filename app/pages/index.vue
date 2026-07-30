@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useLocalStorage } from "@vueuse/core";
 import { TRANSCRIPTION_RETENTION_PERIOD_MS } from "#imports";
 import ProcessingTasksTable from "~/components/transcription/ProcessingTasksTable.vue";
 import TranscriptionTable from "~/components/transcription/TranscriptionTable.vue";

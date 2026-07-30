@@ -1,24 +1,27 @@
 <script setup lang="ts">
+import type { DisclaimerConfig } from "@dcc-bs/common-ui.bs.js/types";
+import { useEventListener } from "@vueuse/core";
 import { NuxtLayout } from "#components";
-import disclaimerTextRaw from "./assets/disclaimer.html?raw";
+import disclaimerText from "~/assets/disclaimer.html?raw";
+import DialogView from "~/components/DialogView.vue";
+import { useInitDialog } from "~/composables/dialog";
 
-import DialogView from "./components/DialogView.vue";
-import { useInitDialog } from "./composables/dialog";
+const disclaimerConfig: DisclaimerConfig = {
+    appName: "Transcribo",
+    postfixHtml: disclaimerText,
+    confirmationText:
+        "Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende.",
+    // bumping this re-arms the disclaimer gate for every user
+    version: "1.0.0",
+};
 
-const disclaimerText = disclaimerTextRaw as string;
+// Filled by the transcription page while it is open; the tour points at editor DOM.
+const onboardingBuilder = provideOnboardingTour();
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
 const { undo, redo, canUndo, canRedo } = useCommandHistory();
 
-const appConfig = useAppConfig();
-
-onMounted(() => {
-    window.addEventListener("keydown", handleKeyDown);
-});
-
-onUnmounted(() => {
-    window.removeEventListener("keydown", handleKeyDown);
-});
+useEventListener("keydown", handleKeyDown);
 
 /**
  * Global undo/redo shortcuts (Ctrl+Z / Ctrl+Y).
@@ -38,11 +41,9 @@ function handleKeyDown(event: KeyboardEvent) {
 
 <template>
     <NuxtPwaManifest />
-    <Changelogs />
-    <Disclaimer
-        app-name="Transcribo"
-        :postfix-html="disclaimerText"
-        confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."
+    <FirstRunOrchestrator
+        :disclaimer="disclaimerConfig"
+        :onboarding-builder="onboardingBuilder"
     />
     <UApp>
         <DialogView

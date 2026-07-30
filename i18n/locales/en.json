@@ -437,7 +437,6 @@
         "description": "Transcriptions older than {retentionDays} days are automatically deleted."
     },
     "onboarding": {
-        "help": "Show Help Tour",
         "next": "Next",
         "previous": "Previous",
         "done": "Done",
@@ -509,10 +508,6 @@
         "mediaExpand": {
             "title": "Expand Media View",
             "description": "Click the expand button to see the video/larger view with subtitle preview."
-        },
-        "helpButton": {
-            "title": "Help Button",
-            "description": "Click this button anytime to restart this tour."
         },
         "complete": {
             "title": "You're All Set!",

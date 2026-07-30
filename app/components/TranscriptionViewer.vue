@@ -18,13 +18,8 @@ interface InputProps {
 
 const props = defineProps<InputProps>();
 
-// Viewer mode options (persisted)
-const showSpeakers = useLocalStorage<boolean>("setting:show-speaker", true);
-const showTimestamps = useLocalStorage<boolean>(
-    "setting:show-timestamps",
-    false,
-);
-const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
+const { showSpeakers, showTimestamps, mergeSegments } =
+    useTranscriptDisplaySettings();
 
 const currentTime = usePlaybackTime();
 const { duration } = useMediaDuration(() => props.transcription);

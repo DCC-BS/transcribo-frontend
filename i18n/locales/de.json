@@ -437,7 +437,6 @@
         "description": "Transkriptionen älter als {retentionDays} Tage werden automatisch gelöscht."
     },
     "onboarding": {
-        "help": "Hilfe-Tour anzeigen",
         "next": "Weiter",
         "previous": "Zurück",
         "done": "Fertig",
@@ -509,10 +508,6 @@
         "mediaExpand": {
             "title": "Medienansicht Erweitern",
             "description": "Klicke auf den Erweitern-Button um das Video oder die größere Ansicht mit Untertitelvorschau zu sehen."
-        },
-        "helpButton": {
-            "title": "Hilfe-Button",
-            "description": "Klicke jederzeit auf diesen Button um diese Tour erneut zu starten."
         },
         "complete": {
             "title": "Du bist startklar!",

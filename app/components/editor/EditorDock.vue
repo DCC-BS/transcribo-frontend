@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLocalStorage } from "@vueuse/core";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { formatTime } from "~/utils/time";

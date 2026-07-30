@@ -25,7 +25,6 @@ const { t } = useI18n();
 
             <template #rightPreItems>
                 <div id="appbar-actions" class="flex items-center gap-2" />
-                <AppBarHelpButton />
             </template>
 
             <template #rightPostItems>

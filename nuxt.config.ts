@@ -71,7 +71,6 @@ export default defineNuxtConfig({
                 "@tiptap/pm/state",
                 "@tiptap/pm/view",
                 "@tiptap/vue-3",
-                "driver.js",
             ],
             exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "@vueuse/core"],
         },

@@ -22,7 +22,6 @@ export const Cmds = {
     AddSegmentCommand: "AddSegmentCommand",
     RestoreSegmentCommand: "RestoreSegmentCommand",
     ChangeEditorModeCommand: "ChangeEditorModeCommand",
-    ShowOnboardingCommand: "ShowOnboardingCommand",
 };
 
 export type ITransriboReversibleCommand = IReversibleCommand & {
@@ -469,24 +468,5 @@ export class ChangeEditorModeCommand implements ICommand {
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
         return t("commands.changeEditorMode", { mode: this.newMode });
-    }
-}
-
-export class ShowOnboardingCommand implements ICommand {
-    readonly $type = "ShowOnboardingCommand";
-
-    /**
-     * Returns a string representation of the command
-     */
-    toString(): string {
-        return "Start Onboarding";
-    }
-
-    /**
-     * Returns a localized string representation of the command
-     * @param t - Translation function from useI18n
-     */
-    toLocaleString(t: (key: string, params?: object) => string): string {
-        return t("commands.startOnboarding");
     }
 }
