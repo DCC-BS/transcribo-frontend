@@ -52,18 +52,23 @@ const filteredTranscriptions = computed(() => {
                 </UButton>
             </div>
 
-            <UAlert
-                v-if="showRetentionHint"
-                icon="i-lucide-info"
-                color="info"
-                variant="soft"
-                :title="t('retention.title')"
-                :description="
-                    t('retention.description', { retentionDays: retentionDays })
-                "
-                close
-                @update:open="(open) => (showRetentionHint = open)"
-            />
+            <!-- Client only: the dismissed state lives in localStorage, which the server cannot read -->
+            <ClientOnly>
+                <UAlert
+                    v-if="showRetentionHint"
+                    icon="i-lucide-info"
+                    color="info"
+                    variant="soft"
+                    :title="t('retention.title')"
+                    :description="
+                        t('retention.description', {
+                            retentionDays: retentionDays,
+                        })
+                    "
+                    close
+                    @update:open="(open) => (showRetentionHint = open)"
+                />
+            </ClientOnly>
 
             <div class="mt-5">
                 <ProcessingTasksTable
