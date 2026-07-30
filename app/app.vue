@@ -15,8 +15,9 @@ const disclaimerConfig: DisclaimerConfig = {
     version: "1.0.0",
 };
 
-// Filled by the transcription page while it is open; the tour points at editor DOM.
-const onboardingBuilder = provideOnboardingTour();
+// The tour drives the routes it needs itself, so it is built here instead of
+// on a single page.
+const onboardingBuilder = useTranscriboTour();
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
 const { undo, redo, canUndo, canRedo } = useCommandHistory();

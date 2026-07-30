@@ -8,6 +8,7 @@ const { t } = useI18n();
             <template #left>
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
                     <NuxtLink
+                        id="appbar-home-link"
                         to="/"
                         :title="t('navigation.home')"
                         class="flex items-center gap-1.5 px-1.5 font-bold tracking-tight text-(--ui-primary-strong)"

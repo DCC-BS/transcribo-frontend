@@ -445,6 +445,34 @@
             "title": "Willkommen bei Transcribo!",
             "description": "Transcribo ist ein KI-basierter Transkriptionsdienst, der Dir hilft, Audio- und Videodateien zu transkribieren. Alle Daten werden auf lokalen Servern der IT BS verarbeitet. Du kannst mit Transcribo auch besondere Personendaten und Daten, die dem Amtsgeheimnis (Erhöhter Schutzbedarf) unterliegen, verarbeiten. Ich zeige Dir jetzt die Hauptfunktionen von Transcribo."
         },
+        "transcriptionList": {
+            "title": "Deine Transkriptionen",
+            "description": "In dieser Übersicht siehst du alle Transkriptionen, die du erstellt hast. Klicke auf eine Zeile, um sie zu öffnen – über das Transcribo-Logo oben links kommst du von überall hierher zurück."
+        },
+        "newTranscription": {
+            "title": "Neue Transkription",
+            "description": "Hier beginnt alles: Dieser Knopf führt zur Seite, auf der du eine Aufnahme an Transcribo übergibst. Schauen wir sie uns an."
+        },
+        "uploadMedia": {
+            "title": "Medien hochladen",
+            "description": "Ziehe eine bestehende Audio- oder Videodatei hierhin oder wähle sie auf deinem Computer aus. Die gängigen Formate werden unterstützt."
+        },
+        "recordAudio": {
+            "title": "Audio aufnehmen",
+            "description": "Noch keine Datei? Nimm direkt über dein Mikrofon im Browser auf – praktisch für eine kurze Notiz oder ein spontanes Interview."
+        },
+        "recordMeeting": {
+            "title": "Sitzung aufnehmen",
+            "description": "Für Online-Sitzungen nimmst du Bildschirm und Mikrofon zusammen auf: Die Stimmen aus der Videokonferenz und deine eigene landen in einer Aufnahme."
+        },
+        "backHome": {
+            "title": "Zurück zur Übersicht",
+            "description": "Die Transkription läuft im Hintergrund, du kannst die Seite also verlassen. Über das Logo kommst du zurück zur Liste deiner Transkriptionen, in der das fertige Ergebnis erscheint."
+        },
+        "tutorialTranscription": {
+            "title": "Eine Beispiel-Transkription",
+            "description": "Für diese Tour habe ich eine Beispiel-Transkription mit drei Sprechenden erstellt – ein kurzes Gespräch über Transcribo selbst. Sie wird am Ende der Tour wieder gelöscht, du kannst also alles gefahrlos ausprobieren."
+        },
         "transcriptionInfo": {
             "title": "Transkriptions-Info",
             "description": "Klicke hier um den Namen der Transkription zu ändern oder die Original-Mediendatei herunterzuladen."

@@ -75,7 +75,7 @@ const acceptedMedia = [
 <template>
     <!-- two equal choice cards: upload media | record audio -->
     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <UCard :ui="{ body: 'flex flex-col gap-4' }">
+        <UCard id="upload-media-card" :ui="{ body: 'flex flex-col gap-4' }">
             <CardHead
                 icon="i-lucide-upload"
                 tone="primary"
@@ -95,7 +95,7 @@ const acceptedMedia = [
             />
         </UCard>
 
-        <UCard :ui="{ body: 'flex flex-col gap-4' }">
+        <UCard id="record-media-card" :ui="{ body: 'flex flex-col gap-4' }">
             <CardHead
                 icon="i-lucide-mic"
                 tone="secondary"
@@ -106,16 +106,20 @@ const acceptedMedia = [
                 <!-- only one recorder at a time: the other is hidden while
                      a recording is running -->
                 <div class="flex flex-col items-center gap-4">
-                    <AudioRecordingView
-                        v-if="!meetingActive"
-                        v-model:active="audioActive"
-                        @on-recording-complete="onRecodingComplete"
-                    />
-                    <MeetingRecordingView
-                        v-if="!audioActive"
-                        v-model:active="meetingActive"
-                        @on-recording-complete="onMeetingRecorded"
-                    />
+                    <div id="record-audio-control">
+                        <AudioRecordingView
+                            v-if="!meetingActive"
+                            v-model:active="audioActive"
+                            @on-recording-complete="onRecodingComplete"
+                        />
+                    </div>
+                    <div id="record-meeting-control">
+                        <MeetingRecordingView
+                            v-if="!audioActive"
+                            v-model:active="meetingActive"
+                            @on-recording-complete="onMeetingRecorded"
+                        />
+                    </div>
                 </div>
             </div>
         </UCard>

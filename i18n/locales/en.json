@@ -445,6 +445,34 @@
             "title": "Welcome to Transcribo!",
             "description": "Transcribo is an AI-powered transcription service that helps you transcribe audio and video files. All data is processed on local servers of IT BS. You can also process special personal data and data subject to official secrecy (increased protection requirements) with Transcribo. I will now show you the main features of Transcribo."
         },
+        "transcriptionList": {
+            "title": "Your Transcriptions",
+            "description": "This overview lists every transcription you created. Click a row to open it — the Transcribo logo in the top left brings you back here from anywhere."
+        },
+        "newTranscription": {
+            "title": "New Transcription",
+            "description": "Everything starts here: this button takes you to the page where you hand a recording over to Transcribo. Let's have a look at it."
+        },
+        "uploadMedia": {
+            "title": "Upload Media",
+            "description": "Drop an existing audio or video file here, or pick one from your computer. Most common formats are supported."
+        },
+        "recordAudio": {
+            "title": "Record Audio",
+            "description": "No file yet? Record straight from your microphone in the browser — handy for a quick note or an interview on the spot."
+        },
+        "recordMeeting": {
+            "title": "Record a Meeting",
+            "description": "For online meetings, record screen and microphone together: the voices from the video call and your own end up in a single recording."
+        },
+        "backHome": {
+            "title": "Back to the Overview",
+            "description": "Transcribing runs in the background, so you can leave this page. The logo brings you back to the list of your transcriptions, where the finished result appears."
+        },
+        "tutorialTranscription": {
+            "title": "A Sample Transcription",
+            "description": "For this tour I created a sample transcription with three speakers — a short conversation about Transcribo itself. It is deleted again when the tour ends, so feel free to try anything out."
+        },
         "transcriptionInfo": {
             "title": "Transcription Info",
             "description": "Click here to view and change the transcription name, or download the original media file."

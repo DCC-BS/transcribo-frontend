@@ -43,6 +43,7 @@ const filteredTranscriptions = computed(() => {
                     class="w-56"
                 />
                 <UButton
+                    id="new-transcription-button"
                     to="/new-transcription"
                     color="primary"
                     icon="i-lucide-plus"
@@ -72,7 +73,7 @@ const filteredTranscriptions = computed(() => {
                 />
             </div>
 
-            <div class="mt-5">
+            <div id="transcription-table" class="mt-5">
                 <TranscriptionTable
                     :transcriptions="filteredTranscriptions"
                     @delete="deleteTranscription"
