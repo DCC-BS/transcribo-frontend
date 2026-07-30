@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import type { ICommand, IReversibleCommand } from "#build/types/commands";
 import type { EditorMode } from "./editor";
 import type { StoredSegment } from "./storedSegments";
@@ -119,30 +120,59 @@ export class TogglePlayCommand implements ICommand {
     }
 }
 
+/*
+    Redo re-executes the very same command object, so both segment-creating
+    commands must produce the identical segment every time they run:
+
+    - the id is assigned at construction, never by the handler — otherwise
+      the segment would come back under a new id and orphan every later
+      history entry pointing at it (that also lets the undo command exist
+      from construction on, instead of being patched in after execution);
+    - the speaker is picked by the handler (it needs the stored roster), so
+      the command remembers the pick and replays it on every later run.
+*/
 export class AddSegmentCommand implements ITransriboReversibleCommand {
     readonly $type = "AddSegmentCommand";
-    $undoCommand: ICommand = new EmptyCommand();
+    /** Id the created segment gets — known before the command runs. */
+    readonly newSegmentId: string;
+    readonly $undoCommand: ICommand;
+    /** Speaker chosen on the first run, replayed on redo. */
+    resolvedSpeaker: string | undefined;
 
-    constructor(public readonly newSegment: Omit<StoredSegment, "id">) {}
+    constructor(
+        public readonly newSegment: Omit<StoredSegment, "id">,
+        newSegmentId: string = uuid(),
+    ) {
+        this.newSegmentId = newSegmentId;
+        this.$undoCommand = new DeleteSegmentCommand(newSegmentId);
+    }
 
-    public setUndoCommand(undoCommand: ICommand) {
-        this.$undoCommand = undoCommand;
+    public setResolvedSpeaker(speaker: string) {
+        this.resolvedSpeaker = speaker;
     }
 }
 
 export class InsertSegmentCommand implements ITransriboReversibleCommand {
     readonly $type = "InsertSegmentCommand";
-    $undoCommand: ICommand = new EmptyCommand();
+    /** Id the created segment gets — known before the command runs. */
+    readonly newSegmentId: string;
+    readonly $undoCommand: ICommand;
+    /** Speaker chosen on the first run, replayed on redo. */
+    resolvedSpeaker: string | undefined;
 
     constructor(
         public readonly transcriptionId: string,
         public readonly targetSegmentId: string,
         public readonly newSegment: Partial<Segment>,
         public readonly direction: "before" | "after",
-    ) {}
+        newSegmentId: string = uuid(),
+    ) {
+        this.newSegmentId = newSegmentId;
+        this.$undoCommand = new DeleteSegmentCommand(newSegmentId);
+    }
 
-    public setUndoCommand(undoCommand: ICommand) {
-        this.$undoCommand = undoCommand;
+    public setResolvedSpeaker(speaker: string) {
+        this.resolvedSpeaker = speaker;
     }
 
     /**

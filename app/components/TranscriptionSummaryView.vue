@@ -205,7 +205,7 @@ async function handleGenerateSummary(): Promise<void> {
                     <div
                         v-else-if="props.transcription.summary"
                         id="summary-content"
-                        class="prose prose-sm mt-4 max-w-none dark:prose-invert"
+                        class="prose prose-sm mt-4 max-w-none"
                     >
                         <MDCView :value="props.transcription.summary" />
                     </div>

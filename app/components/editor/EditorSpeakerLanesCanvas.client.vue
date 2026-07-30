@@ -5,6 +5,7 @@ import {
     useResizeObserver,
 } from "@vueuse/core";
 import type { KonvaEventObject } from "konva/lib/Node";
+import type { Stage } from "konva/lib/Stage";
 import type { Rect } from "konva/lib/shapes/Rect";
 import type { Transformer } from "konva/lib/shapes/Transformer";
 import type {
@@ -67,7 +68,7 @@ const emit = defineEmits<{
 }>();
 
 const viewport = ref<HTMLElement>();
-const rulerStage = ref<KonvaComponent<import("konva/lib/Stage").Stage>>();
+const rulerStage = ref<KonvaComponent<Stage>>();
 const transformer = ref<KonvaComponent<Transformer>>();
 const baseTrackWidth = ref(250);
 const selectedBlockId = ref<string>();

@@ -12,85 +12,51 @@
    Nuxt UI semantic vars (--ui-*) onto the BS palette.
    ============================================================ */
 
-/* Nuxt UI redefines Tailwind's `dark:` variant to the `.dark` class, but
-   this app has colorMode disabled and follows the OS preference — without
-   this re-definition every `dark:*` utility would silently never apply. */
-@custom-variant dark (@media (prefers-color-scheme: dark));
-
 @theme static {
     --font-sans:
         "Inter", "Inter Fallback", ui-sans-serif, system-ui, "Segoe UI", Roboto,
         sans-serif;
 }
 
-/* Semantic tokens mirroring Nuxt UI's --ui-* vars. Light theme.
-   --ui-primary/secondary/warning/success/info/error come from the
-   common-ui module (purple/teal/yellow ramps); we add the surface,
-   text, border and soft/strong tones the module doesn't define. */
+/* Semantic tokens the common-ui module does not define, taken from the BS
+   ramps. The design system is light-only (`color-scheme: light`).
+   The values are literal hexes: Tailwind v4 only emits `@theme` variables
+   that some utility references, so `var(--color-gray-20)` & co. can resolve
+   to nothing at runtime. */
 :root {
-    --ui-primary: #9156b4;
-    /* text/icon color on top of --ui-primary surfaces */
-    --ui-on-primary: #ffffff;
-    --ui-primary-soft: #f4edfa;
-    --ui-primary-strong: #723d8e;
-    --ui-secondary: #009a79;
-    --ui-secondary-soft: #cff5ef;
-    --ui-warning: #e69500;
-    --ui-warning-soft: #fff5cc;
+    /* common-ui maps --ui-primary/secondary/warning onto the 600 shades, but
+       it does so inside `@layer base`, which loses to Nuxt UI's unlayered
+       `--ui-primary: var(--ui-color-primary-500)`. Restate the module's
+       values here so the BS brand shades win. */
+    --ui-primary: var(--color-purple-600);
+    --ui-secondary: var(--color-teal-600);
+    --ui-warning: var(--color-yellow-600);
 
-    --ui-bg: #ffffff;
-    --ui-bg-muted: #f8f8f8;
-    --ui-bg-elevated: #f2f2f2;
-    --ui-border: #e3e3e3;
-    --ui-text: #333333;
-    --ui-text-muted: #777777;
-    --ui-text-dimmed: #a5a5a5;
-    --ui-text-highlighted: #1c1a26;
-    --ui-text-toned: #535353;
-    --ui-text-inverted: #ffffff;
-    --ui-bg-accented: #e9e9e9;
-    --ui-bg-inverted: #333333;
-    --ui-border-muted: #ececec;
-    --ui-border-accented: #d6d6d6;
-    --ui-border-inverted: #333333;
+    /* text/icon color on top of --ui-primary surfaces */
+    --ui-on-primary: #ffffff; /* white */
+    --ui-primary-soft: #f4edfa; /* purple-100 */
+    --ui-primary-strong: #723d8e; /* purple-700 */
+    --ui-secondary-soft: #cff5ef; /* teal-100 */
+    --ui-warning-soft: #fff5cc; /* yellow-100 */
+
+    --ui-bg: #ffffff; /* white */
+    --ui-bg-muted: #f8f8f8; /* gray-20 */
+    --ui-bg-elevated: #f2f2f2; /* gray-50 */
+    --ui-bg-accented: #ebebeb; /* gray-100 */
+    --ui-bg-inverted: #333333; /* gray-900 */
+    --ui-border: #e3e3e3; /* gray-200 */
+    --ui-border-muted: #ebebeb; /* gray-100 */
+    --ui-border-accented: #bababa; /* gray-300 */
+    --ui-border-inverted: #333333; /* gray-900 */
+    --ui-text: #333333; /* gray-900 */
+    --ui-text-muted: #777777; /* gray-600 */
+    --ui-text-dimmed: #a5a5a5; /* gray-400 */
+    --ui-text-highlighted: #333333; /* gray-900 */
+    --ui-text-toned: #535353; /* gray-700 */
+    --ui-text-inverted: #ffffff; /* white */
 
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
     --shadow-md: 0 6px 18px rgb(0 0 0 / 0.09);
-}
-
-/* colorMode is disabled (nuxt.config ui.colorMode:false) and the `dark`
-   variant is media-based (see @custom-variant above), so dark styling
-   follows the OS preference only — no .dark class is ever applied. */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --ui-primary: #c196dc;
-        --ui-on-primary: #241436;
-        --ui-primary-soft: #3a2749;
-        --ui-primary-strong: #d7bdea;
-        --ui-secondary: #29c9a9;
-        --ui-secondary-soft: #0b342b;
-        --ui-warning: #ffbb1a;
-        --ui-warning-soft: #3a2e10;
-
-        --ui-bg: #171522;
-        --ui-bg-muted: #1d1b2a;
-        --ui-bg-elevated: #262336;
-        --ui-border: #343047;
-        --ui-text: #eae7f2;
-        --ui-text-muted: #a49fb8;
-        --ui-text-dimmed: #6e6987;
-        --ui-text-highlighted: #f6f4fb;
-        --ui-text-toned: #c9c4d8;
-        --ui-text-inverted: #171522;
-        --ui-bg-accented: #2e2a40;
-        --ui-bg-inverted: #eae7f2;
-        --ui-border-muted: #2b2739;
-        --ui-border-accented: #3f3a55;
-        --ui-border-inverted: #eae7f2;
-
-        --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
-        --shadow-md: 0 6px 20px rgb(0 0 0 / 0.5);
-    }
 }
 
 body {

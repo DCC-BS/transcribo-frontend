@@ -83,7 +83,7 @@ const hint = computed(() =>
                         repeat: Number.POSITIVE_INFINITY,
                     }"
                 />
-                <span class="text-lg font-medium text-red-600 dark:text-red-400">
+                <span class="text-lg font-medium text-red-600">
                     {{ t("audio-recorder.audio.recordingInProgress") }}
                 </span>
             </div>
@@ -92,10 +92,10 @@ const hint = computed(() =>
             </p>
 
             <div
-                class="rounded-2xl border border-slate-200/30 bg-slate-900/5 p-6 dark:border-slate-700/30 dark:bg-white/5"
+                class="rounded-2xl border border-slate-200/30 bg-slate-900/5 p-6"
             >
                 <div
-                    class="mb-2 font-mono text-4xl font-bold text-slate-800 dark:text-slate-200"
+                    class="mb-2 font-mono text-4xl font-bold text-slate-800"
                 >
                     {{
                         formatTime(elapsedSeconds, {
@@ -104,13 +104,13 @@ const hint = computed(() =>
                         })
                     }}
                 </div>
-                <p class="text-sm text-slate-600 dark:text-slate-400">
+                <p class="text-sm text-slate-600">
                     {{ t("audio-recorder.audio.recordingTime") }}
                 </p>
             </div>
 
             <div
-                class="rounded-2xl border border-slate-200/30 bg-slate-900/5 p-4 dark:border-slate-700/30 dark:bg-white/5"
+                class="rounded-2xl border border-slate-200/30 bg-slate-900/5 p-4"
             >
                 <AudioVisualizer :stream="stream" :is-recording="isRecording" />
             </div>

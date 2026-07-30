@@ -1,9 +1,10 @@
 export default defineAppConfig({
     ui: {
         colors: {
-            primary: "bs-purple",
-            secondary: "bs-teal",
-            warning: "bs-yellow",
+            // Ramp names as shipped by @dcc-bs/common-ui.bs.js (--color-purple-*, …).
+            primary: "purple",
+            secondary: "teal",
+            warning: "yellow",
             neutral: "neutral",
         },
         card: {

@@ -71,13 +71,17 @@ export function getSegmentService() {
     /**
      * Inserts a single new segment.
      *
-     * @param segment - Segment without an id; the id is generated here.
-     * @returns The stored segment including its generated id.
+     * @param segment - Segment without an id.
+     * @param id - Id to store it under; generated when the caller has none.
+     * @returns The stored segment including its id.
      */
-    async function addSegment(segment: Omit<StoredSegment, "id">) {
+    async function addSegment(
+        segment: Omit<StoredSegment, "id">,
+        id: string = uuid(),
+    ) {
         const newSegment = StoredSegmentSchema.parse({
             ...segment,
-            id: uuid(),
+            id,
         });
 
         await db.segments.add(newSegment);

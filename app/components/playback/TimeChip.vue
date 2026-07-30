@@ -3,14 +3,14 @@ import { formatTime } from "~/utils/time";
 
 /*
     Draggable black time chip riding on a seek line/ruler. Positions itself
-    at `pct` % of its relative parent and clamps its own edges inside the
+    at `percent` % of its relative parent and clamps its own edges inside the
     parent, so it never overhangs (no scrollbar growth, no overlap with
     neighboring labels). Pointer handling stays with the parent — it
     receives the chip's pointerdown through normal event fallthrough.
 */
 const props = defineProps<{
     time: number;
-    pct: number;
+    percent: number;
     dragging?: boolean;
     compact?: boolean;
 }>();
@@ -36,7 +36,7 @@ watch(
 // 1px safety margin against sub-pixel rounding at the right edge
 const left = computed(
     () =>
-        `clamp(${halfWidth.value}px, ${props.pct}%, calc(100% - ${halfWidth.value + 1}px))`,
+        `clamp(${halfWidth.value}px, ${props.percent}%, calc(100% - ${halfWidth.value + 1}px))`,
 );
 </script>
 

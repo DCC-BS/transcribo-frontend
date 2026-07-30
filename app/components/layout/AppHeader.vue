@@ -29,7 +29,7 @@ const { t } = useI18n();
             </template>
 
             <template #rightPostItems>
-                <AppBarSettingsMenu />
+                <AppHeaderSettingsMenu />
             </template>
         </NavigationBar>
     </header>

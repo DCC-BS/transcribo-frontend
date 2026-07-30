@@ -76,7 +76,6 @@ export function useMediaPlayback(
     // ~4Hz `timeupdate` event so karaoke highlight and playhead move
     // smoothly; `timeupdate` stays as the fallback for paused seeks.
     let rafId = 0;
-    let hasTimelineOnlyPosition = false;
 
     function stopRafSync(): void {
         cancelAnimationFrame(rafId);
@@ -85,7 +84,7 @@ export function useMediaPlayback(
 
     function rafSync(): void {
         const el = mediaEl();
-        if (!el || hasTimelineOnlyPosition) {
+        if (!el) {
             rafId = 0;
             return;
         }
@@ -108,10 +107,6 @@ export function useMediaPlayback(
         useEventListener(element, "loadedmetadata", () => {
             const el = element.value;
             if (el && currentTime.value > 0) {
-                if (currentTime.value > el.duration) {
-                    hasTimelineOnlyPosition = true;
-                    return;
-                }
                 el.currentTime = currentTime.value;
             }
         });
@@ -132,7 +127,7 @@ export function useMediaPlayback(
 
     function togglePlay(): void {
         const el = mediaEl();
-        if (!el || hasTimelineOnlyPosition) {
+        if (!el) {
             return;
         }
         if (el.paused) {
@@ -144,28 +139,23 @@ export function useMediaPlayback(
 
     function seekTo(time: number): void {
         const el = mediaEl();
-        if (el && Number.isFinite(el.duration) && time > el.duration) {
-            hasTimelineOnlyPosition = true;
-            if (!el.paused) {
-                el.pause();
-            }
-            currentTime.value = time;
-            return;
-        }
+        // Segments may end past the media (the last one, or one inserted at
+        // the very end), so clamp — seeking beyond the audio would strand the
+        // playhead where playback can never reach it.
+        const target =
+            el && Number.isFinite(el.duration)
+                ? Math.min(time, el.duration)
+                : time;
 
-        hasTimelineOnlyPosition = false;
-        if (el && el.currentTime !== time) {
-            el.currentTime = time;
+        if (el && el.currentTime !== target) {
+            el.currentTime = target;
         }
-        currentTime.value = time;
+        currentTime.value = target;
     }
 
     function onTimeUpdate(): void {
         const el = mediaEl();
         if (!el) {
-            return;
-        }
-        if (hasTimelineOnlyPosition) {
             return;
         }
         // ignore the spurious 0 a freshly mounted element reports before

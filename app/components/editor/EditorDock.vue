@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { useLocalStorage } from "@vueuse/core";
+import {
+    breakpointsTailwind,
+    useBreakpoints,
+    useLocalStorage,
+} from "@vueuse/core";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { formatTime } from "~/utils/time";
@@ -59,8 +63,9 @@ function collapseLanes(): void {
 }
 
 // on phones the lanes take too much of the viewport — start collapsed
+const isPhone = useBreakpoints(breakpointsTailwind).smaller("sm");
 onMounted(() => {
-    if (window.innerWidth < 640) {
+    if (isPhone.value) {
         compact.value = true;
     }
 });

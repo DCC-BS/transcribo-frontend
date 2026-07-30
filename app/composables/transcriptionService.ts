@@ -2,7 +2,7 @@ import { db } from "~/stores/db";
 import {
     type AddSegmentCommand,
     Cmds,
-    DeleteSegmentCommand,
+    type DeleteSegmentCommand,
     DeleteSegmentsCommand,
     type InsertSegmentCommand,
     type MergeSpeakerCommand,
@@ -137,24 +137,36 @@ export const useTranscriptionCommandHandler = () => {
                     : targetSegment.end;
             const { start, end } = segmentWindow(anchor);
 
-            const createdSegment = await addSegment({
-                start,
-                end,
-                text: "",
-                speaker: await nextFreeSpeakerId(
+            // On redo the speaker of the first run is reused, so the segment
+            // comes back exactly as it was.
+            const speaker =
+                command.resolvedSpeaker ??
+                command.newSegment.speaker ??
+                (await nextFreeSpeakerId(
                     command.transcriptionId,
                     segments.map((segment) => segment.speaker),
-                ),
-                transcriptionId: command.transcriptionId,
-                ...command.newSegment,
-            });
-            command.setUndoCommand(new DeleteSegmentCommand(createdSegment.id));
+                ));
+            command.setResolvedSpeaker(speaker);
+
+            await addSegment(
+                {
+                    start,
+                    end,
+                    text: "",
+                    transcriptionId: command.transcriptionId,
+                    ...command.newSegment,
+                    speaker,
+                },
+                command.newSegmentId,
+            );
         },
     );
 
     onCommand<AddSegmentCommand>(Cmds.AddSegmentCommand, async (command) => {
-        // Assign a unique new speaker unless the caller already picked one.
+        // Assign a unique new speaker unless the caller already picked one or
+        // an earlier run of this very command did (redo).
         const speaker =
+            command.resolvedSpeaker ||
             command.newSegment.speaker ||
             (await nextFreeSpeakerId(
                 command.newSegment.transcriptionId,
@@ -165,8 +177,11 @@ export const useTranscriptionCommandHandler = () => {
                         .toArray()
                 ).map((segment) => segment.speaker),
             ));
-        const newSegment = await addSegment({ ...command.newSegment, speaker });
-        command.setUndoCommand(new DeleteSegmentCommand(newSegment.id));
+        command.setResolvedSpeaker(speaker);
+        await addSegment(
+            { ...command.newSegment, speaker },
+            command.newSegmentId,
+        );
     });
 
     onCommand<UpdateSegmentCommand>(

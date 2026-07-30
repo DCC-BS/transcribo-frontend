@@ -144,7 +144,7 @@ function onNext() {
                 class="flex items-center gap-3 bg-primary px-4.5 py-3.5 text-(--ui-on-primary)"
             >
                 <span
-                    class="grid size-10 flex-none place-items-center rounded-[11px] bg-white/20 dark:bg-black/15"
+                    class="grid size-10 flex-none place-items-center rounded-[11px] bg-white/20"
                 >
                     <UIcon name="i-lucide-settings-2" class="size-5" />
                 </span>

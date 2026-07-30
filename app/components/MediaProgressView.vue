@@ -18,7 +18,7 @@ const { t } = useI18n();
             class="flex items-center gap-3 bg-primary px-4.5 py-3.5 text-(--ui-on-primary)"
         >
             <span
-                class="grid size-10 flex-none place-items-center rounded-[11px] bg-white/20 dark:bg-black/15"
+                class="grid size-10 flex-none place-items-center rounded-[11px] bg-white/20"
             >
                 <UIcon
                     :name="
@@ -44,7 +44,7 @@ const { t } = useI18n();
                 </p>
             </div>
             <span
-                class="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium dark:bg-black/15"
+                class="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium"
             >
                 <span
                     class="size-2 animate-pulse rounded-full bg-(--ui-secondary-soft)"

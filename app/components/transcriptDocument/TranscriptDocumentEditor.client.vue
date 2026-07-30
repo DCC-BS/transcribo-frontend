@@ -6,6 +6,7 @@ import {
     onClickOutside,
     useDebounceFn,
     useEventListener,
+    useResizeObserver,
     useStyleTag,
 } from "@vueuse/core";
 import {
@@ -670,34 +671,40 @@ function centerActiveKaraokeWord(
     });
 }
 
+/*
+    The initial scroll waits for layout: at mount the editor's DOM exists but
+    the surrounding scroll container can still have zero height, and scrolling
+    a zero-height container is a no-op.
+*/
+let awaitingInitialScroll = false;
+
+/**
+ * Performs the initial scroll once the editor has been laid out.
+ */
+function tryInitialScroll(): void {
+    if (
+        !awaitingInitialScroll ||
+        !editorRoot.value ||
+        editorRoot.value.getBoundingClientRect().height === 0
+    ) {
+        return;
+    }
+    awaitingInitialScroll = false;
+    stopInitialScrollObserver();
+    centerActiveKaraokeWord("auto", true);
+}
+
+const { stop: stopInitialScrollObserver } = useResizeObserver(
+    editorRoot,
+    tryInitialScroll,
+);
+
 onMounted(() => {
-    let attempts = 0;
-    const tryScroll = () => {
-        const word = editorRoot.value?.querySelector<HTMLElement>(
-            ".transcript-w-current",
-        );
-        const anchorId = scrollAnchorSegment.value?.id;
-        const anchor = anchorId
-            ? editorRoot.value?.querySelector<HTMLElement>(
-                  `[data-segment-id="${anchorId}"]`,
-              )
-            : null;
-        const target = word ?? anchor;
-        if (
-            target &&
-            target.getBoundingClientRect().height > 0 &&
-            (word || attempts >= 5)
-        ) {
-            centerActiveKaraokeWord("auto", true);
-            return;
-        }
-        if (++attempts < 30) {
-            requestAnimationFrame(tryScroll);
-        }
-    };
     nextTick(() => {
+        // paints the karaoke decorations, so the word to center on exists
         applyPlayheadDecorations();
-        requestAnimationFrame(tryScroll);
+        awaitingInitialScroll = true;
+        tryInitialScroll();
     });
 });
 
@@ -730,22 +737,20 @@ watch(
 const pendingFocusSegmentId = ref<string | null>(null);
 
 /**
- * Runs a creation command and focuses the segment the handler reports back
- * through its undo command (it leaves an EmptyCommand when there was no room
- * to insert). Callers settle pending typing first, so the rebuild the new
- * segment triggers starts from an already-persisted document.
+ * Runs a creation command and focuses the segment it creates — the command
+ * carries that id from construction on. Callers settle pending typing first,
+ * so the rebuild the new segment triggers starts from an already-persisted
+ * document.
+ *
+ * @param command - The creation command to run.
  */
 async function createSegment(
     command: AddSegmentCommand | InsertSegmentCommand,
 ): Promise<void> {
     await executeCommand(command);
-    const undo = command.$undoCommand;
-    if (!(undo instanceof DeleteSegmentCommand)) {
-        return;
-    }
-    pendingFocusSegmentId.value = undo.segmentId;
+    pendingFocusSegmentId.value = command.newSegmentId;
     await nextTick();
-    if (focusSegment(undo.segmentId)) {
+    if (focusSegment(command.newSegmentId)) {
         pendingFocusSegmentId.value = null;
     }
 }

@@ -17,7 +17,7 @@ const emit = defineEmits<(e: "seek", seconds: number) => void>();
 const track = ref<HTMLElement>();
 const dragging = ref(false);
 
-const pct = computed(() =>
+const percent = computed(() =>
     props.duration > 0 ? (props.currentTime / props.duration) * 100 : 0,
 );
 
@@ -69,11 +69,11 @@ function onPointerDown(event: PointerEvent): void {
         />
         <div
             class="absolute top-1/2 left-0 h-0.75 -translate-y-1/2 rounded-full bg-primary"
-            :style="{ width: `${pct}%` }"
+            :style="{ width: `${percent}%` }"
         />
         <TimeChip
             :time="props.currentTime"
-            :pct="pct"
+            :percent="percent"
             :dragging="dragging"
             :compact="props.compactChip"
             @pointerdown.stop="onPointerDown"
