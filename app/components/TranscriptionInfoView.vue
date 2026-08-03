@@ -56,7 +56,6 @@ async function handleNameChange() {
                     class="p-4 space-y-4 bg-default rounded-lg shadow-xl border border-default">
                     <!-- File Name Input -->
                     <div class="space-y-1.5">
-                        <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the UInput below (id forwarded to native input) -->
                         <label for="transcription-name"
                             class="text-xs font-medium text-muted uppercase tracking-wide">
                             {{ t("transcription.nameLabel") }}

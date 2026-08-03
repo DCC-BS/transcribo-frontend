@@ -160,7 +160,6 @@ function onNext() {
 
             <div class="flex flex-col gap-4 p-4.5">
                 <div class="flex flex-col gap-1.5">
-                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelect below (id forwarded to native control) -->
                     <label
                         for="num-speakers"
                         class="flex items-center gap-2 text-sm font-semibold"
@@ -184,7 +183,6 @@ function onNext() {
                 </div>
 
                 <div class="flex flex-col gap-1.5">
-                    <!-- biome-ignore lint/a11y/noLabelWithoutControl: associated via for/id with the USelectMenu below (id forwarded to native control) -->
                     <label
                         for="audio-language"
                         class="flex items-center gap-2 text-sm font-semibold"

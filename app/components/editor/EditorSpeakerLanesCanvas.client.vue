@@ -957,7 +957,6 @@ onBeforeUnmount(() => clearTimeout(dragCommitTimeout));
         >
             <div class="relative" :style="{ height: `${lanesHeight}px` }">
                 <ClientOnly>
-                    <!-- biome-ignore lint/a11y/noStaticElementInteractions: Konva canvas stage provides pointer timeline interaction -->
                     <v-stage
                         class="absolute top-0"
                         :style="{ left: `${labelWidth}px` }"
@@ -972,7 +971,6 @@ onBeforeUnmount(() => clearTimeout(dragCommitTimeout));
                                 v-for="(speaker, index) in props.speakers"
                                 :key="speaker"
                             >
-                                <!-- biome-ignore lint/a11y/noStaticElementInteractions: Konva lane background seeks on pointer click -->
                                 <v-rect
                                     :config="{
                                         x: 0,
@@ -1006,7 +1004,6 @@ onBeforeUnmount(() => clearTimeout(dragCommitTimeout));
                                 />
                             </template>
 
-                            <!-- biome-ignore lint/a11y/noStaticElementInteractions: Konva blocks support selection, drag, resize and context menu -->
                             <v-rect
                                 v-for="(config, index) in blockConfigs"
                                 :key="props.blocks[index]?.id"
@@ -1083,7 +1080,6 @@ onBeforeUnmount(() => clearTimeout(dragCommitTimeout));
                     :style="{ width: `${labelWidth}px` }"
                 />
                 <ClientOnly>
-                    <!-- biome-ignore lint/a11y/noStaticElementInteractions: Konva ruler seeks on pointer click -->
                     <v-stage
                         ref="rulerStage"
                         :config="{ width: trackWidth, height: RULER_HEIGHT }"
