@@ -1,25 +1,34 @@
 <script setup lang="ts">
+import type { DisclaimerConfig } from "@dcc-bs/common-ui.bs.js/types";
+import { useEventListener } from "@vueuse/core";
 import { NuxtLayout } from "#components";
-import disclaimerTextRaw from "./assets/disclaimer.html?raw";
+import disclaimerText from "~/assets/disclaimer.html?raw";
+import DialogView from "~/components/DialogView.vue";
+import { useInitDialog } from "~/composables/dialog";
 
-import DialogView from "./components/DialogView.vue";
-import { useInitDialog } from "./composables/dialog";
+const disclaimerConfig: DisclaimerConfig = {
+    appName: "Transcribo",
+    postfixHtml: disclaimerText,
+    confirmationText:
+        "Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende.",
+    // bumping this re-arms the disclaimer gate for every user
+    version: "1.0.0",
+};
 
-const disclaimerText = disclaimerTextRaw as string;
+// The tour drives the routes it needs itself, so it is built here instead of
+// on a single page.
+const onboardingBuilder = useTranscriboTour();
 
 const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
 const { undo, redo, canUndo, canRedo } = useCommandHistory();
 
-const appConfig = useAppConfig();
+useEventListener("keydown", handleKeyDown);
 
-onMounted(() => {
-    window.addEventListener("keydown", handleKeyDown);
-});
-
-onUnmounted(() => {
-    window.removeEventListener("keydown", handleKeyDown);
-});
-
+/**
+ * Global undo/redo shortcuts (Ctrl+Z / Ctrl+Y).
+ *
+ * @param event - The keyboard event.
+ */
 function handleKeyDown(event: KeyboardEvent) {
     if (event.key === "z" && event.ctrlKey && canUndo.value) {
         undo();
@@ -33,11 +42,9 @@ function handleKeyDown(event: KeyboardEvent) {
 
 <template>
     <NuxtPwaManifest />
-    <Changelogs />
-    <Disclaimer
-        app-name="Transcribo"
-        :postfixHTML="disclaimerText"
-        confirmation-text="Ich habe die Hinweise gelesen und verstanden und bestätige, dass ich Transcribo ausschliesslich unter Einhaltung der genannten Richtlinien verwende."
+    <FirstRunOrchestrator
+        :disclaimer="disclaimerConfig"
+        :onboarding-builder="onboardingBuilder"
     />
     <UApp>
         <DialogView

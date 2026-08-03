@@ -4,6 +4,8 @@ import pwaIcons from "./public/icons.json";
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: "2024-11-01",
+    // components are grouped in topic subfolders but referenced by bare name
+    components: [{ path: "~/components", pathPrefix: false }],
     extends: [
         ["github:DCC-BS/nuxt-layers/backend_communication", { install: true }],
         ["github:DCC-BS/nuxt-layers/health_check", { install: true }],
@@ -63,6 +65,12 @@ export default defineNuxtConfig({
                 "@dcc-bs/communication.bs.js",
                 "uuid",
                 "zod",
+                "@mohtasham/md-to-docx",
+                "@tiptap/core",
+                "@tiptap/pm/model",
+                "@tiptap/pm/state",
+                "@tiptap/pm/view",
+                "@tiptap/vue-3",
             ],
             exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util", "@vueuse/core"],
         },

@@ -1,10 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
-    WordSchema,
     SegmentSchema,
+    TranscriptCorrectionSchema,
     TranscriptionResponseSchema,
-    VerboseSegmentSchema,
-    VerboseTranscriptionResponseSchema,
 } from "../../app/types/transcriptionResponse";
 
 import {
@@ -13,57 +11,6 @@ import {
 } from "../../app/types/storedSegments"
 
 describe("Zod Schemas", () => {
-    describe("WordSchema", () => {
-        it("should validate valid word object", () => {
-            const word = {
-                start: 0.5,
-                end: 1.5,
-                word: "Hello",
-                probability: 0.95,
-                speaker: "Speaker 1",
-            };
-
-            const result = WordSchema.safeParse(word);
-            expect(result.success).toBe(true);
-        });
-
-        it("should validate word with null speaker", () => {
-            const word = {
-                start: 0.5,
-                end: 1.5,
-                word: "Hello",
-                probability: 0.95,
-                speaker: null,
-            };
-
-            const result = WordSchema.safeParse(word);
-            expect(result.success).toBe(true);
-        });
-
-        it("should fail for missing required fields", () => {
-            const word = {
-                start: 0.5,
-                end: 1.5,
-            };
-
-            const result = WordSchema.safeParse(word);
-            expect(result.success).toBe(false);
-        });
-
-        it("should fail for wrong types", () => {
-            const word = {
-                start: "0.5",
-                end: 1.5,
-                word: "Hello",
-                probability: 0.95,
-                speaker: "Speaker 1",
-            };
-
-            const result = WordSchema.safeParse(word);
-            expect(result.success).toBe(false);
-        });
-    });
-
     describe("SegmentSchema", () => {
         it("should validate valid segment object", () => {
             const segment = {
@@ -154,80 +101,42 @@ describe("Zod Schemas", () => {
             const result = TranscriptionResponseSchema.safeParse(response);
             expect(result.success).toBe(false);
         });
-    });
 
-    describe("VerboseSegmentSchema", () => {
-        it("should validate valid verbose segment", () => {
-            const segment = {
-                id: 1,
-                seek: 0,
-                start: 0,
-                end: 5,
-                text: "Hello",
-                tokens: [1, 2, 3],
-                temperature: 0.5,
-                avg_logprob: -0.3,
-                compression_ratio: 1.5,
-                no_speech_prob: 0.01,
-                words: [
+        it("should validate response with applied corrections", () => {
+            const response = {
+                segments: [{ start: 0, end: 5, text: "Hello" }],
+                applied_corrections: [
                     {
-                        start: 0,
-                        end: 0.5,
-                        word: "Hello",
-                        probability: 0.95,
-                        speaker: null,
+                        original: "Jobshipping",
+                        corrected: "Dropshipping",
+                        reason: "dominant variant",
+                        confidence: 0.9,
                     },
                 ],
-                speaker: "Speaker 1",
             };
 
-            const result = VerboseSegmentSchema.safeParse(segment);
-            expect(result.success).toBe(true);
-        });
-
-        it("should validate segment with null words", () => {
-            const segment = {
-                id: 1,
-                seek: 0,
-                start: 0,
-                end: 5,
-                text: "Hello",
-                tokens: [],
-                temperature: 0.5,
-                avg_logprob: -0.3,
-                compression_ratio: 1.5,
-                no_speech_prob: 0.01,
-                words: null,
-                speaker: null,
-            };
-
-            const result = VerboseSegmentSchema.safeParse(segment);
+            const result = TranscriptionResponseSchema.safeParse(response);
             expect(result.success).toBe(true);
         });
     });
 
-    describe("VerboseTranscriptionResponseSchema", () => {
-        it("should validate valid verbose response", () => {
-            const response = {
-                task: "transcribe",
-                language: "en",
-                duration: 60,
-                text: "Hello world",
-                words: [],
-                segments: [],
+    describe("TranscriptCorrectionSchema", () => {
+        it("should default a missing reason to an empty string", () => {
+            const correction = {
+                original: "Zagg",
+                corrected: "ZAK",
+                confidence: 0.9,
             };
 
-            const result = VerboseTranscriptionResponseSchema.safeParse(response);
+            const result = TranscriptCorrectionSchema.safeParse(correction);
             expect(result.success).toBe(true);
+            expect(result.data?.reason).toBe("");
         });
 
         it("should fail for missing required fields", () => {
-            const response = {
-                task: "transcribe",
-                language: "en",
-            };
+            const correction = { original: "Zagg" };
 
-            const result = VerboseTranscriptionResponseSchema.safeParse(response);
+            const result = TranscriptCorrectionSchema.safeParse(correction);
             expect(result.success).toBe(false);
         });
     });

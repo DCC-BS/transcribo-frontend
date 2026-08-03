@@ -3,6 +3,9 @@ import type { AudioRecorder } from "#components";
 
 const emit = defineEmits<(e: "onRecordingComplete", file: Blob) => void>();
 
+/** Lets the parent hide the other recorder while this one is busy. */
+const active = defineModel<boolean>("active", { default: false });
+
 const { t } = useI18n();
 
 const appLogger = useLogger();
@@ -22,6 +25,12 @@ const audioBlob = ref<Blob | undefined>(undefined);
 const userRecording = ref(false);
 const showAbandonedRecordings = ref(false);
 
+/**
+ * Takes over the finished recording and hands it to the parent.
+ *
+ * @param file - The recorded audio.
+ * @param _ - Unused mime type reported by the recorder.
+ */
 function onRecordingStopped(file: Blob, _: string) {
     isRecording.value = false;
     audioBlob.value = file;
@@ -29,10 +38,21 @@ function onRecordingStopped(file: Blob, _: string) {
     emitAudio();
 }
 
+/**
+ * Emits the recorded audio, if there is any.
+ */
 function emitAudio(): void {
     if (audioBlob.value) {
         emit("onRecordingComplete", audioBlob.value);
     }
+}
+
+/**
+ * Starts a new microphone recording.
+ */
+function startRecording(): void {
+    shouldRecord.value = true;
+    active.value = true;
 }
 
 const audioSessionActions = computed(() => [
@@ -65,7 +85,7 @@ const audioSessionActions = computed(() => [
                 }}
             </p>
             <UDrawer
-                title="Audio Recordings"
+                :title="t('media.recordings')"
                 description="Abandoned audio recordings"
                 v-model:open="showAbandonedRecordings"
             >
@@ -88,7 +108,7 @@ const audioSessionActions = computed(() => [
         <UButton
             v-if="!shouldRecord"
             icon="i-lucide-mic"
-            @click="shouldRecord = true"
+            @click="startRecording"
             >{{ t("pages.index.recordAudio") }}</UButton
         >
     </div>

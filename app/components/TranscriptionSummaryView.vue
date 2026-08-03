@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { useStorage } from "@vueuse/core";
+import { useClipboard, useStorage } from "@vueuse/core";
 import { match } from "ts-pattern";
 import type { SummaryType } from "#shared/types/summary";
-import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
 
 interface Props {
     transcription: StoredTranscription;
-    segments: StoredSegment[];
 }
 
 const props = defineProps<Props>();
@@ -15,6 +13,7 @@ const props = defineProps<Props>();
 const { isSummaryGenerating, generateSummary } = useTranscriptionSummary();
 const { exportSummaryAsDocx } = useExport();
 const { t } = useI18n();
+const { copy, copied } = useClipboard();
 
 const summaryOptions: {
     label: string;
@@ -49,6 +48,9 @@ const languageOptions = useLanguageOptions();
 
 const summaryError = ref<string | null>(null);
 
+/**
+ * Generates the summary in the selected type and language, showing any failure inline.
+ */
 async function handleGenerateSummary(): Promise<void> {
     if (isSummaryGenerating.value || !props.transcription) return;
 
@@ -61,7 +63,6 @@ async function handleGenerateSummary(): Promise<void> {
     try {
         await generateSummary(
             props.transcription,
-            props.segments,
             summaryType.value,
             language,
         );
@@ -75,85 +76,148 @@ async function handleGenerateSummary(): Promise<void> {
 </script>
 
 <template>
-    <div class="bg-linear-to-br">
-        <!-- Header -->
-        <div class="flex gap-2 flex-wrap items-center justify-between p-4">
-            <!--  Icon and Title -->
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-9 h-9 rounded-lg bg-linear-to-br from-amber-400/20 to-orange-400/20 flex items-center justify-center ring-1 ring-amber-400/30">
-                    <UIcon name="i-lucide-sparkles" class="w-5 h-5 text-amber-600" />
-                </div>
-                <h3 class="text-lg font-semibold text-gray-800">
-                    {{ t("summary.title") }}
-                </h3>
-            </div>
-
-            <!-- Action Buttons -->
-            <div class="flex-1 flex flex-wrap gap-2 justify-end">
-                <div id="generate-summary-button">
-                    <UPopover>
-                        <UButton :icon="props.transcription.summary
+    <div class="flex min-h-0 grow flex-col">
+        <Teleport defer to="#editor-toolbar-tools">
+            <div id="generate-summary-button">
+                <UPopover>
+                    <UButton
+                        :icon="
+                            props.transcription.summary
                                 ? 'i-lucide-refresh-cw'
-                                : 'i-lucide-lightbulb'
-                            " variant="soft" color="warning" size="sm" :label="props.transcription.summary
-                                    ? t('summary.regenerate')
-                                    : t('summary.generate')
-                                " class="shadow-sm" />
+                                : 'i-lucide-sparkles'
+                        "
+                        color="primary"
+                        size="sm"
+                        :label="
+                            props.transcription.summary
+                                ? t('summary.regenerate')
+                                : t('summary.generate')
+                        "
+                    />
 
-                        <template #content>
-                            <div class="p-4 w-80">
-                                <h4 class="font-medium text-sm mb-3">
-                                    {{ t("summary.selectType") }}
-                                </h4>
-                                <URadioGroup v-model="summaryType" :items="summaryOptions" value-key="value"
-                                    class="mb-4" />
-                                <h4 class="font-medium text-sm mb-2">
-                                    {{ t("summary.selectLanguage") }}
-                                </h4>
-                                <USelectMenu v-model="selectedLanguage" :items="languageOptions" label-key="label"
-                                    value-key="value" class="mb-4" />
-                                <UButton block color="warning" :label="t('summary.generate')"
-                                    :loading="isSummaryGenerating" :disabled="isSummaryGenerating"
-                                    @click="handleGenerateSummary" />
-                            </div>
-                        </template>
-                    </UPopover>
-                </div>
-                <template v-if="props.transcription.summary">
-                    <UButton icon="i-lucide-download" variant="ghost" color="primary" size="sm"
-                        :label="t('summary.export')" @click="() => exportSummaryAsDocx(props.transcription)" />
-                </template>
+                    <template #content>
+                        <div class="w-80 p-4">
+                            <h4 class="mb-3 text-sm font-semibold">
+                                {{ t("summary.selectType") }}
+                            </h4>
+                            <URadioGroup
+                                v-model="summaryType"
+                                :items="summaryOptions"
+                                value-key="value"
+                                class="mb-4"
+                            />
+                            <h4 class="mb-2 text-sm font-semibold">
+                                {{ t("summary.selectLanguage") }}
+                            </h4>
+                            <USelectMenu
+                                v-model="selectedLanguage"
+                                :items="languageOptions"
+                                label-key="label"
+                                value-key="value"
+                                class="mb-4 w-full"
+                            />
+                            <UButton
+                                block
+                                color="primary"
+                                :label="t('summary.generate')"
+                                :loading="isSummaryGenerating"
+                                :disabled="isSummaryGenerating"
+                                @click="handleGenerateSummary"
+                            />
+                        </div>
+                    </template>
+                </UPopover>
             </div>
-        </div>
+        </Teleport>
 
-        <!-- Error Alert -->
-        <div v-if="summaryError" class="px-4 pb-4">
-            <UAlert color="error" :title="t('summary.error')" :description="summaryError" icon="i-lucide-triangle-alert"
-                closable @close="summaryError = null" class="shadow-sm" />
-        </div>
+        <div class="min-h-0 flex-1 overflow-y-auto px-5 py-8">
+            <div class="mx-auto w-full max-w-225">
+                <UAlert
+                    v-if="summaryError"
+                    class="mb-4"
+                    color="error"
+                    :title="t('summary.error')"
+                    :description="summaryError"
+                    icon="i-lucide-triangle-alert"
+                    closable
+                    @close="summaryError = null"
+                />
 
-        <div v-if="isSummaryGenerating" class="p-6 text-center border-t border-amber-200/50">
-            <UIcon name="i-lucide-loader-2" class="w-8 h-8 text-amber-500 animate-spin mx-auto mb-4" />
-            <p class="text-gray-500">
-                {{ t("summary.generating") || "Generating summary..." }}
-            </p>
-        </div>
+                <UCard :ui="{ body: 'p-8 sm:p-12' }">
+                    <div
+                        v-if="
+                            props.transcription.summary &&
+                            !isSummaryGenerating
+                        "
+                        class="mb-4 flex items-center gap-3 border-b border-default pb-3"
+                    >
+                        <h3
+                            class="min-w-0 flex-1 truncate text-[0.95rem] font-semibold text-default"
+                            :title="props.transcription.name"
+                        >
+                            {{
+                                props.transcription.name ||
+                                t("transcription.info")
+                            }}
+                        </h3>
+                        <div
+                            v-if="props.transcription.summary"
+                            class="flex items-center gap-1"
+                        >
+                            <UButton
+                                :icon="
+                                    copied
+                                        ? 'i-lucide-clipboard-check'
+                                        : 'i-lucide-clipboard'
+                                "
+                                variant="ghost"
+                                color="neutral"
+                                :title="
+                                    copied
+                                        ? t('summary.copied')
+                                        : t('summary.copy')
+                                "
+                                @click="copy(props.transcription.summary)"
+                            />
+                            <UButton
+                                icon="i-lucide-download"
+                                variant="ghost"
+                                color="neutral"
+                                :title="t('summary.export')"
+                                @click="
+                                    () => exportSummaryAsDocx(props.transcription)
+                                "
+                            />
+                        </div>
+                    </div>
 
-        <!-- Summary Content -->
-        <div v-if="props.transcription.summary">
-            <div id="summary-content" class="p-4 border-t border-amber-200/50 bg-white/40">
-                <div class="prose prose-sm overflow-y-auto prose-amber">
-                    <MDCView :value="props.transcription.summary" />
-                </div>
+                    <div
+                        v-if="isSummaryGenerating"
+                        class="flex flex-col items-center gap-4 py-10 text-center text-muted"
+                    >
+                        <UIcon
+                            name="i-lucide-loader-2"
+                            class="size-8 animate-spin text-primary"
+                        />
+                        {{ t("summary.generating") }}
+                    </div>
+
+                    <div
+                        v-else-if="props.transcription.summary"
+                        id="summary-content"
+                        class="prose prose-sm mt-4 max-w-none"
+                    >
+                        <MDCView :value="props.transcription.summary" />
+                    </div>
+
+                    <p
+                        v-else
+                        class="py-10 text-center text-sm text-muted"
+                    >
+                        {{ t("summary.empty") }}
+                    </p>
+                </UCard>
             </div>
-        </div>
-
-        <!-- Empty State -->
-        <div v-else-if="!isSummaryGenerating" class="p-6 text-center border-t border-amber-200/50">
-            <p class="text-gray-500 text-sm">
-                {{ t("summary.empty") || "No summar y generated yet" }}
-            </p>
         </div>
     </div>
 </template>

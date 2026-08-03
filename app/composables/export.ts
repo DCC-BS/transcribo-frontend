@@ -11,6 +11,11 @@ export interface ExportOptions {
     withSummary: boolean; // Only applies to text exports
 }
 
+/**
+ * Download helpers for the transcript in the supported export formats.
+ *
+ * @returns The export functions.
+ */
 export function useExport() {
     /**
      * Merges consecutive segments from the same speaker into single segments
@@ -49,6 +54,12 @@ export function useExport() {
         return merged;
     }
 
+    /**
+     * Downloads the transcript as a plain text file.
+     *
+     * @param options - What to include (speakers, timestamps, merging,
+     * summary) and the transcription to export.
+     */
     function exportAsText(options: ExportOptions) {
         let segments = options.segments;
 
@@ -116,6 +127,13 @@ export function useExport() {
         return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")},${milliseconds.toString().padStart(3, "0")}`;
     }
 
+    /**
+     * Downloads the transcript as an SRT subtitle file.
+     *
+     * @param transciption - The transcription being exported.
+     * @param segments - Segments to write as subtitle cues.
+     * @param withSpeakers - Whether to prefix each cue with the speaker.
+     */
     function exportAsSrt(
         transciption: StoredTranscription,
         segments: StoredSegment[],
@@ -173,6 +191,12 @@ export function useExport() {
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Downloads the transcript as a Word document, rendered from markdown.
+     *
+     * @param options - What to include (speakers, timestamps, merging,
+     * summary) and the transcription to export.
+     */
     async function exportAsDocx(options: ExportOptions) {
         let segments = options.segments;
 
@@ -214,6 +238,12 @@ export function useExport() {
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Downloads only the meeting summary as a Word document. Does nothing when
+     * no summary has been generated yet.
+     *
+     * @param transciption - The transcription whose summary to export.
+     */
     async function exportSummaryAsDocx(transciption: StoredTranscription) {
         if (!transciption.summary) return;
 
@@ -227,11 +257,26 @@ export function useExport() {
         URL.revokeObjectURL(url);
     }
 
+    /**
+     * Downloads the original media file (audio/video) of the transcription.
+     */
+    function exportMedia(transcription: StoredTranscription): void {
+        if (!transcription.mediaFile) return;
+
+        const url = URL.createObjectURL(transcription.mediaFile);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = transcription.mediaFileName ?? transcription.name;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
     return {
         exportAsText,
         exportAsSrt,
         exportAsJson,
         exportAsDocx,
         exportSummaryAsDocx,
+        exportMedia,
     };
 }

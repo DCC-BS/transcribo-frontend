@@ -40,12 +40,14 @@
         "audioLanguageHelp": "What language was spoken in the audio file? If you are not sure, select 'Auto detection'.",
         "settings": "Settings",
         "configureTranscription": "Configure your transcription",
-        "settingsInfo": "These settings help improve transcription accuracy. You can leave both on auto-detection if you're unsure."
+        "settingsInfo": "These settings help improve transcription accuracy. You can leave both on auto-detection if you're unsure.",
+        "preparingAudio": "Preparing audio...",
+        "processing": "Processing"
     },
     "pages": {
         "index": {
             "title": "Transcribo",
-            "subtitle": "Transcribe your audio and video files with AI and automatically generate summaries. 96 languages and audio files up to 2 hours supported.",
+            "subtitle": "Transcribe your audio and video files with AI and automatically generate summaries. 96 languages and audio files with a length up to 2 hours supported.",
             "uploadMedia": "Upload Media",
             "uploadDescription": "Upload your audio or video files",
             "recordAudio": "Record Audio",
@@ -64,11 +66,14 @@
             "step3": "Process Media",
             "pendingTitle": "Unfinished Transcriptions",
             "pendingDescription": "You have unfinished transcriptions",
-            "goToTranscriptions": "Go to Transcriptions"
+            "goToTranscriptions": "Go to Transcriptions",
+            "dropzoneLabel": "Drag a file here or click",
+            "dropzoneFormats": "mp3, mp4, m4a, flac, wav, webm … max. 500 MB"
         }
     },
     "navigation": {
         "app": "Transcribo",
+        "home": "Home",
         "new": "New Transcription",
         "transcriptions": "All Transcriptions",
         "languages": "Languages",
@@ -76,24 +81,16 @@
         "de": "German",
         "undo": "Undo",
         "redo": "Redo",
-        "actions": "Actions"
-    },
-    "audioRecorder": {
-        "useRecording": "Use this recording",
-        "makeSureMicrophoneIsProperlyConnected": "Make sure your microphone is properly connected",
-        "checkBrowserPermissionsForMicrophoneAccess": "Check browser permissions for microphone access",
-        "tryUsingDifferentBrowser": "Try using a different browser",
-        "restartDeviceIfIssuePersists": "Restart your device if the issue persists"
-    },
-    "timeline": {
-        "noTranscription": "No transcription available"
+        "actions": "Actions",
+        "settings": "Settings",
+        "language": "Language"
     },
     "media": {
         "play": "Play",
         "pause": "Pause",
-        "addSegment": "Add Segment",
         "downloadMedia": "Download Media",
-        "noMedia": "No media file available"
+        "noMedia": "No media file available",
+        "recordings": "Audio Recordings"
     },
     "taskStatus": {
         "processing": "Processing your request...",
@@ -102,26 +99,18 @@
         "failedDescription": "Something went wrong during the transcription process. Please try again with a different file.",
         "goBack": "Go Back"
     },
-    "speaker": {
-        "delete": "Delete Speaker",
-        "deleteTitle": "Delete Speaker",
-        "deleteMessage": "All segments from \"{speaker}\" will be reassigned. Select which speaker should receive these segments:",
-        "reassignTo": "Reassign to speaker"
-    },
     "transcription": {
         "noSpeaker": "unknown",
         "placeholderSpeakerName": "Speaker name",
         "loading": "Loading...",
         "notFound": "Transcription not found or failed to load",
         "noTranscriptionsFound": "No transcriptions found",
-        "untitled": "Untitled",
         "info": "Transcription Info",
         "nameLabel": "Name",
         "namePlaceholder": "Transcription name",
         "autoScrollOn": "Auto-scroll ON",
         "autoScrollOff": "Auto-scroll OFF",
         "tab": "Transcription",
-        "timelineTab": "Timeline",
         "delete": {
             "title": "Delete Transcription",
             "confirmation": "Are you sure you want to delete this transcription?"
@@ -137,7 +126,6 @@
         }
     },
     "ui": {
-        "saveChangesHint": "Leave text field or press Enter to save changes",
         "emptyState": {
             "title": "No data found",
             "description": "There is no data available to display."
@@ -173,6 +161,8 @@
         "hide": "Hide Summary",
         "title": "Meeting Summary",
         "error": "Summary Generation Error",
+        "copy": "Copy to clipboard",
+        "copied": "Summary copied",
         "empty": "No summary generated yet",
         "export": "Export Summary",
         "selectType": "Select Summary Type",
@@ -192,8 +182,10 @@
             "in_progress": "In progress",
             "completed": "Completed",
             "failed": "Failed",
-            "cancelled": "Cancelled"
+            "cancelled": "Cancelled",
+            "pending": "Pending"
         },
+        "postProcessing": "Post-processing transcript …",
         "preprocessing": {
             "extractedAudio": "Extracted audio from video",
             "audioPreprocessed": "Audio preprocessed"
@@ -205,18 +197,21 @@
             "failedToCreateTranscription": "Failed to create transcription from results",
             "noResult": "No transcription result available",
             "TaskNotFound": "Task not found"
-        }
+        },
+        "postProcessingDone": "Post-processing finished"
     },
     "commands": {
         "empty": "Empty Command",
-        "startTranscription": "Start Transcription: Task ID {taskId}, File: {fileName}",
         "transcriptionFinished": "Transcription Finished: Status {status}{hasResults}",
         "transcriptionFinishedResults": ", Results available",
         "seekToSeconds": "Seek To: {seconds} seconds",
         "togglePlay": "Toggle Play/Pause",
         "insertSegment": "Insert Segment {direction}",
         "deleteSegment": "Delete Segment",
+        "deleteSegments": "Delete {count} segments",
+        "restoreSegments": "Restore {count} segments",
         "updateSegment": "Update Segment: Updates: {updates}",
+        "updateSegments": "Update {count} segments",
         "updateSegmentNoUpdates": "Update Segment: Updates: none",
         "changeTranscriptionName": "Change Transcription Name To: {name}",
         "renameSpeaker": "Rename Speaker: \"{oldName}\" → \"{newName}\"",
@@ -230,7 +225,8 @@
         "showSpeakers": "Show speakers",
         "showTimestamps": "Show timestamps",
         "mergeSegments": "Merge segments",
-        "placeholder": "No transcription available to display"
+        "placeholder": "No transcription available to display",
+        "playFromHere": "Jump to here"
     },
     "mode": {
         "viewer": "Viewer",
@@ -299,6 +295,7 @@
         "refresh": "Refresh",
         "unknownFile": "Unknown file",
         "transcribe": "Transcribe",
+        "viewStatus": "View status",
         "delete": "Delete",
         "noTasksFound": "No tasks found",
         "noTasksDescription": "There are no transcriptions currently in progress",
@@ -432,14 +429,14 @@
     },
     "transcriptionList": {
         "title": "Your Transcriptions",
-        "description": "Here you can see all your transcribed files"
+        "description": "Here you can see all your transcribed files",
+        "searchPlaceholder": "Search…"
     },
     "retention": {
         "title": "Availability of Transcriptions",
         "description": "Transcriptions older than {retentionDays} days are automatically deleted."
     },
     "onboarding": {
-        "help": "Show Help Tour",
         "next": "Next",
         "previous": "Previous",
         "done": "Done",
@@ -447,6 +444,34 @@
         "welcome": {
             "title": "Welcome to Transcribo!",
             "description": "Transcribo is an AI-powered transcription service that helps you transcribe audio and video files. All data is processed on local servers of IT BS. You can also process special personal data and data subject to official secrecy (increased protection requirements) with Transcribo. I will now show you the main features of Transcribo."
+        },
+        "transcriptionList": {
+            "title": "Your Transcriptions",
+            "description": "This overview lists every transcription you created. Click a row to open it — the Transcribo logo in the top left brings you back here from anywhere."
+        },
+        "newTranscription": {
+            "title": "New Transcription",
+            "description": "Everything starts here: this button takes you to the page where you hand a recording over to Transcribo. Let's have a look at it."
+        },
+        "uploadMedia": {
+            "title": "Upload Media",
+            "description": "Drop an existing audio or video file here, or pick one from your computer. Most common formats are supported."
+        },
+        "recordAudio": {
+            "title": "Record Audio",
+            "description": "No file yet? Record straight from your microphone in the browser — handy for a quick note or an interview on the spot."
+        },
+        "recordMeeting": {
+            "title": "Record a Meeting",
+            "description": "For online meetings, record screen and microphone together: the voices from the video call and your own end up in a single recording."
+        },
+        "backHome": {
+            "title": "Back to the Overview",
+            "description": "Transcribing runs in the background, so you can leave this page. The logo brings you back to the list of your transcriptions, where the finished result appears."
+        },
+        "tutorialTranscription": {
+            "title": "A Sample Transcription",
+            "description": "For this tour I created a sample transcription with three speakers — a short conversation about Transcribo itself. It is deleted again when the tour ends, so feel free to try anything out."
         },
         "transcriptionInfo": {
             "title": "Transcription Info",
@@ -493,28 +518,94 @@
             "description": "Here you can rename the speakers. Just type a new name and it will be applied to all segments from this speaker."
         },
         "editTranscriptions": {
-            "title": "Edit Transcriptions",
-            "description": "Each segment can be edited: change the text, update the speaker, or modify the start and end times. Click the timestamps to jump to that position."
+            "title": "Edit the Transcript",
+            "description": "Click into the text and edit it directly. Clicking a speaker name renames it or assigns the passage to another speaker."
+        },
+        "speakerLanes": {
+            "title": "Speaker Lanes",
+            "description": "Each lane shows one speaker's segments on the timeline. Drag blocks to move them or onto another lane (when its slot is free), rename speakers by clicking the name, and right-click for the assignment menu."
         },
         "addTranscription": {
-            "title": "Add New Transcriptions",
-            "description": "Click the + button to add new transcription segments at any position."
+            "title": "Add a Segment",
+            "description": "Inserts a new, empty segment at the playhead."
         },
         "mediaPlayback": {
             "title": "Media Playback",
-            "description": "Use the media bar to play your audio or video."
+            "description": "Play and pause (also with the space bar), change the speed, and scrub through the recording with the time chip."
         },
         "mediaExpand": {
             "title": "Expand Media View",
             "description": "Click the expand button to see the video/larger view with subtitle preview."
         },
-        "helpButton": {
-            "title": "Help Button",
-            "description": "Click this button anytime to restart this tour."
-        },
         "complete": {
             "title": "You're All Set!",
             "description": "You're ready to use Transcribo! Click the help button anytime to see this tour again."
+        }
+    },
+    "editor": {
+        "toolrow": {
+            "highlightKeywords": "Highlight keywords",
+            "highlightKeywordsHint": "Detected special terms and people",
+            "autoScroll": "Auto scroll",
+            "mergeSegments": "Merge segments"
+        },
+        "dock": {
+            "zoom": "Zoom timeline",
+            "zoomReset": "Reset zoom",
+            "addSegment": "Insert new segment at playhead",
+            "segment": "Segment",
+            "playbackSpeed": "Playback speed",
+            "toggleVideo": "Show/hide video",
+            "video": "Video",
+            "toggleLanes": "Expand/collapse speaker view",
+            "resizeLanes": "Resize speaker view"
+        },
+        "lanes": {
+            "speakers": "Speakers",
+            "addSpeaker": "Add speaker",
+            "addSpeakerPrompt": "Name of the new speaker:",
+            "laneMenu": "Speaker menu",
+            "rename": "Rename",
+            "resizeSpeakerColumn": "Drag to resize the speaker column",
+            "moveSegmentsTo": "Move segments to",
+            "jumpToNext": "Jump to next appearance",
+            "deleteSpeaker": "Delete speaker",
+            "deleteSpeakerConfirm": "All segments of \"{speaker}\" will be deleted. Continue?"
+        }
+    },
+    "vocabulary": {
+        "title": "Vocabulary",
+        "description": "Words learned from your corrections in the editor. They are sent along with every new transcription to improve spelling.",
+        "storageTitle": "Vocabulary Storage",
+        "storageDescription": "Keywords are stored locally in your browser.",
+        "newPlaceholder": "New word…",
+        "add": "Add",
+        "rename": "Rename",
+        "delete": "Delete",
+        "added": "\"{term}\" added to vocabulary",
+        "deleted": "\"{term}\" removed from vocabulary",
+        "empty": "No words in the vocabulary yet. Correct words in the editor or add them here.",
+        "editCountHint": "How often this spelling was confirmed",
+        "updatedAtHint": "Last changed",
+        "types": {
+            "person": "Person",
+            "location": "Place",
+            "object": "Term",
+            "institution": "Institution"
+        }
+    },
+    "meeting": {
+        "record": "Record Meeting",
+        "hint": "Records your microphone together with the sound of a shared screen or tab.",
+        "audioOnly": "Only the audio is recorded — the screen content is never captured.",
+        "errors": {
+            "permission-denied": "Recording was cancelled. Microphone and screen sharing are both required.",
+            "no-screen-audio": "The selected screen was shared without sound. Share a tab or window again and tick “Share audio”.",
+            "failed": "The recording could not be started."
+        },
+        "unsupported": {
+            "browser": "Recording screen audio is not supported in this browser. Use Chrome or Edge on Windows.",
+            "platform": "On this operating system the browser can only share the audio of a browser tab, not the sound of apps like Teams."
         }
     }
 }

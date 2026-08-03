@@ -1,3 +1,4 @@
+import { v4 as uuid } from "uuid";
 import type { ICommand, IReversibleCommand } from "#build/types/commands";
 import type { EditorMode } from "./editor";
 import type { StoredSegment } from "./storedSegments";
@@ -5,14 +6,15 @@ import type { TaskStatus } from "./storedTasks";
 import type { Segment, TranscriptionResponse } from "./transcriptionResponse";
 
 export const Cmds = {
-    UploadFileCommand: "UploadFileCommand",
-    StartTranscriptionCommand: "StartTranscriptionCommand",
     TranscriptionFinishedCommand: "TranscriptionFinishedCommand",
     SeekToSecondsCommand: "SeekToSecondsCommand",
     TogglePlayCommand: "TogglePlayCommand",
     InsertSegmentCommand: "InsertSegmentCommand",
     DeleteSegmentCommand: "DeleteSegmentCommand",
+    DeleteSegmentsCommand: "DeleteSegmentsCommand",
+    RestoreSegmentsCommand: "RestoreSegmentsCommand",
     UpdateSegmentCommand: "UpdateSegmentCommand",
+    UpdateSegmentsCommand: "UpdateSegmentsCommand",
     TranscriptionNameChangeCommand: "TranscriptionNameChangeCommand",
     RenameSpeakerCommand: "RenameSpeakerCommand",
     MergeSpeakerCommand: "MergeSpeakerCommand",
@@ -21,21 +23,11 @@ export const Cmds = {
     AddSegmentCommand: "AddSegmentCommand",
     RestoreSegmentCommand: "RestoreSegmentCommand",
     ChangeEditorModeCommand: "ChangeEditorModeCommand",
-    ShowOnboardingCommand: "ShowOnboardingCommand",
 };
 
 export type ITransriboReversibleCommand = IReversibleCommand & {
     toLocaleString: (t: (key: string, params?: object) => string) => string;
 };
-
-export class UploadFileCommand implements ICommand {
-    readonly $type = "UploadFileCommand";
-
-    constructor(
-        public readonly file: File,
-        public readonly status: TaskStatus,
-    ) {}
-}
 
 export class EmptyCommand implements ICommand {
     readonly $type = "EmptyCommand";
@@ -53,33 +45,6 @@ export class EmptyCommand implements ICommand {
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
         return t("commands.empty");
-    }
-}
-
-export class StartTranscriptionCommand implements ICommand {
-    readonly $type = "StartTranscriptionCommand";
-
-    constructor(
-        public taskId: string,
-        public audio: File,
-    ) {}
-
-    /**
-     * Returns a string representation of the command
-     */
-    toString(): string {
-        return `Start Transcription: Task ID ${this.taskId}, File: ${this.audio.name}`;
-    }
-
-    /**
-     * Returns a localized string representation of the command
-     * @param t - Translation function from useI18n
-     */
-    toLocaleString(t: (key: string, params?: object) => string): string {
-        return t("commands.startTranscription", {
-            taskId: this.taskId,
-            fileName: this.audio.name,
-        });
     }
 }
 
@@ -155,30 +120,59 @@ export class TogglePlayCommand implements ICommand {
     }
 }
 
+/*
+    Redo re-executes the very same command object, so both segment-creating
+    commands must produce the identical segment every time they run:
+
+    - the id is assigned at construction, never by the handler — otherwise
+      the segment would come back under a new id and orphan every later
+      history entry pointing at it (that also lets the undo command exist
+      from construction on, instead of being patched in after execution);
+    - the speaker is picked by the handler (it needs the stored roster), so
+      the command remembers the pick and replays it on every later run.
+*/
 export class AddSegmentCommand implements ITransriboReversibleCommand {
     readonly $type = "AddSegmentCommand";
-    $undoCommand: ICommand = new EmptyCommand();
+    /** Id the created segment gets — known before the command runs. */
+    readonly newSegmentId: string;
+    readonly $undoCommand: ICommand;
+    /** Speaker chosen on the first run, replayed on redo. */
+    resolvedSpeaker: string | undefined;
 
-    constructor(public readonly newSegment: Omit<StoredSegment, "id">) {}
+    constructor(
+        public readonly newSegment: Omit<StoredSegment, "id">,
+        newSegmentId: string = uuid(),
+    ) {
+        this.newSegmentId = newSegmentId;
+        this.$undoCommand = new DeleteSegmentCommand(newSegmentId);
+    }
 
-    public setUndoCommand(undoCommand: ICommand) {
-        this.$undoCommand = undoCommand;
+    public setResolvedSpeaker(speaker: string) {
+        this.resolvedSpeaker = speaker;
     }
 }
 
 export class InsertSegmentCommand implements ITransriboReversibleCommand {
     readonly $type = "InsertSegmentCommand";
-    $undoCommand: ICommand = new EmptyCommand();
+    /** Id the created segment gets — known before the command runs. */
+    readonly newSegmentId: string;
+    readonly $undoCommand: ICommand;
+    /** Speaker chosen on the first run, replayed on redo. */
+    resolvedSpeaker: string | undefined;
 
     constructor(
         public readonly transcriptionId: string,
         public readonly targetSegmentId: string,
         public readonly newSegment: Partial<Segment>,
         public readonly direction: "before" | "after",
-    ) {}
+        newSegmentId: string = uuid(),
+    ) {
+        this.newSegmentId = newSegmentId;
+        this.$undoCommand = new DeleteSegmentCommand(newSegmentId);
+    }
 
-    public setUndoCommand(undoCommand: ICommand) {
-        this.$undoCommand = undoCommand;
+    public setResolvedSpeaker(speaker: string) {
+        this.resolvedSpeaker = speaker;
     }
 
     /**
@@ -215,6 +209,50 @@ export class RestoreSegmentCommand implements ICommand {
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
         return t("commands.restoreSegment");
+    }
+}
+
+/** Delete several segments as ONE undoable step — e.g. a merged lane block. */
+export class DeleteSegmentsCommand implements ITransriboReversibleCommand {
+    readonly $type = "DeleteSegmentsCommand";
+    $undoCommand: ICommand = new EmptyCommand();
+
+    constructor(public readonly segmentIds: string[]) {}
+
+    public setUndoCommand(undoCommand: ICommand) {
+        this.$undoCommand = undoCommand;
+    }
+
+    toString(): string {
+        return `Delete ${this.segmentIds.length} Segments`;
+    }
+
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.deleteSegments", {
+            count: this.segmentIds.length,
+        });
+    }
+}
+
+/** Restore several segments as ONE undoable step (undo of bulk delete). */
+export class RestoreSegmentsCommand implements ITransriboReversibleCommand {
+    readonly $type = "RestoreSegmentsCommand";
+    $undoCommand: ICommand = new EmptyCommand();
+
+    constructor(public readonly segments: StoredSegment[]) {}
+
+    public setUndoCommand(undoCommand: ICommand) {
+        this.$undoCommand = undoCommand;
+    }
+
+    toString(): string {
+        return `Restore ${this.segments.length} Segments`;
+    }
+
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.restoreSegments", {
+            count: this.segments.length,
+        });
     }
 }
 
@@ -284,6 +322,42 @@ export class UpdateSegmentCommand implements ITransriboReversibleCommand {
     }
 }
 
+/**
+ * Bulk segment update as ONE undoable step — moving a merged block or
+ * reassigning a whole speaker touches many segments, but undo/redo must
+ * treat it as a single action.
+ */
+export class UpdateSegmentsCommand implements ITransriboReversibleCommand {
+    readonly $type = "UpdateSegmentsCommand";
+    $undoCommand: ICommand = new EmptyCommand();
+
+    constructor(
+        public readonly entries: {
+            segmentId: string;
+            updates: Partial<Segment>;
+        }[],
+    ) {}
+
+    public setUndoCommand(undoCommand: ICommand) {
+        this.$undoCommand = undoCommand;
+    }
+
+    /**
+     * Returns a string representation of the command
+     */
+    toString(): string {
+        return `Update ${this.entries.length} Segments`;
+    }
+
+    /**
+     * Returns a localized string representation of the command
+     * @param t - Translation function from useI18n
+     */
+    toLocaleString(t: (key: string, params?: object) => string): string {
+        return t("commands.updateSegments", { count: this.entries.length });
+    }
+}
+
 export class TranscriptionNameChangeCommand
     implements ITransriboReversibleCommand
 {
@@ -316,12 +390,14 @@ export class TranscriptionNameChangeCommand
     }
 }
 
+/** Set the display name of one speaker entity; the id on segments stays. */
 export class RenameSpeakerCommand implements ITransriboReversibleCommand {
     readonly $type = "RenameSpeakerCommand";
     readonly $undoCommand: ICommand;
 
     constructor(
         public readonly transcriptionId: string,
+        public readonly speakerId: string,
         public readonly oldName: string,
         public readonly newName: string,
         undoCommand?: ICommand,
@@ -329,7 +405,13 @@ export class RenameSpeakerCommand implements ITransriboReversibleCommand {
         // to avoid circular dependency, we set the undo command in the constructor
         this.$undoCommand =
             undoCommand ||
-            new RenameSpeakerCommand(transcriptionId, newName, oldName, this);
+            new RenameSpeakerCommand(
+                transcriptionId,
+                speakerId,
+                newName,
+                oldName,
+                this,
+            );
     }
 
     /**
@@ -416,24 +498,5 @@ export class ChangeEditorModeCommand implements ICommand {
      */
     toLocaleString(t: (key: string, params?: object) => string): string {
         return t("commands.changeEditorMode", { mode: this.newMode });
-    }
-}
-
-export class ShowOnboardingCommand implements ICommand {
-    readonly $type = "ShowOnboardingCommand";
-
-    /**
-     * Returns a string representation of the command
-     */
-    toString(): string {
-        return "Start Onboarding";
-    }
-
-    /**
-     * Returns a localized string representation of the command
-     * @param t - Translation function from useI18n
-     */
-    toLocaleString(t: (key: string, params?: object) => string): string {
-        return t("commands.startOnboarding");
     }
 }

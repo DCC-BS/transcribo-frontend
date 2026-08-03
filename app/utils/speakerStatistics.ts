@@ -6,6 +6,14 @@ export interface SpeakerStatistics {
     percentage: number;
 }
 
+/**
+ * Aggregates speaking time per speaker.
+ *
+ * @param segments - Diarized segments; segments without a speaker are counted
+ * as `"unknown"`.
+ * @returns Per-speaker duration and share of total speaking time, longest
+ * first.
+ */
 export function computeSpeakerStatistics(
     segments: Segment[],
 ): SpeakerStatistics[] {
@@ -33,16 +41,4 @@ export function computeSpeakerStatistics(
     statistics.sort((a, b) => b.duration - a.duration);
 
     return statistics;
-}
-
-export function formatDuration(seconds: number): string {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = Math.floor(seconds % 60);
-
-    if (hours > 0) {
-        return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-    }
-
-    return `${minutes}:${secs.toString().padStart(2, "0")}`;
 }

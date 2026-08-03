@@ -9,7 +9,7 @@ export const summaryTypeSchema = z.enum([
 export type SummaryType = z.infer<typeof summaryTypeSchema>;
 
 export const summarizeSchema = z.object({
-    transcript: z.string(),
+    text: z.string(),
     summary_type: summaryTypeSchema,
     language: z.string().optional(),
 });

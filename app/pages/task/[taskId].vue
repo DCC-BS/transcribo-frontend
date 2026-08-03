@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { motion } from "motion-v";
 import { useTasks } from "~/composables/useTasks";
-import type { MediaProgress } from "~/types/mediaProgress";
 
 const { getTask } = useTasks();
 const { t } = useI18n();
 const logger = useLogger();
-const { pollTaskStatus, applyTaskResult } = useTaskListener();
+const { createProgressSteps, pollTaskStatus, applyTaskResult } =
+    useTaskListener();
 
 const route = useRoute();
 
@@ -17,13 +17,7 @@ const mediaFileName = ref<string>();
 
 const errorMessage = ref<string>();
 
-const progression = ref<[MediaProgress]>([
-    {
-        icon: "i-lucide-cpu",
-        message: "..",
-        progress: 0
-    }]
-);
+const progressions = ref<ReturnType<typeof createProgressSteps>>();
 
 onMounted(async () => {
     try {
@@ -44,23 +38,43 @@ onMounted(async () => {
         mediaFile.value = task.mediaFile;
         mediaFileName.value = task.mediaFileName;
 
+        // Same steps as the upload flow; preprocessing and upload are
+        // already behind us when a task is resumed.
+        progressions.value = createProgressSteps(task.mediaFile);
+        const steps = progressions.value;
+        steps[0].progress = 100;
+        steps[1].progress = 100;
+
         pollTaskStatus(
             taskId,
             ({ message, progress }) => {
-                progression.value[0].message = message;
-                progression.value[0].progress = progress;
-            }, async (transcription) => {
+                steps[2].message = message;
+                steps[2].progress = progress;
+            },
+            async (transcription) => {
                 try {
                     if (!task.mediaFile || !task.mediaFileName) {
                         throw new Error("Task has no media file");
                     }
 
-                    await applyTaskResult(taskId, transcription, task.mediaFile, task.mediaFileName);
+                    await applyTaskResult(
+                        taskId,
+                        transcription,
+                        task.mediaFile,
+                        task.mediaFileName,
+                    );
                 } catch (e) {
-                    logger.error(e, "Failed to finihs the task");
-                    errorMessage.value = t("task.errors.failedToCreateTranscription");
+                    logger.error(e, "Failed to finish the task");
+                    errorMessage.value = t(
+                        "task.errors.failedToCreateTranscription",
+                    );
                 }
-            });
+            },
+            ({ message, progress }) => {
+                steps[3].message = message;
+                steps[3].progress = progress;
+            },
+        );
     } catch (e) {
         errorMessage.value = t("task.errors.failedToLoad");
         logger.error({ taskId, error: e }, "Failed to get task");
@@ -69,14 +83,29 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex items-center justify-center">
-        <MediaProgressView v-if="mediaFile && mediaFileName" :media="mediaFile" :media-name="mediaFileName"
-            :progress-steps="progression" />
+    <div class="flex grow items-start justify-center overflow-y-auto px-5 py-10">
+        <div class="w-full max-w-lg">
+            <MediaProgressView
+                v-if="mediaFile && mediaFileName && progressions"
+                :media="mediaFile"
+                :media-name="mediaFileName"
+                :progress-steps="progressions"
+            />
 
-        <!-- Error Message Display -->
-        <motion.div v-if="errorMessage" :animate="{ opacity: 1, y: 0 }" :initial="{ opacity: 0, y: 20 }"
-            :transition="{ type: 'spring', stiffness: 200, damping: 20 }" class="mt-8 max-w-md w-full">
-            <UAlert icon="i-lucide-alert-circle" color="error" title="error" :description="errorMessage"></UAlert>
-        </motion.div>
+            <motion.div
+                v-if="errorMessage"
+                :animate="{ opacity: 1, y: 0 }"
+                :initial="{ opacity: 0, y: 20 }"
+                :transition="{ type: 'spring', stiffness: 200, damping: 20 }"
+                class="mt-8 w-full"
+            >
+                <UAlert
+                    icon="i-lucide-alert-circle"
+                    color="error"
+                    :title="t('upload.error')"
+                    :description="errorMessage"
+                />
+            </motion.div>
+        </div>
     </div>
 </template>

@@ -3,3 +3,63 @@
 
 @import "@dcc-bs/common-ui.bs.js";
 @import "@dcc-bs/audio-recorder.bs.js";
+
+/* ============================================================
+   App theme — Kanton Basel-Stadt / TextMate.
+   The BS color ramps (purple/teal/yellow/…) and the Inter
+   @font-face declarations come from @dcc-bs/common-ui.bs.js.
+   Here we only point --font-sans at that Inter face and map the
+   Nuxt UI semantic vars (--ui-*) onto the BS palette.
+   ============================================================ */
+
+@theme static {
+    --font-sans:
+        "Inter", "Inter Fallback", ui-sans-serif, system-ui, "Segoe UI", Roboto,
+        sans-serif;
+}
+
+/* Semantic tokens the common-ui module does not define, taken from the BS
+   ramps. The design system is light-only (`color-scheme: light`).
+   The values are literal hexes: Tailwind v4 only emits `@theme` variables
+   that some utility references, so `var(--color-gray-20)` & co. can resolve
+   to nothing at runtime. */
+:root {
+    /* common-ui maps --ui-primary/secondary/warning onto the 600 shades, but
+       it does so inside `@layer base`, which loses to Nuxt UI's unlayered
+       `--ui-primary: var(--ui-color-primary-500)`. Restate the module's
+       values here so the BS brand shades win. */
+    --ui-primary: var(--color-purple-600);
+    --ui-secondary: var(--color-teal-600);
+    --ui-warning: var(--color-yellow-600);
+
+    /* text/icon color on top of --ui-primary surfaces */
+    --ui-on-primary: #ffffff; /* white */
+    --ui-primary-soft: #f4edfa; /* purple-100 */
+    --ui-primary-strong: #723d8e; /* purple-700 */
+    --ui-secondary-soft: #cff5ef; /* teal-100 */
+    --ui-warning-soft: #fff5cc; /* yellow-100 */
+
+    --ui-bg: #ffffff; /* white */
+    --ui-bg-muted: #f8f8f8; /* gray-20 */
+    --ui-bg-elevated: #f2f2f2; /* gray-50 */
+    --ui-bg-accented: #ebebeb; /* gray-100 */
+    --ui-bg-inverted: #333333; /* gray-900 */
+    --ui-border: #e3e3e3; /* gray-200 */
+    --ui-border-muted: #ebebeb; /* gray-100 */
+    --ui-border-accented: #bababa; /* gray-300 */
+    --ui-border-inverted: #333333; /* gray-900 */
+    --ui-text: #333333; /* gray-900 */
+    --ui-text-muted: #777777; /* gray-600 */
+    --ui-text-dimmed: #a5a5a5; /* gray-400 */
+    --ui-text-highlighted: #333333; /* gray-900 */
+    --ui-text-toned: #535353; /* gray-700 */
+    --ui-text-inverted: #ffffff; /* white */
+
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.05);
+    --shadow-md: 0 6px 18px rgb(0 0 0 / 0.09);
+}
+
+body {
+    background: var(--ui-bg-muted);
+    color: var(--ui-text);
+}

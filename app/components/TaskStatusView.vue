@@ -93,11 +93,8 @@ const fetchTaskStatus = async (): Promise<void> => {
         let result: TranscriptionResponse | undefined;
         if (status.value?.status === TaskStatusEnum.COMPLETED) {
             try {
-                const response = await apiFetch(
-                    `/api/transcribe/${props.taskId}`,
-                    {
-                        schema: TranscriptionResponseSchema,
-                    },
+                const response = await fetchTaskResultWithVocabulary(
+                    props.taskId,
                 );
 
                 if (isApiError(response)) {
@@ -196,12 +193,12 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
     font-size: 2rem;
     animation: spin 1.5s infinite linear;
     margin-bottom: 1rem;
-    color: var(--color-primary-500, #3b82f6);
+    color: var(--ui-primary);
 }
 
 .loading-text {
     font-size: 1rem;
-    color: var(--color-gray-600, #4b5563);
+    color: var(--ui-text-muted);
 }
 
 /* Success animation styles */
@@ -220,7 +217,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    border: 2px solid var(--color-green-500);
+    border: 2px solid var(--ui-secondary);
     animation: scale-in 0.5s ease-out;
     margin-bottom: 1rem;
 }
@@ -234,7 +231,7 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
 .success-text {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--color-green-700, #047857);
+    color: var(--ui-secondary);
     animation: fade-in 0.6s ease-out 0.5s both;
 }
 
@@ -254,29 +251,29 @@ const loadTaskStatus = async (taskId: string): Promise<void> => {
     width: 60px;
     height: 60px;
     border-radius: 50%;
-    border: 2px solid var(--color-red-500);
+    border: 2px solid var(--ui-error);
     animation: scale-in 0.5s ease-out;
     margin-bottom: 1rem;
-    background-color: var(--color-red-50);
+    background-color: var(--ui-error-soft, #fff1ef);
 }
 
 .error-icon {
     font-size: 2rem;
-    color: var(--color-red-500);
+    color: var(--ui-error);
     animation: check-mark 0.3s ease-out 0.2s both;
 }
 
 .error-text {
     font-size: 1rem;
     font-weight: 600;
-    color: var(--color-red-700, #b91c1c);
+    color: var(--ui-error);
     animation: fade-in 0.6s ease-out 0.5s both;
     margin-bottom: 0.5rem;
 }
 
 .error-description {
     font-size: 0.875rem;
-    color: var(--color-gray-600, #4b5563);
+    color: var(--ui-text-muted);
     text-align: center;
     max-width: 300px;
     animation: fade-in 0.6s ease-out 0.7s both;

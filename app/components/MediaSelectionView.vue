@@ -1,5 +1,4 @@
 <script lang="ts" setup>
-import { motion } from "motion-v";
 import type { MediaSelectionData } from "~/types/mediaStepInOut";
 
 const emit =
@@ -8,6 +7,8 @@ const emit =
 const { t } = useI18n();
 
 const uploadFile = ref<File>();
+const audioActive = ref(false);
+const meetingActive = ref(false);
 
 watch(uploadFile, () => {
     if (uploadFile.value) {
@@ -15,150 +16,112 @@ watch(uploadFile, () => {
     }
 });
 
+/**
+ * Wraps a microphone recording in a file and selects it for upload.
+ *
+ * @param audio - The recorded audio.
+ */
 function onRecodingComplete(audio: Blob) {
-    const file = new File([audio], "recoding.mp3", { type: "audio/mpeg" });
+    const file = new File([audio], "Aufnahme.mp3", { type: "audio/mpeg" });
     emit("onMediaSelected", { media: file });
 }
+
+/**
+ * Wraps a meeting recording in a file and selects it for upload.
+ *
+ * @param audio - The recorded audio.
+ */
+function onMeetingRecorded(audio: Blob) {
+    // the recorder reports e.g. "audio/webm;codecs=opus" — the codec suffix
+    // is dropped so the file carries a plain media type
+    const mediaType = audio.type.split(";")[0] || "audio/webm";
+    const extension = mediaType.endsWith("ogg") ? "ogg" : "webm";
+    const file = new File([audio], `Meeting.${extension}`, {
+        type: mediaType,
+    });
+    emit("onMediaSelected", { media: file });
+}
+
+const acceptedMedia = [
+    "audio/*",
+    "video/*",
+    "audio/aac",
+    "audio/aacp",
+    "audio/aiff",
+    "audio/flac",
+    "audio/mp4",
+    "audio/mpeg",
+    "audio/ogg",
+    "audio/opus",
+    "audio/wav",
+    "audio/webm",
+    "audio/x-aiff",
+    "audio/x-m4a",
+    "audio/x-wav",
+    "video/3gpp",
+    "video/3gpp2",
+    "video/mp4",
+    "video/mpeg",
+    "video/ogg",
+    "video/quicktime",
+    "video/webm",
+    "video/x-flv",
+    "video/x-m4v",
+    "video/x-matroska",
+    "video/x-msvideo",
+].join(",");
 </script>
 
 <template>
-    <div class="w-full">
-        <div class="max-w-6xl mx-auto p-6 lg:p-8">
-            <!-- Two Column Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-                <!-- Upload Section -->
-                <motion.div
-                    :animate="{ opacity: 1, x: 0 }"
-                    :initial="{ opacity: 0, x: -20 }"
-                    :transition="{ duration: 0.6, delay: 0.2 }"
-                >
-                    <div
-                        class="rounded-3xl p-8 shadow-xl shadow-gray-900/10 ring-1 ring-gray-200/50 h-full flex flex-col"
-                    >
-                        <!-- Icon Header -->
-                        <div class="flex items-center gap-4 mb-6">
-                            <div
-                                class="w-14 h-14 bg-secondary-500 text-white backdrop-blur-sm rounded-2xl flex items-center justify-center"
-                            >
-                                <UIcon name="i-lucide-upload" class="w-7 h-7" />
-                            </div>
-                            <div>
-                                <h2 class="text-xl font-semibold">
-                                    {{ t("pages.index.uploadMedia") }}
-                                </h2>
-                                <p
-                                    class="text-sm text-gray-500 dark:text-gray-40 mt-1"
-                                >
-                                    {{ t("pages.index.uploadDescription") }}
-                                </p>
-                            </div>
-                        </div>
+    <!-- two equal choice cards: upload media | record audio -->
+    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <UCard id="upload-media-card" :ui="{ body: 'flex flex-col gap-4' }">
+            <CardHead
+                icon="i-lucide-upload"
+                tone="primary"
+                :title="t('pages.index.uploadMedia')"
+                :subtitle="t('pages.index.uploadDescription')"
+            />
+            <UFileUpload
+                v-model="uploadFile"
+                :accept="acceptedMedia"
+                icon="i-lucide-file-up"
+                :label="t('pages.index.dropzoneLabel')"
+                :description="t('pages.index.dropzoneFormats')"
+                class="min-h-47.5 flex-1"
+                :ui="{
+                    base: 'rounded-2xl border-2 border-dashed border-default bg-default hover:border-primary hover:bg-(--ui-primary-soft) transition-colors',
+                }"
+            />
+        </UCard>
 
-                        <!-- Upload Card Content -->
-                        <div
-                            class="flex-1 backdrop-blur-sm rounded-2xl flex items-center justify-center min-h-[200px]"
-                        >
-                            <UFileUpload
-                                accept="
-                                audio/*,
-                                video/*,
-                                audio/aac,
-                                audio/aacp,
-                                audio/aiff,
-                                audio/flac,
-                                audio/mp4,
-                                audio/mpeg,
-                                audio/ogg,
-                                audio/opus,
-                                audio/wav,
-                                audio/webm,
-                                audio/x-aiff,
-                                audio/x-m4a,
-                                audio/x-wav,
-                                video/3gpp,
-                                video/3gpp2,
-                                video/mp4,
-                                video/mpeg,
-                                video/ogg,
-                                video/quicktime,
-                                video/webm,
-                                video/x-flv,
-                                video/x-m4v,
-                                video/x-matroska,
-                                video/x-msvideo"
-                                icon="i-lucide-file-up"
-                                v-model="uploadFile"
-                                class="w-full h-full rounded"
-                                :ui="{
-                                    base: 'bg-secondary-50',
-                                }"
-                            />
-                        </div>
-
-                        <!-- File Types Info -->
-                        <div
-                            class="mt-6 flex items-start gap-3 text-sm text-white/80"
-                        >
-                            <UIcon
-                                name="i-lucide-info"
-                                class="w-5 h-5 shrink-0 mt-0.5"
-                            />
-                            <div>
-                                <p class="font-medium mb-1">
-                                    Supported formats
-                                </p>
-                                <p class="text-xs text-white/70">
-                                    MP3, MP4, M4A, FLAC, WAV, WEBM
-                                </p>
-                            </div>
-                        </div>
+        <UCard id="record-media-card" :ui="{ body: 'flex flex-col gap-4' }">
+            <CardHead
+                icon="i-lucide-mic"
+                tone="secondary"
+                :title="t('pages.index.recordAudio')"
+                :subtitle="t('pages.index.recordDescription')"
+            />
+            <div class="grid min-h-47.5 flex-1 place-items-center">
+                <!-- only one recorder at a time: the other is hidden while
+                     a recording is running -->
+                <div class="flex flex-col items-center gap-4">
+                    <div id="record-audio-control">
+                        <AudioRecordingView
+                            v-if="!meetingActive"
+                            v-model:active="audioActive"
+                            @on-recording-complete="onRecodingComplete"
+                        />
                     </div>
-                </motion.div>
-
-                <!-- Recording Section -->
-                <motion.div
-                    :animate="{ opacity: 1, x: 0 }"
-                    :initial="{ opacity: 0, x: 20 }"
-                    :transition="{ duration: 0.6, delay: 0.3 }"
-                >
-                    <div
-                        class="rounded-3xl p-8 shadow-xl shadow-gray-900/10 ring-1 ring-gray-200/50 h-full flex flex-col"
-                    >
-                        <!-- Icon Header -->
-                        <div class="flex items-center gap-4 mb-6">
-                            <div
-                                class="w-14 h-14 bg-gradient-to-br from-red-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg"
-                            >
-                                <UIcon
-                                    name="i-lucide-mic"
-                                    class="w-7 h-7 text-white"
-                                />
-                            </div>
-                            <div>
-                                <h2
-                                    class="text-xl font-semibold text-gray-900 dark:text-white"
-                                >
-                                    {{ t("pages.index.recordAudio") }}
-                                </h2>
-                                <p
-                                    class="text-sm text-gray-500 dark:text-gray-400 mt-1"
-                                >
-                                    {{ t("pages.index.recordDescription") }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- Recording Card Content -->
-                        <div
-                            class="rounded p-6 flex items-center justify-center min-h-[200px]"
-                        >
-                            <AudioRecordingView
-                                @on-recording-complete="onRecodingComplete"
-                            />
-                        </div>
+                    <div id="record-meeting-control">
+                        <MeetingRecordingView
+                            v-if="!audioActive"
+                            v-model:active="meetingActive"
+                            @on-recording-complete="onMeetingRecorded"
+                        />
                     </div>
-                </motion.div>
+                </div>
             </div>
-        </div>
+        </UCard>
     </div>
 </template>

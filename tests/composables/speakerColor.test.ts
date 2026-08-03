@@ -20,7 +20,7 @@ describe("useSpeakerColor", () => {
         const { getSpeakerColor } = useSpeakerColor(speakers);
 
         const color = getSpeakerColor(undefined);
-        expect(color).toEqual({ r: 1, g: 1, b: 1 });
+        expect(color).toEqual({ r: 115, g: 115, b: 115 });
     });
 
     it("should return white color for unknown speaker", () => {
@@ -28,7 +28,7 @@ describe("useSpeakerColor", () => {
         const { getSpeakerColor } = useSpeakerColor(speakers);
 
         const color = getSpeakerColor("Unknown Speaker");
-        expect(color).toEqual({ r: 1, g: 1, b: 1 });
+        expect(color).toEqual({ r: 115, g: 115, b: 115 });
     });
 
     it("should return color for known speaker", () => {
@@ -74,6 +74,6 @@ describe("useSpeakerColor", () => {
         const { colorDict, getSpeakerColor } = useSpeakerColor(speakers);
 
         expect(Object.keys(colorDict.value)).toHaveLength(0);
-        expect(getSpeakerColor("Any")).toEqual({ r: 1, g: 1, b: 1 });
+        expect(getSpeakerColor("Any")).toEqual({ r: 115, g: 115, b: 115 });
     });
 });

@@ -11,20 +11,28 @@ interface InputProps {
 const props = defineProps<InputProps>();
 
 const { t } = useI18n();
-const { exportAsText, exportAsSrt, exportAsJson, exportAsDocx } = useExport();
+const { exportAsText, exportAsSrt, exportAsJson, exportAsDocx, exportMedia } =
+    useExport();
+const { displayName } = useSpeakerRegistry();
 
-// Export options state
-const withSpeakers = useLocalStorage<boolean>("setting:show-speaker", true);
-const withTimestamps = useLocalStorage<boolean>(
-    "setting:show-timestamps",
-    false,
+// exports print human names, not the SPEAKER_xx ids stored on segments
+const namedSegments = computed(() =>
+    props.segments.map((segment) => ({
+        ...segment,
+        speaker: displayName(segment.speaker ?? undefined),
+    })),
 );
-const mergeSegments = useLocalStorage<boolean>("setting:merge-segments", true);
+
+const {
+    showSpeakers: withSpeakers,
+    showTimestamps: withTimestamps,
+    mergeSegments,
+} = useTranscriptDisplaySettings();
 const withSummary = ref(false);
 
 const exportOptions = computed<ExportOptions>(() => ({
     transcription: props.transcription,
-    segments: props.segments,
+    segments: namedSegments.value,
     withSpeakers: withSpeakers.value,
     withTimestamps: withTimestamps.value,
     mergeSegments: mergeSegments.value,
@@ -32,6 +40,9 @@ const exportOptions = computed<ExportOptions>(() => ({
 }));
 
 // Functions to handle exports
+/**
+ * Exports the transcript as plain text with the selected options.
+ */
 function handleTextExport(): void {
     exportAsText({
         ...exportOptions.value,
@@ -39,18 +50,27 @@ function handleTextExport(): void {
     });
 }
 
+/**
+ * Exports the transcript as an SRT subtitle file.
+ */
 function handleSubtitleExport(): void {
     exportAsSrt(
         props.transcription,
-        props.segments,
+        namedSegments.value,
         exportOptions.value.withSpeakers,
     );
 }
 
+/**
+ * Exports the transcript as JSON, preserving all metadata.
+ */
 function handleJsonExport(): void {
-    exportAsJson(props.transcription, props.segments);
+    exportAsJson(props.transcription, namedSegments.value);
 }
 
+/**
+ * Exports the transcript as a Word document.
+ */
 async function handleDocxExport(): Promise<void> {
     await exportAsDocx(exportOptions.value);
 }
@@ -61,16 +81,24 @@ async function handleDocxExport(): Promise<void> {
         <UButton
             id="export-toolbar"
             icon="i-lucide-download"
-            :label="t('export.export')"
             trailing-icon="i-lucide-chevron-down"
             color="primary"
-        />
+            variant="soft"
+            :title="t('export.export')"
+            class="text-[0.82rem]"
+            :ui="{
+                leadingIcon: 'size-4',
+                trailingIcon: 'hidden size-4 md:block',
+            }"
+        >
+            <span class="hidden md:inline">{{ t("export.export") }}</span>
+        </UButton>
 
         <template #content>
             <div class="p-4 w-80">
                 <!-- Export Options Section -->
                 <div class="mb-4">
-                    <h4 class="font-medium text-sm mb-3">
+                    <h4 class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
                         {{ t("export.optionsTitle") }}
                     </h4>
 
@@ -88,7 +116,7 @@ async function handleDocxExport(): Promise<void> {
                             <span class="text-sm">{{
                                 t("export.withTimestamps")
                             }}</span>
-                            <span class="text-xs text-gray-500">{{
+                            <span class="text-xs text-dimmed">{{
                                 t("export.textOnly")
                             }}</span>
                         </div>
@@ -101,7 +129,7 @@ async function handleDocxExport(): Promise<void> {
                             <span class="text-sm">{{
                                 t("export.mergeSegments")
                             }}</span>
-                            <span class="text-xs text-gray-500">{{
+                            <span class="text-xs text-dimmed">{{
                                 t("export.textOnly")
                             }}</span>
                         </div>
@@ -117,7 +145,7 @@ async function handleDocxExport(): Promise<void> {
                             <span class="text-sm">{{
                                 t("export.withSummary")
                             }}</span>
-                            <span class="text-xs text-gray-500">{{
+                            <span class="text-xs text-dimmed">{{
                                 t("export.textOnly")
                             }}</span>
                         </div>
@@ -126,11 +154,11 @@ async function handleDocxExport(): Promise<void> {
                 </div>
 
                 <!-- Divider -->
-                <div class="border-t border-gray-200 my-3"></div>
+                <div class="border-t border-default my-3"></div>
 
                 <!-- Export Format Buttons -->
                 <div class="space-y-2">
-                    <h4 class="font-medium text-sm mb-2">
+                    <h4 class="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
                         {{ t("export.formats.title") }}
                     </h4>
 
@@ -138,7 +166,7 @@ async function handleDocxExport(): Promise<void> {
                     <UButton
                         block
                         variant="ghost"
-                        color="primary"
+                        color="neutral"
                         icon="i-lucide-file-text"
                         :label="t('export.formats.text')"
                         @click="handleTextExport"
@@ -149,7 +177,7 @@ async function handleDocxExport(): Promise<void> {
                     <UButton
                         block
                         variant="ghost"
-                        color="primary"
+                        color="neutral"
                         icon="i-lucide-message-square-text"
                         :label="t('export.formats.subtitle')"
                         @click="handleSubtitleExport"
@@ -160,7 +188,7 @@ async function handleDocxExport(): Promise<void> {
                     <UButton
                         block
                         variant="ghost"
-                        color="primary"
+                        color="neutral"
                         icon="i-lucide-file-braces"
                         :label="t('export.formats.json')"
                         @click="handleJsonExport"
@@ -171,10 +199,22 @@ async function handleDocxExport(): Promise<void> {
                     <UButton
                         block
                         variant="ghost"
-                        color="primary"
+                        color="neutral"
                         icon="i-lucide-file-type"
                         :label="t('export.formats.docx')"
                         @click="handleDocxExport"
+                        class="justify-start"
+                    />
+
+                    <!-- Original media file -->
+                    <UButton
+                        v-if="props.transcription.mediaFile"
+                        block
+                        variant="ghost"
+                        color="neutral"
+                        icon="i-lucide-file-audio"
+                        :label="t('media.downloadMedia')"
+                        @click="() => exportMedia(props.transcription)"
                         class="justify-start"
                     />
                 </div>

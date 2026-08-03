@@ -14,22 +14,25 @@ interface InputProps {
     segments: StoredSegment[];
     currentTime?: number;
     autoScrollEnabled?: boolean;
+    /** Bottom edge (viewport px) of the sticky header that overlaps the list. */
+    stickyHeaderBottom?: number;
 }
 
 const props = withDefaults(defineProps<InputProps>(), {
     currentTime: 0,
     autoScrollEnabled: true,
+    stickyHeaderBottom: 0,
 });
 
 const { executeCommand } = useCommandBus();
+const logger = useLogger();
 
 const segmentRefs = ref<Map<string, HTMLElement>>(new Map());
 const { height: windowHeight } = useWindowSize();
-const segmentSize = 192;
+const segmentSize = 120;
 const { y } = useWindowScroll();
 
-const maxSegment = ref(0);
-const useProgress = computed(() => segments.value.length < 500);
+const maxSegment = ref(15);
 
 watch(
     () => [windowHeight.value, y.value],
@@ -55,6 +58,12 @@ const currentSegmentId = computed(() => {
     return current?.id;
 });
 
+/**
+ * Registers a segment's element so it can be scrolled to.
+ *
+ * @param id - Segment id.
+ * @param el - The element or component instance, if mounted.
+ */
 function setSegmentRef(id: string, el: unknown): void {
     if (!el) {
         return;
@@ -63,19 +72,25 @@ function setSegmentRef(id: string, el: unknown): void {
     if (el instanceof HTMLElement) {
         segmentRefs.value.set(id, el);
     } else {
-        console.warn(
+        logger.warn(
             `Attempted to set segment ref for ID ${id} with a non-HTMLElement`,
             el,
         );
     }
 }
 
+/**
+ * Whether a segment is the one currently playing.
+ *
+ * @param segmentId - Segment id.
+ * @returns `true` for the active segment.
+ */
 function isSegmentActive(segmentId: string): boolean {
     return currentSegmentId.value === segmentId;
 }
 
 watch(currentSegmentId, async (newId, oldId) => {
-    if (!props.autoScrollEnabled || !newId || newId === oldId) {
+    if (!newId || newId === oldId) {
         return;
     }
 
@@ -84,18 +99,46 @@ watch(currentSegmentId, async (newId, oldId) => {
         maxSegment.value = Math.max(index + 2, maxSegment.value);
     }
 
+    if (!props.autoScrollEnabled) {
+        return;
+    }
+
     // wait for the element to load
     await nextTick();
 
     const segmentEl = segmentRefs.value.get(newId);
     if (!segmentEl) {
-        console.warn(`No element found for segment ID: ${newId}`);
+        logger.warn(`No element found for segment ID: ${newId}`);
+        return;
+    }
+
+    const headerBottom = props.stickyHeaderBottom;
+    const visibleHeight = window.innerHeight - headerBottom;
+
+    if (visibleHeight > 0) {
+        const rect = segmentEl.getBoundingClientRect();
+        const elementDocTop = window.scrollY + rect.top;
+        const elementHeight = rect.height;
+        const elementDocCenter = elementDocTop + elementHeight / 2;
+
+        const visibleCenterInViewport = headerBottom + visibleHeight / 2;
+        const targetScrollY = elementDocCenter - visibleCenterInViewport;
+
+        window.scrollTo({
+            top: targetScrollY,
+            behavior: "smooth",
+        });
         return;
     }
 
     segmentEl.scrollIntoView({ behavior: "smooth", block: "center" });
 });
 
+/**
+ * Inserts a new segment after the given one.
+ *
+ * @param segment - Segment to insert after.
+ */
 async function addSegmentAfter(segment: StoredSegment) {
     await executeCommand(
         new InsertSegmentCommand(
@@ -107,6 +150,9 @@ async function addSegmentAfter(segment: StoredSegment) {
     );
 }
 
+/**
+ * Inserts a new segment at the very beginning of the transcript.
+ */
 async function addSegmentAtZero() {
     const speaker = speakers.value[0] ?? "SPEAKER_1";
 
@@ -123,9 +169,11 @@ async function addSegmentAtZero() {
 
 <template>
     <div class="flex flex-col">
-        <USeparator id="add-transcription-top">
-            <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegmentAtZero()" />
-        </USeparator>
+        <div id="add-transcription-top">
+            <USeparator>
+                <UButton icon="i-lucide-plus" variant="link" color="neutral" @click="() => addSegmentAtZero()" />
+            </USeparator>
+        </div>
 
         <AnimatePresence>
             <div id="transcription-segments">
@@ -133,8 +181,8 @@ async function addSegmentAtZero() {
                     :initial="{ opacity: 0, scaleY: 0 }" :animate="{ opacity: 1, scaleY: 1 }" :exit="{ scale: 0 }">
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
                         <TranscriptionListItem :segment="segment" :speakers="speakers"
-                            :isActive="isSegmentActive(segment.id)" :currentTime="props.currentTime"
-                            :showProgress="useProgress" />
+                            :is-active="isSegmentActive(segment.id)"
+                            :current-time="isSegmentActive(segment.id) ? props.currentTime : 0" />
                     </div>
 
                     <USeparator>
