@@ -1,5 +1,4 @@
 import { varlockVitePlugin } from "@varlock/vite-integration";
-import pwaIcons from "./public/icons.json";
 
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
@@ -116,21 +115,30 @@ export default defineNuxtConfig({
                     content: "Transcribo",
                 },
                 { name: "application-name", content: "Transcribo" },
-                { name: "msapplication-config", content: "/browserconfig.xml" },
             ],
             link: [
                 { rel: "icon", type: "image/x-icon", href: "/favicon.ico" },
                 {
                     rel: "icon",
+                    type: "image/svg+xml",
+                    href: "/favicon.svg",
+                },
+                {
+                    rel: "icon",
                     type: "image/png",
                     sizes: "32x32",
-                    href: "/ios/32.png",
+                    href: "/favicon-32x32.png",
                 },
                 {
                     rel: "icon",
                     type: "image/png",
                     sizes: "16x16",
-                    href: "/ios/16.png",
+                    href: "/favicon-16x16.png",
+                },
+                {
+                    rel: "apple-touch-icon",
+                    sizes: "180x180",
+                    href: "/apple-touch-icon.png",
                 },
             ],
         },
@@ -233,9 +241,29 @@ export default defineNuxtConfig({
             name: "Transcribo BS",
             short_name: "Transcribo BS",
             description: "Speech-to-text transcription tool",
-            theme_color: "#000000",
-            background_color: "#000000",
-            icons: pwaIcons.icons,
+            theme_color: "#8c4a92",
+            background_color: "#FFFFFF",
+            display: "standalone",
+            icons: [
+                {
+                    src: "/android-chrome-192x192.png",
+                    sizes: "192x192",
+                    type: "image/png",
+                    purpose: "any",
+                },
+                {
+                    src: "/android-chrome-512x512.png",
+                    sizes: "512x512",
+                    type: "image/png",
+                    purpose: "any",
+                },
+                {
+                    src: "/android-chrome-512x512.png",
+                    sizes: "512x512",
+                    type: "image/png",
+                    purpose: "maskable",
+                },
+            ],
         },
     },
 });
