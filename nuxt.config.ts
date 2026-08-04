@@ -10,6 +10,7 @@ export default defineNuxtConfig({
         ["github:DCC-BS/nuxt-layers/health_check", { install: true }],
         ["github:DCC-BS/nuxt-layers/feedback-control", { install: true }],
         ["github:DCC-BS/nuxt-layers/logger"],
+        ["github:DCC-BS/nuxt-layers/dcc-app-config"],
     ],
     routeRules: {
         "/api/ping": {
