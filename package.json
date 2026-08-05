@@ -47,7 +47,7 @@
         "varlock": "^1.6.1",
         "vue": "3.5.40",
         "vue-konva": "3.4.0",
-        "vue-tsc": "3.3.7",
+        "vue-tsc": "3.3.8",
         "zod": "4.4.3"
     },
     "devDependencies": {
