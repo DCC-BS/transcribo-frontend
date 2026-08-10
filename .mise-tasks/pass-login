@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+#MISE description="Login to Proton Pass CLI for secret access"
+#MISE alias="login"
+
+if pass-cli info >/dev/null 2>&1; then
+    echo "Already logged in, skipping login"
+    exit 0
+fi
+pass-cli login

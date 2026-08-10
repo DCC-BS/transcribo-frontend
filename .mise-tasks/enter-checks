@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+#MISE hide=true
+
+if ! pass-cli info >/dev/null 2>&1; then
+    printf '\033[33m\u26a0\033[0m \033[1mNot logged in\033[0m to \033[36mpass-cli\033[0m. Run \033[35mmise r pass-login\033[0m\n'
+    exit 0
+fi

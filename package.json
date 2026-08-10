@@ -51,7 +51,7 @@
         "zod": "4.4.3"
     },
     "devDependencies": {
-        "@biomejs/biome": "^2.5.5",
+        "@biomejs/biome": "2.5.7",
         "@nuxt/test-utils": "^4.0.3",
         "@types/bun": "1.3.14",
         "@varlock/proton-pass-plugin": "^1.0.2",
