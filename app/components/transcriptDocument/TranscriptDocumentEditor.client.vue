@@ -33,6 +33,7 @@ import {
     TranscriptTextNode,
 } from "~/utils/tiptapTranscript";
 import {
+    activeSegmentsAt,
     charOffsetAtTime,
     timeAtCharOffset,
     wordBoundsAt,
@@ -195,6 +196,9 @@ watch(
             refreshKeywordHighlights();
             return;
         }
+        // `setContent` throws the selection away, which would drop the caret
+        // at the document's end mid-typing — remember where it was.
+        const caret = readCaretAnchor();
         editor.commands.setContent(
             buildTranscriptDocContent(
                 segments,
@@ -204,10 +208,13 @@ watch(
             { emitUpdate: false },
         );
         refreshKeywordHighlights();
-        if (pendingFocusSegmentId.value) {
-            if (focusSegment(pendingFocusSegmentId.value)) {
+        const pendingFocus = pendingFocusSegmentId.value;
+        if (pendingFocus) {
+            if (focusSegment({ segmentId: pendingFocus, offset: 0 })) {
                 pendingFocusSegmentId.value = null;
             }
+        } else {
+            focusSegment(caret);
         }
     },
     { deep: true },
@@ -268,7 +275,12 @@ const transcriptTurns = computed(() =>
     buildTranscriptTurns(props.segments, props.mergeSegments),
 );
 
-/** True when the document already mirrors the current segments exactly. */
+/**
+ * True when the document already mirrors the current segments exactly.
+ *
+ * Segments are compared by id rather than by node count alone: the count is
+ * only a proxy, while the ids also catch a reordering that leaves it equal.
+ */
 function docReflectsSegments(): boolean {
     const turns = transcriptTurns.value;
     const doc = editor.state.doc;
@@ -276,25 +288,29 @@ function docReflectsSegments(): boolean {
         return false;
     }
     const docTexts = readDocSegmentTexts();
-    let matches = true;
-    doc.forEach((turnNode, _offset, turnIndex) => {
+    // An index loop, unlike `forEach`, can stop at the first mismatch.
+    for (let turnIndex = 0; turnIndex < doc.childCount; turnIndex++) {
+        const turnNode = doc.child(turnIndex);
         const turn = turns[turnIndex];
         if (
             !turn ||
             (turnNode.attrs.speaker ?? null) !== turn.speaker ||
             turnNode.childCount !== turn.segments.length
         ) {
-            matches = false;
-            return;
+            return false;
         }
-        for (const segment of turn.segments) {
-            if (docTexts.get(segment.id) !== segment.text) {
-                matches = false;
-                return;
+        for (let index = 0; index < turn.segments.length; index++) {
+            const segment = turn.segments[index];
+            if (
+                !segment ||
+                turnNode.child(index).attrs.segmentId !== segment.id ||
+                docTexts.get(segment.id) !== segment.text
+            ) {
+                return false;
             }
         }
-    });
-    return matches;
+    }
+    return true;
 }
 
 /**
@@ -491,6 +507,63 @@ function segmentById(id: string | null): StoredSegment | undefined {
         : undefined;
 }
 
+/*
+    Segment and document position translate into each other through the two
+    helpers below — the single place that knows a `transcriptSegment` node
+    holds one segment's text, so every caller (click-to-seek, caret rescue,
+    focusing a freshly inserted segment) agrees on what an offset means.
+
+    Segment plus offset is also the only caret coordinate that survives a
+    rebuild, which replaces every node and so invalidates raw positions.
+*/
+interface CaretAnchor {
+    segmentId: string;
+    offset: number;
+}
+
+/** The segment a document position sits in, with the offset into its text. */
+function segmentAnchorAt(position: number): CaretAnchor | null {
+    const resolved = editor.state.doc.resolve(position);
+    for (let depth = resolved.depth; depth > 0; depth--) {
+        const node = resolved.node(depth);
+        if (node.type.name !== "transcriptSegment") {
+            continue;
+        }
+        const segmentId = node.attrs.segmentId as string | null;
+        return segmentId
+            ? {
+                  segmentId,
+                  offset: Math.max(position - resolved.start(depth), 0),
+              }
+            : null;
+    }
+    return null;
+}
+
+/**
+ * The document position of an offset inside a segment.
+ *
+ * @param anchor - Segment and offset into its text.
+ * @returns The position, or `null` when the segment is not in the document.
+ */
+function positionOfSegmentAnchor(anchor: CaretAnchor): number | null {
+    let position: number | null = null;
+    editor.state.doc.descendants((node, nodePos) => {
+        if (position !== null) {
+            return false;
+        }
+        if (node.type.name !== "transcriptSegment") {
+            return true;
+        }
+        if (node.attrs.segmentId !== anchor.segmentId) {
+            return false;
+        }
+        position = nodePos + 1 + Math.min(anchor.offset, node.content.size);
+        return false;
+    });
+    return position;
+}
+
 /** Segment and text offset under a mouse position, if any. */
 function locateSegmentAt(
     event: MouseEvent,
@@ -499,52 +572,22 @@ function locateSegmentAt(
         left: event.clientX,
         top: event.clientY,
     });
-    if (!coords) {
+    const anchor = coords ? segmentAnchorAt(coords.pos) : null;
+    const segment = segmentById(anchor?.segmentId ?? null);
+    if (!anchor || !segment) {
         return null;
     }
-
-    const resolved = editor.state.doc.resolve(coords.pos);
-    for (let depth = resolved.depth; depth > 0; depth--) {
-        const node = resolved.node(depth);
-        if (node.type.name !== "transcriptSegment") {
-            continue;
-        }
-        const segment = segmentById(node.attrs.segmentId as string | null);
-        if (!segment) {
-            return null;
-        }
+    return {
+        segment,
         // Clamp away the trailing join-space added between merged segments.
-        const charOffset = Math.min(
-            Math.max(coords.pos - resolved.start(depth), 0),
-            segment.text.length,
-        );
-        return { segment, charOffset };
-    }
-    return null;
+        charOffset: Math.min(anchor.offset, segment.text.length),
+    };
 }
 
-const activeSegment = computed(() => {
-    for (const turn of transcriptTurns.value) {
-        const first = turn.segments[0];
-        const last = turn.segments[turn.segments.length - 1];
-        if (
-            !first ||
-            !last ||
-            props.currentTime < first.start ||
-            props.currentTime >= last.end
-        ) {
-            continue;
-        }
-        let active = first;
-        for (const segment of turn.segments) {
-            if (segment.start <= props.currentTime) {
-                active = segment;
-            }
-        }
-        return active;
-    }
-    return undefined;
-});
+// Several speakers can talk at once, so every live turn is highlighted.
+const activeSegments = computed(() =>
+    activeSegmentsAt(transcriptTurns.value, props.currentTime),
+);
 
 // Scrolling remains stable in silent gaps, but no word is highlighted there.
 const scrollAnchorSegment = computed(() => {
@@ -582,16 +625,17 @@ let lastPlayheadKey = "";
  * @returns `true` when the decorations changed.
  */
 function applyPlayheadDecorations(): boolean {
-    const segment = activeSegment.value;
-    const position = segment
-        ? {
-              segmentId: segment.id,
-              charOffset: charOffsetAtTime(segment, props.currentTime),
-          }
-        : { segmentId: null, charOffset: 0 };
-    const key = segment
-        ? `${position.segmentId}:${wordStartAt(segment.text, position.charOffset)}`
-        : "";
+    const position = activeSegments.value.map((segment) => ({
+        segmentId: segment.id,
+        charOffset: charOffsetAtTime(segment, props.currentTime),
+    }));
+    // Redrawing is worth it only once the stained word somewhere has moved.
+    const key = position
+        .map((entry, index) => {
+            const text = activeSegments.value[index]?.text ?? "";
+            return `${entry.segmentId}:${wordStartAt(text, entry.charOffset)}`;
+        })
+        .join("|");
     if (key === lastPlayheadKey) {
         return false;
     }
@@ -611,7 +655,11 @@ function syncPlayheadDecorations(): void {
 }
 
 watch(
-    () => [activeSegment.value?.id, props.currentTime] as const,
+    () =>
+        [
+            activeSegments.value.map((segment) => segment.id).join("|"),
+            props.currentTime,
+        ] as const,
     syncPlayheadDecorations,
 );
 
@@ -624,6 +672,37 @@ watch(
         nextTick(() => centerActiveKaraokeWord("smooth", true));
     },
 );
+
+/*
+    While several speakers talk at once every live turn carries a stained
+    word, so "the" current word is ambiguous. Clicking into the text answers
+    it: that turn is the one being followed. Without this the scroll snaps to
+    whichever live turn comes first in the document — not the one clicked.
+
+    The id is left to go stale rather than cleared: once the turn falls
+    silent it holds no live segment and the lookup below falls back, while
+    seeking back into it picks the same turn up again.
+*/
+const followedSegmentId = ref<string | null>(null);
+
+/*
+    The click names a segment but the user is following its *turn* — in
+    merged mode a turn runs through many segments, and the follow has to
+    survive each of those handovers, not expire at the first one.
+*/
+const followedActiveSegmentId = computed(() => {
+    const followed = followedSegmentId.value;
+    if (!followed) {
+        return null;
+    }
+    const turn = transcriptTurns.value.find((candidate) =>
+        candidate.segments.some((segment) => segment.id === followed),
+    );
+    const live = turn?.segments.find((segment) =>
+        activeSegments.value.some((active) => active.id === segment.id),
+    );
+    return live?.id ?? null;
+});
 
 /**
  * Scrolls the active karaoke word into the middle of the editor.
@@ -640,6 +719,11 @@ function centerActiveKaraokeWord(
         "[data-transcript-scroll]",
     );
     const active =
+        (followedActiveSegmentId.value
+            ? root?.querySelector<HTMLElement>(
+                  `[data-segment-id="${followedActiveSegmentId.value}"] .transcript-w-current`,
+              )
+            : null) ??
         root?.querySelector<HTMLElement>(".transcript-w-current") ??
         (scrollAnchorSegment.value
             ? root?.querySelector<HTMLElement>(
@@ -750,7 +834,7 @@ async function createSegment(
     await executeCommand(command);
     pendingFocusSegmentId.value = command.newSegmentId;
     await nextTick();
-    if (focusSegment(command.newSegmentId)) {
+    if (focusSegment({ segmentId: command.newSegmentId, offset: 0 })) {
         pendingFocusSegmentId.value = null;
     }
 }
@@ -784,28 +868,32 @@ async function insertSegmentAt(start: number, end: number): Promise<void> {
 defineExpose({ insertSegmentAt });
 
 /**
- * Places the caret in a segment.
+ * The caret's position as segment and character offset, if it sits in one.
  *
- * @param segmentId - Segment to focus.
- * @returns `true` when the segment was found.
+ * @returns The anchor, or `null` when the editor is unfocused, something is
+ * selected, or the caret is not inside a stored segment.
  */
-function focusSegment(segmentId: string): boolean {
-    let pos: number | null = null;
-    editor.state.doc.descendants((node, nodePos) => {
-        if (
-            node.type.name === "transcriptSegment" &&
-            node.attrs.segmentId === segmentId
-        ) {
-            pos = nodePos + 1;
-            return false;
-        }
-        return true;
-    });
-    if (pos !== null) {
-        editor.chain().focus().setTextSelection(pos).run();
-        return true;
+function readCaretAnchor(): CaretAnchor | null {
+    if (!editor.isFocused || !editor.state.selection.empty) {
+        return null;
     }
-    return false;
+    return segmentAnchorAt(editor.state.selection.from);
+}
+
+/**
+ * Places the caret in a segment. Does nothing when the segment is not in the
+ * document — a deleted one has no position to return to.
+ *
+ * @param anchor - Segment to focus and offset into its text, or `null`.
+ * @returns `true` when the caret was placed.
+ */
+function focusSegment(anchor: CaretAnchor | null): boolean {
+    const position = anchor ? positionOfSegmentAnchor(anchor) : null;
+    if (position === null) {
+        return false;
+    }
+    editor.chain().focus().setTextSelection(position).run();
+    return true;
 }
 
 // --- Click: seek the player / open the speaker menu -------------------------
@@ -833,6 +921,12 @@ function handleClick(event: MouseEvent): void {
     // start time code: play from the turn's beginning
     const timecode = target?.closest(".transcript-turn-tc[data-seek]");
     if (timecode instanceof HTMLElement && timecode.dataset.seek !== "") {
+        // follow the turn just clicked, not one still running alongside it
+        followedSegmentId.value =
+            timecode
+                .closest(".transcript-turn")
+                ?.querySelector("[data-segment-id]")
+                ?.getAttribute("data-segment-id") ?? null;
         executeCommand(
             new SeekToSecondsCommand(Number(timecode.dataset.seek)),
         );
@@ -856,6 +950,8 @@ function handleClick(event: MouseEvent): void {
     if (!located) {
         return;
     }
+    // Follow the clicked turn, not whichever one the document lists first.
+    followedSegmentId.value = located.segment.id;
     executeCommand(
         new SeekToSecondsCommand(
             timeAtCharOffset(located.segment, located.charOffset),
@@ -1120,7 +1216,9 @@ async function changeTurnSpeaker(newSpeaker: string): Promise<void> {
     .transcript-segment {
         border-radius: 0.25rem;
         transition: background-color 0.3s ease;
-        cursor: pointer;
+        /* The text is editable, so it reads as text — clicking it also seeks,
+           but a hand would promise a link and hide the caret it places. */
+        cursor: text;
     }
 
     /* formatting-only paragraph break inside a turn (see

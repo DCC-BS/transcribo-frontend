@@ -21,6 +21,11 @@ const props = withDefaults(defineProps<TranscriptionListProps>(), {
     isActive: false,
 });
 
+const emit = defineEmits<{
+    /** Playback was seeked into this segment. */
+    seek: [segmentId: string];
+}>();
+
 const MotionCard = motion.create(UCard);
 
 const { executeCommand } = useCommandBus();
@@ -115,11 +120,17 @@ function removeSegment(segment: StoredSegment): void {
 }
 
 /**
- * Seeks playback.
+ * Seeks playback. When the target lies inside this segment the list is told
+ * which segment asked, so an overlapping one does not take the highlight.
+ * Seeking to the end lands outside it (the range is half-open), so that
+ * claim would be false and is not made.
  *
  * @param time - Target time in seconds.
  */
 function seekTo(time: number): void {
+    if (time >= props.segment.start && time < props.segment.end) {
+        emit("seek", props.segment.id);
+    }
     executeCommand(new SeekToSecondsCommand(time));
 }
 

@@ -49,13 +49,30 @@ const segments = computed(() => props.segments);
 
 const speakers = computed(() => Array.from(getUniqueSpeakers(props.segments)));
 
+/*
+    Speakers may talk over each other, so several segments can cover the same
+    instant. Seeking from a segment marks it as the one being followed, which
+    then wins over the merely first match — otherwise clicking a segment's
+    time code would highlight and scroll to whichever overlapping segment
+    happens to come first in the list.
+*/
+const followedSegmentId = ref<string | null>(null);
+
 const currentSegmentId = computed(() => {
-    const current = segments.value.find(
-        (segment) =>
-            props.currentTime >= segment.start &&
-            props.currentTime < segment.end,
-    );
-    return current?.id;
+    let first: StoredSegment | undefined;
+    for (const segment of segments.value) {
+        if (
+            props.currentTime < segment.start ||
+            props.currentTime >= segment.end
+        ) {
+            continue;
+        }
+        if (segment.id === followedSegmentId.value) {
+            return segment.id;
+        }
+        first ??= segment;
+    }
+    return first?.id;
 });
 
 /**
@@ -182,7 +199,8 @@ async function addSegmentAtZero() {
                     <div :ref="(el) => setSegmentRef(segment.id, el)">
                         <TranscriptionListItem :segment="segment" :speakers="speakers"
                             :is-active="isSegmentActive(segment.id)"
-                            :current-time="isSegmentActive(segment.id) ? props.currentTime : 0" />
+                            :current-time="isSegmentActive(segment.id) ? props.currentTime : 0"
+                            @seek="followedSegmentId = $event" />
                     </div>
 
                     <USeparator>
