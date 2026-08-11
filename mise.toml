@@ -64,7 +64,7 @@ run = "bunx biome check --fix"
 
 # ── Testing ───────────────────────────────────────────────────────────────────
 
-[tasks.test]
+[tasks."test:unit"]
 description = "run unit tests"
 run = "bunx vitest"
 
