@@ -114,7 +114,7 @@ export function useExport() {
      * @param options - What to include (speakers, timestamps, merging,
      * summary) and the transcription to export.
      */
-    function exportAsText(options: ExportOptions) {
+    function exportAsText(options: ExportOptions): void {
         const finalText = buildTranscriptText(options);
 
         const blob = new Blob([finalText], { type: "text/plain" });

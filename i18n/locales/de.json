@@ -228,7 +228,8 @@
         "placeholder": "Keine Transkription zur Anzeige verfügbar",
         "playFromHere": "Hierhin springen",
         "copy": "Transkript kopieren",
-        "copied": "Transkript kopiert"
+        "copied": "Transkript kopiert",
+        "copyFailed": "Transkript konnte nicht kopiert werden"
     },
     "mode": {
         "viewer": "Betrachter",

@@ -206,24 +206,30 @@ const { executeCommand } = useCommandBus();
 // text so it can be pasted into Word, Notepad and friends.
 const { copy, copied } = useClipboard();
 const { buildTranscriptText } = useExport();
+const { showToast } = useUserFeedback();
 
 /**
  * Copies the transcript to the clipboard using the current display options.
  */
 async function copyTranscript(): Promise<void> {
-    await copy(
-        buildTranscriptText({
-            transcription: props.transcription,
-            segments: props.segments.map((segment) => ({
-                ...segment,
-                speaker: displayName(segment.speaker ?? undefined),
-            })),
-            withSpeakers: showSpeakers.value,
-            withTimestamps: showTimestamps.value,
-            mergeSegments: mergeSegments.value,
-            withSummary: false,
-        }),
-    );
+    // Clipboard access can be denied by the browser or the permission prompt
+    try {
+        await copy(
+            buildTranscriptText({
+                transcription: props.transcription,
+                segments: props.segments.map((segment) => ({
+                    ...segment,
+                    speaker: displayName(segment.speaker ?? undefined),
+                })),
+                withSpeakers: showSpeakers.value,
+                withTimestamps: showTimestamps.value,
+                mergeSegments: mergeSegments.value,
+                withSummary: false,
+            }),
+        );
+    } catch {
+        showToast(t("viewer.copyFailed"), "error");
+    }
 }
 
 // Click into the text plays from that word (read-only, no editing):

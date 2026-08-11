@@ -228,7 +228,8 @@
         "placeholder": "No transcription available to display",
         "playFromHere": "Jump to here",
         "copy": "Copy transcript",
-        "copied": "Transcript copied"
+        "copied": "Transcript copied",
+        "copyFailed": "Could not copy the transcript"
     },
     "mode": {
         "viewer": "Viewer",

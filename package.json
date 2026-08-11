@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "varlock run -- nuxt dev",
         "build": "nuxt build",
-        "debug": "varlock run -- nuxt dev --insepct",
+        "debug": "varlock run -- nuxt dev --inspect",
         "dummy": "AUTH_MODE=none DUMMY=true varlock run -- nuxt dev",
         "start": "nuxt start",
         "generate": "nuxt generate",

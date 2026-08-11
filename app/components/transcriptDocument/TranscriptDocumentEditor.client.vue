@@ -625,16 +625,21 @@ let lastPlayheadKey = "";
  * @returns `true` when the decorations changed.
  */
 function applyPlayheadDecorations(): boolean {
-    const position = activeSegments.value.map((segment) => ({
-        segmentId: segment.id,
-        charOffset: charOffsetAtTime(segment, props.currentTime),
+    const entries = activeSegments.value.map((segment) => {
+        const charOffset = charOffsetAtTime(segment, props.currentTime);
+        return {
+            segmentId: segment.id,
+            charOffset,
+            wordStart: wordStartAt(segment.text, charOffset),
+        };
+    });
+    const position = entries.map(({ segmentId, charOffset }) => ({
+        segmentId,
+        charOffset,
     }));
     // Redrawing is worth it only once the stained word somewhere has moved.
-    const key = position
-        .map((entry, index) => {
-            const text = activeSegments.value[index]?.text ?? "";
-            return `${entry.segmentId}:${wordStartAt(text, entry.charOffset)}`;
-        })
+    const key = entries
+        .map((entry) => `${entry.segmentId}:${entry.wordStart}`)
         .join("|");
     if (key === lastPlayheadKey) {
         return false;
