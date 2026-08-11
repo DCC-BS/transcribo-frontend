@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useClipboard } from "@vueuse/core";
 import { SeekToSecondsCommand } from "~/types/commands";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
@@ -201,6 +202,30 @@ const { t } = useI18n();
 
 const { executeCommand } = useCommandBus();
 
+// Copy the transcript exactly as the display options render it, as plain
+// text so it can be pasted into Word, Notepad and friends.
+const { copy, copied } = useClipboard();
+const { buildTranscriptText } = useExport();
+
+/**
+ * Copies the transcript to the clipboard using the current display options.
+ */
+async function copyTranscript(): Promise<void> {
+    await copy(
+        buildTranscriptText({
+            transcription: props.transcription,
+            segments: props.segments.map((segment) => ({
+                ...segment,
+                speaker: displayName(segment.speaker ?? undefined),
+            })),
+            withSpeakers: showSpeakers.value,
+            withTimestamps: showTimestamps.value,
+            mergeSegments: mergeSegments.value,
+            withSummary: false,
+        }),
+    );
+}
+
 // Click into the text plays from that word (read-only, no editing):
 // map the click to a character offset in the block's text node, then
 // interpolate the time. Works for merged blocks too — they carry the
@@ -361,6 +386,19 @@ async function seekFromClick(
 <template>
     <div class="flex min-h-0 grow flex-col">
         <Teleport defer to="#editor-toolbar-tools">
+            <UButton
+                v-if="displayedSegments.length > 0"
+                id="viewer-copy-transcript"
+                :icon="copied ? 'i-lucide-clipboard-check' : 'i-lucide-clipboard'"
+                color="primary"
+                variant="soft"
+                :title="copied ? t('viewer.copied') : t('viewer.copy')"
+                class="text-[0.82rem]"
+                :ui="{ leadingIcon: 'size-4' }"
+                @click="copyTranscript"
+            >
+                <span class="hidden md:inline">{{ t("viewer.copy") }}</span>
+            </UButton>
             <UPopover>
                 <UButton
                     id="viewer-display-options"

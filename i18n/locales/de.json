@@ -226,7 +226,9 @@
         "showTimestamps": "Zeitstempel anzeigen",
         "mergeSegments": "Transkriptionen zusammenführen",
         "placeholder": "Keine Transkription zur Anzeige verfügbar",
-        "playFromHere": "Hierhin springen"
+        "playFromHere": "Hierhin springen",
+        "copy": "Transkript kopieren",
+        "copied": "Transkript kopiert"
     },
     "mode": {
         "viewer": "Betrachter",

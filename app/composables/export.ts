@@ -55,12 +55,13 @@ export function useExport() {
     }
 
     /**
-     * Downloads the transcript as a plain text file.
+     * Builds the plain text rendering of the transcript.
      *
      * @param options - What to include (speakers, timestamps, merging,
-     * summary) and the transcription to export.
+     * summary) and the transcription to render.
+     * @returns The transcript as plain text.
      */
-    function exportAsText(options: ExportOptions) {
+    function buildTranscriptText(options: ExportOptions): string {
         let segments = options.segments;
 
         // Merge segments if requested
@@ -103,6 +104,18 @@ export function useExport() {
             // Use the stored summary
             finalText = `MEETING SUMMARY:\n${options.transcription.summary}\n\n---\n\nFULL TRANSCRIPT:\n${transcriptText}`;
         }
+
+        return finalText;
+    }
+
+    /**
+     * Downloads the transcript as a plain text file.
+     *
+     * @param options - What to include (speakers, timestamps, merging,
+     * summary) and the transcription to export.
+     */
+    function exportAsText(options: ExportOptions) {
+        const finalText = buildTranscriptText(options);
 
         const blob = new Blob([finalText], { type: "text/plain" });
         const url = URL.createObjectURL(blob);
@@ -272,6 +285,7 @@ export function useExport() {
     }
 
     return {
+        buildTranscriptText,
         exportAsText,
         exportAsSrt,
         exportAsJson,

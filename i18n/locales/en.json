@@ -226,7 +226,9 @@
         "showTimestamps": "Show timestamps",
         "mergeSegments": "Merge segments",
         "placeholder": "No transcription available to display",
-        "playFromHere": "Jump to here"
+        "playFromHere": "Jump to here",
+        "copy": "Copy transcript",
+        "copied": "Transcript copied"
     },
     "mode": {
         "viewer": "Viewer",
