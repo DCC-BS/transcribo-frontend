@@ -1,10 +1,12 @@
 {
     "name": "transcribo-frontend",
-    "version": "2.0.1",
+    "version": "2.0.2",
     "private": true,
     "scripts": {
-        "dev": "nuxt dev",
+        "dev": "varlock run -- nuxt dev",
         "build": "nuxt build",
+        "debug": "varlock run -- nuxt dev --inspect",
+        "dummy": "AUTH_MODE=none DUMMY=true varlock run -- nuxt dev",
         "start": "nuxt start",
         "generate": "nuxt generate",
         "lint": "biome check",
@@ -22,8 +24,8 @@
         "env:check": "bunx varlock load"
     },
     "dependencies": {
-        "@dcc-bs/audio-recorder.bs.js": "2.1.3",
-        "@dcc-bs/common-ui.bs.js": "2.1.2",
+        "@dcc-bs/audio-recorder.bs.js": "2.1.4",
+        "@dcc-bs/common-ui.bs.js": "2.1.5",
         "@dcc-bs/communication.bs.js": "0.1.3",
         "@dcc-bs/event-system.bs.js": "^1.4.3",
         "@ffmpeg/ffmpeg": "^0.12.15",
@@ -34,6 +36,7 @@
         "@nuxtjs/i18n": "10.5.0",
         "@nuxtjs/mdc": "0.22.0",
         "@tiptap/pm": "3.29.2",
+        "@tiptap/starter-kit": "3.29.2",
         "@tiptap/vue-3": "3.29.2",
         "@vite-pwa/nuxt": "1.1.1",
         "@vueuse/core": "^14.3.0",

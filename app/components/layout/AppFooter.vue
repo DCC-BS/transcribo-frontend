@@ -7,7 +7,9 @@
             class="relative border-t border-default bg-default py-2 text-muted"
         >
             <template #right>
-                <FeedbackControl inline />
+                <div class="flex justify-end">
+                    <FeedbackControl inline />
+                </div>
             </template>
         </DataBsFooter>
     </footer>

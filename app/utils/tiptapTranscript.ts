@@ -1,6 +1,7 @@
 import { mergeAttributes, Node } from "@tiptap/core";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
+import { canJoin } from "@tiptap/pm/transform";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { StoredSegment } from "~/types/storedSegments";
 import { formatTime } from "~/utils/time";
@@ -293,19 +294,19 @@ export function buildTranscriptDocContent(
 
 // --- Segment ownership -------------------------------------------------
 
-/** Id of the segment a node at `index` extends: the preceding one, else the
- *  following one — typing after a segment continues that segment. */
-function adjacentSegmentId(
+/** The node at `index` extends the preceding segment, else the following one
+ *  — typing after a segment continues that segment. `follows` marks the
+ *  latter case, where the id-less node comes first and so survives the join. */
+function adjacentSegmentNode(
     turn: ProseMirrorNode,
     index: number,
-): string | null {
+): { node: ProseMirrorNode; follows: boolean } | null {
     const previous = index > 0 ? turn.child(index - 1) : null;
+    if (previous?.attrs.segmentId) {
+        return { node: previous, follows: false };
+    }
     const next = index + 1 < turn.childCount ? turn.child(index + 1) : null;
-    return (
-        (previous?.attrs.segmentId as string | null) ??
-        (next?.attrs.segmentId as string | null) ??
-        null
-    );
+    return next?.attrs.segmentId ? { node: next, follows: true } : null;
 }
 
 /**
@@ -319,8 +320,11 @@ function adjacentSegmentId(
  * makes the next keystroke get wrapped in a fresh, id-less segment. Text
  * there belongs to no database row and is dropped by the next rebuild.
  *
- * Adopting such a node costs one attribute write; text and caret stay put
- * and the segment spans two nodes until the next rebuild collapses them.
+ * Adopting such a node costs one attribute write; text and caret stay put.
+ * The adopted node is then joined back into the sibling it belongs to, so the
+ * document keeps exactly one node per stored segment — the invariant the
+ * karaoke decorations (which measure word offsets per node) and the editor's
+ * sync check both rely on.
  */
 export function createSegmentOwnershipPlugin(): Plugin {
     return new Plugin({
@@ -330,22 +334,67 @@ export function createSegmentOwnershipPlugin(): Plugin {
             }
 
             const { tr } = newState;
+            // Boundaries between two nodes of one segment, in document order.
+            const boundaries: number[] = [];
+            let previousParent: ProseMirrorNode | null = null;
+            let previousIndex = -1;
+            let previousId: string | null = null;
+
             newState.doc.descendants((node, pos, parent, index) => {
                 if (node.type.name !== "transcriptSegment") {
                     return true;
                 }
-                if (node.attrs.segmentId || !parent) {
-                    return false;
+                let segmentId = node.attrs.segmentId as string | null;
+                if (!segmentId && parent) {
+                    const source = adjacentSegmentNode(parent, index);
+                    segmentId =
+                        (source?.node.attrs.segmentId as string) ?? null;
+                    if (source && segmentId) {
+                        /*
+                            The join below keeps the attrs of whichever node
+                            comes first. When the adopted node is the one in
+                            front, it has to carry its source's paragraph
+                            break over — otherwise typing into an empty
+                            segment that opens a paragraph silently closes
+                            the blank line before it.
+                        */
+                        tr.setNodeMarkup(pos, undefined, {
+                            ...node.attrs,
+                            segmentId,
+                            ...(source.follows
+                                ? {
+                                      paragraphBreak:
+                                          source.node.attrs.paragraphBreak,
+                                  }
+                                : {}),
+                        });
+                    }
                 }
-                const segmentId = adjacentSegmentId(parent, index);
-                if (segmentId) {
-                    tr.setNodeMarkup(pos, undefined, {
-                        ...node.attrs,
-                        segmentId,
-                    });
+                if (
+                    segmentId !== null &&
+                    segmentId === previousId &&
+                    parent === previousParent &&
+                    index === previousIndex + 1
+                ) {
+                    boundaries.push(pos);
                 }
+                previousParent = parent;
+                previousIndex = index;
+                previousId = segmentId;
                 return false;
             });
+
+            /*
+                Attribute writes leave every position untouched, so the
+                positions collected above stay valid; joining back to front
+                keeps the earlier ones valid too. The caret rides along on the
+                transaction's mapping.
+            */
+            for (const boundary of boundaries.reverse()) {
+                if (canJoin(tr.doc, boundary)) {
+                    tr.join(boundary);
+                }
+            }
 
             return tr.steps.length > 0 ? tr : null;
         },
@@ -354,11 +403,18 @@ export function createSegmentOwnershipPlugin(): Plugin {
 
 // --- Playhead plugin ---------------------------------------------------
 
-export interface PlayheadPosition {
-    segmentId: string | null;
+export interface PlayheadSegment {
+    segmentId: string;
     /** Interpolated character offset of the playback position. */
     charOffset: number;
 }
+
+/**
+ * Every segment being spoken right now. Speakers can talk over each other, so
+ * this holds one entry per simultaneously live turn — each gets its own
+ * current word.
+ */
+export type PlayheadPosition = PlayheadSegment[];
 
 export const playheadPluginKey = new PluginKey<PlayheadPosition>(
     "transcriptPlayhead",
@@ -376,19 +432,40 @@ export function createPlayheadPlugin(): Plugin<PlayheadPosition> {
     return new Plugin<PlayheadPosition>({
         key: playheadPluginKey,
         state: {
-            init: () => ({ segmentId: null, charOffset: 0 }),
+            init: () => [],
             apply: (tr, current) =>
                 (tr.getMeta(playheadPluginKey) as PlayheadPosition) ?? current,
         },
         props: {
             decorations(state) {
                 const playhead = playheadPluginKey.getState(state);
-                if (!playhead?.segmentId) {
+                if (!playhead?.length) {
                     return DecorationSet.empty;
                 }
+                const charOffsets = new Map(
+                    playhead.map((entry) => [
+                        entry.segmentId,
+                        entry.charOffset,
+                    ]),
+                );
+
+                /*
+                    With several turns live at once, "already played" means
+                    "before the last of them" — so where the played/upcoming
+                    split falls has to be known before decorating.
+                */
+                let lastActivePos = -1;
+                state.doc.descendants((node, pos) => {
+                    if (node.type.name !== "transcriptSegment") {
+                        return true;
+                    }
+                    if (charOffsets.has(node.attrs.segmentId as string)) {
+                        lastActivePos = pos;
+                    }
+                    return false;
+                });
 
                 const decorations: Decoration[] = [];
-                let reachedActive = false;
                 state.doc.descendants((node, pos) => {
                     if (node.type.name !== "transcriptSegment") {
                         return true;
@@ -396,20 +473,23 @@ export function createPlayheadPlugin(): Plugin<PlayheadPosition> {
 
                     const from = pos + 1;
                     const to = pos + 1 + node.content.size;
-                    if (node.attrs.segmentId !== playhead.segmentId) {
+                    const charOffset = charOffsets.get(
+                        node.attrs.segmentId as string,
+                    );
+                    if (charOffset === undefined) {
                         if (node.content.size > 0) {
                             decorations.push(
                                 Decoration.inline(from, to, {
-                                    class: reachedActive
-                                        ? "transcript-w-upcoming"
-                                        : "transcript-w-played",
+                                    class:
+                                        pos > lastActivePos
+                                            ? "transcript-w-upcoming"
+                                            : "transcript-w-played",
                                 }),
                             );
                         }
                         return false;
                     }
 
-                    reachedActive = true;
                     decorations.push(
                         Decoration.node(pos, pos + node.nodeSize, {
                             class: "transcript-segment--active",
@@ -420,7 +500,7 @@ export function createPlayheadPlugin(): Plugin<PlayheadPosition> {
                     const text = node.textContent;
                     const { start: wordStart, end: wordEnd } = wordBoundsAt(
                         text,
-                        playhead.charOffset,
+                        charOffset,
                     );
 
                     if (wordStart > 0) {
