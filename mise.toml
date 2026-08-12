@@ -65,10 +65,12 @@ run = "bunx biome check --fix"
 # ── Testing ───────────────────────────────────────────────────────────────────
 
 [tasks."test:unit"]
+env = { APP_MODE= "ci" }
 description = "run unit tests"
 run = "bunx vitest"
 
 [tasks."test:watch"]
+env = { APP_MODE= "ci" }
 description = "run unit tests in watch mode"
 run = "bunx vitest --watch"
 
