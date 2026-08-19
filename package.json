@@ -34,7 +34,7 @@
         "@mohtasham/md-to-docx": "2.10.2",
         "@nuxt/ui": "4.10.0",
         "@nuxtjs/i18n": "10.6.0",
-        "@nuxtjs/mdc": "0.22.0",
+        "@nuxtjs/mdc": "0.22.2",
         "@tiptap/pm": "3.29.2",
         "@tiptap/starter-kit": "3.29.2",
         "@tiptap/vue-3": "3.29.2",
