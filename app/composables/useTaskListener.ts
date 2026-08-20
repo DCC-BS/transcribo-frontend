@@ -1,4 +1,4 @@
-import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { match } from "ts-pattern";
 import { v4 as uuidv4 } from "uuid";
 import { db } from "~/stores/db";
@@ -20,6 +20,7 @@ import { isVideoFile } from "~/utils/videoUtils";
  * @returns The task-listener operations.
  */
 export function useTaskListener() {
+    const { apiFetch } = useApi();
     const { deleteTask } = useTasks();
     const { addTranscription } = getTranscriptionService();
     const { addSegments } = getSegmentService();

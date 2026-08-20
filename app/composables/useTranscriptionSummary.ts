@@ -1,4 +1,4 @@
-import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { db } from "~/stores/db";
 import type { StoredTranscription } from "~/types/storedTranscription";
 import { SummaryResponseSchema } from "~/types/summarizeResponse";
@@ -10,6 +10,7 @@ import type { SummarizeRequest, SummaryType } from "~~/shared/types/summary";
  * @returns The generation function and a reactive in-progress flag.
  */
 export function useTranscriptionSummary() {
+    const { apiFetch } = useApi();
     const { updateTranscription } = getTranscriptionService();
     const logger = useLogger();
 

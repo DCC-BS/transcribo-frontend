@@ -33,6 +33,13 @@ vi.stubGlobal("IntersectionObserver", vi.fn().mockImplementation(() => ({
     disconnect: vi.fn(),
 })));
 
+import { createApp } from "vue";
+import { createNuxtApp, callWithNuxt } from "nuxt/app";
+
+const vueApp = createApp({});
+const nuxtApp = createNuxtApp({ vueApp });
+callWithNuxt(nuxtApp, () => {});
+
 config.global.mocks = {
     $t: (key: string) => key,
     $i18n: {
