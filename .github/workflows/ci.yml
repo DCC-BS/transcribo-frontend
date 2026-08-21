@@ -24,4 +24,4 @@ jobs:
                   install_method: "bun"
                   build_command: "bun run build"
             - name: test
-              run: bun run test
+              run: bun run test:coverage

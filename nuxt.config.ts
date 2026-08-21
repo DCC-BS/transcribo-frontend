@@ -89,7 +89,7 @@ export default defineNuxtConfig({
         // Configure proper MIME types for WebAssembly files
         build: {
             rollupOptions: {
-                external: (id) => id.includes("ffmpeg-core"),
+                external: [/ffmpeg-core/],
             },
             target: "es2020",
         },

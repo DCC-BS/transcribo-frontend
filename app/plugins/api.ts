@@ -8,7 +8,7 @@ export default defineNuxtPlugin((_) => {
     const clientId = useClientId().getClientId();
 
     const fetcher = createFetcherBuilder()
-        .addHeader("X-Ephemeral-UUID", clientId)
+        .addHeader("X-Client-Id", clientId)
         .build();
 
     const apiClient = createApiClient(fetcher);
