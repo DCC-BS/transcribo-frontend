@@ -38,7 +38,7 @@
         "@biomejs/biome": "^2.5.8",
         "@nuxt/test-utils": "4.1.0",
         "@types/bun": "1.3.14",
-        "@varlock/proton-pass-plugin": "^1.1.0",
+        "@varlock/proton-pass-plugin": "^2.0.0",
         "@varlock/vite-integration": "^1.4.0",
         "@vitest/coverage-v8": "^4.1.10",
         "@vue/test-utils": "^2.4.11",
@@ -946,7 +946,7 @@
 
     "@unhead/vue": ["@unhead/vue@2.1.15", "", { "dependencies": { "hookable": "^6.0.1", "unhead": "2.1.15" }, "peerDependencies": { "vue": ">=3.5.18" } }, "sha512-SSByXfEjhzPn8gXdEdgpYqpLMPSkLUH2HVE0GxZfOtNsJ0GgOHQs0g9T67ZZ1z0kTELLKdtOtYrzrbv9+ffF7g=="],
 
-    "@varlock/proton-pass-plugin": ["@varlock/proton-pass-plugin@1.1.0", "", { "peerDependencies": { "varlock": "^1.7.2" } }, "sha512-BGvUSN4Y4LWIVZjx8oHdJhu8kfVUG+wgGcM8mRNPRbkam3KRLc99tCRONm/ln7bgN2ed9W0OMYp+o6cnc55oiA=="],
+    "@varlock/proton-pass-plugin": ["@varlock/proton-pass-plugin@2.0.0", "", { "peerDependencies": { "varlock": "^1.8.0" } }, "sha512-Dg6fmjggMSsL04PA2+BnUbigkmECAsPnA7JK7Ayfjw788eE4oJco6ZCkP96Wd3iKgf4HZ4fGxcMBCdIDb43dWw=="],
 
     "@varlock/vite-integration": ["@varlock/vite-integration@1.4.0", "", { "peerDependencies": { "varlock": "^1.14.0", "vite": ">=5" } }, "sha512-nHEJ9hIEa3aLU/l7DLP6OWWFXD2Y8NoWwA+D0ppDim2tLrHtMMOp19EAHvzFxbdzWw0PwN7Z6lHtGapPuEliGQ=="],
 
