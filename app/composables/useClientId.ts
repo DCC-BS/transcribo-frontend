@@ -6,12 +6,12 @@ const CLIENT_ID_KEY = "transcribo_client_id";
  * Composable for managing persistent client UUID
  */
 export function useClientId() {
-    const clientId = ref<string | null>(null);
+    const clientId = useState<string>(CLIENT_ID_KEY);
 
     /**
      * Initialize or retrieve the client ID from localStorage
      */
-    const initializeClientId = (): string => {
+    function initializeClientId(): string {
         // Check if we're on the client side
         if (typeof window === "undefined") {
             // On server side, generate a temporary ID that will be replaced on client
@@ -39,22 +39,22 @@ export function useClientId() {
             }
             return clientId.value;
         }
-    };
+    }
 
     /**
      * Get the current client ID, initializing if necessary
      */
-    const getClientId = (): string => {
+    function getClientId(): string {
         if (!clientId.value) {
             return initializeClientId();
         }
         return clientId.value;
-    };
+    }
 
     /**
      * Reset the client ID (generates a new one)
      */
-    const resetClientId = (): string => {
+    function resetClientId(): string {
         const newId = uuidv4();
 
         if (typeof window !== "undefined") {
@@ -70,11 +70,6 @@ export function useClientId() {
 
         clientId.value = newId;
         return newId;
-    };
-
-    // Initialize on creation if on client side
-    if (typeof window !== "undefined") {
-        initializeClientId();
     }
 
     return {

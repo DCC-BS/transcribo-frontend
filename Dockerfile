@@ -46,6 +46,10 @@ COPY --from=build --chown=node:node /app/.output ./
 COPY --from=build --chown=node:node /app/env.d.ts /app/
 COPY --chown=node:node /.env*.schema /app/
 
+# varlock resolves @plugin() from the schema against node_modules; ship the
+# plugin so it does not try to download it from npm at container startup
+COPY --from=build --chown=node:node /app/node_modules/@varlock/proton-pass-plugin /app/node_modules/@varlock/proton-pass-plugin
+
 COPY --from=ghcr.io/dmno-dev/varlock:latest --chown=node:node /usr/local/bin/varlock /usr/local/bin/varlock
 
 # Expose the port the app runs on

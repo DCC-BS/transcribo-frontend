@@ -1,4 +1,4 @@
-import { type ApiResponse, apiFetch } from "@dcc-bs/communication.bs.js";
+import type { ApiResponse } from "@dcc-bs/communication.bs.js";
 import {
     type TranscriptionResponse,
     TranscriptionResponseSchema,
@@ -15,6 +15,7 @@ import { getVocabularyService } from "~/utils/vocabularyService";
 export async function fetchTaskResultWithVocabulary(
     taskId: string,
 ): Promise<ApiResponse<TranscriptionResponse>> {
+    const { apiFetch } = useApi();
     const keywords = await getVocabularyService().getVocabularyAsKeywords();
     return await apiFetch(`/api/transcribe/${taskId}`, {
         method: "POST",

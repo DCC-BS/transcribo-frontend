@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { apiFetch, isApiError } from "@dcc-bs/communication.bs.js";
+import { isApiError } from "@dcc-bs/communication.bs.js";
 import { motion } from "motion-v";
 import type { MediaProgress } from "~/types/mediaProgress";
 import type { MediaConfigureData } from "~/types/mediaStepInOut";
@@ -10,6 +10,7 @@ const input = defineModel<MediaConfigureData>("input", { required: true });
 
 const errorMessage = ref<string>();
 
+const { apiFetch } = useApi();
 const { extractAudio } = useAudioExtract();
 const { t } = useI18n();
 

@@ -2,9 +2,9 @@ import type { StoredSegment } from "~/types/storedSegments";
 import { clamp, clamp01 } from "~/utils/math";
 
 /*
-    Time <-> character offset interpolation for the script-style transcript
-    viewer: maps the playback position into the text (playhead caret) and a
-    click position back into a playback time.
+    Playback position <-> text lookups for the script-style transcript
+    viewer: which segment is being spoken, where the playhead sits inside its
+    text, and which time a click in the text maps back to.
 */
 
 /**
@@ -38,6 +38,57 @@ export function charOffsetAtTime(
         currentTime,
     );
     return Math.round(progress * segment.text.length);
+}
+
+/**
+ * The segments being spoken at a playback position, one per turn covering it.
+ *
+ * Speakers may talk over each other — only *same*-speaker segments are barred
+ * from overlapping — so any number of turns can be live at once and each one
+ * contributes the segment it is currently on.
+ *
+ * Clicking behind the last word of a turn seeks to exactly its end time.
+ * That instant belongs to no turn under a plain half-open test, which would
+ * leave the karaoke without a current word and the transcript unstained.
+ * Turns ending exactly at `currentTime` are therefore kept as a fallback and
+ * only used when no turn really contains it, so a turn starting where its
+ * predecessor ends still wins.
+ *
+ * @param turns - Speaker turns in playback order.
+ * @param currentTime - Playback position in seconds.
+ * @returns The segments being spoken, empty outside the transcript.
+ */
+export function activeSegmentsAt<
+    T extends Pick<StoredSegment, "start" | "end">,
+>(
+    turns: readonly { readonly segments: readonly T[] }[],
+    currentTime: number,
+): T[] {
+    const spoken: T[] = [];
+    const endHere: T[] = [];
+    for (const turn of turns) {
+        const first = turn.segments[0];
+        const last = turn.segments[turn.segments.length - 1];
+        if (
+            !first ||
+            !last ||
+            currentTime < first.start ||
+            currentTime > last.end
+        ) {
+            continue;
+        }
+        // One speaker never overlaps themselves, so a turn's segments run in
+        // playback order and the last one that has started is the live one.
+        let active = first;
+        for (const segment of turn.segments) {
+            if (segment.start > currentTime) {
+                break;
+            }
+            active = segment;
+        }
+        (currentTime < last.end ? spoken : endHere).push(active);
+    }
+    return spoken.length > 0 ? spoken : endHere;
 }
 
 /**
