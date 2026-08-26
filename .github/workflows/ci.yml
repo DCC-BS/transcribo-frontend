@@ -14,4 +14,4 @@ env:
 
 jobs:
     frontend-ci:
-        uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@c78eccc843c19ba40a4b55aa4f4a8537cc3160b3 #v10
+        uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@d64a5d501aaee55d37be82405e03812862d43474

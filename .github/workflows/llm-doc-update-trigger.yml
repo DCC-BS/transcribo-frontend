@@ -5,7 +5,7 @@ on:
 
 jobs:
   docs:
-    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@v9
+    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@d64a5d501aaee55d37be82405e03812862d43474
     with:
       doc_repo: "DCC-BS/documentation"
       doc_path: "markdown/nuxt-layers"
