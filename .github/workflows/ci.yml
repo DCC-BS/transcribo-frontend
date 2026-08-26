@@ -10,18 +10,8 @@ on:
 
 env:
     APP_MODE: "ci"
+    CI: true
 
 jobs:
-    ci:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: DCC-BS/ci-workflows/actions/node-bun-biome-playwright@6d1cca8023e197f6e9cda5e64f3b3f0448f4cf6e # v9
-              with:
-                  node_version: "24.x"
-                  working_directory: "."
-                  run_biome: "true"
-                  run_playwright: "false"
-                  install_method: "bun"
-                  build_command: "bun run build"
-            - name: test
-              run: bun run test:coverage
+    frontend-ci:
+        uses: DCC-BS/ci-workflows/.github/workflows/ci.yml@d64a5d501aaee55d37be82405e03812862d43474

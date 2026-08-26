@@ -1,0 +1,102 @@
+[tools]
+bun = "1.3.0"
+node = "24.9.0"
+pass-cli = "latest"
+"npm:varlock" = "1.13.0"
+usage = "3.5.6"
+
+[plugins]
+pass-cli = "https://github.com/DCC-BS/mise-proton-pass-cli"
+
+[hooks]
+postinstall = { task = "install" }
+enter = { task = "enter-checks" }
+
+# ── Setup ─────────────────────────────────────────────────────────────────────
+
+[tasks.install]
+env = { APP_MODE = "build" }
+description = "install npm packages"
+run = [
+    "bun install",
+    "bunx nuxi prepare",
+]
+
+[tasks.env-check]
+description = "Load secrets into the environment via varlock"
+alias = "env"
+depends = ["pass-login"]
+run = "bunx varlock load"
+
+[tasks."nuxt:prepare"]
+description = "generate Nuxt types"
+run = "bunx nuxi prepare"
+
+# ── Development ───────────────────────────────────────────────────────────────
+
+[tasks.dev]
+description = "start the development server"
+run = "bunx nuxt dev"
+
+# ── Build & Preview ───────────────────────────────────────────────────────────
+
+[tasks.build]
+description = "build the production bundle"
+run = "bunx nuxt build"
+
+[tasks.preview]
+description = "preview the production build locally"
+run = "bunx nuxt preview"
+
+# ── Type Checking & Linting ───────────────────────────────────────────────────
+
+[tasks.tsc]
+description = "run TypeScript type checking"
+run = "bunx vue-tsc --noEmit -p tsconfig.json"
+
+[tasks.lint]
+description = "format code with Biome"
+run = "bunx biome format --write"
+
+[tasks.check]
+description = "check and fix linting issues"
+run = "bunx biome check --fix"
+
+[tasks."ci-check"]
+description = "run type checking, linting"
+run = "bunx biome ci ."
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+
+[tasks."test:unit"]
+env = { APP_MODE= "ci" }
+description = "run unit tests"
+alias = "test"
+run = "bunx vitest"
+
+[tasks."test:watch"]
+env = { APP_MODE= "ci" }
+description = "run unit tests in watch mode"
+run = "bunx vitest --watch"
+
+[tasks."test:coverage"]
+description = "run unit tests with coverage report"
+run = "bunx vitest run --coverage"
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+
+[tasks."docker:up"]
+description = "build and start the dev Docker containers"
+run = "docker compose -f docker-compose.dev.yml up --build -d"
+
+[tasks."docker:down"]
+description = "stop the dev Docker containers"
+run = "docker compose -f docker-compose.dev.yml down"
+
+[tasks."docker:prod"]
+description = "build and start the production Docker containers"
+run = "docker compose -f docker-compose.yml up --build -d"
+
+[tasks."docker:prod:down"]
+description = "stop the production Docker containers"
+run = "docker compose -f docker-compose.yml down"
