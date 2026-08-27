@@ -36,6 +36,7 @@ run = "bunx nuxi prepare"
 
 [tasks.dev]
 description = "start the development server"
+depends = "pass-login"
 run = "bunx nuxt dev"
 
 # ── Build & Preview ───────────────────────────────────────────────────────────
