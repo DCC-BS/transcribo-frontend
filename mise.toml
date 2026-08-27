@@ -43,7 +43,6 @@ run = "bunx nuxt dev"
 
 [tasks.build]
 description = "build the production bundle"
-depends = "pass-login"
 run = "bunx nuxt build"
 
 [tasks.preview]
