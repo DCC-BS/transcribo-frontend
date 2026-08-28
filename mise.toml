@@ -17,10 +17,14 @@ enter = { task = "enter-checks" }
 [tasks.install]
 env = { APP_MODE = "build" }
 description = "install npm packages"
-run = [
-    "bun install",
-    "bunx nuxi prepare",
-]
+run = '''
+if [ "${DOCKER_BUILD:-}" = "1" ]; then
+    bun install --frozen-lockfile
+else
+    bun install
+    bunx nuxi prepare
+fi
+'''
 
 [tasks.env-check]
 description = "Load secrets into the environment via varlock"
