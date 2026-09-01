@@ -208,6 +208,12 @@ export default defineNuxtConfig({
         ],
         defaultLocale: "de",
         strategy: "no_prefix",
+        detectBrowserLanguage: {
+            useCookie: true,
+            cookieKey: "i18n_redirected",
+            redirectOn: "no prefix",
+            alwaysRedirect: false,
+        },
     },
     pwa: {
         devOptions: {
