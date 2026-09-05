@@ -61,7 +61,7 @@
         "@varlock/vite-integration": "^1.4.0",
         "@vitest/coverage-v8": "^4.1.10",
         "@vue/test-utils": "^2.4.11",
-        "happy-dom": "20.11.2",
+        "happy-dom": "20.11.6",
         "jiti": "^2.7.0",
         "msw": "^2.15.0",
         "pino-pretty": "^13.1.3",
