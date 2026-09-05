@@ -50,7 +50,7 @@
         "varlock": "^1.16.1",
         "vue": "3.5.41",
         "vue-konva": "3.4.0",
-        "vue-tsc": "3.3.9",
+        "vue-tsc": "3.3.11",
         "zod": "4.4.3"
     },
     "devDependencies": {
