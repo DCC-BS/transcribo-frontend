@@ -1,7 +1,5 @@
 {
     "recommendations": [
-        "github.copilot",
-        "github.copilot-chat",
         "nuxtr.nuxt-vscode-extentions",
         "yoavbls.pretty-ts-errors",
         "bradlc.vscode-tailwindcss",

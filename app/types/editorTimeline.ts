@@ -20,3 +20,24 @@ export interface EditorLaneContextMenu {
     x: number;
     y: number;
 }
+
+export interface EditorLaneCanvasProps {
+    speakers: {
+        ids: string[];
+        colors: Record<string, string>;
+    };
+    blocks: EditorLaneBlock[];
+    timeline: {
+        duration: number;
+        currentTime: number;
+    };
+    viewport: {
+        height: number;
+        labelWidth: number;
+    };
+    active: {
+        blockId?: string;
+        speaker?: string;
+        autoScroll?: boolean;
+    };
+}

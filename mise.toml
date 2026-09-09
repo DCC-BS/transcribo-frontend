@@ -43,6 +43,12 @@ description = "start the development server"
 depends = "pass-login"
 run = "bunx nuxt dev"
 
+[tasks.dummy]
+description = ""
+depends = "pass-login"
+env = { DUMMY=true }
+run = "bunx nuxt dev"
+
 # ── Build & Preview ───────────────────────────────────────────────────────────
 
 [tasks.build]
