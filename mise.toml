@@ -1,6 +1,6 @@
 [tools]
 bun = "1.4.0"
-node = "24.19.0"
+node = "24.20.0"
 pass-cli = "latest"
 "npm:varlock" = "1.17.1"
 usage = "3.6.0"
