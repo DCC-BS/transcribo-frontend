@@ -183,6 +183,8 @@ const SOFT_SPLIT_CHARS = 5.5 * CHARS_PER_LINE;
 const HARD_SPLIT_CHARS = 9 * CHARS_PER_LINE;
 const SPLIT_PAUSE_SECONDS = 2.5;
 const SENTENCE_END = /[.!?…]["')\]]?$/;
+// A trailing abbreviation belongs to the next word ("Schulhaus St." | "Alban").
+const ABBREVIATION_END = /\b(?:St|Dr|Prof|Nr|bzw|ca|vgl|usw)\.$/i;
 
 /**
  * Decides whether a speaker turn should start a new paragraph before the next
@@ -205,8 +207,9 @@ function shouldBreakParagraph(
     if (paragraphLength < SOFT_SPLIT_CHARS) {
         return false;
     }
+    const text = lastSegment.text.trimEnd();
     return (
-        SENTENCE_END.test(lastSegment.text.trimEnd()) ||
+        (SENTENCE_END.test(text) && !ABBREVIATION_END.test(text)) ||
         next.start - lastSegment.end >= SPLIT_PAUSE_SECONDS
     );
 }

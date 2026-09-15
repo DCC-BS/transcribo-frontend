@@ -42,6 +42,9 @@ function stripExtension(fileName: string): string {
     return lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
 }
 
+// Forwarded untouched by the backend (see audio_converter.py); re-encoding adds a lossy generation.
+const PASSTHROUGH_EXTENSIONS = ["mp3", "ogg", "oga", "opus"];
+
 /**
  * ffmpeg-backed audio extraction for uploads, terminating the worker when the
  * owning component unmounts.
@@ -56,11 +59,7 @@ export const useAudioExtract = () => {
     });
 
     /**
-     * Transcodes any audio/video to mono 32 kbit/s Opus (drops video, shrinks
-     * upload). Opus is used instead of low-sample-rate MP3 because 16 kHz MP3
-     * introduces artifacts that make the Whisper worker's VAD/diarization skip
-     * whole passages; Opus at 32k keeps transcription quality on par with the
-     * untouched original at a quarter of the size.
+     * Uploads mp3/ogg audio as is; transcodes everything else to mono 48 kbit/s Opus.
      *
      * @param mediaFile - The source audio or video file.
      * @param onProgress - Optional callback receiving progress in percent.
@@ -71,6 +70,17 @@ export const useAudioExtract = () => {
         mediaFile: File,
         onProgress?: (percent: number) => void,
     ): Promise<{ audioBlob: Blob; audioFileName: string }> {
+        // Untyped files go through ffmpeg: the backend rejects uploads without a content type.
+        if (
+            mediaFile.type.startsWith("audio/") &&
+            PASSTHROUGH_EXTENSIONS.includes(
+                extension(mediaFile.name).toLowerCase(),
+            )
+        ) {
+            onProgress?.(100);
+            return { audioBlob: mediaFile, audioFileName: mediaFile.name };
+        }
+
         await ffmpeg.load();
 
         const audioFileName = `${stripExtension(mediaFile.name)}.ogg`;
@@ -94,11 +104,9 @@ export const useAudioExtract = () => {
                 "-c:a",
                 "libopus",
                 "-b:a",
-                "32k",
+                "48k",
                 "-ac",
                 "1",
-                "-application",
-                "voip",
                 audioFileName,
             ]);
             const data = await ffmpeg.readFile(audioFileName);

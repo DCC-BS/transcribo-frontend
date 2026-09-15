@@ -14,6 +14,7 @@ const { t } = useI18n();
 
 const language = ref<string>("de");
 const numSpeaker = ref<string>("auto");
+const { correctPlaceNames } = useTranscriptionSettings();
 
 const speakerOptions = [
     { label: t("upload.autoDetection"), value: "auto" },
@@ -203,6 +204,27 @@ function onNext() {
                         :items="audioLanguageOptions"
                         size="lg"
                         class="w-full"
+                    />
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label
+                        for="correct-place-names"
+                        class="flex items-center gap-2 text-sm font-semibold"
+                    >
+                        <UIcon
+                            name="i-lucide-map-pin"
+                            class="size-4 text-(--ui-primary-strong)"
+                        />
+                        {{ t("upload.correctPlaceNames") }}
+                    </label>
+                    <p class="text-xs leading-relaxed text-muted">
+                        {{ t("upload.correctPlaceNamesHelp") }}
+                    </p>
+                    <USwitch
+                        id="correct-place-names"
+                        v-model="correctPlaceNames"
+                        size="lg"
                     />
                 </div>
 
