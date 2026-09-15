@@ -175,6 +175,8 @@
             "kurzprotokollDesc": "Kurze Zusammenfassung der wichtigsten Punkte und Entscheidungen",
             "ergebnisprotokoll": "Ergebnisprotokoll",
             "ergebnisprotokollDesc": "Fokus ausschliesslich auf Ergebnisse, Entscheidungen und Aufgaben",
+            "managementSummary": "Management Summary",
+            "managementSummaryDesc": "Kompakte Übersicht für Entscheidungsträger",
             "verhandlungsprotokoll": "Verhandlungsprotokoll",
             "verhandlungsprotokollDesc": "Detailliertes Protokoll mit Diskussionen und Begründungen"
         }
