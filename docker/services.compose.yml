@@ -8,7 +8,7 @@ services:
             - ./nginx.conf:/etc/nginx/nginx.conf:ro
     llm:
         platform: linux/amd64
-        image: vllm/vllm-openai:v0.11.2
+        image: vllm/vllm-openai:v0.30.0
         container_name: llm
         expose:
             - "8000"
