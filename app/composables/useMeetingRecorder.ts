@@ -1,4 +1,4 @@
-import { useDisplayMedia, useIntervalFn, useUserMedia } from "@vueuse/core";
+import { useDisplayMedia, useUserMedia } from "@vueuse/core";
 
 /*
     Records a meeting as a single audio track: the microphone (your own voice)
@@ -7,25 +7,9 @@ import { useDisplayMedia, useIntervalFn, useUserMedia } from "@vueuse/core";
     Browsers only hand out screen audio together with a video track, so video
     is requested but never recorded — both streams are routed through a Web
     Audio graph into one destination, and only that mix reaches the recorder.
+    Recording itself is left to useAudioRecording, so a meeting is stored in
+    IndexedDB chunk by chunk and survives a crash like any other recording.
 */
-
-// Opus in WebM is what every browser that can capture screen audio produces;
-// the ordering is just a fallback chain, not a preference the user can see.
-const MIME_TYPES = [
-    "audio/webm;codecs=opus",
-    "audio/webm",
-    "audio/ogg;codecs=opus",
-];
-
-/**
- * Picks the first recording container the browser supports.
- *
- * @returns The mime type to record with, or `undefined` to let the browser
- * decide.
- */
-function pickMimeType(): string | undefined {
-    return MIME_TYPES.find((type) => MediaRecorder.isTypeSupported(type));
-}
 
 /** Why the feature cannot be offered, or `null` when it can. */
 export type MeetingRecorderUnsupported = "browser" | "platform";
@@ -62,66 +46,109 @@ export type MeetingRecorderError =
     | "no-screen-audio"
     | "failed";
 
+/** Thrown inside the capture step to abort the recording; `error` says why. */
+class CaptureAborted extends Error {}
+
 /**
  * Records a meeting as one audio track: microphone mixed with shared-screen
- * audio. Devices are released again when the surrounding scope is disposed.
+ * audio. Devices are released again when the surrounding scope is disposed;
+ * an interrupted recording stays in IndexedDB and shows up as abandoned.
  *
+ * @param logger - Receives debug output of the underlying recorder.
  * @returns Recording state (support, progress, elapsed time, live stream,
  * error) plus `start` and `stop`.
  */
-export function useMeetingRecorder() {
+export function useMeetingRecorder(logger?: (msg: string) => void) {
     const mic = useUserMedia({ constraints: { audio: true, video: false } });
     // video: true is required — browsers refuse to share audio on its own
     const screen = useDisplayMedia({ audio: true, video: true });
 
-    const isRecording = ref(false);
     const isStarting = ref(false);
     const error = ref<MeetingRecorderError | null>(null);
-    const elapsedSeconds = ref(0);
     /** The mixed audio being recorded — drives the level visualizer. */
     const stream = shallowRef<MediaStream | undefined>();
 
+    let audioContext: AudioContext | undefined;
+    let resolveRecording: ((audio: Blob | undefined) => void) | undefined;
+
+    const {
+        isRecording,
+        isProcessing,
+        recordingTime: elapsedSeconds,
+        startRecording,
+        stopRecording,
+    } = useAudioRecording({
+        getStream: captureMix,
+        onRecordingStarted: (mix) => {
+            stream.value = mix;
+        },
+        onRecordingStopped: (audio) => finish(audio),
+        storeToDbInterval: 10,
+        logger,
+    });
+
     const unsupported = computed<MeetingRecorderUnsupported | null>(() => {
-        if (
-            !mic.isSupported.value ||
-            !screen.isSupported.value ||
-            typeof MediaRecorder === "undefined"
-        ) {
+        if (!mic.isSupported.value || !screen.isSupported.value) {
             return "browser";
         }
         return detectUnsupported();
     });
     const isSupported = computed(() => unsupported.value === null);
 
-    let recorder: MediaRecorder | undefined;
-    let audioContext: AudioContext | undefined;
-    let chunks: Blob[] = [];
-    let resolveRecording: ((audio: Blob | undefined) => void) | undefined;
-
-    const timer = useIntervalFn(
-        () => {
-            elapsedSeconds.value += 1;
-        },
-        1000,
-        { immediate: false },
-    );
+    /**
+     * Asks for the screen share and the microphone and mixes both into one
+     * audio-only stream for the recorder.
+     *
+     * @returns The mixed stream.
+     * @throws CaptureAborted when a source is missing; `error` says which.
+     */
+    async function captureMix(): Promise<MediaStream> {
+        try {
+            return await mixSources();
+        } catch (cause) {
+            if (
+                cause instanceof DOMException &&
+                cause.name === "NotAllowedError"
+            ) {
+                error.value = "permission-denied";
+            }
+            throw cause;
+        }
+    }
 
     /**
-     * Mixes the given streams down to one audio-only stream. The AudioContext
-     * is kept so it can be closed again when the recording ends.
+     * Opens both sources and routes them into one destination.
      *
-     * @param streams - Source streams; tracks without audio are ignored.
-     * @returns The mixed audio-only stream.
+     * @returns The mixed stream.
      */
-    function mixToSingleStream(streams: MediaStream[]): MediaStream {
+    async function mixSources(): Promise<MediaStream> {
+        // the screen picker first: it is the step a user is most likely
+        // to cancel, and cancelling should not leave the mic running
+        const screenStream = await screen.start();
+        if (!screenStream) {
+            error.value = "permission-denied";
+            throw new CaptureAborted();
+        }
+        if (screenStream.getAudioTracks().length === 0) {
+            error.value = "no-screen-audio";
+            throw new CaptureAborted();
+        }
+
+        const micStream = await mic.start();
+        if (!micStream) {
+            error.value = "permission-denied";
+            throw new CaptureAborted();
+        }
+
+        // ending the share from the browser's own bar must stop us too
+        for (const track of screenStream.getVideoTracks()) {
+            track.addEventListener("ended", () => void stop());
+        }
+
         audioContext = new AudioContext();
         const destination = audioContext.createMediaStreamDestination();
-        for (const source of streams) {
-            if (source.getAudioTracks().length > 0) {
-                audioContext
-                    .createMediaStreamSource(source)
-                    .connect(destination);
-            }
+        for (const source of [micStream, screenStream]) {
+            audioContext.createMediaStreamSource(source).connect(destination);
         }
         return destination.stream;
     }
@@ -138,127 +165,80 @@ export function useMeetingRecorder() {
     }
 
     /**
+     * Hands the finished recording to whoever awaits {@link start}.
+     *
+     * @param audio - The recorded audio, or `undefined` if there is none.
+     */
+    function finish(audio: Blob | undefined): void {
+        releaseDevices();
+        resolveRecording?.(audio);
+        resolveRecording = undefined;
+    }
+
+    /**
      * Starts microphone and screen capture and records the mix.
      *
      * @returns The recorded audio once {@link stop} is called, or `undefined`
      * when the recording could not be started — `error` says why.
      */
     async function start(): Promise<Blob | undefined> {
-        if (isRecording.value || isStarting.value) {
+        if (isRecording.value || isStarting.value || isProcessing.value) {
             return undefined;
         }
         error.value = null;
         isStarting.value = true;
 
+        // resolves only once stop() is called, so the caller awaits the
+        // whole recording
+        const recording = new Promise<Blob | undefined>((resolve) => {
+            resolveRecording = resolve;
+        });
         try {
-            // the screen picker first: it is the step a user is most likely
-            // to cancel, and cancelling should not leave the mic running
-            const screenStream = await screen.start();
-            if (!screenStream) {
-                error.value = "permission-denied";
-                return undefined;
-            }
-            if (screenStream.getAudioTracks().length === 0) {
-                error.value = "no-screen-audio";
-                releaseDevices();
-                return undefined;
-            }
-
-            const micStream = await mic.start();
-            if (!micStream) {
-                error.value = "permission-denied";
-                releaseDevices();
-                return undefined;
-            }
-
-            // ending the share from the browser's own bar must stop us too
-            for (const track of screenStream.getVideoTracks()) {
-                track.addEventListener("ended", () => void stop());
-            }
-
-            stream.value = mixToSingleStream([micStream, screenStream]);
-            recorder = new MediaRecorder(stream.value, {
-                mimeType: pickMimeType(),
-            });
-            chunks = [];
-            recorder.addEventListener("dataavailable", (event) => {
-                if (event.data.size > 0) {
-                    chunks.push(event.data);
-                }
-            });
-
-            const recording = new Promise<Blob | undefined>((resolve) => {
-                resolveRecording = resolve;
-            });
-            // read off the recorder now: `stop` fires asynchronously, by
-            // which time the reference has already been cleared
-            const recordedType = recorder.mimeType;
-            recorder.addEventListener("stop", () => {
-                const audio = chunks.length
-                    ? new Blob(chunks, { type: recordedType })
-                    : undefined;
-                chunks = [];
-                resolveRecording?.(audio);
-                resolveRecording = undefined;
-            });
-            // without this the caller would await a recording that can never
-            // arrive, leaving the view stuck mid-recording
-            recorder.addEventListener("error", () => {
-                error.value = "failed";
-                chunks = [];
-                resolveRecording?.(undefined);
-                resolveRecording = undefined;
-                stop();
-            });
-
-            recorder.start();
-            isRecording.value = true;
-            isStarting.value = false;
-            elapsedSeconds.value = 0;
-            timer.resume();
-            // resolves only once stop() is called, so the caller awaits the
-            // whole recording
-            return await recording;
-        } catch (cause) {
-            error.value =
-                cause instanceof DOMException &&
-                cause.name === "NotAllowedError"
-                    ? "permission-denied"
-                    : "failed";
-            releaseDevices();
-            return undefined;
+            await startRecording();
         } finally {
             isStarting.value = false;
         }
+
+        // useAudioRecording reports start failures through its own,
+        // microphone-worded error; ours is more precise when we have one
+        if (!isRecording.value) {
+            error.value ??= "failed";
+            finish(undefined);
+        }
+        return recording;
     }
 
     /**
-     * Ends the recording and releases the devices.
-     *
-     * Devices are released unconditionally, not just while recording: the
-     * screen share is granted before the recorder exists, and unlike
-     * useUserMedia, VueUse's useDisplayMedia registers no scope-dispose
-     * cleanup of its own. Tearing down between the picker and the first chunk
-     * would otherwise leave the capture — and the browser's "sharing your
-     * screen" bar — running.
+     * Ends the recording; the audio arrives through {@link start} once the
+     * stored chunks are joined.
      */
-    function stop(): void {
-        if (isRecording.value) {
-            isRecording.value = false;
-            timer.pause();
-            recorder?.stop();
-            recorder = undefined;
+    async function stop(): Promise<void> {
+        if (!isRecording.value) {
+            return;
         }
-        releaseDevices();
+        try {
+            await stopRecording();
+        } catch {
+            error.value = "failed";
+            finish(undefined);
+        }
     }
 
-    onScopeDispose(stop);
+    /*
+        Unmounting only releases the devices: useAudioRecording aborts on its
+        own and keeps the stored chunks, so the meeting can be recovered from
+        the abandoned recordings. useDisplayMedia, unlike useUserMedia,
+        registers no cleanup of its own, so without this the browser's
+        "sharing your screen" bar would keep running.
+    */
+    onScopeDispose(() => finish(undefined));
 
     return {
         isSupported,
         unsupported,
         isRecording,
         isStarting,
+        isProcessing,
         elapsedSeconds,
         stream,
         error,
