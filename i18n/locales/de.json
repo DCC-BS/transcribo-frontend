@@ -40,6 +40,8 @@
         "audioLanguageHelp": "Welche Sprache wurde in der Audiodatei gesprochen? Wenn du nicht sicher bist, wähle 'Automatische Erkennung'.",
         "settings": "Einstellungen",
         "configureTranscription": "Konfiguriere deine Transkription",
+        "correctPlaceNames": "Basler Orts- und Strassennamen korrigieren",
+        "correctPlaceNamesHelp": "Gleicht erkannte Strassen-, Quartier- und Gebäudenamen mit dem amtlichen Basler Verzeichnis ab und korrigiert die Schreibweise.",
         "settingsInfo": "Diese Einstellungen helfen, die Genauigkeit der Transkription zu verbessern. Du kannst beide auf automatische Erkennung lassen, wenn du unsicher bist.",
         "preparingAudio": "Audio wird vorbereitet...",
         "processing": "In Bearbeitung"

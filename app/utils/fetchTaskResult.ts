@@ -16,10 +16,11 @@ export async function fetchTaskResultWithVocabulary(
     taskId: string,
 ): Promise<ApiResponse<TranscriptionResponse>> {
     const { apiFetch } = useApi();
+    const { correctPlaceNames } = useTranscriptionSettings();
     const keywords = await getVocabularyService().getVocabularyAsKeywords();
     return await apiFetch(`/api/transcribe/${taskId}`, {
         method: "POST",
-        body: { keywords },
+        body: { keywords, correct_place_names: correctPlaceNames.value },
         schema: TranscriptionResponseSchema,
     });
 }
