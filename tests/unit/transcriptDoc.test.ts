@@ -69,6 +69,13 @@ describe("buildTranscriptTurns paragraph breaks", () => {
         expect(turns[0]?.paragraphBreaks.size).toBeGreaterThan(0);
     });
 
+    it("does not treat a trailing abbreviation as a sentence end", () => {
+        const abbreviated = `${sentence.slice(0, -1)} Schulhaus St.`;
+        // Past the soft split but below the hard limit, so only sentence ends could break.
+        const turns = buildTranscriptTurns(run(abbreviated, 7));
+        expect(turns[0]?.paragraphBreaks.size).toBe(0);
+    });
+
     it("never breaks when merging is off", () => {
         const turns = buildTranscriptTurns(run(sentence, 12), false);
         expect(turns).toHaveLength(12);
