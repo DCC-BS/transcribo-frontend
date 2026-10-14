@@ -175,6 +175,8 @@
             "kurzprotokollDesc": "Brief summary of key points and decisions",
             "ergebnisprotokoll": "Results Protocol",
             "ergebnisprotokollDesc": "Focus exclusively on outcomes, decisions, and action items",
+            "managementSummary": "Management Summary",
+            "managementSummaryDesc": "Concise overview for decision-makers",
             "verhandlungsprotokoll": "Negotiation Protocol",
             "verhandlungsprotokollDesc": "Detailed protocol with discussions and reasoning"
         }
