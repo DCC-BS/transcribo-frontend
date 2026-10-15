@@ -8,21 +8,24 @@ const emit = defineEmits<(e: "onRecordingComplete", file: Blob) => void>();
 const active = defineModel<boolean>("active", { default: false });
 
 const { t } = useI18n();
+const logger = useLogger();
 const {
     isSupported,
     unsupported,
     isRecording,
     isStarting,
+    isProcessing,
     elapsedSeconds,
     stream,
     error,
     start,
     stop,
-} = useMeetingRecorder();
+} = useMeetingRecorder((msg) => logger.debug(msg));
 
-// the screen picker counts as busy too, not just the running recording
+// the screen picker and joining the chunks count as busy too, not just the
+// running recording
 watchEffect(() => {
-    active.value = isRecording.value || isStarting.value;
+    active.value = isRecording.value || isStarting.value || isProcessing.value;
 });
 
 /**
@@ -50,7 +53,7 @@ const hint = computed(() =>
                 icon="i-lucide-monitor-speaker"
                 color="neutral"
                 variant="subtle"
-                :loading="isStarting"
+                :loading="isStarting || isProcessing"
                 :disabled="!isSupported"
                 @click="record"
             >

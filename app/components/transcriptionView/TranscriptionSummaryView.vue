@@ -31,6 +31,11 @@ const summaryOptions: {
             description: t("summary.types.ergebnisprotokollDesc"),
         },
         {
+            label: t("summary.types.managementSummary"),
+            value: "management_summary",
+            description: t("summary.types.managementSummaryDesc"),
+        },
+        {
             label: t("summary.types.verhandlungsprotokoll"),
             value: "verhandlungsprotokoll",
             description: t("summary.types.verhandlungsprotokollDesc"),

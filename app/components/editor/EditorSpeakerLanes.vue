@@ -1,20 +1,9 @@
 <script setup lang="ts">
 import { onClickOutside, useLocalStorage } from "@vueuse/core";
-import {
-    DeleteSegmentsCommand,
-    UpdateSegmentCommand,
-    UpdateSegmentsCommand,
-} from "~/types/commands";
-import type {
-    EditorLaneBlock,
-    EditorLaneChange,
-    EditorLaneContextMenu,
-} from "~/types/editorTimeline";
+import type { EditorLaneBlock, EditorLaneContextMenu } from "~/types/editorTimeline";
 import type { StoredSegment } from "~/types/storedSegments";
 import type { StoredTranscription } from "~/types/storedTranscription";
-import { describeLaneChange, laneAcceptsBlock } from "~/utils/laneGeometry";
 import { clamp } from "~/utils/math";
-import { buildTranscriptTurns } from "~/utils/tiptapTranscript";
 
 const props = defineProps<{
     transcription: StoredTranscription;
@@ -31,20 +20,32 @@ const zoom = defineModel<number>("zoom", { required: true });
 const emit = defineEmits<(event: "seek", seconds: number) => void>();
 
 const { t } = useI18n();
-const { executeCommand } = useCommandBus();
-const { openDialog } = useDialog();
 const { renameSpeaker } = useSpeakerRename(
     () => props.transcription.id,
     () => props.segments,
 );
+const { speakerIds: speakers, displayName, speakerColors, addSpeaker } =
+    useSpeakerRegistry();
 
 const {
-    speakerIds: speakers,
-    displayName,
-    speakerColors,
-    addSpeaker,
-    removeEmptySpeaker,
-} = useSpeakerRegistry();
+    segmentsBySpeaker,
+    timelineDuration,
+    blocks,
+    blockForId,
+    activeBlock,
+    activeSpeaker,
+} = useLaneBlocks(
+    () => props.segments,
+    () => props.mergeSegments,
+    () => props.duration,
+    () => props.currentTime,
+);
+
+const commands = useLaneCommands(
+    blocks,
+    segmentsBySpeaker,
+    (seconds) => emit("seek", seconds),
+);
 
 // --- resizable speaker column (drag the split next to the lane track) -------
 
@@ -73,238 +74,6 @@ function beginLabelResize(event: PointerEvent): void {
         () => window.removeEventListener("pointermove", move),
         { once: true },
     );
-}
-
-const segmentsBySpeaker = computed(() => {
-    const map = new Map<string, StoredSegment[]>();
-    for (const segment of props.segments) {
-        const speaker = segment.speaker ?? "unknown";
-        const entries = map.get(speaker) ?? [];
-        entries.push(segment);
-        map.set(speaker, entries);
-    }
-    return map;
-});
-
-const timelineDuration = computed(() =>
-    props.segments.reduce(
-        (latestEnd, segment) => Math.max(latestEnd, segment.end),
-        props.duration,
-    ),
-);
-
-// A merged block must keep its members when it moves across other speakers in
-// time. Rebuilding turns solely from chronological order would split that block
-// as soon as another speaker falls between two of its member segments.
-const mergeGroupBySegmentId = new Map<string, string>();
-
-/**
- * Rebuilds the segment-to-turn mapping so lane blocks match the merged turns shown in the document editor.
- */
-function initializeMergeGroups(): void {
-    mergeGroupBySegmentId.clear();
-    for (const turn of buildTranscriptTurns(props.segments, true)) {
-        const groupId = turn.segments[0]?.id;
-        if (!groupId) {
-            continue;
-        }
-        for (const segment of turn.segments) {
-            mergeGroupBySegmentId.set(segment.id, groupId);
-        }
-    }
-}
-
-watch(
-    [() => props.segments, () => props.mergeSegments],
-    ([segments, merged], [, previousMerged]) => {
-        if (!merged) {
-            mergeGroupBySegmentId.clear();
-            return;
-        }
-        if (!previousMerged || mergeGroupBySegmentId.size === 0) {
-            initializeMergeGroups();
-            return;
-        }
-        // Keep mappings for deleted IDs while this editor is mounted. Undo may
-        // restore them, and segment IDs are stable, so retaining the mapping
-        // restores the exact merged block without affecting new segments.
-        for (const segment of segments) {
-            if (!mergeGroupBySegmentId.has(segment.id)) {
-                mergeGroupBySegmentId.set(segment.id, segment.id);
-            }
-        }
-    },
-    { immediate: true, flush: "sync" },
-);
-
-const blocks = computed<EditorLaneBlock[]>(() => {
-    if (props.mergeSegments) {
-        const groups = new Map<string, StoredSegment[]>();
-        for (const segment of props.segments) {
-            const groupId = mergeGroupBySegmentId.get(segment.id) ?? segment.id;
-            const entries = groups.get(groupId) ?? [];
-            entries.push(segment);
-            groups.set(groupId, entries);
-        }
-        return Array.from(groups, ([id, segments]) => {
-            const sorted = [...segments].sort(
-                (left, right) => left.start - right.start,
-            );
-            const first = sorted[0] as StoredSegment;
-            const last = sorted[sorted.length - 1] as StoredSegment;
-            return {
-                id,
-                speaker: first.speaker ?? "unknown",
-                start: first.start,
-                end: last.end,
-                segments: sorted,
-            };
-        }).sort((left, right) => left.start - right.start);
-    }
-
-    const result: EditorLaneBlock[] = [];
-    const turns = buildTranscriptTurns(props.segments, false);
-    for (const turn of turns) {
-        const first = turn.segments[0];
-        const last = turn.segments[turn.segments.length - 1];
-        if (!first || !last) {
-            continue;
-        }
-        result.push({
-            id: first.id,
-            speaker: turn.speaker ?? "unknown",
-            start: first.start,
-            end: last.end,
-            segments: turn.segments,
-        });
-    }
-    return result;
-});
-
-/**
- * Looks up a lane block.
- *
- * @param blockId - Block id.
- * @returns The block, or `undefined` when it is gone.
- */
-function blockForId(blockId: string): EditorLaneBlock | undefined {
-    return blocks.value.find((block) => block.id === blockId);
-}
-
-// currently playing block and speaker — drive the lane highlight
-const activeBlock = computed(() =>
-    blocks.value.find(
-        (block) =>
-            props.currentTime >= block.start && props.currentTime < block.end,
-    ),
-);
-const activeSpeaker = computed(() => activeBlock.value?.speaker);
-
-// Delete key on a selected block: remove every segment it holds (one in
-// unmerged mode, the whole merged run otherwise).
-/**
- * Deletes a whole lane block as one undoable command.
- *
- * @param blockId - Block to delete.
- */
-async function deleteBlock(blockId: string): Promise<void> {
-    const block = blockForId(blockId);
-    if (!block) {
-        return;
-    }
-    // one command for the whole block, so undo/redo restores it as a whole
-    await executeCommand(
-        new DeleteSegmentsCommand(
-            block.segments.map((segment) => segment.id),
-        ),
-    );
-}
-
-/**
- * Applies a finished lane drag — move, resize or speaker change — to the underlying segments.
- *
- * @param change - The change the canvas reported.
- */
-async function applyLaneChange(change: EditorLaneChange): Promise<void> {
-    const block = blockForId(change.blockId);
-    if (!block) {
-        return;
-    }
-
-    const { startDelta, isMove, isNoop, movedStart, movedEnd } =
-        describeLaneChange(block, change);
-
-    if (isMove) {
-        if (isNoop) {
-            return;
-        }
-        await executeCommand(
-            new UpdateSegmentsCommand(
-                block.segments.map((segment) => ({
-                    segmentId: segment.id,
-                    updates: {
-                        start: segment.start + startDelta,
-                        end: segment.end + startDelta,
-                        ...(change.targetSpeaker
-                            ? { speaker: change.targetSpeaker }
-                            : {}),
-                    },
-                })),
-            ),
-        );
-        return;
-    }
-
-    const first = block.segments[0];
-    const last = block.segments[block.segments.length - 1];
-    if (!first || !last) {
-        return;
-    }
-    if (first.id === last.id) {
-        await executeCommand(
-            new UpdateSegmentCommand(first.id, {
-                ...(movedStart ? { start: change.start } : {}),
-                ...(movedEnd ? { end: change.end } : {}),
-            }),
-        );
-        return;
-    }
-
-    const updates: ConstructorParameters<typeof UpdateSegmentsCommand>[0] = [];
-    if (movedStart) {
-        updates.push({
-            segmentId: first.id,
-            updates: { start: change.start },
-        });
-    }
-    if (movedEnd) {
-        updates.push({
-            segmentId: last.id,
-            updates: { end: change.end },
-        });
-    }
-    if (updates.length > 0) {
-        await executeCommand(new UpdateSegmentsCommand(updates));
-    }
-}
-
-// Jump per block, not per segment: with merging on, a merged run counts as
-// one stop and the jump lands on its first timestamp.
-/**
- * Seeks to the speaker's next block after the playhead, wrapping to their first one.
- *
- * @param speaker - Speaker id.
- */
-function jumpToNext(speaker: string): void {
-    const sorted = blocks.value
-        .filter((block) => block.speaker === speaker)
-        .sort((left, right) => left.start - right.start);
-    const next =
-        sorted.find((block) => block.start > props.currentTime + 0.05) ??
-        sorted[0];
-    if (next) {
-        emit("seek", next.start);
-    }
 }
 
 /**
@@ -353,32 +122,10 @@ function openBlockMenu(menu: EditorLaneContextMenu): void {
 async function moveBlockTo(target: string): Promise<void> {
     const block = blockMenu.value?.block;
     blockMenu.value = undefined;
-    if (
-        !block ||
-        target === block.speaker ||
-        !canMoveBlockTo(block, target)
-    ) {
+    if (!block) {
         return;
     }
-    await executeCommand(
-        new UpdateSegmentsCommand(
-            block.segments.map((segment) => ({
-                segmentId: segment.id,
-                updates: { speaker: target },
-            })),
-        ),
-    );
-}
-
-/**
- * Whether a block fits into a lane without overlapping.
- *
- * @param block - The block to move.
- * @param target - Target speaker id.
- * @returns `true` when the lane has room.
- */
-function canMoveBlockTo(block: EditorLaneBlock, target: string): boolean {
-    return laneAcceptsBlock(blocks.value, block, target);
+    await commands.moveBlockTo(block, target);
 }
 
 /**
@@ -389,7 +136,7 @@ function canMoveBlockTo(block: EditorLaneBlock, target: string): boolean {
  */
 function blockMenuDisabledFor(target: string): boolean {
     const block = blockMenu.value?.block;
-    return block ? !canMoveBlockTo(block, target) : false;
+    return block ? !commands.canMoveBlockTo(block, target) : false;
 }
 
 const laneMenu = ref<{ speaker: string; x: number; y: number }>();
@@ -422,14 +169,7 @@ async function moveSegmentsTo(target: string): Promise<void> {
     if (!source || source === target) {
         return;
     }
-    await executeCommand(
-        new UpdateSegmentsCommand(
-            (segmentsBySpeaker.value.get(source) ?? []).map((segment) => ({
-                segmentId: segment.id,
-                updates: { speaker: target },
-            })),
-        ),
-    );
+    await commands.moveSegmentsTo(source, target);
     laneMenu.value = undefined;
 }
 
@@ -442,35 +182,7 @@ function requestDeleteSpeaker(): void {
     if (!speaker) {
         return;
     }
-    const segmentIds = (segmentsBySpeaker.value.get(speaker) ?? []).map(
-        (segment) => segment.id,
-    );
-    if (segmentIds.length === 0) {
-        return;
-    }
-    openDialog({
-        title: t("editor.lanes.deleteSpeaker"),
-        message: t("editor.lanes.deleteSpeakerConfirm", {
-            speaker: displayName(speaker),
-        }),
-        onSubmit: () => {
-            void deleteSpeakerSegments(speaker, segmentIds);
-        },
-    });
-}
-
-/**
- * Deletes a speaker's segments and drops the now empty speaker.
- *
- * @param speaker - Speaker id.
- * @param segmentIds - Segments to delete.
- */
-async function deleteSpeakerSegments(
-    speaker: string,
-    segmentIds: string[],
-): Promise<void> {
-    await executeCommand(new DeleteSegmentsCommand(segmentIds));
-    removeEmptySpeaker(speaker);
+    commands.requestDeleteSpeaker(speaker, t);
 }
 
 const editingSpeaker = ref<string>();
@@ -604,20 +316,25 @@ async function confirmAddSpeaker(): Promise<void> {
 
         <EditorSpeakerLanesCanvas
             v-model:zoom="zoom"
-            :speakers="speakers"
-            :label-width="labelWidth"
-            :active-block-id="activeBlock?.id"
-            :active-speaker="activeSpeaker"
-            :auto-scroll="props.autoScroll"
+            :speakers="{ ids: speakers, colors: speakerColors }"
             :blocks="blocks"
-            :current-time="props.currentTime"
-            :duration="timelineDuration"
-            :viewport-height="props.viewportHeight ?? 4 * 44 + 27"
-            :speaker-colors="speakerColors"
+            :timeline="{
+                duration: timelineDuration,
+                currentTime: props.currentTime,
+            }"
+            :viewport="{
+                height: props.viewportHeight ?? 4 * 44 + 27,
+                labelWidth,
+            }"
+            :active="{
+                blockId: activeBlock?.id,
+                speaker: activeSpeaker,
+                autoScroll: props.autoScroll,
+            }"
             @seek="emit('seek', $event)"
-            @change="applyLaneChange"
+            @change="commands.applyLaneChange"
             @contextmenu="openBlockMenu"
-            @delete="deleteBlock"
+            @delete="commands.deleteBlock"
         >
             <template #speaker="{ speaker }">
                 <div
@@ -651,7 +368,7 @@ async function confirmAddSpeaker(): Promise<void> {
                         type="button"
                         class="rounded-md p-0.5 text-dimmed hover:bg-elevated hover:text-default"
                         :title="t('editor.lanes.jumpToNext')"
-                        @click.stop="jumpToNext(speaker)"
+                        @click.stop="commands.jumpToNext(speaker, props.currentTime)"
                     >
                         <UIcon name="i-lucide-step-forward" class="size-4" />
                     </button>

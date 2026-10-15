@@ -32,13 +32,7 @@ function onRecodingComplete(audio: Blob) {
  * @param audio - The recorded audio.
  */
 function onMeetingRecorded(audio: Blob) {
-    // the recorder reports e.g. "audio/webm;codecs=opus" — the codec suffix
-    // is dropped so the file carries a plain media type
-    const mediaType = audio.type.split(";")[0] || "audio/webm";
-    const extension = mediaType.endsWith("ogg") ? "ogg" : "webm";
-    const file = new File([audio], `Meeting.${extension}`, {
-        type: mediaType,
-    });
+    const file = new File([audio], "Meeting.mp3", { type: "audio/mpeg" });
     emit("onMediaSelected", { media: file });
 }
 

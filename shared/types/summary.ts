@@ -4,6 +4,7 @@ export const summaryTypeSchema = z.enum([
     "verhandlungsprotokoll",
     "kurzprotokoll",
     "ergebnisprotokoll",
+    "management_summary",
 ]);
 
 export type SummaryType = z.infer<typeof summaryTypeSchema>;
