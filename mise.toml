@@ -1,8 +1,6 @@
 [tools]
 bun = "1.4.3"
-# 24 LTS: happy-dom (20.x/21.x) flakily creates Windows without localStorage
-# under node 26, breaking the unit suite. Revisit when happy-dom fixes it.
-node = "24.21.0"
+node = "26.12.1"
 pass-cli = "latest"
 "npm:varlock" = "1.23.0"
 usage = "7.1.0"
