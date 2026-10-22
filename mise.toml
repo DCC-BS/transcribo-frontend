@@ -1,9 +1,9 @@
 [tools]
-bun = "1.4.0"
-node = "24.19.0"
+bun = "1.4.3"
+node = "26.12.1"
 pass-cli = "latest"
-"npm:varlock" = "1.17.1"
-usage = "3.6.0"
+"npm:varlock" = "1.23.0"
+usage = "7.1.0"
 
 [plugins]
 pass-cli = "https://github.com/DCC-BS/mise-proton-pass-cli"
