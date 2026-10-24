@@ -23,6 +23,13 @@
             "matchUpdateTypes": ["major"],
             "groupName": "all major dependencies",
             "groupSlug": "all-major"
+        },
+        {
+            "description": "Majors that need a human (DCC dependency routine hold_majors) get their own PR instead of blocking the major group",
+            "matchPackageNames": ["typescript", "nuxt", "vue", "node"],
+            "matchUpdateTypes": ["major"],
+            "groupName": "held major dependencies",
+            "groupSlug": "held-major"
         }
     ],
     "lockFileMaintenance": {
