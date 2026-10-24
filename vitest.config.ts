@@ -5,6 +5,9 @@ export default defineVitestConfig({
     test: {
         globals: true,
         environment: "happy-dom",
+        // Node 25+ ships its own global localStorage (undefined without
+        // --localstorage-file), which shadows happy-dom's implementation.
+        execArgv: ["--no-experimental-webstorage"],
         setupFiles: ["./tests/setup/vitest-setup.ts"],
         include: ["tests/**/*.test.ts"],
         exclude: ["node_modules", "dist", ".nuxt"],
