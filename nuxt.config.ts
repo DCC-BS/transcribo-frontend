@@ -223,6 +223,9 @@ export default defineNuxtConfig({
         workbox: {
             globPatterns: ["**/*.{js,css,html,png,jpg,jpeg,svg,wasm,ico}"],
             globIgnores: ["dev-sw-dist/**/*"],
+            // @dcc-bs/common-ui.bs.js >= 2.2 bundles pdf.js (~2.5 MB lazy chunk),
+            // which is over workbox's 2 MiB default and fails the build.
+            maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
             navigateFallback: "/",
             navigateFallbackDenylist: [/^\/transcription\/.*/, /^\/task\/.*/],
             clientsClaim: true,
