@@ -51,7 +51,7 @@
         "vue": "3.5.43",
         "vue-konva": "3.4.0",
         "vue-tsc": "3.3.13",
-        "zod": "4.6.5"
+        "zod": "4.6.6"
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.15",
