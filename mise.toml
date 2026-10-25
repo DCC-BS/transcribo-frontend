@@ -52,6 +52,10 @@ run = "bunx nuxt dev"
 # ── Build & Preview ───────────────────────────────────────────────────────────
 
 [tasks.build]
+# Without APP_MODE, varlock runs in dev mode (needs pass secrets) and leaves the
+# layer URIs unset, so the built server fails ("Logger not available").
+# CI (APP_MODE=ci) and Docker (APP_MODE=build) set it themselves.
+env = { APP_MODE = "{{ get_env(name='APP_MODE', default='build') }}" }
 description = "build the production bundle"
 run = "bunx nuxt build"
 
