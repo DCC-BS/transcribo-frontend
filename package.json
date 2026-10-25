@@ -55,7 +55,7 @@
     },
     "devDependencies": {
         "@biomejs/biome": "2.5.15",
-        "@nuxt/test-utils": "^4.0.3",
+        "@nuxt/test-utils": "^4.3.4",
         "@types/bun": "1.4.2",
         "@varlock/proton-pass-plugin": "^2.0.0",
         "@varlock/vite-integration": "^1.4.0",
