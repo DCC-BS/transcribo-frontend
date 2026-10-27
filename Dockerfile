@@ -38,6 +38,11 @@ RUN assemble-runtime node
 # ------------------------------------------------
 FROM debian:13-slim
 
+# Node 26+ links against libatomic, which debian-slim does not ship
+RUN apt-get update \
+    && apt-get -y --no-install-recommends install libatomic1 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Set the working directory
 WORKDIR /app
 
