@@ -9,7 +9,10 @@ import {
     TaskStatusSchema,
 } from "~/types/storedTasks";
 import type { Speaker } from "~/types/storedTranscription";
-import type { TranscriptionResponse } from "~/types/transcriptionResponse";
+import type {
+    PostProcessingProgress,
+    TranscriptionResponse,
+} from "~/types/transcriptionResponse";
 import { resolveTranscriptionTitle } from "~/utils/resolveTranscriptionTitle";
 import { isVideoFile } from "~/utils/videoUtils";
 
@@ -76,6 +79,27 @@ export function useTaskListener() {
             icon: "i-lucide-cpu",
             message: status.status ? t(`task.status.${status.status}`) : "",
             progress: calculateProgress(status),
+        };
+    }
+
+    /**
+     * Renders a post-processing progress line as a progress step. The
+     * percentage only exists once the keyword list, the bulk of the answer,
+     * has started; before that the step stays indeterminate.
+     *
+     * @param progress - The streamed post-processing progress.
+     * @returns The matching progress step.
+     */
+    function createPostProcessingProgress(
+        progress: PostProcessingProgress,
+    ): MediaProgress {
+        return {
+            icon: "i-lucide-sparkles",
+            message: t(`task.postProcessingStage.${progress.stage}`, {
+                count: progress.keywords,
+            }),
+            progress:
+                progress.stage === "keywords" ? progress.progress * 100 : null,
         };
     }
 
@@ -150,7 +174,13 @@ export function useTaskListener() {
                     message: t("task.postProcessing"),
                     progress: null,
                 });
-                const result = await fetchTaskResult(status.task_id);
+                const result = await fetchTaskResult(
+                    status.task_id,
+                    (progress) =>
+                        notifyPostProcessing(
+                            createPostProcessingProgress(progress),
+                        ),
+                );
                 notifyPostProcessing({
                     icon: "i-lucide-sparkles",
                     message: t("task.postProcessingDone"),
@@ -200,14 +230,19 @@ export function useTaskListener() {
      * Fetches a finished task's transcription.
      *
      * @param taskId - Task to read.
+     * @param onProgress - Receives each post-processing progress line.
      * @returns The transcription response.
      * @throws When the request fails; the error is also shown to the user.
      */
     async function fetchTaskResult(
         taskId: string,
+        onProgress: (progress: PostProcessingProgress) => void,
     ): Promise<TranscriptionResponse> {
         try {
-            const response = await fetchTaskResultWithVocabulary(taskId);
+            const response = await fetchTaskResultWithVocabulary(
+                taskId,
+                onProgress,
+            );
 
             if (isApiError(response)) {
                 showError(response);

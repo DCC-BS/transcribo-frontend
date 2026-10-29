@@ -109,3 +109,38 @@ export const TranscriptionResponseSchema = z.object({
  * Inferred from TranscriptionResponseSchema
  */
 export type TranscriptionResponse = z.infer<typeof TranscriptionResponseSchema>;
+
+/**
+ * Zod schema for PostProcessingProgress
+ * How far the LLM post-processing has got: the section it is writing, the
+ * share of the transcript its keyword list has reached (0..1) and the number
+ * of keywords proposed so far
+ * Corresponds to the Python PostProcessingProgress model
+ */
+export const PostProcessingProgressSchema = z.object({
+    type: z.literal("progress"),
+    stage: z.enum(["speakers", "corrections", "keywords"]),
+    progress: z.number(),
+    keywords: z.number(),
+});
+
+/**
+ * Type representing a post-processing progress line
+ * Inferred from PostProcessingProgressSchema
+ */
+export type PostProcessingProgress = z.infer<
+    typeof PostProcessingProgressSchema
+>;
+
+/**
+ * Zod schema for one line of the task result stream: progress lines while
+ * the post-processing runs, then the finished transcription
+ * Corresponds to the Python PostProcessingProgress / TranscriptionResultFrame models
+ */
+export const TaskResultFrameSchema = z.discriminatedUnion("type", [
+    PostProcessingProgressSchema,
+    z.object({
+        type: z.literal("result"),
+        transcription: TranscriptionResponseSchema,
+    }),
+]);
