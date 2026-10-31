@@ -47,8 +47,8 @@ declare module 'varlock/env' {
 
 export type EnvSchemaAsStrings = {
   [Property in keyof CoercedEnvSchema]:
-    CoercedEnvSchema[Property] extends string ? CoercedEnvSchema[Property]
-      : (CoercedEnvSchema[Property] extends boolean ? ('true' | 'false') : string)
+    NonNullable<CoercedEnvSchema[Property]> extends string ? NonNullable<CoercedEnvSchema[Property]>
+      : (NonNullable<CoercedEnvSchema[Property]> extends boolean ? ('true' | 'false') : string)
 };
 
 type _EnvSchemaAsStrings_cd953a0a = EnvSchemaAsStrings;
