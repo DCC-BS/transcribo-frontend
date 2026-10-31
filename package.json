@@ -1,6 +1,6 @@
 {
     "name": "transcribo-frontend",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "private": true,
     "scripts": {
         "dev": "varlock run -- nuxt dev",
@@ -25,9 +25,9 @@
     },
     "dependencies": {
         "@dcc-bs/audio-recorder.bs.js": "2.1.5",
-        "@dcc-bs/common-ui.bs.js": "2.2.2",
+        "@dcc-bs/common-ui.bs.js": "2.2.3",
         "@dcc-bs/communication.bs.js": "0.1.4",
-        "@dcc-bs/event-system.bs.js": "^1.4.3",
+        "@dcc-bs/event-system.bs.js": "^1.4.5",
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
         "@iconify-json/lucide": "1.2.145",
@@ -43,7 +43,7 @@
         "dexie": "^4.4.4",
         "konva": "10.9.0",
         "motion-v": "2.8.0",
-        "nuxt": "4.6.2",
+        "nuxt": "4.6.3",
         "pino": "10.4.0",
         "ts-pattern": "^5.9.0",
         "uuid": "^14.0.1",
