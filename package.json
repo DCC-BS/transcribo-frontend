@@ -1,6 +1,6 @@
 {
     "name": "transcribo-frontend",
-    "version": "2.1.1",
+    "version": "2.1.2",
     "private": true,
     "scripts": {
         "dev": "varlock run -- nuxt dev",
@@ -43,7 +43,7 @@
         "dexie": "^4.4.4",
         "konva": "10.9.0",
         "motion-v": "2.8.0",
-        "nuxt": "4.6.2",
+        "nuxt": "4.6.3",
         "pino": "10.4.0",
         "ts-pattern": "^5.9.0",
         "uuid": "^14.0.1",
