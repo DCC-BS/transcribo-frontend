@@ -1,5 +1,7 @@
 [tools]
-bun = "1.4.3"
+# TEMPORARY until 2026-10-29: bun 1.4.4 fixes CVE-2026-111497 (Brotli decoder) but is younger than
+# the 7-day cooldown. The weekly dependency routine deletes this comment once 1.4.4 is 7 days old.
+bun = "1.4.4"
 node = "26.12.1"
 pass-cli = "latest"
 "npm:varlock" = "1.23.0"
