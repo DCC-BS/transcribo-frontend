@@ -6,9 +6,9 @@
       "name": "transcribo-frontend",
       "dependencies": {
         "@dcc-bs/audio-recorder.bs.js": "2.1.5",
-        "@dcc-bs/common-ui.bs.js": "2.2.2",
+        "@dcc-bs/common-ui.bs.js": "2.2.3",
         "@dcc-bs/communication.bs.js": "0.1.4",
-        "@dcc-bs/event-system.bs.js": "^1.4.3",
+        "@dcc-bs/event-system.bs.js": "^1.4.5",
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
         "@iconify-json/lucide": "1.2.145",
@@ -285,11 +285,11 @@
 
     "@dcc-bs/audio-recorder.bs.js": ["@dcc-bs/audio-recorder.bs.js@2.1.5", "", { "dependencies": { "@ffmpeg/ffmpeg": "0.12.15", "@ffmpeg/util": "0.12.2", "baseline-browser-mapping": "^2.10.0", "caniuse-lite": "^1.0.30001776", "dexie": "4.4.6", "rollup-plugin-import-css": "4.2.1" }, "peerDependencies": { "@nuxt/kit": "^4.0.0", "@nuxt/ui": "4.11.3", "@nuxtjs/i18n": "^10.0.0", "motion-v": "2.7.0" } }, "sha512-78nJ43D12XNPK9yGLo39CRRH8zqebUcZ7p2984Wl33ApL4Grw3Dy5IvDg2k4vUxKhYT6U8XjlYEefvZj96WruA=="],
 
-    "@dcc-bs/common-ui.bs.js": ["@dcc-bs/common-ui.bs.js@2.2.2", "", { "dependencies": { "defu": "^6.1.4", "driver.js": "^1.6.0", "gray-matter": "^4.0.3", "markdown-it": "15.0.3", "pdfjs-dist": "6.4.299", "semver": "7.8.5", "tailwind-merge": "3.7.0", "vue-pdf-embed": "^2.1.6" }, "peerDependencies": { "@nuxt/icon": "^2.2.1", "@nuxt/kit": "^4.0.0", "@nuxt/ui": "^4.5.1", "@nuxtjs/i18n": "^10.0.0", "motion-v": "^2.0.1", "nuxt": "^4.4.2", "typescript": "^5.9.0", "zod": "^4.3.6" } }, "sha512-uJJoNw0fgC1iGz4cL8EGT6cDpj7Ogc5C1aS5am08f4AvMNP2DG9/g+Fk6HlzfthRAXedb2uhULrFFFRSmymo3g=="],
+    "@dcc-bs/common-ui.bs.js": ["@dcc-bs/common-ui.bs.js@2.2.3", "", { "dependencies": { "defu": "^6.1.4", "driver.js": "^1.6.0", "gray-matter": "^4.0.3", "markdown-it": "15.0.3", "pdfjs-dist": "6.4.299", "semver": "7.8.5", "tailwind-merge": "3.7.0", "vue-pdf-embed": "^2.1.6" }, "peerDependencies": { "@nuxt/icon": "^2.2.1", "@nuxt/kit": "^4.0.0", "@nuxt/ui": "^4.5.1", "@nuxtjs/i18n": "^10.0.0", "motion-v": "^2.0.1", "nuxt": "^4.4.2", "typescript": "^5.9.0", "zod": "^4.3.6" } }, "sha512-TOJH3Fvin+S8TaYfgipJtqbIRmhu4r08NTojIHUXvHf27FrujXCkxs0+bg+U/gVIBxRu9Oco+Nz9GJf60k04ow=="],
 
     "@dcc-bs/communication.bs.js": ["@dcc-bs/communication.bs.js@0.1.4", "", { "dependencies": { "vite": "^8.0.0", "vue": "^3.5.25", "zod": "^4.1.9" }, "peerDependencies": { "typescript": "^5" } }, "sha512-UhPu5M+2sMa7WYhBe9Ep8g6Tw/AaRCUBDDiWAHtQsRbM6Jj1e+PbHbZ7kbm4ilu+7UXT6FVcWAWd1Mtu+RLStA=="],
 
-    "@dcc-bs/event-system.bs.js": ["@dcc-bs/event-system.bs.js@1.4.3", "", { "dependencies": { "@nuxt/kit": "^4.0.1" } }, "sha512-G0cRzswB/WGfXehNmoteGVg9MUriRPKaNUO3ugQ2Ss7uUo/KlI9uMW4SJqPOi8ccglbmFMlGCsfsfZ2PbEqhlg=="],
+    "@dcc-bs/event-system.bs.js": ["@dcc-bs/event-system.bs.js@1.4.5", "", { "dependencies": { "@nuxt/kit": "^4.4.2" } }, "sha512-22PYt5lHX8kub6MJfqbIQKWXvRC/WvOSJ54UOSLfs3iG4docjjEhZx8hcIXNu/qFzA+wZM06Ti2Pb9zKO4ELCQ=="],
 
     "@dxup/nuxt": ["@dxup/nuxt@0.5.10", "", { "dependencies": { "@dxup/unimport": "^0.1.2", "@nuxt/kit": "^4.5.2", "@vue/compiler-dom": "^3.5.41", "chokidar": "^5.0.0", "knitwork": "^1.3.0", "magic-string": "^1.2.2", "pathe": "^2.0.3", "tinyglobby": "^0.2.17", "unplugin": "^3.3.0" } }, "sha512-54Vehb7LmR7qYpC6KFwjDTSm6CB1CayBu+JXdHrPLrIjjr5xAgb43jvgOU+mnB+tsRh414fSsEy0QjBMKILQ8g=="],
 
@@ -2754,6 +2754,8 @@
     "@babel/preset-env/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
     "@dcc-bs/audio-recorder.bs.js/dexie": ["dexie@4.4.6", "", {}, "sha512-hJP/BO6mjB+tX6hToIO1kmxYLNmun90wYbfcoAoLpKEyDYal/k33dg0TAfoUe2TDsbbLoVIzljJ3BN2UbR5EOg=="],
+
+    "@dcc-bs/event-system.bs.js/@nuxt/kit": ["@nuxt/kit@4.6.3", "", { "dependencies": { "consola": "^3.4.2", "defu": "^6.1.7", "destr": "^2.0.5", "errx": "^0.2.2", "exsolve": "^1.1.3", "ignore": "^7.0.14", "klona": "^2.0.6", "microdiff": "^1.6.0", "nostics": "^1.3.0", "package-manager-detector": "^1.9.0", "pathe": "^2.0.3", "rc9": "^3.1.0", "scule": "^1.3.0", "std-env": "^4.3.0", "tinyexec": "^1.3.1", "tinyglobby": "^0.2.17", "unctx": "^3.0.1", "verkit": "^0.5.0" }, "peerDependencies": { "@nuxt/schema": "^3.0.0 || ^4.0.0 || ^5.0.0-0", "confbox": ">=0.1.0", "dotenv": "*", "giget": ">=3.1.0", "jiti": "^2.0.0", "mlly": "^1.2.0", "oxc-parser": ">=0.56.0", "rolldown": ">=1.0.0" }, "optionalPeers": ["@nuxt/schema", "confbox", "dotenv", "giget", "jiti", "mlly", "oxc-parser", "rolldown"] }, "sha512-djNup72hMvn7C9xp0/KAYeoY9uzbrPguv91SUBjEeSHh49kP/YI4BvxUVHP8sZd3kms5Ht+IZTJ6XAfm9hofKw=="],
 
     "@intlify/bundle-utils/esbuild": ["esbuild@0.25.12", "", { "optionalDependencies": { "@esbuild/aix-ppc64": "0.25.12", "@esbuild/android-arm": "0.25.12", "@esbuild/android-arm64": "0.25.12", "@esbuild/android-x64": "0.25.12", "@esbuild/darwin-arm64": "0.25.12", "@esbuild/darwin-x64": "0.25.12", "@esbuild/freebsd-arm64": "0.25.12", "@esbuild/freebsd-x64": "0.25.12", "@esbuild/linux-arm": "0.25.12", "@esbuild/linux-arm64": "0.25.12", "@esbuild/linux-ia32": "0.25.12", "@esbuild/linux-loong64": "0.25.12", "@esbuild/linux-mips64el": "0.25.12", "@esbuild/linux-ppc64": "0.25.12", "@esbuild/linux-riscv64": "0.25.12", "@esbuild/linux-s390x": "0.25.12", "@esbuild/linux-x64": "0.25.12", "@esbuild/netbsd-arm64": "0.25.12", "@esbuild/netbsd-x64": "0.25.12", "@esbuild/openbsd-arm64": "0.25.12", "@esbuild/openbsd-x64": "0.25.12", "@esbuild/openharmony-arm64": "0.25.12", "@esbuild/sunos-x64": "0.25.12", "@esbuild/win32-arm64": "0.25.12", "@esbuild/win32-ia32": "0.25.12", "@esbuild/win32-x64": "0.25.12" }, "bin": { "esbuild": "bin/esbuild" } }, "sha512-bbPBYYrtZbkt6Os6FiTLCTFxvq4tt3JKall1vRwshA3fdVztsLAatFaZobhkBC8/BrPetoa0oksYoKXoG4ryJg=="],
 
