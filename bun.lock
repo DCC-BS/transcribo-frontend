@@ -11,7 +11,7 @@
         "@dcc-bs/event-system.bs.js": "^1.4.5",
         "@ffmpeg/ffmpeg": "^0.12.15",
         "@ffmpeg/util": "^0.12.2",
-        "@iconify-json/lucide": "1.2.145",
+        "@iconify-json/lucide": "1.2.146",
         "@mohtasham/md-to-docx": "4.0.1",
         "@nuxt/ui": "4.12.0",
         "@nuxtjs/i18n": "10.6.0",
@@ -367,7 +367,7 @@
 
     "@floating-ui/vue": ["@floating-ui/vue@2.0.1", "", { "dependencies": { "@floating-ui/dom": "^1.8.0", "@floating-ui/utils": "^0.2.12" }, "peerDependencies": { "vue": ">=3.3.0" } }, "sha512-043dyEKD9TDSfz080YH2vobubgg+NIo/9Fw4RAl7sEMpD8Am1DNrrSTl/GpMBjyGHoD/FbJY2QLawY+HSQsEIA=="],
 
-    "@iconify-json/lucide": ["@iconify-json/lucide@1.2.145", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-eYBZipY6g4bbJNyKBAEq1wBy3mJ2jKtI4O2K30ArO2lMpVDOEuQfu5aDZhiimj1+Q/mIrn3ZxnDeX1BbILxkwQ=="],
+    "@iconify-json/lucide": ["@iconify-json/lucide@1.2.146", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-T7qetsZJ682CCVT2X8C5uYEF6G/mtSoPl8F87wvu1LbfeVt4RxdP03NtaAs4RrrAXbWHBLjKrb8cmMtDucoI5g=="],
 
     "@iconify/collections": ["@iconify/collections@1.0.755", "", { "dependencies": { "@iconify/types": "*" } }, "sha512-X5ek7eriIl25N6LQ1fNOsAJdNtlnQOaxpb4/NOW0d4qiif4K5ppr7j0Ow7+eiTuQcKK4YXBNHlw82t7DPcwhPg=="],
 
