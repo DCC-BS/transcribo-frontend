@@ -56,6 +56,7 @@
   "overrides": {
     "@nuxt/schema": "^4.6.4",
     "node-forge": "^1.4.3",
+    "prosemirror-model": "1.25.12",
     "sharp": "^0.35.5",
     "vue": "3.5.44",
   },
