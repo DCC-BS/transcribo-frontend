@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-logger
-skillDescription: "dcc_backend_common.logger module for structured logging built on structlog. Use when calling init_logger() at startup and get_logger(__name__), choosing JSON (IS_PROD) vs colored console output, or tuning FocusedTracebackFormatter / DEV_TRACEBACK_STYLE tracebacks."
+skillDescription: "dcc_backend_common.logger module for structured logging built on structlog. Use when calling init_logger() at startup and get_logger(**name**), choosing JSON (IS_PROD) vs colored console output, or tuning FocusedTracebackFormatter / DEV_TRACEBACK_STYLE tracebacks."
 ---
+
 # Structured Logging
 
 The `dcc_backend_common.logger` module provides structured, consistent logging across all services using [structlog](https://www.structlog.org/).
@@ -61,12 +63,12 @@ app = FastAPI(lifespan=lifespan)
 
 The logger is configured via environment variables:
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LOG_LEVEL` | `INFO` | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`) |
-| `IS_PROD` | - | Set to `true` for JSON output (fluentbit compatible) |
-| `DEV_TRACEBACK_STYLE` | `focused` | Traceback style in development: `focused` (user code locals) or `rich` (all locals) |
-| `LOGGER_USER_CODE_PATHS` | `dcc_backend_common, src/, app/, tests/` | Comma-separated paths to identify user code for detailed tracebacks |
+| Variable                 | Default                                  | Description                                                                         |
+| ------------------------ | ---------------------------------------- | ----------------------------------------------------------------------------------- |
+| `LOG_LEVEL`              | `INFO`                                   | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`)                     |
+| `IS_PROD`                | -                                        | Set to `true` for JSON output (fluentbit compatible)                                |
+| `DEV_TRACEBACK_STYLE`    | `focused`                                | Traceback style in development: `focused` (user code locals) or `rich` (all locals) |
+| `LOGGER_USER_CODE_PATHS` | `dcc_backend_common, src/, app/, tests/` | Comma-separated paths to identify user code for detailed tracebacks                 |
 
 ### Development vs Production
 
@@ -110,27 +112,27 @@ def process_translation(request: TranslationRequest) -> TranslationResult:
 
 The logger automatically adds context to every log entry:
 
-| Field | Description |
-|-------|-------------|
-| `timestamp` | ISO-8601 formatted timestamp |
-| `request_id` | Unique UUID for request tracing |
-| `module` | The module name where the log was called |
-| `func_name` | The function name |
-| `lineno` | The line number |
-| `level` | The log level |
+| Field        | Description                              |
+| ------------ | ---------------------------------------- |
+| `timestamp`  | ISO-8601 formatted timestamp             |
+| `request_id` | Unique UUID for request tracing          |
+| `module`     | The module name where the log was called |
+| `func_name`  | The function name                        |
+| `lineno`     | The line number                          |
+| `level`      | The log level                            |
 
 Example JSON output in production:
 
 ```json
 {
-  "timestamp": "2024-01-15T10:30:45+0000",
-  "request_id": "550e8400-e29b-41d4-a716-446655440000",
-  "module": "myapp.services.translator",
-  "func_name": "translate",
-  "lineno": 42,
-  "level": "info",
-  "event": "Translation completed",
-  "result_length": 256
+    "timestamp": "2024-01-15T10:30:45+0000",
+    "request_id": "550e8400-e29b-41d4-a716-446655440000",
+    "module": "myapp.services.translator",
+    "func_name": "translate",
+    "lineno": 42,
+    "level": "info",
+    "event": "Translation completed",
+    "result_length": 256
 }
 ```
 
@@ -178,10 +180,10 @@ app.add_middleware(RequestLoggingMiddleware)
 
 Enum defining the available traceback styles for development mode.
 
-| Value | Description |
-|-------|-------------|
-| `FOCUSED` | Rich traceback + focused locals for user code only (default) |
-| `RICH` | Default Rich traceback with full locals for all frames (verbose) |
+| Value     | Description                                                      |
+| --------- | ---------------------------------------------------------------- |
+| `FOCUSED` | Rich traceback + focused locals for user code only (default)     |
+| `RICH`    | Default Rich traceback with full locals for all frames (verbose) |
 
 ### FocusedTracebackFormatter
 

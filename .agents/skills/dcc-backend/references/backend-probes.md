@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-probes
 skillDescription: "dcc_backend_common.fastapi_health_probes module for Kubernetes health checks. Use when mounting health_probe_router(service_dependencies) to expose /health/liveness, /health/readiness, and /health/startup endpoints with external dependency checks."
 ---
+
 # Health Probes
 
 The `dcc_backend_common.fastapi_health_probes` module provides Kubernetes-ready health check endpoints that follow best practices for container orchestration.
@@ -59,18 +61,18 @@ app.include_router(health_probe_router(service_dependencies))
 
 **`GET /health/liveness`**
 
-| Aspect | Description |
-|--------|-------------|
-| **Purpose** | Checks if the application process is running and not deadlocked |
-| **K8s Action** | If this fails, the container is **killed and restarted** |
-| **Rule** | Keep it simple. Do **NOT** check databases or external dependencies here |
+| Aspect         | Description                                                              |
+| -------------- | ------------------------------------------------------------------------ |
+| **Purpose**    | Checks if the application process is running and not deadlocked          |
+| **K8s Action** | If this fails, the container is **killed and restarted**                 |
+| **Rule**       | Keep it simple. Do **NOT** check databases or external dependencies here |
 
 **Response:**
 
 ```json
 {
-  "status": "up",
-  "uptime_seconds": 123.45
+    "status": "up",
+    "uptime_seconds": 123.45
 }
 ```
 
@@ -78,21 +80,21 @@ app.include_router(health_probe_router(service_dependencies))
 
 **`GET /health/readiness`**
 
-| Aspect | Description |
-|--------|-------------|
-| **Purpose** | Checks if the app is ready to handle user requests |
-| **K8s Action** | If this fails, **traffic stops** being sent to this pod |
-| **Rule** | Check critical dependencies here (databases, external APIs, etc.) |
+| Aspect         | Description                                                       |
+| -------------- | ----------------------------------------------------------------- |
+| **Purpose**    | Checks if the app is ready to handle user requests                |
+| **K8s Action** | If this fails, **traffic stops** being sent to this pod           |
+| **Rule**       | Check critical dependencies here (databases, external APIs, etc.) |
 
 **Response (healthy):**
 
 ```json
 {
-  "status": "ready",
-  "checks": {
-    "database": "healthy",
-    "external-api": "healthy"
-  }
+    "status": "ready",
+    "checks": {
+        "database": "healthy",
+        "external-api": "healthy"
+    }
 }
 ```
 
@@ -100,12 +102,12 @@ app.include_router(health_probe_router(service_dependencies))
 
 ```json
 {
-  "status": "unhealthy",
-  "checks": {
-    "database": "error: Connection refused",
-    "external-api": "unhealthy (status: 503)"
-  },
-  "error": "Service unavailable"
+    "status": "unhealthy",
+    "checks": {
+        "database": "error: Connection refused",
+        "external-api": "unhealthy (status: 503)"
+    },
+    "error": "Service unavailable"
 }
 ```
 
@@ -113,18 +115,18 @@ app.include_router(health_probe_router(service_dependencies))
 
 **`GET /health/startup`**
 
-| Aspect | Description |
-|--------|-------------|
-| **Purpose** | Checks if the application has finished initialization |
-| **K8s Action** | **Blocks** liveness/readiness probes until this returns 200 |
-| **Rule** | Useful for apps that need to load large ML models or caches on boot |
+| Aspect         | Description                                                         |
+| -------------- | ------------------------------------------------------------------- |
+| **Purpose**    | Checks if the application has finished initialization               |
+| **K8s Action** | **Blocks** liveness/readiness probes until this returns 200         |
+| **Rule**       | Useful for apps that need to load large ML models or caches on boot |
 
 **Response:**
 
 ```json
 {
-  "status": "started",
-  "timestamp": "2025-12-04T10:30:00.000000+00:00"
+    "status": "started",
+    "timestamp": "2025-12-04T10:30:00.000000+00:00"
 }
 ```
 
@@ -151,11 +153,11 @@ service_dependencies: list[ServiceDependency] = [
 ]
 ```
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | `str` | Human-readable name for the service |
-| `health_check_url` | `str` | URL to check for service health |
-| `api_key` | `str \| None` | Optional API key sent as Bearer token |
+| Field              | Type          | Description                           |
+| ------------------ | ------------- | ------------------------------------- |
+| `name`             | `str`         | Human-readable name for the service   |
+| `health_check_url` | `str`         | URL to check for service health       |
+| `api_key`          | `str \| None` | Optional API key sent as Bearer token |
 
 ### Timeouts
 
@@ -181,9 +183,9 @@ For services requiring authentication, provide an `api_key`. It will be sent as 
 
 ### Kubernetes-Ready Status Codes
 
-| Scenario | HTTP Status | Meaning |
-|----------|-------------|---------|
-| All checks pass | `200 OK` | Pod is healthy |
+| Scenario             | HTTP Status               | Meaning                        |
+| -------------------- | ------------------------- | ------------------------------ |
+| All checks pass      | `200 OK`                  | Pod is healthy                 |
 | Any dependency fails | `503 Service Unavailable` | Pod should not receive traffic |
 
 ## Kubernetes Configuration
@@ -194,36 +196,36 @@ Example Kubernetes deployment configuration:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-service
+    name: my-service
 spec:
-  template:
-    spec:
-      containers:
-        - name: app
-          image: my-service:latest
-          ports:
-            - containerPort: 8000
-          livenessProbe:
-            httpGet:
-              path: /health/liveness
-              port: 8000
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            failureThreshold: 3
-          readinessProbe:
-            httpGet:
-              path: /health/readiness
-              port: 8000
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 3
-          startupProbe:
-            httpGet:
-              path: /health/startup
-              port: 8000
-            initialDelaySeconds: 0
-            periodSeconds: 5
-            failureThreshold: 30  # Allow 2.5 minutes for slow startups
+    template:
+        spec:
+            containers:
+                - name: app
+                  image: my-service:latest
+                  ports:
+                      - containerPort: 8000
+                  livenessProbe:
+                      httpGet:
+                          path: /health/liveness
+                          port: 8000
+                      initialDelaySeconds: 5
+                      periodSeconds: 10
+                      failureThreshold: 3
+                  readinessProbe:
+                      httpGet:
+                          path: /health/readiness
+                          port: 8000
+                      initialDelaySeconds: 5
+                      periodSeconds: 5
+                      failureThreshold: 3
+                  startupProbe:
+                      httpGet:
+                          path: /health/startup
+                          port: 8000
+                      initialDelaySeconds: 0
+                      periodSeconds: 5
+                      failureThreshold: 30 # Allow 2.5 minutes for slow startups
 ```
 
 ## Complete Example

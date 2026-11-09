@@ -1,25 +1,25 @@
 name: Documentation on demand
 on:
-  issue_comment:
-    types: [ created ]
+    issue_comment:
+        types: [created]
 
 permissions:
-  contents: read
+    contents: read
 
 jobs:
-  docs:
-    uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@a7a5611d4ea9bc55f27ca8bc22327181d0e0cbc0 # v10.0.0
-    permissions:
-      contents: read
-      issues: write
-      pull-requests: write
-    with:
-      doc_repo: "DCC-BS/documentation"
-      doc_path: "markdown/nuxt-layers"
-      openai_model: GLM-5.1
-      openai_base_url: https://api.z.ai/api/coding/paas/v4
-      pr_number: ${{ github.event.issue.number }}
-      client_id: ${{ vars.DOC_CLIENT_ID }}
-    secrets:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      DOC_APP_PRIVATE_KEY: ${{ secrets.DOC_APP_PRIVATE_KEY }}
+    docs:
+        uses: DCC-BS/ci-workflows/.github/workflows/llm-doc-update-conditional.yml@a7a5611d4ea9bc55f27ca8bc22327181d0e0cbc0 # v10.0.0
+        permissions:
+            contents: read
+            issues: write
+            pull-requests: write
+        with:
+            doc_repo: "DCC-BS/documentation"
+            doc_path: "markdown/nuxt-layers"
+            openai_model: GLM-5.1
+            openai_base_url: https://api.z.ai/api/coding/paas/v4
+            pr_number: ${{ github.event.issue.number }}
+            client_id: ${{ vars.DOC_CLIENT_ID }}
+        secrets:
+            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+            DOC_APP_PRIVATE_KEY: ${{ secrets.DOC_APP_PRIVATE_KEY }}

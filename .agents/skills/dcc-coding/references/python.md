@@ -1,4 +1,5 @@
 ---
+
 outline: deep
 description: Coding standards and best practices for Python projects.
 editLink: true
@@ -6,6 +7,7 @@ skillParent: dcc-coding
 skillName: python
 skillDescription: "Python coding standards and conventions: type hints, Google-style docstrings, FastAPI routers/Pydantic models, Returns for functional error handling, HTTPX async clients, Dependency Injector, and UV/ruff/ty/pytest tooling. Covers code style, structure, and tooling rules (not the shared backend-common library modules). Use when writing or reviewing .py backend code."
 ---
+
 # Python Coding Standards
 
 These coding standards define how we write, organize, and maintain our **Python** projects.
@@ -297,12 +299,12 @@ class AbstractAppConfig(ABC):
 
 **When to use which:**
 
-| Use Case | Choice |
-|----------|--------|
-| Define a contract/interface | `Protocol` |
-| Shared implementation needed | `ABC` |
-| Duck typing with type safety | `Protocol` |
-| Enforce inheritance hierarchy | `ABC` |
+| Use Case                      | Choice     |
+| ----------------------------- | ---------- |
+| Define a contract/interface   | `Protocol` |
+| Shared implementation needed  | `ABC`      |
+| Duck typing with type safety  | `Protocol` |
+| Enforce inheritance hierarchy | `ABC`      |
 
 ## Error Handling & Exceptions
 
@@ -648,13 +650,13 @@ For setup instructions and API reference on using the `backend_common.logger` mo
 
 ### Log Levels
 
-| Level | When to Use |
-|-------|-------------|
-| `DEBUG` | Detailed diagnostic information (disabled in production) |
-| `INFO` | General operational events (request received, task completed) |
-| `WARNING` | Unexpected situations that don't prevent operation |
-| `ERROR` | Errors that prevent a specific operation from completing |
-| `CRITICAL` | System-wide failures requiring immediate attention |
+| Level      | When to Use                                                   |
+| ---------- | ------------------------------------------------------------- |
+| `DEBUG`    | Detailed diagnostic information (disabled in production)      |
+| `INFO`     | General operational events (request received, task completed) |
+| `WARNING`  | Unexpected situations that don't prevent operation            |
+| `ERROR`    | Errors that prevent a specific operation from completing      |
+| `CRITICAL` | System-wide failures requiring immediate attention            |
 
 ### Best Practices
 
@@ -746,11 +748,11 @@ prepare-dataset = "bs_translator_backend.scripts.prepare_dataset:main"
 
 Choose the right data structure based on your use case:
 
-| Structure | Use Case | Validation | Immutable |
-|-----------|----------|------------|-----------|
-| `Pydantic BaseModel` | API input/output, configuration, external data | ✅ Yes | Optional |
-| `dataclass` | Internal data containers, no validation needed | ❌ No | Optional |
-| `TypedDict` | Dict-like data with type hints (JSON responses) | ❌ No | N/A |
+| Structure            | Use Case                                        | Validation | Immutable |
+| -------------------- | ----------------------------------------------- | ---------- | --------- |
+| `Pydantic BaseModel` | API input/output, configuration, external data  | ✅ Yes     | Optional  |
+| `dataclass`          | Internal data containers, no validation needed  | ❌ No      | Optional  |
+| `TypedDict`          | Dict-like data with type hints (JSON responses) | ❌ No      | N/A       |
 
 ### Pydantic Models
 
@@ -963,12 +965,12 @@ async def validation_exception_handler(request: Request, exc: ValidationError):
 
 ### HTTP Status Codes
 
-| Operation | Success | Common Errors |
-|-----------|---------|---------------|
-| `POST` (create) | `201 Created` | `400`, `409 Conflict` |
-| `GET` (read) | `200 OK` | `404 Not Found` |
-| `PATCH/PUT` (update) | `200 OK` | `404`, `400` |
-| `DELETE` | `204 No Content` | `404` |
+| Operation            | Success          | Common Errors         |
+| -------------------- | ---------------- | --------------------- |
+| `POST` (create)      | `201 Created`    | `400`, `409 Conflict` |
+| `GET` (read)         | `200 OK`         | `404 Not Found`       |
+| `PATCH/PUT` (update) | `200 OK`         | `404`, `400`          |
+| `DELETE`             | `204 No Content` | `404`                 |
 
 ## Testing
 
@@ -1130,12 +1132,11 @@ We use **[Semantic Versioning (SemVer)](https://semver.org/)** for all packages 
 
 Format: `MAJOR.MINOR.PATCH` (e.g., `2.1.0`)
 
-| Component | When to Increment |
-|-----------|-------------------|
-| `MAJOR` | Breaking changes (incompatible API changes) |
-| `MINOR` | New features (backwards-compatible) |
-| `PATCH` | Bug fixes (backwards-compatible) |
-
+| Component | When to Increment                           |
+| --------- | ------------------------------------------- |
+| `MAJOR`   | Breaking changes (incompatible API changes) |
+| `MINOR`   | New features (backwards-compatible)         |
+| `PATCH`   | Bug fixes (backwards-compatible)            |
 - **Do:** Define version in `pyproject.toml` under `[project]`.
 - **Do:** Tag releases in Git with `v` prefix (e.g., `v2.1.0`).
 - **Do:** Update version before merging to main/production.
@@ -1312,11 +1313,11 @@ def get_translation(request_id: str) -> TranslationResponse:
 
 **Where to place things:**
 
-| Item | Location |
-|------|----------|
-| Module-specific constants | Top of the module file |
-| Shared constants | `utils/constants.py` |
-| Shared enums | `utils/constants.py` or `models/enums.py` |
-| Decorators | `utils/decorators.py` |
-| Context managers | `utils/context_managers.py` |
-| Protocols/Interfaces | `interfaces/` or alongside related code |
+| Item                      | Location                                  |
+| ------------------------- | ----------------------------------------- |
+| Module-specific constants | Top of the module file                    |
+| Shared constants          | `utils/constants.py`                      |
+| Shared enums              | `utils/constants.py` or `models/enums.py` |
+| Decorators                | `utils/decorators.py`                     |
+| Context managers          | `utils/context_managers.py`               |
+| Protocols/Interfaces      | `interfaces/` or alongside related code   |

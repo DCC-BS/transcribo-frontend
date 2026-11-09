@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: undo-redo-buttons
 skillDescription: "UndoRedoButtons is a pair of tooltip buttons taking canUndo/canRedo props and emitting @undo/@redo events, auto-disabled when unavailable. Use when adding undo/redo controls to an editor or form."
 ---
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import UiContainer from '../../../components/UiContainer.vue';
@@ -55,8 +57,8 @@ The tooltips mention keyboard shortcuts (Ctrl+Z for undo and Ctrl+Y for redo), b
 
 The tooltip text can be customized using the following localization keys:
 
-| Key | Default Value | Description |
-|-----|---------------|-------------|
+| Key                      | Default Value   | Description                      |
+| ------------------------ | --------------- | -------------------------------- |
 | `common-ui.undo_tooltip` | "Undo (Ctrl+Z)" | Tooltip text for the undo button |
 | `common-ui.redo_tooltip` | "Redo (Ctrl+Y)" | Tooltip text for the redo button |
 
@@ -72,17 +74,17 @@ Override these keys in your application's localization configuration to customiz
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `canUndo` | `boolean` | Yes | - | Whether undo action is available |
-| `canRedo` | `boolean` | Yes | - | Whether redo action is available |
+| Prop      | Type      | Required | Default | Description                      |
+| --------- | --------- | -------- | ------- | -------------------------------- |
+| `canUndo` | `boolean` | Yes      | -       | Whether undo action is available |
+| `canRedo` | `boolean` | Yes      | -       | Whether redo action is available |
 
 ## Events
 
-| Event | Payload | Description |
-|-------|---------|-------------|
-| `@undo` | None | Emitted when the undo button is clicked |
-| `@redo` | None | Emitted when the redo button is clicked |
+| Event   | Payload | Description                             |
+| ------- | ------- | --------------------------------------- |
+| `@undo` | None    | Emitted when the undo button is clicked |
+| `@redo` | None    | Emitted when the redo button is clicked |
 
 ## Usage
 

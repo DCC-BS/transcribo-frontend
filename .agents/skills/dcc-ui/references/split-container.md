@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: split-container
 skillDescription: "SplitContainer is a propless card with header, left, and right slots showing two side-by-side panes (fixed border divider) that stack vertically on mobile. Use for static paired/comparison layouts. NOT user-resizable (use split-view for a draggable resizer)."
 ---
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import UiContainer from '../../../components/UiContainer.vue';
@@ -72,11 +74,11 @@ This component has no props - it uses slots for all content.
 
 ## Slots
 
-| Slot | Description |
-|------|-------------|
-| `header` | Content for the header section at the top |
-| `left` | Content for the left pane (or top pane on mobile) |
-| `right` | Content for the right pane (or bottom pane on mobile) |
+| Slot     | Description                                           |
+| -------- | ----------------------------------------------------- |
+| `header` | Content for the header section at the top             |
+| `left`   | Content for the left pane (or top pane on mobile)     |
+| `right`  | Content for the right pane (or bottom pane on mobile) |
 
 ## Usage
 

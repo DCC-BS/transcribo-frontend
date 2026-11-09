@@ -173,23 +173,27 @@ sudo docker compose up --build
 ## Key Components
 
 ### Timeline Editor
+
 - Visual representation of audio/video with spectrograms
 - Drag-and-drop segment editing with snapping
 - Real-time playhead synchronization
 - Zoom and pan controls for precise editing
 
 ### Command System
+
 - Reversible command pattern for all editing operations
 - Full undo/redo functionality
 - Localized command descriptions for user feedback
 
 ### Media Support
+
 - Support for various audio and video formats
 - Client-side media conversion using FFmpeg.wasm
 - Built-in audio recording capabilities
 - Media file management with IndexedDB storage
 
-##  Acknowledgments
+## Acknowledgments
+
 This application is based on [Transcribo](https://github.com/machinelearningZH/audio-transcription/) from the Statistical Office of the Canton of Zurich.
 We have rewritten the functionality of the original application to fit into a modular and modern web application that separates frontend, backend and AI models.
 

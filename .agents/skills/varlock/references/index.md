@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 editLink: true
 skillName: varlock
 skillDescription: "Manages environment variables with the varlock tool: .env.schema validation, secret injection (Proton Pass, exec()), leak scanning, auto-generated TypeScript env.d.ts types, and APP_MODE buildtime/runtime splits. Use for varlock scan/run, env:check, or wiring varlock into Nuxt/Vite, Python/FastAPI Makefiles, or Docker."
 ---
+
 # Varlock Setup
 
 [Varlock](https://varlock.dev/) is a tool for **AI-safe .env files** that provides:
@@ -53,12 +55,12 @@ The project uses `@varlock/vite-integration` for seamless integration:
 
 ```typescript
 // nuxt.config.ts
-import { varlockVitePlugin } from '@varlock/vite-integration';
+import { varlockVitePlugin } from "@varlock/vite-integration";
 
 export default defineNuxtConfig({
-  vite: {
-    plugins: [varlockVitePlugin({ ssrInjectMode: "resolved-env" })],
-  }
+    vite: {
+        plugins: [varlockVitePlugin({ ssrInjectMode: "resolved-env" })],
+    },
 });
 ```
 
@@ -66,25 +68,25 @@ export default defineNuxtConfig({
 
 For production Docker builds, we separate **buildtime** and **runtime** variables using different schemas:
 
-| Schema | Purpose |
-|--------|---------|
-| `.env.schema` | Main schema, imports buildtime/runtime conditionally |
-| `.env.buildtime.schema` | Variables needed at build time |
-| `.env.runtime.schema` | Variables needed at runtime |
+| Schema                  | Purpose                                              |
+| ----------------------- | ---------------------------------------------------- |
+| `.env.schema`           | Main schema, imports buildtime/runtime conditionally |
+| `.env.buildtime.schema` | Variables needed at build time                       |
+| `.env.runtime.schema`   | Variables needed at runtime                          |
 
 Control validation with `APP_MODE`:
 
-| APP_MODE | Validates |
-|----------|-----------|
+| APP_MODE | Validates                           |
+| -------- | ----------------------------------- |
 | `dev`    | All variables (buildtime + runtime) |
-| `ci`     | All variable (buildtome + runtime) |
-| `build`  | Buildtime variables only |
-| `prod`   | Runtime variables only |
+| `ci`     | All variable (buildtome + runtime)  |
+| `build`  | Buildtime variables only            |
+| `prod`   | Runtime variables only              |
 
 ::: info
 The ci mode will disable automaticaly set some variables, for example it can enable the DUMMY Mode, so testing works on CI.
 :::
- 
+
 
 Example from `.env.schema`:
 
@@ -116,17 +118,17 @@ Varlock auto-generates TypeScript types in `env.d.ts`:
 ```typescript
 // Auto-generated - do not edit
 type CoercedEnvSchema = {
-  API_URL: string;
-  LOG_LEVEL: string;
-  // ...
+    API_URL: string;
+    LOG_LEVEL: string;
+    // ...
 };
 ```
 The generated types can then be access via
 ```typescript
-import { ENV } from 'varlock/env';
+import { ENV } from "varlock/env";
 
 console.log(import.meta.env.SOMEVAR); // 🆗 still works
-console.log(ENV.SOMEVAR);             // ✨ recommended
+console.log(ENV.SOMEVAR); // ✨ recommended
 ```
 
 See also [Accessing environment variables](https://varlock.dev/integrations/vite/#accessing-environment-variables)

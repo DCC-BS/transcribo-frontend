@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: navigation-bar
 skillDescription: "NavigationBar is a responsive top nav bar with left/center/right slots plus rightPreItems/rightPostItems, including a built-in DisclaimerButton and LanguageSelect and i18n app-name branding. Use when building the app header/top navigation."
 ---
+
 <script setup lang="ts">
 import UiContainer from "../../../components/UiContainer.vue";
 import { NavigationBar } from "@dcc-bs/common-ui.bs.js/components";

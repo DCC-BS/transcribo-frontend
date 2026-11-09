@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 editLink: true
 skillName: dcc-nuxt-layers
 skillDescription: "DCC-BS reusable Nuxt layers — partial Nuxt apps shared across projects via extends: ['github:DCC-BS/nuxt-layers/...']. Use when adding, configuring, or choosing among the five layers: auth (Azure AD/no-auth switching), backend_communication (backendHandlerBuilder), logger (pino), feedback-control (GitHub-issue widget), and health_check (Kubernetes probes)."
 ---
+
 # Nuxt Layers
 
 > **📦 Repository**: [github.com/DCC-BS/nuxt-layers](https://github.com/DCC-BS/nuxt-layers)
@@ -36,11 +38,11 @@ Layers are extended in your `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  extends: [
-    ['github:DCC-BS/nuxt-layers/auth', { install: true }],
-    ['github:DCC-BS/nuxt-layers/health_check', { install: true }]
-  ]
-})
+    extends: [
+        ["github:DCC-BS/nuxt-layers/auth", { install: true }],
+        ["github:DCC-BS/nuxt-layers/health_check", { install: true }],
+    ],
+});
 ```
 
 When multiple layers define the same files or components, the **priority order**
@@ -62,7 +64,7 @@ At DCC-BS, we follow these guidelines:
 
 - ✅ The code is **dependent on DCC-BS applications** and their specific architecture
 - ✅ The code needs to integrate deeply with Nuxt (components, middleware, server
-routes)
+  routes)
 - ✅ You need plug-and-play functionality that can be switched via environment variables
 - ✅ The code is specific to our internal infrastructure (auth, monitoring, etc.)
 
@@ -127,14 +129,14 @@ In your `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  extends: [
-    ['github:DCC-BS/nuxt-layers/logger', { install: true }],
-    ['github:DCC-BS/nuxt-layers/auth', { install: true }],
-    ['github:DCC-BS/nuxt-layers/backend_communication', { install: true }],
-    ['github:DCC-BS/nuxt-layers/health_check', { install: true }],
-    ['github:DCC-BS/nuxt-layers/feedback-control', { install: true }]
-  ]
-})
+    extends: [
+        ["github:DCC-BS/nuxt-layers/logger", { install: true }],
+        ["github:DCC-BS/nuxt-layers/auth", { install: true }],
+        ["github:DCC-BS/nuxt-layers/backend_communication", { install: true }],
+        ["github:DCC-BS/nuxt-layers/health_check", { install: true }],
+        ["github:DCC-BS/nuxt-layers/feedback-control", { install: true }],
+    ],
+});
 ```
 
 ### 2. Configure Environment Variables
@@ -205,18 +207,18 @@ Our layers work together in a cohesive system:
 ```
 
 - **Logger Layer** provides the interface and dynamically loads an implementation
-based on `LOGGER_LAYER_URI`
+  based on `LOGGER_LAYER_URI`
 - **Logger Implementations** (pino-logger) extend the base and provide logging
-functionality for both client and server
+  functionality for both client and server
 - **Auth Layer** provides the interface and dynamically loads an implementation
-based on `AUTH_LAYER_URI`
+  based on `AUTH_LAYER_URI`
 - **Auth Implementations** (azure-auth/no-auth) extend the base and provide
-`authHandler` for authenticated API calls
+  `authHandler` for authenticated API calls
 - **Backend Communication** offers utilities used by auth layers and available for
-custom server routes
+  custom server routes
 - **Health Checks** operates independently for monitoring
 - **Feedback Control** provides a `<FeedbackControl />` component and server API
-to send feedback to GitHub
+  to send feedback to GitHub
 
 ## Repository Structure
 

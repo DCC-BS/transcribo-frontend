@@ -1,4 +1,5 @@
 ---
+
 outline: deep
 description: Coding standards and best practices for Nuxt.js + TypeScript projects.
 editLink: true
@@ -6,6 +7,7 @@ skillParent: dcc-coding
 skillName: nuxt
 skillDescription: "Nuxt.js + Vue + TypeScript coding conventions: Composition API with <script setup>, file naming (kebab-case pages/PascalCase components/camelCase utils), composables, Nuxt import aliases, Tailwind + Lucide, Biome linting, and Bun dependency management. Use when creating or reviewing .vue/.ts files or Nuxt frontend code."
 ---
+
 # Nuxt.js + TypeScript Coding Standards
 
 These coding standards define how we write, organize, and maintain our **Nuxt.js + TypeScript** projects.  
@@ -71,9 +73,9 @@ All contributors must follow these standards unless explicitly justified with a 
 
 **Do:** Write all server API file names using lowercase letters separated by dashes.
 
-| Type     | Example                                       |
-| -------- | --------------------------------------------- |
-| ✅ Right | `server/api/user-profile.ts`                  |
+| Type     | Example                                                  |
+| -------- | -------------------------------------------------------- |
+| ✅ Right | `server/api/user-profile.ts`                             |
 | ❌ Wrong | `server/api/userProfile.ts`, `server/api/UserProfile.ts` |
 
 **Why:** Kebab-case improves readability in API URLs and maintains consistency with page routing conventions.
@@ -82,23 +84,23 @@ All contributors must follow these standards unless explicitly justified with a 
 
 **Do:** Use Nuxt's built-in aliases for imports to maintain consistent paths across the project.
 
-| Alias | Points To | Example |
-|-------|-----------|---------|
-| `~/` | `/app` directory | `import { useUser } from '~/composables/useUser'` |
-| `~~/` | Root directory | `import config from '~~/nuxt.config'` |
-| `~~/server` | Server directory | `import { validateUser } from '~~/server/utils/validation'` |
-| `#shared` | Shared code (client & server) | `import { UserSchema } from '#shared/types/user'` |
+| Alias       | Points To                     | Example                                                     |
+| ----------- | ----------------------------- | ----------------------------------------------------------- |
+| `~/`        | `/app` directory              | `import { useUser } from '~/composables/useUser'`           |
+| `~~/`       | Root directory                | `import config from '~~/nuxt.config'`                       |
+| `~~/server` | Server directory              | `import { validateUser } from '~~/server/utils/validation'` |
+| `#shared`   | Shared code (client & server) | `import { UserSchema } from '#shared/types/user'`           |
 
 ```typescript
 // ✅ Right
-import { useCounter } from '~/composables/useCounter'
-import { formatDate } from '~/utils/formatDate'
-import { UserService } from '~~/server/services/userService'
-import { ApiResponse } from '#shared/types/api'
+import { useCounter } from "~/composables/useCounter";
+import { formatDate } from "~/utils/formatDate";
+import { UserService } from "~~/server/services/userService";
+import { ApiResponse } from "#shared/types/api";
 
 // ❌ Wrong
-import { useCounter } from '../../../composables/useCounter'
-import { formatDate } from '../../utils/formatDate'
+import { useCounter } from "../../../composables/useCounter";
+import { formatDate } from "../../utils/formatDate";
 ```
 
 **Why:** Aliases eliminate brittle relative paths, make imports more readable, and prevent path errors when moving files. They also help Generative AI understand the project structure more clearly.
@@ -117,11 +119,11 @@ import { formatDate } from '../../utils/formatDate'
 ```ts
 // ✅ Right
 try {
-  // ... some code
+    // ... some code
 } catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error(error.message);
-  }
+    if (error instanceof Error) {
+        console.error(error.message);
+    }
 }
 ```
 
@@ -166,7 +168,7 @@ export default {
 ```ts
 // ✅ Right
 function formatName(name: string): string {
-  return name.trim();
+    return name.trim();
 }
 
 // ❌ Wrong
@@ -185,16 +187,16 @@ const formatName = (name: string): string => name.trim();
 ```ts
 // ✅ Right (in composables/useCounter.ts)
 export function useCounter() {
-  const count = ref(0);
-  function increment() {
-    count.value++;
-  }
-  return { count, increment };
+    const count = ref(0);
+    function increment() {
+        count.value++;
+    }
+    return { count, increment };
 }
 
 // ❌ Wrong
 export const counter = {
-  count: ref(0),
+    count: ref(0),
 };
 ```
 
@@ -208,12 +210,12 @@ export const counter = {
 ```ts
 // ✅ utils/formatDate.ts
 export function formatDate(date: Date) {
-  return date.toISOString().split("T");
+    return date.toISOString().split("T");
 }
 
 // ✅ services/userServices.ts
 export async function fetchUser(id: string) {
-  return await $fetch(`/api/user/${id}`);
+    return await $fetch(`/api/user/${id}`);
 }
 ```
 

@@ -1,4 +1,5 @@
 ---
+
 name: dcc-ui
 description: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons components, the useUserFeedback composable, and the BS color palette. Use when building a DCC/Basel-Stadt Vue/Nuxt frontend or wiring up the common-ui.bs.js module."
 ---
@@ -8,6 +9,7 @@ description: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-
 Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons components, the useUserFeedback composable, and the BS color palette. Use when building a DCC/Basel-Stadt Vue/Nuxt frontend or wiring up the common-ui.bs.js module.
 
 ### Reference Sub-Guidelines
+
 The following reference sub-guides are available in this skill directory. Read them using your file reading tools as needed:
 
 - **[changelogs](references/changelogs.md)**: Propless Changelogs component that fetches changelog entries from the /changelogs endpoint, renders Markdown, and shows a modal of unread versions tracked via the changelogs-last-read localStorage key. Use when surfacing release notes or what's new to users on app load.
@@ -21,4 +23,3 @@ The following reference sub-guides are available in this skill directory. Read t
 - **[split-view](references/split-view.md)**: SplitView is a resizable two-pane layout with a draggable resizer, a/b slots, isHorizontal orientation toggle, and per-pane/resizer style props. Use when users need to drag-adjust pane proportions. NOT a fixed card (use split-container for a non-resizable header layout).
 - **[undo-redo-buttons](references/undo-redo-buttons.md)**: UndoRedoButtons is a pair of tooltip buttons taking canUndo/canRedo props and emitting @undo/@redo events, auto-disabled when unavailable. Use when adding undo/redo controls to an editor or form.
 - **[useUserFeedback](references/useUserFeedback.md)**: Vue/Nuxt composable returning showToast and showError to display Nuxt UI toast notifications (success/info/warning/error) and i18n-translated API error messages. Use when surfacing user feedback, toasts, or handling ApiError responses in a DCC frontend.
-

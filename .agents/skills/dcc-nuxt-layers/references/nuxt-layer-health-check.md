@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-nuxt-layers
 skillName: nuxt-layer-health-check
 skillDescription: "DCC-BS Nuxt layer exposing Kubernetes-ready health endpoints GET api/health/liveness, api/health/readiness, and api/health/startup for container orchestration. Use when configuring liveness/readiness/startup probes or Docker Compose healthchecks for a Nuxt app (not the FastAPI backend-probes)."
 ---
+
 # Health Check Layer
 
 The health check layer provides Kubernetes-ready health monitoring endpoints for
@@ -31,10 +33,8 @@ Add the layer to your `nuxt.config.ts`:
 
 ```ts
 export default defineNuxtConfig({
-  extends: [
-    ['github:DCC-BS/nuxt-layers/health_check', { install: true }]
-  ]
-})
+    extends: [["github:DCC-BS/nuxt-layers/health_check", { install: true }]],
+});
 ```
 
 That's it! The health check endpoints are immediately available at:
@@ -77,8 +77,8 @@ curl http://localhost:3000/api/health/startup
 
 ```json
 {
-  "status": "ok",
-  "timestamp": 1234567890
+    "status": "ok",
+    "timestamp": 1234567890
 }
 ```
 
@@ -91,14 +91,14 @@ curl http://localhost:3000/api/health/startup
 
 ```yaml
 livenessProbe:
-  httpGet:
-    path: api/health/liveness
-    port: 3000
-  initialDelaySeconds: 30
-  periodSeconds: 10
-  timeoutSeconds: 5
-  failureThreshold: 3
-  successThreshold: 1
+    httpGet:
+        path: api/health/liveness
+        port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
 ```
 
 ### Readiness Probe
@@ -118,9 +118,9 @@ livenessProbe:
 
 ```json
 {
-  "status": "ready",
-  "timestamp": 1234567890,
-  "checks": {}
+    "status": "ready",
+    "timestamp": 1234567890,
+    "checks": {}
 }
 ```
 
@@ -133,14 +133,14 @@ livenessProbe:
 
 ```yaml
 readinessProbe:
-  httpGet:
-    path: api/health/readiness
-    port: 3000
-  initialDelaySeconds: 10
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 3
-  successThreshold: 1
+    httpGet:
+        path: api/health/readiness
+        port: 3000
+    initialDelaySeconds: 10
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 3
+    successThreshold: 1
 ```
 
 ### Startup Probe
@@ -160,8 +160,8 @@ readinessProbe:
 
 ```json
 {
-  "status": "started",
-  "timestamp": 1234567890
+    "status": "started",
+    "timestamp": 1234567890
 }
 ```
 
@@ -174,14 +174,14 @@ readinessProbe:
 
 ```yaml
 startupProbe:
-  httpGet:
-    path: api/health/startup
-    port: 3000
-  initialDelaySeconds: 0
-  periodSeconds: 5
-  timeoutSeconds: 3
-  failureThreshold: 30
-  successThreshold: 1
+    httpGet:
+        path: api/health/startup
+        port: 3000
+    initialDelaySeconds: 0
+    periodSeconds: 5
+    timeoutSeconds: 3
+    failureThreshold: 30
+    successThreshold: 1
 ```
 
 ## Kubernetes Integration
@@ -192,66 +192,66 @@ startupProbe:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nuxt-app
-  labels:
-    app: nuxt-app
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: nuxt-app
-  template:
-    metadata:
-      labels:
+    name: nuxt-app
+    labels:
         app: nuxt-app
-    spec:
-      containers:
-      - name: nuxt-app
-        image: your-registry/nuxt-app:latest
-        ports:
-        - containerPort: 3000
-          name: http
-        
-        # Startup probe - runs first
-        startupProbe:
-          httpGet:
-            path: api/health/startup
-            port: 3000
-          initialDelaySeconds: 0
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 30  # 30 * 5s = 150s max startup time
-          successThreshold: 1
-        
-        # Liveness probe - restarts pod if fails
-        livenessProbe:
-          httpGet:
-            path: api/health/liveness
-            port: 3000
-          initialDelaySeconds: 30
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 3  # Restart after 3 failures
-          successThreshold: 1
-        
-        # Readiness probe - removes from service if fails
-        readinessProbe:
-          httpGet:
-            path: api/health/readiness
-            port: 3000
-          initialDelaySeconds: 10
-          periodSeconds: 5
-          timeoutSeconds: 3
-          failureThreshold: 3  # Remove from service after 3 failures
-          successThreshold: 1
-        
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
+spec:
+    replicas: 3
+    selector:
+        matchLabels:
+            app: nuxt-app
+    template:
+        metadata:
+            labels:
+                app: nuxt-app
+        spec:
+            containers:
+                - name: nuxt-app
+                  image: your-registry/nuxt-app:latest
+                  ports:
+                      - containerPort: 3000
+                        name: http
+
+                  # Startup probe - runs first
+                  startupProbe:
+                      httpGet:
+                          path: api/health/startup
+                          port: 3000
+                      initialDelaySeconds: 0
+                      periodSeconds: 5
+                      timeoutSeconds: 3
+                      failureThreshold: 30 # 30 * 5s = 150s max startup time
+                      successThreshold: 1
+
+                  # Liveness probe - restarts pod if fails
+                  livenessProbe:
+                      httpGet:
+                          path: api/health/liveness
+                          port: 3000
+                      initialDelaySeconds: 30
+                      periodSeconds: 10
+                      timeoutSeconds: 5
+                      failureThreshold: 3 # Restart after 3 failures
+                      successThreshold: 1
+
+                  # Readiness probe - removes from service if fails
+                  readinessProbe:
+                      httpGet:
+                          path: api/health/readiness
+                          port: 3000
+                      initialDelaySeconds: 10
+                      periodSeconds: 5
+                      timeoutSeconds: 3
+                      failureThreshold: 3 # Remove from service after 3 failures
+                      successThreshold: 1
+
+                  resources:
+                      requests:
+                          memory: "256Mi"
+                          cpu: "250m"
+                      limits:
+                          memory: "512Mi"
+                          cpu: "500m"
 ```
 
 ### Probe Execution Order
@@ -284,25 +284,31 @@ Application Running
 Health checks work with Docker Compose too:
 
 ```yml
-version: '3.8'
+version: "3.8"
 
 services:
-  nuxt-app:
-    build: .
-    ports:
-      - "3000:3000"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000api/health/liveness"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-      - API_URL=https://api.example.com
-    deploy:
-      replicas: 2
+    nuxt-app:
+        build: .
+        ports:
+            - "3000:3000"
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "curl",
+                    "-f",
+                    "http://localhost:3000api/health/liveness",
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        restart: unless-stopped
+        environment:
+            - NODE_ENV=production
+            - API_URL=https://api.example.com
+        deploy:
+            replicas: 2
 ```
 
 ## Related Documentation

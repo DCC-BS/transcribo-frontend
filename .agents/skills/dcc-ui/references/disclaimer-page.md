@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: disclaimer-page
 skillDescription: "DisclaimerPage is a full-page disclaimer view with contentHtml and postfixHtml props and an acceptance mechanism, shown before app access. Use for a dedicated standalone disclaimer/terms page. NOT the popup modal gate (disclaimer) or re-open button (disclaimer-button)."
 ---
+
 <script setup lang="ts">
 import { DisclaimerPage } from '@dcc-bs/common-ui.bs.js/components';
 import UiContainer from '../../../components/UiContainer.vue';
@@ -31,10 +33,10 @@ The `DisclaimerPage` component provides a full-page disclaimer view that users s
 
 ## Props
 
-| Prop                | Type     | Required | Description                                                           |
-| ------------------- | -------- | -------- | --------------------------------------------------------------------- |
-| `contentHtml`       | `string` | No       | Main HTML content for the disclaimer body                             |
-| `postfixHtml`       | `string` | No       | HTML content displayed after main content (e.g., contact info)        |
+| Prop          | Type     | Required | Description                                                    |
+| ------------- | -------- | -------- | -------------------------------------------------------------- |
+| `contentHtml` | `string` | No       | Main HTML content for the disclaimer body                      |
+| `postfixHtml` | `string` | No       | HTML content displayed after main content (e.g., contact info) |
 
 ## Usage
 

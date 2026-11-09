@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-nuxt-layers
 skillName: nuxt-layer-feedback-control
 skillDescription: "DCC-BS Nuxt layer providing the <FeedbackControl /> widget that posts user feedback to GitHub issues via /api/feedback. Use when adding emoji-rating feedback, file attachments, or FEEDBACK_REPO/FEEDBACK_GITHUB_TOKEN config — distinct from dcc-ui's general components/composables."
 ---
+
 # Feedback Control Layer
 
 The feedback control layer provides a comprehensive, user-friendly feedback collection system for DCC-BS Nuxt applications. It enables users to submit feedback directly from your application, with support for ratings, file attachments, and seamless integration with GitHub issues.
@@ -55,10 +57,10 @@ In your `nuxt.config.ts`:
 
 ```typescript
 export default defineNuxtConfig({
-  extends: [
-    ['github:DCC-BS/nuxt-layers/feedback-control', { install: true }]
-  ]
-})
+    extends: [
+        ["github:DCC-BS/nuxt-layers/feedback-control", { install: true }],
+    ],
+});
 ```
 
 ### 2. Configure GitHub Integration
@@ -66,12 +68,12 @@ export default defineNuxtConfig({
 ** Local **
 Set the required environment variables in your `.env` file:
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `FEEDBACK_REPO` | Yes | Name of the GitHub repository for feedback issues | `Feedback` |
-| `FEEDBACK_REPO_OWNER` | Yes | GitHub organization or username that owns the repository | `DCC-BS` |
-| `FEEDBACK_PROJECT` | Yes | GitHub project name for organization | `Test` |
-| `FEEDBACK_GITHUB_TOKEN` | Yes | Personal access token with `content` and `issues` read & write permissions | `ghp_xxxxxxxxxxxx` |
+| Variable                | Required | Description                                                                | Example            |
+| ----------------------- | -------- | -------------------------------------------------------------------------- | ------------------ |
+| `FEEDBACK_REPO`         | Yes      | Name of the GitHub repository for feedback issues                          | `Feedback`         |
+| `FEEDBACK_REPO_OWNER`   | Yes      | GitHub organization or username that owns the repository                   | `DCC-BS`           |
+| `FEEDBACK_PROJECT`      | Yes      | GitHub project name for organization                                       | `Test`             |
+| `FEEDBACK_GITHUB_TOKEN` | Yes      | Personal access token with `content` and `issues` read & write permissions | `ghp_xxxxxxxxxxxx` |
 
 ::: tip
 To set the env variables at runtime prefix the variables with `NUXT_` for example `NUXT_FEEDBACK_REPO`
@@ -88,8 +90,8 @@ To create a GitHub token for the feedback control:
 5. Select the following permissions:
    - ✅ `contents` (read and write content)
    - ✅ `issues` (read and write issues)
-5. Click **Generate token**
-6. Copy the token immediately (you won't see it again)
+6. Click **Generate token**
+7. Copy the token immediately (you won't see it again)
 
 ** Production **
 To set the variables at runtime and not build time you need to prefix the variables with `NUXT_`:
@@ -136,10 +138,10 @@ Add the `FeedbackControl` component to your layout or a specific page:
 
 The `FeedbackControl` component accepts the following optional props:
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `defaultMail` | `string` | `""` | Pre-fill the email address field |
-| `inline` | `boolean` | `false` | Removes fixed positioning to allow placement inline with other elements (e.g., in a footer) |
+| Prop          | Type      | Default | Description                                                                                 |
+| ------------- | --------- | ------- | ------------------------------------------------------------------------------------------- |
+| `defaultMail` | `string`  | `""`    | Pre-fill the email address field                                                            |
+| `inline`      | `boolean` | `false` | Removes fixed positioning to allow placement inline with other elements (e.g., in a footer) |
 
 **Example:**
 
@@ -155,13 +157,13 @@ The `FeedbackControl` component accepts the following optional props:
 
 The feedback control includes a 5-level emoji-based rating system:
 
-| Emoji | Value | Description |
-|-------|-------|-------------|
-| 😕 | `poor` | Very unsatisfied |
-| 😐 | `okay` | Somewhat satisfied |
-| 🙂 | `good` | Satisfied |
-| 😀 | `great` | Very satisfied |
-| 🤩 | `excellent` | Extremely satisfied |
+| Emoji | Value       | Description         |
+| ----- | ----------- | ------------------- |
+| 😕    | `poor`      | Very unsatisfied    |
+| 😐    | `okay`      | Somewhat satisfied  |
+| 🙂    | `good`      | Satisfied           |
+| 😀    | `great`     | Very satisfied      |
+| 🤩    | `excellent` | Extremely satisfied |
 
 Users click on the emoji to select their rating, providing quick sentiment analysis for your team.
 
@@ -196,7 +198,7 @@ The feedback control uses Zod for comprehensive form validation:
 - **Rating**: Must be selected (one of the 5 values)
 - **Message**: Required, trimmed to ensure non-empty content
 - **Email**: Valid email format if provided
-- **Attachments**: 
+- **Attachments**:
   - Maximum 2 files
   - Maximum 75MB per file
   - File size validation before upload
@@ -211,15 +213,15 @@ The feedback control layer creates a server API endpoint at `/api/feedback` that
 
 ```typescript
 interface FeedbackBody {
-  rating: 'poor' | 'okay' | 'good' | 'great' | 'excellent';
-  message: string;
-  email?: string;
-  attachments: FeedbackAttachment[];
+    rating: "poor" | "okay" | "good" | "great" | "excellent";
+    message: string;
+    email?: string;
+    attachments: FeedbackAttachment[];
 }
 
 interface FeedbackAttachment {
-  base64: string;
-  fileName: string;
+    base64: string;
+    fileName: string;
 }
 ```
 
@@ -310,8 +312,8 @@ If you need to keep the fixed positioning but change the coordinates, use CSS ov
 
 ```css
 #feedback-control {
-  bottom: 32px !important;
-  right: 32px !important;
+    bottom: 32px !important;
+    right: 32px !important;
 }
 ```
 
@@ -338,14 +340,14 @@ To add or customize translations, create an i18n configuration file:
 ```typescript
 // nuxt.config.ts
 export default defineNuxtConfig({
-  i18n: {
-    locales: [
-      { code: 'en', iso: 'en-US', file: 'en.json', name: 'English' },
-      { code: 'de', iso: 'de-DE', file: 'de.json', name: 'Deutsch' }
-    ],
-    defaultLocale: 'en'
-  }
-})
+    i18n: {
+        locales: [
+            { code: "en", iso: "en-US", file: "en.json", name: "English" },
+            { code: "de", iso: "de-DE", file: "de.json", name: "Deutsch" },
+        ],
+        defaultLocale: "en",
+    },
+});
 ```
 
 Add translations for the feedback namespace:

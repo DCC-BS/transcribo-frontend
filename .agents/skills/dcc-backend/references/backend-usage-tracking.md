@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-usage-tracking
 skillDescription: "dcc_backend_common.usage_tracking module for privacy-compliant usage events. Use when logging events with UsageTrackingService.log_event() and pseudonymizing user IDs via HMAC-SHA256 (get_pseudonymized_user_id) for OpenSearch-compatible structured logs."
 ---
+
 # Usage Tracking
 
 The `dcc_backend_common.usage_tracking` module provides a service for tracking and logging usage events compatible with OpenSearch functionality, with built-in user pseudonymization for privacy compliance.
@@ -56,8 +58,8 @@ The main service class for tracking usage events.
 UsageTrackingService(hmac_secret: str)
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter     | Type  | Description                                                 |
+| ------------- | ----- | ----------------------------------------------------------- |
 | `hmac_secret` | `str` | Secret key used for HMAC-based pseudonymization of user IDs |
 
 **Example:**
@@ -76,8 +78,8 @@ Generates a consistent, one-way pseudonym for a given user ID using HMAC-SHA256.
 get_pseudonymized_user_id(user_id: str | None) -> str
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
+| Parameter | Type          | Description                                                             |
+| --------- | ------------- | ----------------------------------------------------------------------- |
 | `user_id` | `str \| None` | The user ID to pseudonymize. If `None`, returns pseudonym for "unknown" |
 
 **Returns:** `str` - A hexadecimal HMAC-SHA256 hash of the user ID
@@ -112,12 +114,12 @@ log_event(
 ) -> None
 ```
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `module` | `str` | The module name where the event occurred |
-| `func` | `str` | The function name where the event occurred |
-| `user_id` | `str \| None` | The user ID (will be pseudonymized automatically) |
-| `**kwargs` | `str \| int \| float \| bool \| None` | Additional event data as key-value pairs |
+| Parameter  | Type                                  | Description                                       |
+| ---------- | ------------------------------------- | ------------------------------------------------- |
+| `module`   | `str`                                 | The module name where the event occurred          |
+| `func`     | `str`                                 | The function name where the event occurred        |
+| `user_id`  | `str \| None`                         | The user ID (will be pseudonymized automatically) |
+| `**kwargs` | `str \| int \| float \| bool \| None` | Additional event data as key-value pairs          |
 
 **Example:**
 

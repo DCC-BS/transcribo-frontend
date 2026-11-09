@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: split-view
 skillDescription: "SplitView is a resizable two-pane layout with a draggable resizer, a/b slots, isHorizontal orientation toggle, and per-pane/resizer style props. Use when users need to drag-adjust pane proportions. NOT a fixed card (use split-container for a non-resizable header layout)."
 ---
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import UiContainer from '../../../components/UiContainer.vue';
@@ -96,21 +98,21 @@ The `SplitView` component allows you to create a resizable split view layout wit
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `aPaneStyle` | `string` | No | `""` | Custom CSS classes for the first pane (pane A) |
-| `bPaneStyle` | `string` | No | `""` | Custom CSS classes for the second pane (pane B) |
-| `splitViewStyle` | `string` | No | `""` | Custom CSS classes for the split view container |
-| `resizerStyle` | `string` | No | `""` | Custom CSS classes for the resizer element |
-| `resizerInnerStyle` | `string` | No | `""` | Custom CSS classes for the inner resizer element |
-| `isHorizontal` | `boolean` | No | `false` | Determines the orientation (false = vertical, true = horizontal) |
+| Prop                | Type      | Required | Default | Description                                                      |
+| ------------------- | --------- | -------- | ------- | ---------------------------------------------------------------- |
+| `aPaneStyle`        | `string`  | No       | `""`    | Custom CSS classes for the first pane (pane A)                   |
+| `bPaneStyle`        | `string`  | No       | `""`    | Custom CSS classes for the second pane (pane B)                  |
+| `splitViewStyle`    | `string`  | No       | `""`    | Custom CSS classes for the split view container                  |
+| `resizerStyle`      | `string`  | No       | `""`    | Custom CSS classes for the resizer element                       |
+| `resizerInnerStyle` | `string`  | No       | `""`    | Custom CSS classes for the inner resizer element                 |
+| `isHorizontal`      | `boolean` | No       | `false` | Determines the orientation (false = vertical, true = horizontal) |
 
 ## Slots
 
-| Slot | Description |
-|------|-------------|
-| `a` | Content for the first pane (left pane in vertical mode, top pane in horizontal mode) |
-| `b` | Content for the second pane (right pane in vertical mode, bottom pane in horizontal mode) |
+| Slot | Description                                                                               |
+| ---- | ----------------------------------------------------------------------------------------- |
+| `a`  | Content for the first pane (left pane in vertical mode, top pane in horizontal mode)      |
+| `b`  | Content for the second pane (right pane in vertical mode, bottom pane in horizontal mode) |
 
 ## Usage
 

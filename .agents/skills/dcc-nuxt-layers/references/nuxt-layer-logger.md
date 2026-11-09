@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-nuxt-layers
 skillName: nuxt-layer-logger
 skillDescription: "DCC-BS frontend Nuxt logging layer with pluggable implementations selected by LOGGER_LAYER_URI (pino-logger). Provides the useLogger() composable and getEventLogger(event) server utility plus breadcrumbs, for both browser and server. Not the Python structlog backend-logger."
 ---
+
 # Logger Layer
 
 The logger layer provides a universal, type-safe logging interface for DCC-BS Nuxt applications. It enables switching between different logging implementations using environment variables, without changing your application code.
@@ -337,7 +339,7 @@ export default defineNuxtConfig({
   - `autoCollect`: Automatic tracking settings.
     - `navigation`: Track route changes.
     - `xhr`: Track HTTP requests (`fetch`, `$fetch`).
-  :::
+      :::
 
 ## Pino Logger Implementation (`pino-logger`)
 
@@ -512,7 +514,7 @@ export function useLogger(): BaseLogger {
             console.error(`[ERROR] ${msg}`, ...args);
         },
         // ... implement other methods (fatal, warn, debug, trace, silent)
-        
+
         // Implement breadcrumb methods
         addBreadcrumb: (breadcrumb) => {
             console.log("[BREADCRUMB]", breadcrumb);

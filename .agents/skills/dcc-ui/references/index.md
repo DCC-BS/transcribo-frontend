@@ -1,7 +1,9 @@
 ---
+
 skillName: dcc-ui
 skillDescription: "Nuxt module of the Kanton Basel-Stadt design system for DCC Basel-Stadt apps: NavigationBar, DataBsFooter, SplitContainer/SplitView, Disclaimer/DisclaimerButton/DisclaimerPage, Changelogs, OnlineStatus, UndoRedoButtons components, the useUserFeedback composable, and the BS color palette. Use when building a DCC/Basel-Stadt Vue/Nuxt frontend or wiring up the common-ui.bs.js module."
 ---
+
 # User Interface Overview
 
 A comprehensive Nuxt module providing reusable UI components, composables, and utilities built with the official [Kanton Basel-Stadt design system](https://github.com/kanton-basel-stadt/designsystem). This package streamlines development of Basel-Stadt applications by offering a consistent, accessible, and well-documented component library.
@@ -39,10 +41,8 @@ yarn add @dcc-bs/common-ui.bs.js
 2. Add the module to your `nuxt.config.ts`:
 ```typescript
 export default defineNuxtConfig({
-  modules: [
-    '@dcc-bs/common-ui.bs.js'
-  ]
-})
+    modules: ["@dcc-bs/common-ui.bs.js"],
+});
 ```
 
 3. Add the CSS imports to your main css file:
@@ -98,9 +98,11 @@ You can customize the following translation keys in your application:
 To override these translations, add them to your application's i18n configuration files (e.g., `locales/en.json`, `locales/de.json`, etc.).
 
 ## Components
+
 For components see the [Components](./components/) section.
 
 ## Composables
+
 For composables see the [Composables](./composables/) section.
 
 ## Design System
@@ -110,7 +112,7 @@ This library uses the official [Kanton Basel-Stadt design system](https://github
 ### Available Color Palettes
 
 - **Green**: Primary brand colors (green-50 to green-900)
-- **Blue**: Secondary colors (blue-50 to blue-900)  
+- **Blue**: Secondary colors (blue-50 to blue-900)
 - **Purple**: Accent colors (purple-50 to purple-900)
 - **Red**: Error and warning states (red-50 to red-900)
 - **Gray**: Neutral colors (gray-20 to gray-900)
