@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 editLink: true
 skillName: docker
 skillDescription: "Docker containerization standards for DCC-BS projects: multi-stage Dockerfiles, .dockerignore, docker-compose extends pattern (services.compose.yml + dev/prod overrides), alpine/slim images, non-root users, GHCR (ghcr.io/dcc-bs) tagging/CI, hadolint/dive linting, nginx proxy, and Nuxt-layer build-args (AUTH_LAYER_URI, ARG vs ENV). Use when writing/reviewing a Dockerfile or compose file or containerizing a Node/Bun/Nuxt or Python (uv) app."
 ---
+
 # Internal Docker Standards
 
 This document outlines the mandatory standards and best practices for containerizing applications within our organization. These guidelines ensure consistency, security, and performance across all projects.
@@ -27,6 +29,7 @@ Every project must be containerized. The root of the repository must contain the
 To optimize build speed and security, you must exclude all files not required for the application runtime. This prevents secrets (`.env`) and local build artifacts (`node_modules`) from accidentally entering the image.
 
 ### Standard Exclusion List
+
 ```
 .git
 .vscode
@@ -47,11 +50,11 @@ dist
 
 ## Base Images & Tagging
 
-* No `latest` tags: Never depend on the `latest` tag. It is mutable and leads to non-reproducible builds.
-* Pin Versions: Use specific version tags (e.g., `node:24-alpine` or `python:3.13-alpine`).
-* For Web Applications which are sperated in Frontend and Backend services, ensure compatibility when the Major and Minor version are the same. Patch versions can differ. So for example `1.3.1` and `1.3.5` are compatible, but `1.2.x` and `1.3.x` are not.
+- No `latest` tags: Never depend on the `latest` tag. It is mutable and leads to non-reproducible builds.
+- Pin Versions: Use specific version tags (e.g., `node:24-alpine` or `python:3.13-alpine`).
+- For Web Applications which are sperated in Frontend and Backend services, ensure compatibility when the Major and Minor version are the same. Patch versions can differ. So for example `1.3.1` and `1.3.5` are compatible, but `1.2.x` and `1.3.x` are not.
 
-* Minimal Base Images: Prefer `alpine` or `slim` (only if `alpine` fails) variants to reduce image size and download time.
+- Minimal Base Images: Prefer `alpine` or `slim` (only if `alpine` fails) variants to reduce image size and download time.
 
 ## Multi-Stage Builds
 
@@ -63,11 +66,11 @@ Use multi-stage builds to separate build dependencies (compilers, headers, full 
 
 ## Security Context
 
-* Rootless Execution: Containers should not run as root. Create a specific user or use the default non-root user provided by the base image (e.g., `node` user in Node images).
+- Rootless Execution: Containers should not run as root. Create a specific user or use the default non-root user provided by the base image (e.g., `node` user in Node images).
 
-* Privileged Mode: Do not run containers in `--privileged` mode.
+- Privileged Mode: Do not run containers in `--privileged` mode.
 
-* Kubernetes pod security standards prohibit "run as root" containers.
+- Kubernetes pod security standards prohibit "run as root" containers.
 
 ## Nuxt Layer Configuration with Build Arguments
 
@@ -79,10 +82,10 @@ Layer URI environment variables must be passed as Docker **build arguments (ARG)
 
 ### Required Build Arguments for Nuxt Layers
 
-| Build Argument | Description | Example Value |
-|----------------|-------------|---------------|
-| `AUTH_LAYER_URI` | Authentication implementation layer | `github:DCC-BS/nuxt-layers/azure-auth` |
-| `LOGGER_LAYER_URI` | Logger implementation layer | `github:DCC-BS/nuxt-layers/pino-logger` |
+| Build Argument     | Description                         | Example Value                           |
+| ------------------ | ----------------------------------- | --------------------------------------- |
+| `AUTH_LAYER_URI`   | Authentication implementation layer | `github:DCC-BS/nuxt-layers/azure-auth`  |
+| `LOGGER_LAYER_URI` | Logger implementation layer         | `github:DCC-BS/nuxt-layers/pino-logger` |
 
 ### Dockerfile Pattern
 
@@ -118,26 +121,26 @@ In your `docker-compose.yml` or `docker/services.compose.yml`:
 
 ```yaml
 services:
-  app-frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        AUTH_LAYER_URI: ${AUTH_LAYER_URI:-github:DCC-BS/nuxt-layers/no-auth}
-        LOGGER_LAYER_URI: ${LOGGER_LAYER_URI:-github:DCC-BS/nuxt-layers/pino-logger}
+    app-frontend:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                AUTH_LAYER_URI: ${AUTH_LAYER_URI:-github:DCC-BS/nuxt-layers/no-auth}
+                LOGGER_LAYER_URI: ${LOGGER_LAYER_URI:-github:DCC-BS/nuxt-layers/pino-logger}
 ```
 
 Then create a `.env` file with your desired values or set them in your shell before running `docker compose build`.
 
 ### Key Differences: ARG vs ENV
 
-| Aspect | ARG (Build Argument) | ENV (Environment Variable) |
-|--------|---------------------|---------------------------|
-| **Available during** | `RUN` commands in build stage | Build and runtime |
-| **Accessible to processes** | ✅ Injected into shell env during `RUN` | ✅ Always in `process.env` |
-| **Set via** | `--build-arg` flag | `-e` flag, `environment:` in compose, or `ENV` instruction |
-| **Persisted in image** | ❌ No | ✅ Yes |
-| **Use for Layer URIs** | ✅ Yes (build-time only, not persisted) | ❌ Unnecessary duplication |
+| Aspect                      | ARG (Build Argument)                    | ENV (Environment Variable)                                 |
+| --------------------------- | --------------------------------------- | ---------------------------------------------------------- |
+| **Available during**        | `RUN` commands in build stage           | Build and runtime                                          |
+| **Accessible to processes** | ✅ Injected into shell env during `RUN` | ✅ Always in `process.env`                                 |
+| **Set via**                 | `--build-arg` flag                      | `-e` flag, `environment:` in compose, or `ENV` instruction |
+| **Persisted in image**      | ❌ No                                   | ✅ Yes                                                     |
+| **Use for Layer URIs**      | ✅ Yes (build-time only, not persisted) | ❌ Unnecessary duplication                                 |
 
 ::: tip Full Documentation
 For comprehensive documentation on Nuxt layer configuration and all available layers, see [Nuxt Layers - Environment Configuration in Docker](/nuxt-layers/#environment-configuration-in-docker).
@@ -187,6 +190,7 @@ ENTRYPOINT ["node", "./server/index.mjs"]
 ```
 
 ### Python (Alpine)
+
 ```
 # Stage 1: Builder
 FROM python:3.13-alpine as builder
@@ -249,13 +253,14 @@ We utilize a modular Docker Compose strategy to avoid duplication between develo
 
 ### The "Extends" Pattern
 
-* `docker/services.compose.yml`: The base definition. Contains image names, build contexts, and shared environment variables.
+- `docker/services.compose.yml`: The base definition. Contains image names, build contexts, and shared environment variables.
 
-* `docker-compose.dev.yml`: Extends the base. Adds hot-reloading (volumes), debugging ports, and local overrides.
+- `docker-compose.dev.yml`: Extends the base. Adds hot-reloading (volumes), debugging ports, and local overrides.
 
-* `docker-compose.yml`: Extends the base. Defines production networks, restart policies, and resource limits.
+- `docker-compose.yml`: Extends the base. Defines production networks, restart policies, and resource limits.
 
 ### Example Directory Structure
+
 ```
 project-root/
 ├── docker/
@@ -269,6 +274,7 @@ project-root/
 ```
 
 ### Syntax Reference
+
 ```
 # docker-compose.dev.yml
 services:
@@ -456,15 +462,15 @@ http {
 
 ## Static Analysis & Linting
 
-* SonarQube: Ensure Dockerfiles are scanned during the CI process to detect security smells (e.g., hardcoded secrets, sudo usage).
+- SonarQube: Ensure Dockerfiles are scanned during the CI process to detect security smells (e.g., hardcoded secrets, sudo usage).
 
-* [Hadolint](https://github.com/hadolint/hadolint): Recommended for local linting of Dockerfile syntax.
+- [Hadolint](https://github.com/hadolint/hadolint): Recommended for local linting of Dockerfile syntax.
 
 ### Installation
 
-* Windows: scoop install hadolint
+- Windows: scoop install hadolint
 
-* Ubuntu:
+- Ubuntu:
 
 ```
 sudo wget -qO /usr/local/bin/hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
@@ -475,48 +481,48 @@ sudo chmod a+x /usr/local/bin/hadolint
 
 ### Usage
 
-* Local CLI: hadolint Dockerfile
+- Local CLI: hadolint Dockerfile
 
 ## Image Optimization
 
-* Size Analysis: Use [Dive](https://github.com/wagoodman/dive) to inspect image layers and identify wasted space.
+- Size Analysis: Use [Dive](https://github.com/wagoodman/dive) to inspect image layers and identify wasted space.
 
-* Layer Caching: Leverage the build cache by ordering instructions from stable to volatile. Copy dependency definitions (e.g., package.json) and install packages before copying the source code to avoid re-installing dependencies on every code change.
+- Layer Caching: Leverage the build cache by ordering instructions from stable to volatile. Copy dependency definitions (e.g., package.json) and install packages before copying the source code to avoid re-installing dependencies on every code change.
 
-* Clean Artifacts: Clear package manager caches (e.g., apk cache clean, rm -rf /var/lib/apt/lists/*) within the same RUN instruction as the installation to prevent temporary files from committing to the layer.
+- Clean Artifacts: Clear package manager caches (e.g., apk cache clean, rm -rf /var/lib/apt/lists/*) within the same RUN instruction as the installation to prevent temporary files from committing to the layer.
 
-* Further Reading: [Guide to Reducing Docker Image Size](https://devopscube.com/reduce-docker-image-size/)
+- Further Reading: [Guide to Reducing Docker Image Size](https://devopscube.com/reduce-docker-image-size/)
 
 # 5. Deployment & CI/CD
 
 ## Registry
 
-* Images are pushed to GHCR (GitHub Container Registry).
+- Images are pushed to GHCR (GitHub Container Registry).
 
-* Namespace convention: `ghcr.io/dcc-bs/<service-name>`.
+- Namespace convention: `ghcr.io/dcc-bs/<service-name>`.
 
 ## Versioning Strategy
 
-* Development: Tag with the branch name or dev.
+- Development: Tag with the branch name or dev.
 
-* Staging/Production: Tag with the Git Commit SHA (sha-xyz123) and the Semantic Version (v1.0.0).
+- Staging/Production: Tag with the Git Commit SHA (sha-xyz123) and the Semantic Version (v1.0.0).
 
-* Avoid Overwriting: Do not overwrite stable tags.
+- Avoid Overwriting: Do not overwrite stable tags.
 
 ## CI Workflow
 
-* Checkout Code.
+- Checkout Code.
 
-* Lint Dockerfile (Hadolint/SonarQube).
+- Lint Dockerfile (Hadolint/SonarQube).
 
-* Build Image (using BuildKit).
+- Build Image (using BuildKit).
 
-* Run Tests against the container.
+- Run Tests against the container.
 
-* Push to GHCR.
+- Push to GHCR.
 
 # 6. Docker Configuration (Host)
 
-* Rootless Daemon: Run the Docker daemon in rootless mode to mitigate privilege escalation vulnerabilities on the host machine.
+- Rootless Daemon: Run the Docker daemon in rootless mode to mitigate privilege escalation vulnerabilities on the host machine.
 
-* Resource Limits: Configure global resource quotas to prevent a single container from exhausting host memory or CPU.
+- Resource Limits: Configure global resource quotas to prevent a single container from exhausting host memory or CPU.

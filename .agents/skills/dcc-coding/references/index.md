@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 editLink: true
 skillName: dcc-coding
 skillDescription: "DCC coding standards across languages and stacks. Routes to language-specific conventions for Nuxt/Vue/TypeScript frontends and Python/FastAPI backends. Use when writing or reviewing code in a DCC project and you need naming, structure, tooling, or style conventions for .vue, .ts, or .py files."
 ---
+
 # General Coding Standards
 
 Most important thing:

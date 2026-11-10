@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-llm-agent
 skillDescription: "dcc_backend_common.llm_agent module: a Pydantic AI agent framework (pydantic_ai extra). Use when subclassing BaseAgent, streaming with run/run_stream_text/run_stream_events, configuring LlmConfig, adding postprocessors (trim_text, replace_eszett), or debugging via withDebbuger."
 ---
+
 # LLM Agent Module
 
 The `dcc_backend_common.llm_agent` module provides a comprehensive Pydantic AI agent framework with streaming support, postprocessing utilities, and debugging tools.
@@ -96,11 +98,11 @@ The `LlmConfig` class is a base configuration class specifically for LLM-related
 
 ### Available Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `llm_model` | `str` | The model identifier (e.g., `"gpt-4o"`) |
-| `llm_url` | `str` | The URL for the LLM API endpoint |
-| `llm_api_key` | `str` | The API key for authentication |
+| Field         | Type  | Description                             |
+| ------------- | ----- | --------------------------------------- |
+| `llm_model`   | `str` | The model identifier (e.g., `"gpt-4o"`) |
+| `llm_url`     | `str` | The URL for the LLM API endpoint        |
+| `llm_api_key` | `str` | The API key for authentication          |
 
 ### Creating a Custom Config
 
@@ -148,12 +150,12 @@ class BaseAgent[DepsType, OutputType](ABC):
 
 ### Constructor Parameters
 
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `config` | `LlmConfig` | Required | LLM API configuration |
-| `deps_type` | `type[DepsType]` | `NoneType` | Type for dependencies |
-| `output_type` | `type[OutputType]` | `str` | Expected output type |
-| `enable_thinking` | `bool` | `False` | Enable thinking mode |
+| Parameter         | Type               | Default    | Description           |
+| ----------------- | ------------------ | ---------- | --------------------- |
+| `config`          | `LlmConfig`        | Required   | LLM API configuration |
+| `deps_type`       | `type[DepsType]`   | `NoneType` | Type for dependencies |
+| `output_type`     | `type[OutputType]` | `str`      | Expected output type  |
+| `enable_thinking` | `bool`             | `False`    | Enable thinking mode  |
 
 ### Abstract Method
 
@@ -244,14 +246,14 @@ The decorator automatically:
 
 The debugger logs the following event types:
 
-| Event Type | Description |
-|------------|-------------|
-| `PartStartEvent` | When a response part starts |
-| `PartDeltaEvent` | Text, thinking, and tool call deltas |
-| `FunctionToolCallEvent` | When LLM calls a tool |
-| `FunctionToolResultEvent` | When a tool returns results |
-| `FinalResultEvent` | When final result production starts |
-| `PartEndEvent` | When a response part ends |
+| Event Type                | Description                          |
+| ------------------------- | ------------------------------------ |
+| `PartStartEvent`          | When a response part starts          |
+| `PartDeltaEvent`          | Text, thinking, and tool call deltas |
+| `FunctionToolCallEvent`   | When LLM calls a tool                |
+| `FunctionToolResultEvent` | When a tool returns results          |
+| `FinalResultEvent`        | When final result production starts  |
+| `PartEndEvent`            | When a response part ends            |
 
 ### Using `create_event_debugger()`
 
@@ -275,10 +277,10 @@ Postprocessing automatically transforms agent outputs after the LLM generates th
 
 Two postprocessors are included by default:
 
-| Function | Description |
-|----------|-------------|
-| `trim_text()` | Removes blank lines from the start of text (only on first chunk in streaming) |
-| `replace_eszett()` | Recursively replaces German ß with "ss" in all string fields |
+| Function           | Description                                                                   |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `trim_text()`      | Removes blank lines from the start of text (only on first chunk in streaming) |
+| `replace_eszett()` | Recursively replaces German ß with "ss" in all string fields                  |
 
 ### Adding Custom Postprocessors
 
@@ -309,44 +311,44 @@ class MyAgent(BaseAgent[None, str]):
 
 Postprocessor functions receive a `PostprocessingContext` object with information about the current processing state:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `index` | `int` | The index of the item being processed (0, 1, 2, ...) |
-| `is_partial` | `bool` | Whether this is a partial (streaming) result |
+| Field        | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| `index`      | `int`  | The index of the item being processed (0, 1, 2, ...) |
+| `is_partial` | `bool` | Whether this is a partial (streaming) result         |
 
 ## API Reference
 
 ### Main Classes
 
-| Class | Location | Description |
-|-------|----------|-------------|
-| `BaseAgent` | [base_agent.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/base_agent.py) | Abstract base class for LLM agents |
-| `LlmConfig` | [config/app_config.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/config/app_config.py) | LLM configuration base class |
+| Class                   | Location                                                                                                                   | Description                          |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `BaseAgent`             | [base_agent.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/base_agent.py)         | Abstract base class for LLM agents   |
+| `LlmConfig`             | [config/app_config.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/config/app_config.py)     | LLM configuration base class         |
 | `PostprocessingContext` | [postprocessing.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/postprocessing.py) | Context for postprocessing functions |
 
 ### Public API Methods
 
-| Method | Description | Return Type |
-|--------|-------------|-------------|
-| `run()` | Execute agent and return complete output | `OutputType` |
-| `run_stream_text()` | Stream text output chunk by chunk | `AsyncGenerator[str, None]` |
-| `stream_list()` | Stream list items one-by-one | `AsyncGenerator[T, None]` |
-| `run_stream_output()` | Stream structured output with postprocessing | `AsyncGenerator[Any, None]` |
-| `run_stream_events()` | Stream all events for detailed debugging | `AsyncGenerator[AgentStreamEvent \| AgentRunResultEvent]` |
+| Method                | Description                                  | Return Type                                               |
+| --------------------- | -------------------------------------------- | --------------------------------------------------------- |
+| `run()`               | Execute agent and return complete output     | `OutputType`                                              |
+| `run_stream_text()`   | Stream text output chunk by chunk            | `AsyncGenerator[str, None]`                               |
+| `stream_list()`       | Stream list items one-by-one                 | `AsyncGenerator[T, None]`                                 |
+| `run_stream_output()` | Stream structured output with postprocessing | `AsyncGenerator[Any, None]`                               |
+| `run_stream_events()` | Stream all events for detailed debugging     | `AsyncGenerator[AgentStreamEvent \| AgentRunResultEvent]` |
 
 ### Debugging Utilities
 
-| Function/Decorator | Location | Description |
-|--------------------|----------|-------------|
-| `withDebbuger` | [agent_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/agent_debugger.py) | Decorator to inject event debugger |
-| `create_event_debugger()` | [event_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/event_debugger.py) | Create event stream handler |
+| Function/Decorator        | Location                                                                                                                             | Description                        |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------- |
+| `withDebbuger`            | [agent_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/agent_debugger.py) | Decorator to inject event debugger |
+| `create_event_debugger()` | [event_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/event_debugger.py) | Create event stream handler        |
 
 ### Postprocessing Functions
 
-| Function | Location | Description |
-|----------|----------|-------------|
-| `trim_text()` | [postprocessing.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/postprocessing.py) | Remove blank lines from text start |
-| `replace_eszett()` | [postprocessing.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/postprocessing.py) | Replace German ß with "ss" |
+| Function           | Location                                                                                                                   | Description                        |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `trim_text()`      | [postprocessing.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/postprocessing.py) | Remove blank lines from text start |
+| `replace_eszett()` | [postprocessing.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/postprocessing.py) | Replace German ß with "ss"         |
 
 ## Related Documentation
 

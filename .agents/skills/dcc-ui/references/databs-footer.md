@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: databs-footer
 skillDescription: "DataBsFooter is a branded application footer with default DCC logo/branding and left, center, and right slots for custom links, version, or contact content. Use when adding a page footer."
 ---
+
 <script setup lang="ts">
 import UiContainer from "../../../components/UiContainer.vue";
 import { DataBsFooter } from "@dcc-bs/common-ui.bs.js/components";
@@ -79,11 +81,11 @@ This component has no props - it uses slots for all customization.
 
 ## Slots
 
-| Slot     | Description                              | Default Content                                                              |
-| -------- | ---------------------------------------- | ---------------------------------------------------------------------------- |
-| `left`   | Content for the left section             | DCC logo with animated hover effect and organization information             |
-| `center` | Content for the center section           | Empty                                                                        |
-| `right`  | Content for the right section            | Empty                                                                        |
+| Slot     | Description                    | Default Content                                                  |
+| -------- | ------------------------------ | ---------------------------------------------------------------- |
+| `left`   | Content for the left section   | DCC logo with animated hover effect and organization information |
+| `center` | Content for the center section | Empty                                                            |
+| `right`  | Content for the right section  | Empty                                                            |
 
 ## Usage
 

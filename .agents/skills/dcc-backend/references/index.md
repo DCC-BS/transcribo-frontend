@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 editLink: true
 skillName: dcc-backend
 skillDescription: "Shared Python library dcc-backend-common for FastAPI services. Use when building or maintaining a DCC backend and needing its reusable modules: config (Pydantic AppConfig/LlmConfig), structlog logging, fastapi_health_probes (Kubernetes probes), fastapi_error_handling, usage_tracking, and the Pydantic AI llm_agent framework. Routes to the matching module reference."
 ---
+
 # Backend Common
 
 `dcc-backend-common` is our shared Python package that provides reusable components for building FastAPI-based backend services. It standardizes logging, configuration, health probes, and LLM integration across all our projects.
@@ -14,7 +16,7 @@ skillDescription: "Shared Python library dcc-backend-common for FastAPI services
 - **Less Boilerplate**: Common functionality is already implemented and tested
 - **Best Practices**: Built-in support for Kubernetes, structured logging, and type safety
 - **Faster Development**: Focus on business logic instead of infrastructure code
-- **LLM Integration**: Comprehensive Pydantic AI agent framework with streaming and debugging support 
+- **LLM Integration**: Comprehensive Pydantic AI agent framework with streaming and debugging support
 
 ## Installation
 
@@ -85,25 +87,25 @@ async def root():
 
 ## Modules
 
-| Module | Description |
-|--------|-------------|
-| [Configuration](/backend-common/config) | Type-safe configuration management with Pydantic and CLI tools |
-| [Logger](/backend-common/logger) | Structured logging with structlog |
-| [Health Probes](/backend-common/probes) | Kubernetes liveness, readiness, and startup probes |
-| [Error Handler](/backend-common/error_handler) | Standardized API error handling |
-| [Usage Tracking](/backend-common/usage_tracking) | Usage tracking for the application |
-| [LLM Agent](/backend-common/llm_agent) | Pydantic AI agent framework with streaming, postprocessing, and debugging |
+| Module                                           | Description                                                               |
+| ------------------------------------------------ | ------------------------------------------------------------------------- |
+| [Configuration](/backend-common/config)          | Type-safe configuration management with Pydantic and CLI tools            |
+| [Logger](/backend-common/logger)                 | Structured logging with structlog                                         |
+| [Health Probes](/backend-common/probes)          | Kubernetes liveness, readiness, and startup probes                        |
+| [Error Handler](/backend-common/error_handler)   | Standardized API error handling                                           |
+| [Usage Tracking](/backend-common/usage_tracking) | Usage tracking for the application                                        |
+| [LLM Agent](/backend-common/llm_agent)           | Pydantic AI agent framework with streaming, postprocessing, and debugging |
 
 ## Environment Variables
 
 The package uses environment variables for configuration. Here are the common ones:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `IS_PROD` | Yes | Set to `true` for production (enables JSON logging) |
-| `LOG_LEVEL` | No | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). Default: `INFO` |
-| `DEV_TRACEBACK_STYLE` | No | Traceback style in dev mode (`focused` or `rich`). Default: `focused` |
-| `LOGGER_USER_CODE_PATHS` | No | Comma-separated paths to consider as user code for focused tracebacks. Default: `dcc_backend_common,src/,app/,tests/` |
+| Variable                 | Required | Description                                                                                                           |
+| ------------------------ | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| `IS_PROD`                | Yes      | Set to `true` for production (enables JSON logging)                                                                   |
+| `LOG_LEVEL`              | No       | Logging level (`DEBUG`, `INFO`, `WARNING`, `ERROR`). Default: `INFO`                                                  |
+| `DEV_TRACEBACK_STYLE`    | No       | Traceback style in dev mode (`focused` or `rich`). Default: `focused`                                                 |
+| `LOGGER_USER_CODE_PATHS` | No       | Comma-separated paths to consider as user code for focused tracebacks. Default: `dcc_backend_common,src/,app/,tests/` |
 
 Module-specific environment variables are documented in their respective pages.
 
@@ -188,12 +190,12 @@ If you find yourself writing the same code across multiple FastAPI applications,
 
 Add code to `dcc-backend-common` when it is:
 
-| Criteria | Example |
-|----------|---------|
-| **Used in 2+ projects** | A custom middleware, utility function, or base class |
-| **Generic and reusable** | Not tied to specific business logic |
-| **Well-tested** | Has unit tests and documentation |
-| **Stable** | API is unlikely to change frequently |
+| Criteria                 | Example                                              |
+| ------------------------ | ---------------------------------------------------- |
+| **Used in 2+ projects**  | A custom middleware, utility function, or base class |
+| **Generic and reusable** | Not tied to specific business logic                  |
+| **Well-tested**          | Has unit tests and documentation                     |
+| **Stable**               | API is unlikely to change frequently                 |
 
 ### What Belongs Here
 

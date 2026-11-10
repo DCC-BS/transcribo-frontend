@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-nuxt-layers
 skillName: nuxt-layer-backend-communication
 skillDescription: "DCC-BS Nuxt server-route layer exposing backendHandlerBuilder(), a fluent type-safe builder (withMethod, withBodyProvider, withFetcher, withDummyFetcher, postMap, build) for proxying to API_URL. Use when creating Nuxt server API handlers, dummy-data mode, or dynamic [r:]/[q:] path forwarding."
 ---
+
 # Backend Communication Layer
 
 The backend communication layer provides powerful utilities for building
@@ -34,10 +36,10 @@ Add the layer to your `nuxt.config.ts`:
 
 ```typescript
 export default defineNuxtConfig({
-  extends: [
-    ['github:DCC-BS/nuxt-layers/backend_communication', { install: true }]
-  ]
-})
+    extends: [
+        ["github:DCC-BS/nuxt-layers/backend_communication", { install: true }],
+    ],
+});
 ```
 
 ### Basic Usage
@@ -46,10 +48,9 @@ Create a simple pass-through API handler:
 
 ```typescript
 // server/api/users.get.ts
-import { backendHandlerBuilder } from '#backend_communication'
+import { backendHandlerBuilder } from "#backend_communication";
 
-export default backendHandlerBuilder()
-    .build('/users')
+export default backendHandlerBuilder().build("/users");
 ```
 
 This creates a handler that forwards requests to `${API_URL}/users`. By default,
@@ -59,11 +60,11 @@ it inherits the HTTP method from the incoming request (GET in this case).
 
 The layer requires the following environment variables:
 
-| Variable           | Required | Description                                    | Example                                   |
-| ----------------- | -------- | ---------------------------------------------- | ----------------------------------------- |
-| `API_URL`        | Yes      | Base URL of your backend API                    | `https://api.example.com`                  |
-| `LOGGER_LAYER_URI` | No      | URI to logger implementation layer               | `github:DCC-BS/nuxt-layers/pino-logger`  |
-| `DUMMY`          | No      | Enable dummy data mode (set to "true")         | `true` or empty string                     |
+| Variable           | Required | Description                            | Example                                 |
+| ------------------ | -------- | -------------------------------------- | --------------------------------------- |
+| `API_URL`          | Yes      | Base URL of your backend API           | `https://api.example.com`               |
+| `LOGGER_LAYER_URI` | No       | URI to logger implementation layer     | `github:DCC-BS/nuxt-layers/pino-logger` |
+| `DUMMY`            | No       | Enable dummy data mode (set to "true") | `true` or empty string                  |
 
 ```bash
 # .env
@@ -85,9 +86,9 @@ export default defineNuxtConfig({
 });
 ```
 
-| Option       | Type    | Default | Description                                    |
-| ------------ | ------- | -------- | ---------------------------------------------- |
-| `apiUrl`     | string  | -        | Base URL of backend API                         |
+| Option         | Type   | Default | Description                                                       |
+| -------------- | ------ | ------- | ----------------------------------------------------------------- |
+| `apiUrl`       | string | -       | Base URL of backend API                                           |
 | `useDummyData` | string | `""`    | Set to `"true"` to use dummy data fetcher instead of real backend |
 
 When `useDummyData` is set to `"true"`, all backend handlers will use the dummy fetcher (if configured) instead of making real HTTP requests. This is useful for:
@@ -106,21 +107,22 @@ Each builder method returns a **new** builder instance rather than modifying the
 existing one. This makes builders immutable and allows you to create variations:
 
 ```typescript
-const baseBuilder = backendHandlerBuilder()
-  .extendFetchOptions(async (options) => ({
-    ...options,
-    headers: {
-      ...options.headers,
-      'X-API-Version': 'v1'
-    }
-  }))
+const baseBuilder = backendHandlerBuilder().extendFetchOptions(
+    async (options) => ({
+        ...options,
+        headers: {
+            ...options.headers,
+            "X-API-Version": "v1",
+        },
+    }),
+);
 
 // Create variations without affecting the base
-const getUserHandler = baseBuilder.build('/users')
+const getUserHandler = baseBuilder.build("/users");
 const postUserHandler = baseBuilder
-  .withMethod('POST')
-  .withBodyProvider(async (event) => readBody(event))
-  .build('/users')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => readBody(event))
+    .build("/users");
 ```
 
 ### Type Safety and Method Availability
@@ -147,40 +149,40 @@ and ensures type correctness throughout the chain.
 ```typescript
 // ✅ Valid: Configure body provider, then fetcher, then transform
 const handler1 = backendHandlerBuilder()
-  .withBodyProvider(async (event) => ({ name: 'Test' }))
-  .withFetcher(async (options) => ({ id: 1, name: options.body?.name }))
-  .postMap(async (response) => ({ userId: response.id }))
-  .build('/users')
+    .withBodyProvider(async (event) => ({ name: "Test" }))
+    .withFetcher(async (options) => ({ id: 1, name: options.body?.name }))
+    .postMap(async (response) => ({ userId: response.id }))
+    .build("/users");
 
 // ❌ Invalid: Can't call withBodyProvider twice
 // TypeScript error: withBodyProvider does not exist on type
 const handler2 = backendHandlerBuilder()
-  .withBodyProvider(async (event) => ({ name: 'Test' }))
-  .withBodyProvider(async (event) => ({ email: 'test@example.com' })) // Error!
-  .build('/users')
+    .withBodyProvider(async (event) => ({ name: "Test" }))
+    .withBodyProvider(async (event) => ({ email: "test@example.com" })) // Error!
+    .build("/users");
 
 // ❌ Invalid: Can't call withFetcher twice
 // TypeScript error: withFetcher does not exist on type
 const handler3 = backendHandlerBuilder()
-  .withFetcher(async (options) => ({ id: 1 }))
-  .withFetcher(async (options) => ({ id: 2 })) // Error!
-  .build('/users')
+    .withFetcher(async (options) => ({ id: 1 }))
+    .withFetcher(async (options) => ({ id: 2 })) // Error!
+    .build("/users");
 
 // ❌ Invalid: Can't call withBodyProvider after postMap
 // TypeScript error: withBodyProvider does not exist on type
 const handler4 = backendHandlerBuilder()
-  .postMap(async (response) => ({ data: response }))
-  .withBodyProvider(async (event) => ({ name: 'Test' })) // Error!
-  .build('/users')
+    .postMap(async (response) => ({ data: response }))
+    .withBodyProvider(async (event) => ({ name: "Test" })) // Error!
+    .build("/users");
 
 // ✅ Valid: withMethod and extendFetchOptions are always available
 const handler5 = backendHandlerBuilder()
-  .withBodyProvider(async (event) => ({ name: 'Test' }))
-  .withFetcher(async (options) => ({ id: 1 }))
-  .postMap(async (response) => ({ userId: response.id }))
-  .withMethod('POST') // Still available
-  .extendFetchOptions(async (options) => ({ ...options })) // Still available
-  .build('/users')
+    .withBodyProvider(async (event) => ({ name: "Test" }))
+    .withFetcher(async (options) => ({ id: 1 }))
+    .postMap(async (response) => ({ userId: response.id }))
+    .withMethod("POST") // Still available
+    .extendFetchOptions(async (options) => ({ ...options })) // Still available
+    .build("/users");
 ```
 
 #### Why These Restrictions Exist
@@ -264,20 +266,20 @@ When a handler built with `backendHandlerBuilder()` is executed, the flow is:
 ```typescript
 // This handler...
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    return { ...body, timestamp: Date.now() }
-  })
-  .extendFetchOptions(async (options) => ({
-    ...options,
-    headers: { ...options.headers, 'X-Custom': 'value' }
-  }))
-  .postMap(async (response) => ({
-    success: true,
-    data: response
-  }))
-  .build('/users')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+        return { ...body, timestamp: Date.now() };
+    })
+    .extendFetchOptions(async (options) => ({
+        ...options,
+        headers: { ...options.headers, "X-Custom": "value" },
+    }))
+    .postMap(async (response) => ({
+        success: true,
+        data: response,
+    }))
+    .build("/users");
 
 // ...executes in this order when called:
 // 1. Build URL: Parse '/users'
@@ -293,7 +295,7 @@ export default backendHandlerBuilder()
 The builder uses TypeScript generics to ensure type safety throughout the transformation pipeline:
 
 ```typescript
-backendHandlerBuilder<TRequest, TBody, TResponse, TResponseTransformed>()
+backendHandlerBuilder<TRequest, TBody, TResponse, TResponseTransformed>();
 ```
 
 - `TRequest extends EventHandlerRequest` - Type of the incoming H3 event request
@@ -310,9 +312,7 @@ Each builder method can update these type parameters, and TypeScript will infer 
 Set the HTTP method for the request. Overrides the default method inheritance.
 
 ```typescript
-export default backendHandlerBuilder()
-  .withMethod('POST')
-  .build('/users')
+export default backendHandlerBuilder().withMethod("POST").build("/users");
 ```
 
 **Parameters:**
@@ -328,18 +328,18 @@ of the previous one.
 
 ```typescript
 export default backendHandlerBuilder()
-  .extendFetchOptions(async (options) => {
-    return {
-      ...options,
-      headers: {
-        ...options.headers,
-        'X-API-Key': process.env.API_KEY,
-        'X-Request-ID': generateRequestId()
-      },
-      // Note: ofetch options like timeout can be added here
-    }
-  })
-  .build('/users')
+    .extendFetchOptions(async (options) => {
+        return {
+            ...options,
+            headers: {
+                ...options.headers,
+                "X-API-Key": process.env.API_KEY,
+                "X-Request-ID": generateRequestId(),
+            },
+            // Note: ofetch options like timeout can be added here
+        };
+    })
+    .build("/users");
 ```
 
 **Parameters:**
@@ -372,16 +372,16 @@ you to read, transform, and completely change the body type.
 
 ```typescript
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    return {
-      ...body,
-      processedAt: new Date().toISOString(),
-      source: 'api-gateway'
-    }
-  })
-  .build('/users')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+        return {
+            ...body,
+            processedAt: new Date().toISOString(),
+            source: "api-gateway",
+        };
+    })
+    .build("/users");
 ```
 
 **Parameters:**
@@ -415,11 +415,11 @@ the default `ofetch`-based fetcher with your own implementation.
 
 ```typescript
 export default backendHandlerBuilder()
-  .withFetcher(async (options) => {
-    // Custom fetch logic with retry, logging, etc.
-    return customFetch(options.url, options)
-  })
-  .build('/users')
+    .withFetcher(async (options) => {
+        // Custom fetch logic with retry, logging, etc.
+        return customFetch(options.url, options);
+    })
+    .build("/users");
 ```
 
 **Parameters:**
@@ -440,7 +440,7 @@ Using a custom fetcher changes the response type, which:
 
 - Removes `withBodyProvider` from subsequent calls (body type is locked)
 - Removes `withFetcher` from subsequent calls (fetcher is already set)
-:::
+  :::
 
 #### `withDummyFetcher<TNewResponse extends TResponse = TResponse>(dummyData: DummyFetcherData<TBody, TNewResponse>)`
 
@@ -466,45 +466,45 @@ Configure a dummy fetcher that returns mock data instead of making real HTTP req
 
 ```typescript
 export default backendHandlerBuilder()
-  .withDummyFetcher({
-    id: 1,
-    name: "Test User",
-    email: "test@example.com"
-  })
-  .build('/users')
+    .withDummyFetcher({
+        id: 1,
+        name: "Test User",
+        email: "test@example.com",
+    })
+    .build("/users");
 ```
 
 **Dynamic dummy data:**
 
 ```typescript
 export default backendHandlerBuilder()
-  .withDummyFetcher((options) => {
-    return {
-      url: options.url,
-      method: options.method,
-      data: {
-        mock: true,
-        timestamp: Date.now()
-      }
-    }
-  })
-  .build('/users')
+    .withDummyFetcher((options) => {
+        return {
+            url: options.url,
+            method: options.method,
+            data: {
+                mock: true,
+                timestamp: Date.now(),
+            },
+        };
+    })
+    .build("/users");
 ```
 
 **Combined with real fetcher:**
 
 ```typescript
 export default backendHandlerBuilder()
-  .withFetcher(async (options) => {
-    // Real fetcher for production
-    return await $fetch(options.url, options)
-  })
-  .withDummyFetcher({
-    // Fallback dummy data for development
-    mock: true,
-    data: []
-  })
-  .build('/users')
+    .withFetcher(async (options) => {
+        // Real fetcher for production
+        return await $fetch(options.url, options);
+    })
+    .withDummyFetcher({
+        // Fallback dummy data for development
+        mock: true,
+        data: [],
+    })
+    .build("/users");
 ```
 
 ::: info Note
@@ -512,7 +512,7 @@ Using `withDummyFetcher` removes the following methods from subsequent calls:
 - `withBodyProvider` (body type is locked)
 - `withFetcher` (fetcher is already configured)
 - `withDummyFetcher` (dummy fetcher is already configured)
-:::
+  :::
 
 #### `postMap<TMap>(fn: (response) => Promise<TMap>)`
 
@@ -522,14 +522,14 @@ of the previous one.
 
 ```typescript
 export default backendHandlerBuilder()
-  .postMap(async (response) => {
-    return {
-      data: response.items,
-      count: response.items.length,
-      processedAt: new Date().toISOString()
-    }
-  })
-  .build('/users')
+    .postMap(async (response) => {
+        return {
+            data: response.items,
+            count: response.items.length,
+            processedAt: new Date().toISOString(),
+        };
+    })
+    .build("/users");
 ```
 
 **Parameters:**
@@ -561,9 +561,7 @@ Build and return the configured event handler. Must be called last in the
 builder chain.
 
 ```typescript
-export default backendHandlerBuilder()
-  .withMethod('GET')
-  .build('/users')
+export default backendHandlerBuilder().withMethod("GET").build("/users");
 ```
 
 **Parameters:**
@@ -597,8 +595,7 @@ The simplest pattern - forward requests directly:
 
 ```typescript
 // server/api/data.get.ts
-export default backendHandlerBuilder()
-  .build('/data')
+export default backendHandlerBuilder().build("/data");
 ```
 
 Request to `/api/data` → Forwards to `${API_URL}/data`
@@ -610,17 +607,17 @@ Transform the request before sending:
 ```typescript
 // server/api/users.post.ts
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    return {
-      firstName: body.first_name,
-      lastName: body.last_name,
-      email: body.email.toLowerCase(),
-      createdAt: new Date().toISOString()
-    }
-  })
-  .build('/users')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+        return {
+            firstName: body.first_name,
+            lastName: body.last_name,
+            email: body.email.toLowerCase(),
+            createdAt: new Date().toISOString(),
+        };
+    })
+    .build("/users");
 ```
 
 ### Response Normalization
@@ -630,17 +627,17 @@ Standardize response format:
 ```typescript
 // server/api/users.get.ts
 export default backendHandlerBuilder()
-  .postMap(async (response) => {
-    return {
-      success: true,
-      data: response,
-      meta: {
-        timestamp: Date.now(),
-        version: '1.0'
-      }
-    }
-  })
-  .build('/users')
+    .postMap(async (response) => {
+        return {
+            success: true,
+            data: response,
+            meta: {
+                timestamp: Date.now(),
+                version: "1.0",
+            },
+        };
+    })
+    .build("/users");
 ```
 
 ### Custom Headers and Timeout
@@ -650,19 +647,19 @@ Add custom headers and configure timeout:
 ```typescript
 // server/api/external.get.ts
 export default backendHandlerBuilder()
-  .extendFetchOptions(async (options) => {
-    return {
-      ...options,
-      headers: {
-        ...options.headers,
-        'X-API-Key': process.env.EXTERNAL_API_KEY!,
-        'Accept': 'application/json'
-      },
-      // ofetch timeout option (in milliseconds)
-      timeout: 10000
-    }
-  })
-  .build('/external/data')
+    .extendFetchOptions(async (options) => {
+        return {
+            ...options,
+            headers: {
+                ...options.headers,
+                "X-API-Key": process.env.EXTERNAL_API_KEY!,
+                Accept: "application/json",
+            },
+            // ofetch timeout option (in milliseconds)
+            timeout: 10000,
+        };
+    })
+    .build("/external/data");
 ```
 
 ### Combined Transformations
@@ -672,35 +669,35 @@ Use multiple transformations together:
 ```typescript
 // server/api/orders.post.ts
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    // Validate and transform request
-    return {
-      ...body,
-      orderId: generateOrderId(),
-      timestamp: Date.now()
-    }
-  })
-  .extendFetchOptions(async (options) => {
-    // Add custom headers
-    return {
-      ...options,
-      headers: {
-        ...options.headers,
-        'X-Idempotency-Key': generateIdempotencyKey()
-      }
-    }
-  })
-  .postMap(async (response) => {
-    // Transform response
-    return {
-      success: true,
-      order: response,
-      confirmationUrl: generateConfirmationUrl(response.id)
-    }
-  })
-  .build('/orders')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+        // Validate and transform request
+        return {
+            ...body,
+            orderId: generateOrderId(),
+            timestamp: Date.now(),
+        };
+    })
+    .extendFetchOptions(async (options) => {
+        // Add custom headers
+        return {
+            ...options,
+            headers: {
+                ...options.headers,
+                "X-Idempotency-Key": generateIdempotencyKey(),
+            },
+        };
+    })
+    .postMap(async (response) => {
+        // Transform response
+        return {
+            success: true,
+            order: response,
+            confirmationUrl: generateConfirmationUrl(response.id),
+        };
+    })
+    .build("/orders");
 ```
 
 ## Integration with Auth Layer
@@ -719,28 +716,28 @@ With `azure-auth`, the `authHandler` automatically adds the Bearer token:
 
 ```typescript
 // server/api/protected.get.ts
-import { authHandler } from '#auth'
+import { authHandler } from "#auth";
 
-export default authHandler.build('/protected-data')
+export default authHandler.build("/protected-data");
 ```
 
 This is equivalent to:
 
 ```typescript
-import { backendHandlerBuilder } from '#backend_communication'
+import { backendHandlerBuilder } from "#backend_communication";
 
 export default backendHandlerBuilder()
-  .extendFetchOptions(async (options) => {
-    const token = await getTokenFromSession(options.event)
-    return {
-      ...options,
-      headers: {
-        ...options.headers,
-        'Authorization': `Bearer ${token}`
-      }
-    }
-  })
-  .build('/protected-data')
+    .extendFetchOptions(async (options) => {
+        const token = await getTokenFromSession(options.event);
+        return {
+            ...options,
+            headers: {
+                ...options.headers,
+                Authorization: `Bearer ${token}`,
+            },
+        };
+    })
+    .build("/protected-data");
 ```
 
 ### No Auth Integration
@@ -749,7 +746,7 @@ With `no-auth`, the `authHandler` is a simple pass-through:
 
 ```typescript
 // Same code works without authentication in dev mode
-export default authHandler.build('/data')
+export default authHandler.build("/data");
 ```
 
 ## Using Dummy Data Mode
@@ -792,10 +789,10 @@ export default backendHandlerBuilder()
     .withDummyFetcher({
         users: [
             { id: 1, name: "Alice" },
-            { id: 2, name: "Bob" }
-        ]
+            { id: 2, name: "Bob" },
+        ],
     })
-    .build('/users')
+    .build("/users");
 
 // When DUMMY=true: Returns mock data
 // When DUMMY=false: Makes real request to API_URL/users
@@ -811,9 +808,9 @@ export default backendHandlerBuilder()
             url: options.url,
             method: options.method,
             mock: true,
-        }
+        };
     })
-    .build('/some/path')
+    .build("/some/path");
 
 // Returns dynamic response based on request options
 ```
@@ -842,8 +839,7 @@ The error handler:
 
 ```typescript
 // No additional error handling needed - it's automatic
-export default backendHandlerBuilder()
-  .build('/users')
+export default backendHandlerBuilder().build("/users");
 ```
 
 ### Error Response Format
@@ -867,31 +863,31 @@ While the built-in error handling is comprehensive, you can add custom logic
 by wrapping the handler:
 
 ```typescript
-import { backendHandlerBuilder } from '#backend_communication'
-import { createError } from 'h3'
+import { backendHandlerBuilder } from "#backend_communication";
+import { createError } from "h3";
 
-const handler = backendHandlerBuilder()
-  .build('/users')
+const handler = backendHandlerBuilder().build("/users");
 
 export default defineEventHandler(async (event) => {
-  try {
-    return await handler(event)
-  } catch (error) {
-    // Custom error transformation
-    if (isSpecificError(error)) {
-      throw createError({
-        statusCode: 422,
-        message: 'Custom validation error'
-      })
+    try {
+        return await handler(event);
+    } catch (error) {
+        // Custom error transformation
+        if (isSpecificError(error)) {
+            throw createError({
+                statusCode: 422,
+                message: "Custom validation error",
+            });
+        }
+        throw error; // Re-throw for default handling
     }
-    throw error // Re-throw for default handling
-  }
-})
+});
 ```
 
 ## Advanced Usage
 
 ### Dynamic Path Construction 
+
 The `build` method supports flexible path construction to handle dynamic routes and query parameters without needing to wrap the handler in `defineEventHandler`.
 
 #### Using Placeholders
@@ -900,8 +896,7 @@ Inject router and query parameters directly into the path string using `[r:...]`
 
 ```typescript
 // server/api/users/[id].get.ts
-export default backendHandlerBuilder()
-  .build('/users/[r:id]')
+export default backendHandlerBuilder().build("/users/[r:id]");
 
 // Request: /api/users/123 -> Forwards to ${API_URL}/users/123
 ```
@@ -910,8 +905,9 @@ You can combine router and query parameters:
 
 ```typescript
 // server/api/search/[category].get.ts
-export default backendHandlerBuilder()
-  .build('/items/[r:category]?sort=[q:order]&limit=[q:size]')
+export default backendHandlerBuilder().build(
+    "/items/[r:category]?sort=[q:order]&limit=[q:size]",
+);
 
 // Request: /api/search/books?order=asc&size=10
 // -> Forwards to ${API_URL}/items/books?sort=asc&limit=10
@@ -926,12 +922,11 @@ If a router parameter is missing, it is replaced with an empty string. If a quer
 For complex logic, provide a function that receives the `H3Event` and returns the full path string:
 
 ```typescript
-export default backendHandlerBuilder()
-  .build((event) => {
-    const id = getRouterParam(event, 'id')
-    const version = getHeader(event, 'api-version')
-    return `/users/${id}?v=${version}`
-  })
+export default backendHandlerBuilder().build((event) => {
+    const id = getRouterParam(event, "id");
+    const version = getHeader(event, "api-version");
+    return `/users/${id}?v=${version}`;
+});
 ```
 
 ### Conditional Transformations
@@ -940,18 +935,18 @@ Apply transformations based on conditions:
 
 ```typescript
 export default backendHandlerBuilder()
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    const query = getQuery(event)
-    
-    // Different transformation based on query param
-    if (query.format === 'minimal') {
-      return { id: body.id, name: body.name }
-    }
-    
-    return body
-  })
-  .build('/users')
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+        const query = getQuery(event);
+
+        // Different transformation based on query param
+        if (query.format === "minimal") {
+            return { id: body.id, name: body.name };
+        }
+
+        return body;
+    })
+    .build("/users");
 ```
 
 ### Request Validation
@@ -959,25 +954,25 @@ export default backendHandlerBuilder()
 Validate requests before forwarding:
 
 ```typescript
-import { z } from 'zod'
+import { z } from "zod";
 
 const userSchema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2),
-  age: z.number().min(18)
-})
+    email: z.string().email(),
+    name: z.string().min(2),
+    age: z.number().min(18),
+});
 
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    
-    // Validate with Zod
-    const validated = userSchema.parse(body)
-    
-    return validated
-  })
-  .build('/users')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+
+        // Validate with Zod
+        const validated = userSchema.parse(body);
+
+        return validated;
+    })
+    .build("/users");
 ```
 
 ### Response Caching
@@ -985,18 +980,18 @@ export default backendHandlerBuilder()
 Add caching to responses:
 
 ```typescript
-const cache = new Map()
+const cache = new Map();
 
 export default backendHandlerBuilder()
-  .postMap(async (response) => {
-    const cacheKey = JSON.stringify(response)
-    cache.set(cacheKey, {
-      data: response,
-      timestamp: Date.now()
+    .postMap(async (response) => {
+        const cacheKey = JSON.stringify(response);
+        cache.set(cacheKey, {
+            data: response,
+            timestamp: Date.now(),
+        });
+        return response;
     })
-    return response
-  })
-  .build('/users')
+    .build("/users");
 ```
 
 ### Retry Logic
@@ -1005,17 +1000,17 @@ Implement retry logic with extended fetch options:
 
 ```typescript
 export default backendHandlerBuilder()
-  .extendFetchOptions(async (options) => {
-    return {
-      ...options,
-      retry: 3,
-      retryDelay: 1000,
-      onRetry: ({ attempt, error }) => {
-        console.log(`Retry attempt ${attempt}: ${error.message}`)
-      }
-    }
-  })
-  .build('/users')
+    .extendFetchOptions(async (options) => {
+        return {
+            ...options,
+            retry: 3,
+            retryDelay: 1000,
+            onRetry: ({ attempt, error }) => {
+                console.log(`Retry attempt ${attempt}: ${error.message}`);
+            },
+        };
+    })
+    .build("/users");
 ```
 
 ## Type Safety
@@ -1034,12 +1029,12 @@ TypeScript automatically tracks types through each transformation:
 // - TResponseTransformed = { data: User[], count: number }
 
 export default backendHandlerBuilder()
-  .withBodyProvider(async () => ({ name: 'Test' }))
-  .postMap(async (response) => ({
-    data: response.items,
-    count: response.items.length
-  }))
-  .build('/users')
+    .withBodyProvider(async () => ({ name: "Test" }))
+    .postMap(async (response) => ({
+        data: response.items,
+        count: response.items.length,
+    }))
+    .build("/users");
 ```
 
 ### Explicit Type Annotations
@@ -1048,40 +1043,40 @@ You can also specify types explicitly for better documentation and tooling:
 
 ```typescript
 interface User {
-  id: number
-  name: string
-  email: string
+    id: number;
+    name: string;
+    email: string;
 }
 
 interface CreateUserRequest {
-  name: string
-  email: string
+    name: string;
+    email: string;
 }
 
 interface UserResponse {
-  users: User[]
-  total: number
+    users: User[];
+    total: number;
 }
 
 interface NormalizedResponse {
-  data: User[]
-  count: number
-  hasMore: boolean
+    data: User[];
+    count: number;
+    hasMore: boolean;
 }
 
 export default backendHandlerBuilder()
-  .withBodyProvider<CreateUserRequest>(async (event) => {
-    const body = await readBody(event)
-    return { name: body.name, email: body.email }
-  })
-  .postMap<NormalizedResponse>(async (response: UserResponse) => {
-    return {
-      data: response.users,
-      count: response.total,
-      hasMore: response.total > response.users.length
-    }
-  })
-  .build('/users')
+    .withBodyProvider<CreateUserRequest>(async (event) => {
+        const body = await readBody(event);
+        return { name: body.name, email: body.email };
+    })
+    .postMap<NormalizedResponse>(async (response: UserResponse) => {
+        return {
+            data: response.users,
+            count: response.total,
+            hasMore: response.total > response.users.length,
+        };
+    })
+    .build("/users");
 ```
 
 ### Type Safety Benefits
@@ -1114,14 +1109,14 @@ Use async operations efficiently:
 
 ```typescript
 export default backendHandlerBuilder()
-  .withBodyProvider(async (event) => {
-    const [body, session] = await Promise.all([
-      readBody(event),
-      getSession(event)
-    ])
-    return { ...body, userId: session.user.id }
-  })
-  .build('/users')
+    .withBodyProvider(async (event) => {
+        const [body, session] = await Promise.all([
+            readBody(event),
+            getSession(event),
+        ]);
+        return { ...body, userId: session.user.id };
+    })
+    .build("/users");
 ```
 
 ### Streaming Large Responses
@@ -1130,8 +1125,7 @@ For large responses, avoid transformations that load entire response:
 
 ```typescript
 // For large files/data, use direct pass-through
-export default backendHandlerBuilder()
-  .build('/large-file')
+export default backendHandlerBuilder().build("/large-file");
 ```
 
 ## Best Practices
@@ -1169,22 +1163,20 @@ export default backendHandlerBuilder()
 ```typescript
 // utils/transformations.ts
 export const addTimestamp = (body: any) => ({
-  ...body,
-  timestamp: Date.now()
-})
+    ...body,
+    timestamp: Date.now(),
+});
 
 export const normalizeResponse = (response: any) => ({
-  success: true,
-  data: response
-})
+    success: true,
+    data: response,
+});
 
 // server/api/users.post.ts
 export default backendHandlerBuilder()
-  .withBodyProvider(async (event) => 
-    addTimestamp(await readBody(event))
-  )
-  .postMap(normalizeResponse)
-  .build('/users')
+    .withBodyProvider(async (event) => addTimestamp(await readBody(event)))
+    .postMap(normalizeResponse)
+    .build("/users");
 ```
 
 ### 4. Document Your Handlers
@@ -1192,17 +1184,17 @@ export default backendHandlerBuilder()
 ```typescript
 /**
  * Creates a new user
- * 
+ *
  * Transforms request to add timestamp and source
  * Returns normalized response with user data
  */
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    return { ...body, timestamp: Date.now() }
-  })
-  .build('/users')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+        return { ...body, timestamp: Date.now() };
+    })
+    .build("/users");
 ```
 
 ### 5. Handle Errors Appropriately
@@ -1211,21 +1203,21 @@ The built-in error handling is comprehensive, but you should still validate
 inputs early:
 
 ```typescript
-import { z } from 'zod'
+import { z } from "zod";
 
 const schema = z.object({
-  email: z.string().email(),
-  name: z.string().min(2)
-})
+    email: z.string().email(),
+    name: z.string().min(2),
+});
 
 export default backendHandlerBuilder()
-  .withMethod('POST')
-  .withBodyProvider(async (event) => {
-    const body = await readBody(event)
-    // Validate before sending to backend
-    return schema.parse(body)
-  })
-  .build('/users')
+    .withMethod("POST")
+    .withBodyProvider(async (event) => {
+        const body = await readBody(event);
+        // Validate before sending to backend
+        return schema.parse(body);
+    })
+    .build("/users");
 ```
 
 ## Related Documentation

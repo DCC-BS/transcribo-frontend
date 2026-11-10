@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: disclaimer
 skillDescription: "Modal Disclaimer Vue component that gatekeeps app access until the user accepts terms; tracks accepted version in localStorage with HTML content. Use when adding a one-time terms/usage-guidelines acceptance gate (not the re-open DisclaimerButton or full-page DisclaimerPage)."
 ---
+
 <script setup lang="ts">
 import { ref } from 'vue';
 import DisclaimerExample from '../../../components/DisclaimerExample.vue';
@@ -44,13 +46,13 @@ The `Disclaimer` component displays a modal disclaimer that users must accept be
 
 ## Props
 
-| Prop                | Type     | Required | Description                                                           |
-| ------------------- | -------- | -------- | --------------------------------------------------------------------- |
-| `appName`           | `string` | Yes      | The name of your application, will be used for the default `contentHtml` and `confirmationText` when these props are not set.                                          |
-| `confirmationText`  | `string` | No       | Text users must confirm by checking the box. When not set, the translation key `disclaimer.confirmation_text` will be used with `{appName}` as a placeholder.                           |
-| `disclaimerVersion` | `string` | No       | Version identifier (e.g., "1.0.0") - changing this re-shows the modal |
-| `contentHtml`       | `string` | No       | Main HTML content for the disclaimer body. When not set, the translation key `disclaimer.content` will be used.                             |
-| `postfixHtml`       | `string` | No       | HTML content displayed after main content (e.g., contact info)        |
+| Prop                | Type     | Required | Description                                                                                                                                                   |
+| ------------------- | -------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `appName`           | `string` | Yes      | The name of your application, will be used for the default `contentHtml` and `confirmationText` when these props are not set.                                 |
+| `confirmationText`  | `string` | No       | Text users must confirm by checking the box. When not set, the translation key `disclaimer.confirmation_text` will be used with `{appName}` as a placeholder. |
+| `disclaimerVersion` | `string` | No       | Version identifier (e.g., "1.0.0") - changing this re-shows the modal                                                                                         |
+| `contentHtml`       | `string` | No       | Main HTML content for the disclaimer body. When not set, the translation key `disclaimer.content` will be used.                                               |
+| `postfixHtml`       | `string` | No       | HTML content displayed after main content (e.g., contact info)                                                                                                |
 
 ## Usage
 
@@ -95,8 +97,8 @@ Customize the disclaimer content and see changes in real-time, try to leave prop
 <div class="flex flex-col gap-2 mb-6 p-4 rounded-lg border">
   <label class="text-sm font-semibold">App Name:</label>
   <input v-model="appName" placeholder="App Name" class="border rounded px-3 py-2" />
-  
-  <label class="text-sm font-semibold">Confirmation Text:</label>
+
+<label class="text-sm font-semibold">Confirmation Text:</label>
   <textarea
     v-model="confirmationText"
     placeholder="Type to confirm..."

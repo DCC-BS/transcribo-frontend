@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: changelogs
 skillDescription: "Propless Changelogs component that fetches changelog entries from the /changelogs endpoint, renders Markdown, and shows a modal of unread versions tracked via the changelogs-last-read localStorage key. Use when surfacing release notes or what's new to users on app load."
 ---
+
 # Changelogs
 
 The `Changelogs` component displays a modal with application changelog information. It automatically fetches changelog data from the server and shows unread entries to users. The component tracks the last read version in localStorage and only shows new changelogs.
@@ -31,6 +33,7 @@ Each changelog file should follow this frontmatter format:
 
 ```markdown
 ---
+
 title: "Version 1.1.0"
 version: "1.1.0"
 published_at: "2024-01-15T10:00:00Z"
@@ -126,10 +129,10 @@ The component expects a GET endpoint at `/changelogs` that returns an array of c
 
 ```typescript
 interface Changelog {
-  title: string;
-  version: string;
-  published_at: string;
-  content: string; // Markdown content
+    title: string;
+    version: string;
+    published_at: string;
+    content: string; // Markdown content
 }
 ```
 
@@ -137,18 +140,18 @@ Example server response:
 
 ```json
 [
-  {
-    "title": "Version 1.1.0",
-    "version": "1.1.0",
-    "published_at": "2024-01-15T10:00:00Z",
-    "content": "## New Features\n- Feature 1\n- Feature 2"
-  },
-  {
-    "title": "Version 1.0.0",
-    "version": "1.0.0",
-    "published_at": "2024-01-01T10:00:00Z",
-    "content": "## Initial Release\n- First version"
-  }
+    {
+        "title": "Version 1.1.0",
+        "version": "1.1.0",
+        "published_at": "2024-01-15T10:00:00Z",
+        "content": "## New Features\n- Feature 1\n- Feature 2"
+    },
+    {
+        "title": "Version 1.0.0",
+        "version": "1.0.0",
+        "published_at": "2024-01-01T10:00:00Z",
+        "content": "## Initial Release\n- First version"
+    }
 ]
 ```
 

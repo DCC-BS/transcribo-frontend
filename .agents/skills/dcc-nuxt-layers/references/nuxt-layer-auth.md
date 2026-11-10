@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-nuxt-layers
 skillName: nuxt-layer-auth
 skillDescription: "DCC-BS Nuxt auth layer with plug-and-play implementation switching via the AUTH_LAYER_URI env var (azure-auth Entra ID vs no-auth). Use when wiring authentication, the useAppAuth() composable, or the authHandler server utility for Bearer-token backend calls in a Nuxt app."
 ---
+
 # Authentication Layer
 
 The authentication layer provides a flexible, plug-and-play authentication system
@@ -51,10 +53,8 @@ In your `nuxt.config.ts`:
 
 ```typescript
 export default defineNuxtConfig({
-  extends: [
-    ['github:DCC-BS/nuxt-layers/auth', { install: true }]
-  ]
-})
+    extends: [["github:DCC-BS/nuxt-layers/auth", { install: true }]],
+});
 ```
 
 ### 2. Configure Authentication Implementation
@@ -80,7 +80,7 @@ The auth layer provides type-safe authentication utilities:
 const { data, signOut, isAuthEnabled } = useAppAuth();
 
 // In server routes
-export default authHandler.build('/api/protected-endpoint');
+export default authHandler.build("/api/protected-endpoint");
 ```
 
 ## Base Auth Layer (`auth`)
@@ -93,10 +93,10 @@ The base authentication layer defines the contract that all implementations must
 
 ```typescript
 interface User {
-  name: string
-  email: string
-  // Additional user properties from auth provider
-  [key: string]: unknown
+    name: string;
+    email: string;
+    // Additional user properties from auth provider
+    [key: string]: unknown;
 }
 ```
 
@@ -104,7 +104,7 @@ interface User {
 
 ```typescript
 interface AuthData {
-  user: User;
+    user: User;
 }
 ```
 
@@ -118,9 +118,9 @@ interface AuthData {
 
 The layer reads the following environment variable:
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `AUTH_LAYER_URI` | Yes | URI to the authentication implementation layer |
+| Variable         | Required | Description                                    |
+| ---------------- | -------- | ---------------------------------------------- |
+| `AUTH_LAYER_URI` | Yes      | URI to the authentication implementation layer |
 
 **Example:**
 
@@ -179,16 +179,16 @@ Before using Azure Auth, you need:
 
 Set these environment variables:
 
-| Variable | Required | Description | Example |
-|----------|----------|-------------|---------|
-| `AUTH_LAYER_URI` | Yes | Points to azure-auth layer | `github:DCC-BS/nuxt-layers/azure-auth` |
-| `NUXT_AZURE_AUTH_CLIENT_ID` | Yes | Azure AD application client ID | `12345678-1234-...` |
-| `NUXT_AZURE_AUTH_TENANT_ID` | Yes | Azure AD tenant ID | `87654321-4321-...` |
-| `NUXT_AZURE_AUTH_CLIENT_SECRET` | Yes | Azure AD client secret | `abc123...` |
-| `NUXT_AZURE_AUTH_API_CLIENT_ID` | Yes | Azure AD API Client ID (for backend access) | `12345678-1234-...` |
-| `NUXT_AZURE_AUTH_SECRET` | Yes | Secret for encrypting session tokens | `a-long-random-string` |
-| `NUXT_AZURE_AUTH_ORIGIN` | Yes | Base URL of the application (used for redirects) | `https://app.example.com` |
-| `API_URL` | Yes | Backend API base URL | `https://api.example.com` |
+| Variable                        | Required | Description                                      | Example                                |
+| ------------------------------- | -------- | ------------------------------------------------ | -------------------------------------- |
+| `AUTH_LAYER_URI`                | Yes      | Points to azure-auth layer                       | `github:DCC-BS/nuxt-layers/azure-auth` |
+| `NUXT_AZURE_AUTH_CLIENT_ID`     | Yes      | Azure AD application client ID                   | `12345678-1234-...`                    |
+| `NUXT_AZURE_AUTH_TENANT_ID`     | Yes      | Azure AD tenant ID                               | `87654321-4321-...`                    |
+| `NUXT_AZURE_AUTH_CLIENT_SECRET` | Yes      | Azure AD client secret                           | `abc123...`                            |
+| `NUXT_AZURE_AUTH_API_CLIENT_ID` | Yes      | Azure AD API Client ID (for backend access)      | `12345678-1234-...`                    |
+| `NUXT_AZURE_AUTH_SECRET`        | Yes      | Secret for encrypting session tokens             | `a-long-random-string`                 |
+| `NUXT_AZURE_AUTH_ORIGIN`        | Yes      | Base URL of the application (used for redirects) | `https://app.example.com`              |
+| `API_URL`                       | Yes      | Backend API base URL                             | `https://api.example.com`              |
 
 ### Azure AD Setup
 
@@ -227,7 +227,7 @@ The `authHandler` provided by azure-auth automatically includes the Azure AD acc
 
 ```typescript
 // server/api/users/index.get.ts
-export default authHandler.build('/users')
+export default authHandler.build("/users");
 ```
 
 This handler will:
@@ -249,15 +249,15 @@ see also [Backend Communication](./backend_communication)
 // server/api/custom.post.ts
 
 export default authHandler
-  .withMethod('POST')
-  .postMap(async (response) => {
-    // Transform response
-    return {
-      data: response,
-      processedAt: new Date().toISOString()
-    }
-  })
-  .build('/api/custom-endpoint')
+    .withMethod("POST")
+    .postMap(async (response) => {
+        // Transform response
+        return {
+            data: response,
+            processedAt: new Date().toISOString(),
+        };
+    })
+    .build("/api/custom-endpoint");
 ```
 
 ### User Composable
@@ -360,7 +360,7 @@ The `authHandler` in no-auth mode works the same way, but doesn't add authentica
 
 ```typescript
 // server/api/data.get.ts
-export default authHandler.build('/data')
+export default authHandler.build("/data");
 ```
 
 This forwards requests to the backend without the `Authorization` header. Your backend should be configured to accept unauthenticated requests in development mode.
@@ -482,7 +482,7 @@ export function useAppAuth(): UseAppAuthReturns {
         isAuthEnabled: computed(() => !!nuxtData.value),
     };
 }
-````
+```
 
 add `server/utils/authHandler.ts`
 
@@ -501,7 +501,7 @@ export const authHandler = backendHandlerBuilder().extendFetchOptions(
         };
     },
 );
-````
+```
 
 implement middlewares, endpoints, etc. as needed.
 

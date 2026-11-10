@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: useUserFeedback
 skillDescription: "Vue/Nuxt composable returning showToast and showError to display Nuxt UI toast notifications (success/info/warning/error) and i18n-translated API error messages. Use when surfacing user feedback, toasts, or handling ApiError responses in a DCC frontend."
 ---
+
 # useUserFeedback composable
 
 The `useUserFeedback` composable provides a unified interface for displaying toast notifications and error messages to users. It integrates with Nuxt UI's toast system and supports internationalization for API errors.
@@ -16,19 +18,19 @@ The composable returns an object with the following functions:
 
 Display a toast notification.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `message` | `string` | Yes | The message to display |
-| `type` | `FeedbackType` | No | Type of feedback - `"error"`, `"success"`, `"info"`, or `"warning"`. Default is `"error"` |
-| `options` | `Partial<Toast>` | No | Additional toast options (title, duration, etc.) |
+| Parameter | Type             | Required | Description                                                                               |
+| --------- | ---------------- | -------- | ----------------------------------------------------------------------------------------- |
+| `message` | `string`         | Yes      | The message to display                                                                    |
+| `type`    | `FeedbackType`   | No       | Type of feedback - `"error"`, `"success"`, `"info"`, or `"warning"`. Default is `"error"` |
+| `options` | `Partial<Toast>` | No       | Additional toast options (title, duration, etc.)                                          |
 
 **showError(error)**
 
 Display an error message.
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `error` | `Error \| ApiError` | Yes | An Error object or ApiError object with error details |
+| Parameter | Type                | Required | Description                                           |
+| --------- | ------------------- | -------- | ----------------------------------------------------- |
+| `error`   | `Error \| ApiError` | Yes      | An Error object or ApiError object with error details |
 
 ## Types
 
@@ -37,10 +39,10 @@ type FeedbackType = "error" | "success" | "info" | "warning";
 
 // see also https://github.com/DCC-BS/communication.bs.js
 type ApiError = {
-  $type: "ApiError";
-  errorId: string;
-  debugMessage?: string;
-  status: number;
+    $type: "ApiError";
+    errorId: string;
+    debugMessage?: string;
+    status: number;
 };
 ```
 
@@ -113,12 +115,12 @@ const { showError } = useUserFeedback();
 // Handle API errors
 async function fetchData() {
     const response = await apiFetch<Data>("/api/data");
-    
-    if(isApiError(response)) {
-      showError(response);
-      return;
+
+    if (isApiError(response)) {
+        showError(response);
+        return;
     }
-    
+
     // Process the successful response
 }
 ```
@@ -127,10 +129,10 @@ Make sure to define your API error translations in your i18n configuration:
 
 ```json
 {
-  "api_error": {
-    "not_found": "The requested resource was not found",
-    "unauthorized": "You are not authorized to perform this action",
-    "server_error": "An unexpected server error occurred"
-  }
+    "api_error": {
+        "not_found": "The requested resource was not found",
+        "unauthorized": "You are not authorized to perform this action",
+        "server_error": "An unexpected server error occurred"
+    }
 }
 ```

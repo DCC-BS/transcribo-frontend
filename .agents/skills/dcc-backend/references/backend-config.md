@@ -1,10 +1,12 @@
 ---
+
 outline: deep
 editLink: true
 skillParent: dcc-backend
 skillName: backend-config
 skillDescription: "dcc_backend_common.config module for type-safe settings. Use when defining AppConfig/AbstractAppConfig/LlmConfig with Pydantic, loading env vars via get_env_or_throw, masking secrets with log_secret, or running the generate-env-example / sync-env-with-example CLI tools."
 ---
+
 # Configuration Management
 
 The `dcc_backend_common.config` module provides a robust, type-safe way to manage application configuration using Pydantic and environment variables.
@@ -68,15 +70,15 @@ print(config.llm_url)
 
 ### Available Fields
 
-| Field | Environment Variable | Description |
-|-------|---------------------|-------------|
-| `client_url` | `CLIENT_URL` | The URL for the client application |
-| `hmac_secret` | `HMAC_SECRET` | The secret key for HMAC authentication |
-| `openai_api_key` | `OPENAI_API_KEY` | The API key for authenticating with OpenAI |
-| `llm_url` | `LLM_URL` | The URL for the LLM API |
-| `docling_url` | `DOCLING_URL` | The URL for the Docling service |
-| `whisper_url` | `WHISPER_URL` | The URL for the Whisper API |
-| `ocr_url` | `OCR_URL` | The URL for the OCR API |
+| Field            | Environment Variable | Description                                |
+| ---------------- | -------------------- | ------------------------------------------ |
+| `client_url`     | `CLIENT_URL`         | The URL for the client application         |
+| `hmac_secret`    | `HMAC_SECRET`        | The secret key for HMAC authentication     |
+| `openai_api_key` | `OPENAI_API_KEY`     | The API key for authenticating with OpenAI |
+| `llm_url`        | `LLM_URL`            | The URL for the LLM API                    |
+| `docling_url`    | `DOCLING_URL`        | The URL for the Docling service            |
+| `whisper_url`    | `WHISPER_URL`        | The URL for the Whisper API                |
+| `ocr_url`        | `OCR_URL`            | The URL for the OCR API                    |
 
 ## Using LlmConfig
 
@@ -88,11 +90,11 @@ The module also provides `LlmConfig`, a base class specifically for LLM-related 
 
 ### Available Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `llm_model` | `str` | The model identifier for the LLM API (e.g., `gpt-4o`) |
-| `llm_url` | `str` | The URL for the LLM API endpoint |
-| `llm_api_key` | `str` | The API key for authenticating with the LLM provider |
+| Field         | Type  | Description                                           |
+| ------------- | ----- | ----------------------------------------------------- |
+| `llm_model`   | `str` | The model identifier for the LLM API (e.g., `gpt-4o`) |
+| `llm_url`     | `str` | The URL for the LLM API endpoint                      |
+| `llm_api_key` | `str` | The API key for authenticating with the LLM provider  |
 
 ## Creating a Custom AppConfig
 

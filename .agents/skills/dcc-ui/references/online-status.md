@@ -1,9 +1,11 @@
 ---
+
 outline: deep
 skillParent: dcc-ui
 skillName: online-status
 skillDescription: "OnlineStatus is a color-coded health indicator (green/red) with tooltip that polls a server health endpoint at a configurable pollInterval, with optional showText and custom isOnlineCheckFunction props. Use when showing live server connectivity status."
 ---
+
 <script setup lang="ts">
 import OnlineStatusExample from '../../../components/OnlineStatusExample.vue';
 </script>
@@ -29,11 +31,11 @@ The `OnlineStatus` component displays a real-time health status indicator that c
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `showText` | `boolean` | No | `false` | Whether to display text along with the status indicator |
-| `pollInterval` | `number` | No | `30000` | The interval in milliseconds for checking online status (minimum: 1000ms) |
-| `isOnlineCheckFunction` | `() => Promise<boolean>` | No | `checkIsOnline()` | Custom function to check online status. By default, uses the built-in `checkIsOnline` utility |
+| Prop                    | Type                     | Required | Default           | Description                                                                                   |
+| ----------------------- | ------------------------ | -------- | ----------------- | --------------------------------------------------------------------------------------------- |
+| `showText`              | `boolean`                | No       | `false`           | Whether to display text along with the status indicator                                       |
+| `pollInterval`          | `number`                 | No       | `30000`           | The interval in milliseconds for checking online status (minimum: 1000ms)                     |
+| `isOnlineCheckFunction` | `() => Promise<boolean>` | No       | `checkIsOnline()` | Custom function to check online status. By default, uses the built-in `checkIsOnline` utility |
 
 ## Usage
 
@@ -94,10 +96,10 @@ The component requires the following translation keys:
 {
     "common-ui": {
         "health_status": {
-        "online_title": "Online",
-        "online_description": "Application is connected to the server",
-        "offline_title": "Offline",
-        "offline_description": "Unable to connect to the server"
+            "online_title": "Online",
+            "online_description": "Application is connected to the server",
+            "offline_title": "Offline",
+            "offline_description": "Unable to connect to the server"
         }
     }
 }
@@ -112,9 +114,9 @@ The component checks connectivity by sending requests to your application's heal
 ```typescript
 // server/api/health.get.ts
 export default defineEventHandler(() => {
-  return {
-    status: 'ok',
-    timestamp: new Date().toISOString(),
-  };
+    return {
+        status: "ok",
+        timestamp: new Date().toISOString(),
+    };
 });
 ```
