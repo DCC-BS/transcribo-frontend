@@ -19,7 +19,8 @@ const disclaimerConfig: DisclaimerConfig = {
 // on a single page.
 const onboardingBuilder = useTranscriboTour();
 
-const { isOpen, title, message, onSubmit, onClose } = useInitDialog();
+const { isOpen, title, message, confirmLabel, cancelLabel, onSubmit, onClose } =
+    useInitDialog();
 const { undo, redo, canUndo, canRedo } = useCommandHistory();
 
 useEventListener("keydown", handleKeyDown);
@@ -51,6 +52,8 @@ function handleKeyDown(event: KeyboardEvent) {
             :is-open="isOpen"
             :title="title"
             :message="message"
+            :confirm-label="confirmLabel"
+            :cancel-label="cancelLabel"
             :on-confirm="onSubmit"
             :on-cancel="onClose"
         />

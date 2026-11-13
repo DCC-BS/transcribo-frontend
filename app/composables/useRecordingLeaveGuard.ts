@@ -27,7 +27,9 @@ export function useRecordingLeaveGuard(
     const { t } = useI18n();
     const { openDialog } = useDialog();
 
-    useEventListener(window, "beforeunload", (event: BeforeUnloadEvent) => {
+    // no explicit target: VueUse falls back to `window` only in the
+    // browser, so this stays safe during server-side rendering
+    useEventListener("beforeunload", (event: BeforeUnloadEvent) => {
         if (!toValue(isRecording)) {
             return;
         }
@@ -36,16 +38,28 @@ export function useRecordingLeaveGuard(
         event.returnValue = "";
     });
 
+    // a second navigation while the dialog is open replaces its callbacks;
+    // settle the first one so it is not left pending forever
+    let settlePending: ((leave: boolean) => void) | undefined;
+
     onBeforeRouteLeave(() => {
         if (!toValue(isRecording)) {
             return true;
         }
+        settlePending?.(false);
         return new Promise<boolean>((resolve) => {
+            settlePending = resolve;
+            const settle = (leave: boolean) => {
+                settlePending = undefined;
+                resolve(leave);
+            };
             openDialog({
                 title: t("recording.leave.title"),
                 message: t("recording.leave.message"),
-                onSubmit: () => resolve(true),
-                onClose: () => resolve(false),
+                confirmLabel: t("recording.leave.confirm"),
+                cancelLabel: t("recording.leave.cancel"),
+                onSubmit: () => settle(true),
+                onClose: () => settle(false),
             });
         });
     });

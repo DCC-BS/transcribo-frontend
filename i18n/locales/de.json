@@ -616,10 +616,12 @@
         }
     },
     "recording": {
-        "inProgressWarning": "Aufnahme läuft: Seite nicht neu laden oder schliessen. Sonst bricht die Aufnahme ab und die letzten Sekunden gehen verloren. Der Rest lässt sich danach unter „Abgebrochene Aufnahmen“ wiederherstellen.",
+        "inProgressWarning": "Aufnahme läuft: Lade die Seite nicht neu und schliesse sie nicht, sonst bricht die Aufnahme ab und die letzten Sekunden gehen verloren. Den Rest findest du danach unter „Abgebrochene Aufnahmen anzeigen“.",
         "leave": {
             "title": "Aufnahme läuft",
-            "message": "Wenn Sie die Seite jetzt verlassen, bricht die Aufnahme ab und die letzten Sekunden gehen verloren. Trotzdem verlassen?"
+            "message": "Wenn du die Seite jetzt verlässt, bricht die Aufnahme ab und die letzten Sekunden gehen verloren.",
+            "confirm": "Seite verlassen",
+            "cancel": "Weiter aufnehmen"
         }
     }
 }

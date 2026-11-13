@@ -616,10 +616,12 @@
         }
     },
     "recording": {
-        "inProgressWarning": "Recording in progress: don't reload or close this page. Otherwise the recording stops and the last few seconds are lost. The rest can then be recovered under “Abandoned recordings”.",
+        "inProgressWarning": "Recording in progress: don't reload or close this page, or the recording stops and the last few seconds are lost. You can recover the rest afterwards under “Show abandoned recordings”.",
         "leave": {
             "title": "Recording in progress",
-            "message": "If you leave the page now, the recording stops and the last few seconds are lost. Leave anyway?"
+            "message": "If you leave the page now, the recording stops and the last few seconds are lost.",
+            "confirm": "Leave page",
+            "cancel": "Keep recording"
         }
     }
 }

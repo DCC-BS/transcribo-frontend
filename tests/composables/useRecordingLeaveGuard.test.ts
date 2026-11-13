@@ -74,7 +74,23 @@ describe("useRecordingLeaveGuard", () => {
         expect(await routeLeaveGuards[0]?.()).toBe(false);
 
         expect(openDialog).toHaveBeenLastCalledWith(
-            expect.objectContaining({ message: "recording.leave.message" }),
+            expect.objectContaining({
+                message: "recording.leave.message",
+                confirmLabel: "recording.leave.confirm",
+                cancelLabel: "recording.leave.cancel",
+            }),
         );
+    });
+
+    it("settles a pending navigation when a second one asks", async () => {
+        isRecording.value = true;
+
+        // the dialog is left open: neither callback fires
+        const first = routeLeaveGuards[0]?.();
+        const second = routeLeaveGuards[0]?.();
+
+        expect(await first).toBe(false);
+        openDialog.mock.calls[1]?.[0].onSubmit();
+        expect(await second).toBe(true);
     });
 });

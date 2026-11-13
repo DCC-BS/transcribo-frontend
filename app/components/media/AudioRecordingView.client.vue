@@ -24,6 +24,16 @@ const isRecording = ref(false);
 const audioBlob = ref<Blob | undefined>(undefined);
 const userRecording = ref(false);
 const showAbandonedRecordings = ref(false);
+const recorder = ref<InstanceType<typeof AudioRecorder>>();
+
+// busy only while the recorder actually records or joins chunks: a start
+// that fails (no microphone, permission denied) must not leave the parent
+// believing a recording is running
+watchEffect(() => {
+    active.value = Boolean(
+        recorder.value?.isRecording || recorder.value?.isProcessing,
+    );
+});
 
 /**
  * Takes over the finished recording and hands it to the parent.
@@ -52,7 +62,6 @@ function emitAudio(): void {
  */
 function startRecording(): void {
     shouldRecord.value = true;
-    active.value = true;
 }
 
 const audioSessionActions = computed(() => [
@@ -114,8 +123,8 @@ const audioSessionActions = computed(() => [
     </div>
     <div v-if="isReady && shouldRecord">
         <AudioRecorder
+            ref="recorder"
             :logger="debugLog"
-            :store-to-db-interval="10"
             auto-start
             :show-result="true"
             @recording-stopped="onRecordingStopped"
