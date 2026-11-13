@@ -614,5 +614,12 @@
             "browser": "Die Aufnahme des Bildschirmtons wird in diesem Browser nicht unterstützt. Verwenden Sie Chrome oder Edge unter Windows.",
             "platform": "Unter diesem Betriebssystem kann der Browser nur den Ton eines Browser-Tabs teilen, nicht den Ton von Programmen wie Teams."
         }
+    },
+    "recording": {
+        "inProgressWarning": "Aufnahme läuft: Seite nicht neu laden oder schliessen. Sonst bricht die Aufnahme ab und die letzten Sekunden gehen verloren. Der Rest lässt sich danach unter „Abgebrochene Aufnahmen“ wiederherstellen.",
+        "leave": {
+            "title": "Aufnahme läuft",
+            "message": "Wenn Sie die Seite jetzt verlassen, bricht die Aufnahme ab und die letzten Sekunden gehen verloren. Trotzdem verlassen?"
+        }
     }
 }

@@ -10,6 +10,8 @@ const uploadFile = ref<File>();
 const audioActive = ref(false);
 const meetingActive = ref(false);
 
+useRecordingLeaveGuard(() => audioActive.value || meetingActive.value);
+
 watch(uploadFile, () => {
     if (uploadFile.value) {
         emit("onMediaSelected", { media: uploadFile.value });
@@ -114,6 +116,14 @@ const acceptedMedia = [
                             @on-recording-complete="onMeetingRecorded"
                         />
                     </div>
+                    <UAlert
+                        v-if="audioActive || meetingActive"
+                        icon="i-lucide-triangle-alert"
+                        color="warning"
+                        variant="subtle"
+                        :description="t('recording.inProgressWarning')"
+                        class="max-w-80"
+                    />
                 </div>
             </div>
         </UCard>

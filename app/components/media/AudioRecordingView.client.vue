@@ -115,6 +115,7 @@ const audioSessionActions = computed(() => [
     <div v-if="isReady && shouldRecord">
         <AudioRecorder
             :logger="debugLog"
+            :store-to-db-interval="10"
             auto-start
             :show-result="true"
             @recording-stopped="onRecordingStopped"

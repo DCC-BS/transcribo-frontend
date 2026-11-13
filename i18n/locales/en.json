@@ -614,5 +614,12 @@
             "browser": "Recording screen audio is not supported in this browser. Use Chrome or Edge on Windows.",
             "platform": "On this operating system the browser can only share the audio of a browser tab, not the sound of apps like Teams."
         }
+    },
+    "recording": {
+        "inProgressWarning": "Recording in progress: don't reload or close this page. Otherwise the recording stops and the last few seconds are lost. The rest can then be recovered under “Abandoned recordings”.",
+        "leave": {
+            "title": "Recording in progress",
+            "message": "If you leave the page now, the recording stops and the last few seconds are lost. Leave anyway?"
+        }
     }
 }
