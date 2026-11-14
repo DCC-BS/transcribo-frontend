@@ -5,7 +5,7 @@
     "": {
       "name": "transcribo-frontend",
       "dependencies": {
-        "@dcc-bs/audio-recorder.bs.js": "2.1.6",
+        "@dcc-bs/audio-recorder.bs.js": "2.2.0",
         "@dcc-bs/common-ui.bs.js": "2.2.4",
         "@dcc-bs/communication.bs.js": "0.1.5",
         "@dcc-bs/event-system.bs.js": "^1.4.6",
@@ -288,7 +288,7 @@
 
     "@csstools/css-tokenizer": ["@csstools/css-tokenizer@4.0.2", "", {}, "sha512-OoKoR0f76dCY666JlcbhmVTs2drYj1GUXZTYTcbUgJjh9Nv41aFfZ21bPQTERm5+L5cBDo466NltB2lplS5GBw=="],
 
-    "@dcc-bs/audio-recorder.bs.js": ["@dcc-bs/audio-recorder.bs.js@2.1.6", "", { "dependencies": { "@ffmpeg/ffmpeg": "0.12.15", "@ffmpeg/util": "0.12.2", "baseline-browser-mapping": "^2.10.0", "caniuse-lite": "^1.0.30001776", "dexie": "4.4.7", "rollup-plugin-import-css": "4.2.1" }, "peerDependencies": { "@nuxt/kit": "^4.0.0", "@nuxt/ui": "4.12.0", "@nuxtjs/i18n": "^10.0.0", "motion-v": "2.8.0" } }, "sha512-MyPcCJDysZxXzar53o7jZXeb3wF7M2AXpYgagbrPjf8U5mJTOAYM3mzqbQE+A2OXtdd5T9+up4rXDhAoRXL0cA=="],
+    "@dcc-bs/audio-recorder.bs.js": ["@dcc-bs/audio-recorder.bs.js@2.2.0", "", { "dependencies": { "@ffmpeg/ffmpeg": "0.12.15", "@ffmpeg/util": "0.12.2", "baseline-browser-mapping": "^2.10.0", "caniuse-lite": "^1.0.30001776", "dexie": "4.4.7", "rollup-plugin-import-css": "4.2.1" }, "peerDependencies": { "@nuxt/kit": "^4.0.0", "@nuxt/ui": "4.12.0", "@nuxtjs/i18n": "^10.0.0", "motion-v": "2.9.0" } }, "sha512-fRiv3qM/DtjBPq9WqwSpjwGKqBdytfeqJZ2/dxQsgQdCmoKwBjzufgvGMstDwsBtTKFL7OQwq1MIAoOjqKFxOQ=="],
 
     "@dcc-bs/common-ui.bs.js": ["@dcc-bs/common-ui.bs.js@2.2.4", "", { "dependencies": { "defu": "^6.1.4", "driver.js": "^1.6.0", "gray-matter": "^4.0.3", "markdown-it": "15.0.3", "pdfjs-dist": "6.4.299", "semver": "7.8.5", "tailwind-merge": "3.7.0", "vue-pdf-embed": "^2.1.6" }, "peerDependencies": { "@nuxt/icon": "^2.2.1", "@nuxt/kit": "^4.0.0", "@nuxt/ui": "^4.5.1", "@nuxtjs/i18n": "^10.0.0", "motion-v": "^2.0.1", "nuxt": "^4.4.2", "typescript": "^5.9.0", "zod": "^4.3.6" } }, "sha512-jHy/ZL1PBgDCTIV44T7AfaZlkDD7I/lEfyNFUGcMoK2sGI5Q/XiPLk/X9BGav4SMSahl4GcUbo4I3c3Z3tKc0Q=="],
 

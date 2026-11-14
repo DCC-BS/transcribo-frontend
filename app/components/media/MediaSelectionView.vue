@@ -10,6 +10,10 @@ const uploadFile = ref<File>();
 const audioActive = ref(false);
 const meetingActive = ref(false);
 
+const recording = computed(() => audioActive.value || meetingActive.value);
+
+useRecordingLeaveGuard(recording);
+
 watch(uploadFile, () => {
     if (uploadFile.value) {
         emit("onMediaSelected", { media: uploadFile.value });
@@ -78,6 +82,7 @@ const acceptedMedia = [
             />
             <UFileUpload
                 v-model="uploadFile"
+                :disabled="recording"
                 :accept="acceptedMedia"
                 icon="i-lucide-file-up"
                 :label="t('pages.index.dropzoneLabel')"
@@ -114,6 +119,14 @@ const acceptedMedia = [
                             @on-recording-complete="onMeetingRecorded"
                         />
                     </div>
+                    <UAlert
+                        v-if="recording"
+                        icon="i-lucide-triangle-alert"
+                        color="warning"
+                        variant="subtle"
+                        :description="t('recording.inProgressWarning')"
+                        class="max-w-80"
+                    />
                 </div>
             </div>
         </UCard>
