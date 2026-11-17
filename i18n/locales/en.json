@@ -202,6 +202,11 @@
             "noResult": "No transcription result available",
             "TaskNotFound": "Task not found"
         },
+        "postProcessingStage": {
+            "speakers": "Detecting title and speakers …",
+            "corrections": "Unifying spellings …",
+            "keywords": "Finding keywords … ({count} found)"
+        },
         "postProcessingDone": "Post-processing finished"
     },
     "commands": {

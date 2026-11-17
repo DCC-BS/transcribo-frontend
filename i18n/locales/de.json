@@ -202,6 +202,11 @@
             "noResult": "Kein Transkriptionsergebnis verfügbar",
             "TaskNotFound": "Aufgabe nicht gefunden"
         },
+        "postProcessingStage": {
+            "speakers": "Titel und Sprecher werden erkannt …",
+            "corrections": "Schreibweisen werden vereinheitlicht …",
+            "keywords": "Schlagwörter werden gesucht … ({count} gefunden)"
+        },
         "postProcessingDone": "Nachbearbeitung abgeschlossen"
     },
     "commands": {

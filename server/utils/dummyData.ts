@@ -138,8 +138,22 @@ export function dummyTaskStatusFetcher(options: {
     return createDummyTaskStatus(taskId);
 }
 
-export function dummyTranscriptionResultFetcher(): DummyTranscriptionResponse {
-    return createDummyTranscriptionResponse();
+/**
+ * Streams a dummy task result the way the backend does: post-processing
+ * progress lines, then the transcription, as JSON Lines.
+ *
+ * @returns The streamed response.
+ */
+export function dummyTranscriptionResultFetcher(): Response {
+    const lines = [
+        { type: "progress", stage: "speakers", progress: 0, keywords: 0 },
+        { type: "progress", stage: "keywords", progress: 0.5, keywords: 1 },
+        { type: "result", transcription: createDummyTranscriptionResponse() },
+    ];
+    const body = lines.map((line) => `${JSON.stringify(line)}\n`).join("");
+    return new Response(body, {
+        headers: { "Content-Type": "application/x-ndjson" },
+    });
 }
 
 export function dummySummaryFetcher(): DummySummary {
