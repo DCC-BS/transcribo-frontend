@@ -57,4 +57,20 @@ describe("readJsonLines", () => {
         });
         expect(await collect(stream)).toEqual([{ text: "ü" }]);
     });
+
+    it("cancels the stream when the consumer stops early", async () => {
+        let cancelled = false;
+        const stream = new ReadableStream<Uint8Array>({
+            start(controller) {
+                controller.enqueue(new TextEncoder().encode('{"a":1}\n'));
+            },
+            cancel() {
+                cancelled = true;
+            },
+        });
+        for await (const _record of readJsonLines(stream)) {
+            break;
+        }
+        expect(cancelled).toBe(true);
+    });
 });

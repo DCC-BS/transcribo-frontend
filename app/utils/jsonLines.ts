@@ -12,6 +12,7 @@ export async function* readJsonLines(
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
+    let finished = false;
     try {
         while (true) {
             const { value, done } = await reader.read();
@@ -24,10 +25,16 @@ export async function* readJsonLines(
                 }
             }
             if (done) {
+                finished = true;
                 return;
             }
         }
     } finally {
+        // Releasing the lock alone leaves the response running when the
+        // consumer stops early or a line fails to parse.
+        if (!finished) {
+            await reader.cancel().catch(() => undefined);
+        }
         reader.releaseLock();
     }
 }

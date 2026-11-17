@@ -38,15 +38,24 @@ export async function fetchTaskResultWithVocabulary(
         return stream;
     }
 
-    for await (const line of readJsonLines(stream)) {
-        const frame = TaskResultFrameSchema.safeParse(line);
-        if (!frame.success) {
-            return new ApiError("unexpected_error", 500, frame.error.message);
+    try {
+        for await (const line of readJsonLines(stream)) {
+            const frame = TaskResultFrameSchema.safeParse(line);
+            if (!frame.success) {
+                return new ApiError(
+                    "unexpected_error",
+                    500,
+                    frame.error.message,
+                );
+            }
+            if (frame.data.type === "result") {
+                return frame.data.transcription;
+            }
+            onProgress?.(frame.data);
         }
-        if (frame.data.type === "result") {
-            return frame.data.transcription;
-        }
-        onProgress?.(frame.data);
+    } catch (error) {
+        // A dropped connection or a truncated line.
+        return new ApiError("unexpected_error", 500, String(error));
     }
     return new ApiError(
         "unexpected_error",
