@@ -1,18 +1,163 @@
 <script lang="ts" setup>
+import {
+    type AudioSession,
+    isIOS,
+    isStandalone,
+} from "@dcc-bs/audio-recorder.bs.js/prelude";
+import type {
+    AudioRecordingView,
+    MeetingRecordingView,
+} from "#components";
 import type { MediaSelectionData } from "~/types/mediaStepInOut";
+import { formatTime } from "~/utils/time";
 
 const emit =
     defineEmits<(e: "onMediaSelected", data: MediaSelectionData) => void>();
 
 const { t } = useI18n();
+const appLogger = useLogger();
 
 const uploadFile = ref<File>();
 const audioActive = ref(false);
 const meetingActive = ref(false);
+const audioView = ref<InstanceType<typeof AudioRecordingView>>();
+const meetingView = ref<InstanceType<typeof MeetingRecordingView>>();
 
+/** A recorder is in use (recording, paused or finishing). */
 const recording = computed(() => audioActive.value || meetingActive.value);
+/** Reloading or closing the page now would lose audio. */
+const busy = computed(
+    () => Boolean(audioView.value?.busy) || Boolean(meetingView.value?.busy),
+);
+/** A recording is being joined for upload. */
+const finishing = computed(
+    () =>
+        Boolean(audioView.value?.finishing) ||
+        Boolean(meetingView.value?.finishing),
+);
 
-useRecordingLeaveGuard(recording);
+// leaving inside the app pauses and stores a running recording, so the
+// router only asks while one is being finished
+useRecordingLeaveGuard(busy, finishing);
+
+const {
+    abandonedRecording,
+    pausedRecording,
+    refresh: refreshStored,
+    getMp3Blob,
+    markAsStopped,
+} = useStoredRecordings({
+    deleteOldSessionsDaysInterval: 30,
+    maxSessionsToKeep: 10,
+    logger: (msg) => appLogger.debug(msg),
+});
+
+/** The paused recording, unless it is the one on screen right now. */
+const waitingPausedRecording = computed(() =>
+    recording.value ? undefined : pausedRecording.value,
+);
+
+/** Which recorder asked to start while a recording was paused. */
+const pendingStart = ref<"audio" | "meeting">();
+const transcribingPaused = ref(false);
+
+/**
+ * Safari tabs may lose stored recordings; installed apps keep them. Only
+ * known in the browser, so set after mounting to keep hydration intact.
+ */
+const showInstallHint = ref(false);
+onMounted(() => {
+    showInstallHint.value = isIOS() && !isStandalone();
+});
+
+/**
+ * Starts a new recording, unless one is paused: only one may be, so the
+ * user is asked to continue or transcribe that one first.
+ *
+ * @param kind - The recorder that asked.
+ */
+function requestStart(kind: "audio" | "meeting"): void {
+    if (pausedRecording.value) {
+        pendingStart.value = kind;
+        return;
+    }
+    // straight from the click: the screen picker needs the user gesture
+    if (kind === "audio") {
+        audioView.value?.record();
+    } else {
+        void meetingView.value?.record();
+    }
+}
+
+/**
+ * Continues a stored recording with the recorder that made it.
+ *
+ * @param session - The stored recording.
+ */
+function continueRecording(session: AudioSession): void {
+    pendingStart.value = undefined;
+    if (session.source === "meeting") {
+        void meetingView.value?.record(session.id);
+    } else {
+        audioView.value?.record(session.id);
+    }
+}
+
+/**
+ * Hands the paused recording on for transcription; it no longer counts as
+ * paused, so a new recording can start afterwards.
+ *
+ * @param session - The paused recording.
+ */
+async function transcribePaused(session: AudioSession): Promise<void> {
+    transcribingPaused.value = true;
+    try {
+        const audio = await getMp3Blob(session.id);
+        await markAsStopped(session.id);
+        pendingStart.value = undefined;
+        const name = session.source === "meeting" ? "Meeting" : "Aufnahme";
+        emit("onMediaSelected", {
+            media: new File([audio], `${name}.mp3`, { type: "audio/mpeg" }),
+        });
+    } catch (e) {
+        appLogger.error(`Transcribing the paused recording failed: ${e}`);
+    } finally {
+        transcribingPaused.value = false;
+    }
+}
+
+/**
+ * A stored recording was handed on from the abandoned recordings.
+ *
+ * @param sessionId - The stored recording.
+ */
+function onStoredProcessed(sessionId: string): void {
+    markAsStopped(sessionId).catch(() => {});
+}
+
+/**
+ * Describes a stored recording: when it was started and how long it is.
+ *
+ * @param session - The stored recording.
+ */
+function describe(session: AudioSession): string {
+    return t("recording.paused.description", {
+        date: new Date(session.createdAt).toLocaleString(),
+        duration: formatTime(session.duration ?? 0, {
+            milliseconds: false,
+            minimumMinuteDigits: 2,
+        }),
+    });
+}
+
+const askOpen = computed({
+    get: () => pendingStart.value !== undefined,
+    set: (open: boolean) => {
+        if (!open) {
+            pendingStart.value = undefined;
+        }
+    },
+});
 
 watch(uploadFile, () => {
     if (uploadFile.value) {
@@ -103,24 +248,68 @@ const acceptedMedia = [
             />
             <div class="grid min-h-47.5 flex-1 place-items-center">
                 <!-- only one recorder at a time: the other is hidden while
-                     a recording is running -->
+                     a recording is running or paused -->
                 <div class="flex flex-col items-center gap-4">
+                    <UAlert
+                        v-if="waitingPausedRecording"
+                        id="paused-recording"
+                        icon="i-lucide-pause"
+                        color="warning"
+                        variant="subtle"
+                        :title="t('recording.paused.title')"
+                        :description="describe(waitingPausedRecording)"
+                        class="max-w-80"
+                        :actions="[
+                            {
+                                label: t('recording.paused.continue'),
+                                icon: 'i-lucide-play',
+                                color: 'primary',
+                                onClick: () =>
+                                    continueRecording(waitingPausedRecording!),
+                            },
+                            {
+                                label: t('recording.paused.transcribe'),
+                                color: 'neutral',
+                                variant: 'subtle',
+                                loading: transcribingPaused,
+                                onClick: () =>
+                                    transcribePaused(waitingPausedRecording!),
+                            },
+                        ]"
+                        orientation="vertical"
+                    />
                     <div id="record-audio-control">
                         <AudioRecordingView
-                            v-if="!meetingActive"
+                            v-show="!meetingActive"
+                            ref="audioView"
                             v-model:active="audioActive"
+                            :abandoned-recording="abandonedRecording"
+                            :paused-recording="pausedRecording"
+                            @start-requested="requestStart('audio')"
+                            @continue-requested="continueRecording"
+                            @stored-processed="onStoredProcessed"
+                            @stored-changed="refreshStored"
                             @on-recording-complete="onRecodingComplete"
                         />
                     </div>
                     <div id="record-meeting-control">
                         <MeetingRecordingView
-                            v-if="!audioActive"
+                            v-show="!audioActive"
+                            ref="meetingView"
                             v-model:active="meetingActive"
+                            @start-requested="requestStart('meeting')"
+                            @stored-changed="refreshStored"
                             @on-recording-complete="onMeetingRecorded"
                         />
                     </div>
+                    <p
+                        v-if="showInstallHint"
+                        class="max-w-80 text-center text-xs text-dimmed"
+                    >
+                        {{ t("recording.paused.installHint") }}
+                    </p>
                     <UAlert
-                        v-if="recording"
+                        v-if="busy"
                         icon="i-lucide-triangle-alert"
                         color="warning"
                         variant="subtle"
@@ -130,5 +319,45 @@ const acceptedMedia = [
                 </div>
             </div>
         </UCard>
+
+        <UModal
+            v-model:open="askOpen"
+            :title="t('recording.paused.askTitle')"
+            :description="t('recording.paused.askMessage')"
+        >
+            <template #body>
+                <p v-if="pausedRecording" class="text-sm text-muted">
+                    {{ describe(pausedRecording) }}
+                </p>
+            </template>
+            <template #footer>
+                <div class="flex w-full flex-wrap justify-end gap-2">
+                    <UButton
+                        color="neutral"
+                        variant="ghost"
+                        @click="askOpen = false"
+                    >
+                        {{ t("recording.paused.cancel") }}
+                    </UButton>
+                    <UButton
+                        v-if="pausedRecording"
+                        color="neutral"
+                        variant="subtle"
+                        :loading="transcribingPaused"
+                        @click="transcribePaused(pausedRecording)"
+                    >
+                        {{ t("recording.paused.transcribe") }}
+                    </UButton>
+                    <UButton
+                        v-if="pausedRecording"
+                        color="primary"
+                        icon="i-lucide-play"
+                        @click="continueRecording(pausedRecording)"
+                    >
+                        {{ t("recording.paused.continue") }}
+                    </UButton>
+                </div>
+            </template>
+        </UModal>
     </div>
 </template>

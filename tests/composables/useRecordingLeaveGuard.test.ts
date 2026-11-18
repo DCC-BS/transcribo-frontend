@@ -94,3 +94,35 @@ describe("useRecordingLeaveGuard", () => {
         expect(await second).toBe(true);
     });
 });
+
+describe("useRecordingLeaveGuard with a separate finishing state", () => {
+    const isRecording = ref(false);
+    const isFinishing = ref(false);
+    let scope: EffectScope;
+
+    beforeEach(() => {
+        isRecording.value = false;
+        isFinishing.value = false;
+        routeLeaveGuards.length = 0;
+        openDialog.mockReset();
+        scope = effectScope();
+        scope.run(() => useRecordingLeaveGuard(isRecording, isFinishing));
+    });
+
+    afterEach(() => scope.stop());
+
+    it("lets in-app navigation through while recording", async () => {
+        // unmounting the recorder pauses and stores the recording
+        isRecording.value = true;
+        expect(await routeLeaveGuards[0]?.()).toBe(true);
+        expect(openDialog).not.toHaveBeenCalled();
+        // a reload still loses the last seconds
+        expect(reload()).toBe(true);
+    });
+
+    it("asks before in-app navigation while finishing", async () => {
+        isFinishing.value = true;
+        openDialog.mockImplementationOnce(({ onClose }) => onClose());
+        expect(await routeLeaveGuards[0]?.()).toBe(false);
+    });
+});

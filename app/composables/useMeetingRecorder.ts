@@ -9,6 +9,11 @@ import { useDisplayMedia, useUserMedia } from "@vueuse/core";
     Audio graph into one destination, and only that mix reaches the recorder.
     Recording itself is left to useAudioRecording, so a meeting is stored in
     IndexedDB chunk by chunk and survives a crash like any other recording.
+
+    Pausing keeps the screen share and the microphone open: asking for a
+    screen share again always shows the picker. A paused meeting is still
+    stored as paused, so after a reload it can be continued with `resume`,
+    which does ask for the screen again.
 */
 
 /** Why the feature cannot be offered, or `null` when it can. */
@@ -74,8 +79,14 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
     const {
         isRecording,
         isProcessing,
+        isPaused,
+        isSavingPause,
+        isBusy,
         recordingTime: elapsedSeconds,
         startRecording,
+        resumeSession,
+        pauseRecording,
+        resumeRecording,
         stopRecording,
     } = useAudioRecording({
         getStream: captureMix,
@@ -84,6 +95,8 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
         },
         onRecordingStopped: (audio) => finish(audio),
         storeToDbInterval: 10,
+        pauseMode: "keep",
+        sessionSource: "meeting",
         logger,
     });
 
@@ -181,8 +194,35 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
      * @returns The recorded audio once {@link stop} is called, or `undefined`
      * when the recording could not be started — `error` says why.
      */
-    async function start(): Promise<Blob | undefined> {
-        if (isRecording.value || isStarting.value || isProcessing.value) {
+    function start(): Promise<Blob | undefined> {
+        return begin(startRecording);
+    }
+
+    /**
+     * Continues a stored meeting (paused, or cut off by a reload): asks for
+     * the screen and microphone again and appends to it.
+     *
+     * @param sessionId - The stored meeting.
+     * @returns As {@link start}.
+     */
+    function resume(sessionId: string): Promise<Blob | undefined> {
+        return begin(() => resumeSession(sessionId));
+    }
+
+    /**
+     * Runs a start and awaits the whole recording.
+     *
+     * @param startCapture - Starts recording: a new or a stored session.
+     */
+    async function begin(
+        startCapture: () => Promise<void>,
+    ): Promise<Blob | undefined> {
+        if (
+            isRecording.value ||
+            isStarting.value ||
+            isProcessing.value ||
+            isPaused.value
+        ) {
             return undefined;
         }
         error.value = null;
@@ -194,7 +234,7 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
             resolveRecording = resolve;
         });
         try {
-            await startRecording();
+            await startCapture();
         } finally {
             isStarting.value = false;
         }
@@ -213,7 +253,7 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
      * stored chunks are joined.
      */
     async function stop(): Promise<void> {
-        if (!isRecording.value) {
+        if (!isRecording.value && !isPaused.value) {
             return;
         }
         try {
@@ -225,9 +265,8 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
     }
 
     /*
-        Unmounting only releases the devices: useAudioRecording aborts on its
-        own and keeps the stored chunks, so the meeting can be recovered from
-        the abandoned recordings. useDisplayMedia, unlike useUserMedia,
+        Unmounting only releases the devices: useAudioRecording stores what
+        it has and leaves the meeting paused, so it can be continued later. useDisplayMedia, unlike useUserMedia,
         registers no cleanup of its own, so without this the browser's
         "sharing your screen" bar would keep running.
     */
@@ -239,10 +278,16 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
         isRecording,
         isStarting,
         isProcessing,
+        isPaused,
+        isSavingPause,
+        isBusy,
         elapsedSeconds,
         stream,
         error,
         start,
+        resume,
+        pause: pauseRecording,
+        resumePaused: resumeRecording,
         stop,
     };
 }

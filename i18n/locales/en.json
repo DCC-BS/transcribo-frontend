@@ -334,7 +334,9 @@
         "abandonedRecording": "Recording abandoned at {date}",
         "recover": "Recover",
         "abandonedRecordings": "You have {count} abandoned recordings",
-        "showAbandonedRecordings": "Show abandoned recordings"
+        "showAbandonedRecordings": "Show abandoned recordings",
+        "continueAbandoned": "Continue recording",
+        "processAbandoned": "Process"
     },
     "languages": {
         "autoDetect": "Auto-detect",
@@ -621,12 +623,22 @@
         }
     },
     "recording": {
-        "inProgressWarning": "Recording in progress: don't reload or close this page, or the recording stops and the last few seconds are lost. You can recover the rest afterwards under “Show abandoned recordings”.",
+        "inProgressWarning": "Recording in progress: don't reload or close this page, or the last few seconds are lost. Pause first: a paused recording is saved and can be continued later.",
         "leave": {
-            "title": "Recording in progress",
-            "message": "If you leave the page now, the recording stops and the last few seconds are lost.",
+            "title": "Recording is being finished",
+            "message": "If you leave the page now, the recording is not uploaded. You can still find it under “Show abandoned recordings”.",
             "confirm": "Leave page",
-            "cancel": "Keep recording"
+            "cancel": "Stay"
+        },
+        "paused": {
+            "title": "Paused recording",
+            "description": "From {date}, {duration} recorded so far.",
+            "continue": "Continue recording",
+            "transcribe": "Transcribe it",
+            "cancel": "Cancel",
+            "askTitle": "You have a paused recording",
+            "askMessage": "Only one recording can be paused at a time. Continue the paused recording, or transcribe it first and then start a new one.",
+            "installHint": "Tip: add Transcribo to your Home Screen (Share → Add to Home Screen) so paused recordings are kept safely. Safari may delete data of websites that are not opened for a few days."
         }
     }
 }

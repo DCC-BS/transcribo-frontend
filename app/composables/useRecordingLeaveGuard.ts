@@ -5,24 +5,30 @@ import { onBeforeRouteLeave } from "vue-router";
 import { useDialog } from "./dialog";
 
 /*
-    Leaving the page mid-recording cuts the recording off. The chunks stored
-    so far survive in IndexedDB and show up as abandoned recordings, but the
-    last seconds are lost and the user has to recover the rest by hand — so
-    ask before letting them go.
+    Reloading or closing the page mid-recording cuts the recording off: the
+    chunks stored so far survive in IndexedDB and the recording can be
+    continued, but the last seconds were never stored. That can only be
+    intercepted through `beforeunload`, where browsers show their own fixed
+    wording; the in-page warning next to the recorder carries the
+    explanation.
 
-    Reload and closing the tab/window can only be intercepted through
-    `beforeunload`, where browsers show their own fixed wording; the
-    in-page warning next to the recorder carries the explanation. Navigating
-    inside the app goes through the router and gets our own dialog.
+    Navigating inside the app is different: the page stays alive, so the
+    recorder pauses and stores everything before it goes away. Only a
+    recording that is being finished (joined for upload) would end up
+    among the abandoned recordings instead of being uploaded, so the router
+    asks with our own dialog only then.
 */
 /**
- * Asks for confirmation before the page is reloaded, closed or left while
- * a recording is running.
+ * Asks for confirmation before audio would be lost by leaving the page.
  *
- * @param isRecording - Whether a recording is currently running.
+ * @param isRecording - Whether reloading or closing the page now would lose
+ *   audio (recording, or a pause still being stored).
+ * @param isFinishing - Whether navigating inside the app now would cut off
+ *   a recording being finished. Defaults to `isRecording`.
  */
 export function useRecordingLeaveGuard(
     isRecording: MaybeRefOrGetter<boolean>,
+    isFinishing: MaybeRefOrGetter<boolean> = isRecording,
 ): void {
     const { t } = useI18n();
     const { openDialog } = useDialog();
@@ -43,7 +49,7 @@ export function useRecordingLeaveGuard(
     let settlePending: ((leave: boolean) => void) | undefined;
 
     onBeforeRouteLeave(() => {
-        if (!toValue(isRecording)) {
+        if (!toValue(isFinishing)) {
             return true;
         }
         settlePending?.(false);
