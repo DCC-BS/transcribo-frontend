@@ -616,7 +616,8 @@
         "errors": {
             "permission-denied": "Die Aufnahme wurde abgebrochen. Mikrofon und Bildschirmfreigabe werden beide benötigt.",
             "no-screen-audio": "Der gewählte Bildschirm wurde ohne Ton geteilt. Teilen Sie einen Tab oder ein Fenster erneut und aktivieren Sie „Ton teilen“.",
-            "failed": "Die Aufnahme konnte nicht gestartet werden."
+            "failed": "Die Aufnahme konnte nicht gestartet werden.",
+            "resume-failed": "Die Aufnahme konnte nicht fortgesetzt werden. Sie ist weiterhin pausiert und gespeichert."
         },
         "unsupported": {
             "browser": "Die Aufnahme des Bildschirmtons wird in diesem Browser nicht unterstützt. Verwenden Sie Chrome oder Edge unter Windows.",

@@ -616,7 +616,8 @@
         "errors": {
             "permission-denied": "Recording was cancelled. Microphone and screen sharing are both required.",
             "no-screen-audio": "The selected screen was shared without sound. Share a tab or window again and tick “Share audio”.",
-            "failed": "The recording could not be started."
+            "failed": "The recording could not be started.",
+            "resume-failed": "The recording could not be continued. It is still paused and saved."
         },
         "unsupported": {
             "browser": "Recording screen audio is not supported in this browser. Use Chrome or Edge on Windows.",

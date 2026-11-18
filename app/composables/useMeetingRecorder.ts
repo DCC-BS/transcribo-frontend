@@ -49,7 +49,8 @@ function detectUnsupported(): MeetingRecorderUnsupported | null {
 export type MeetingRecorderError =
     | "permission-denied"
     | "no-screen-audio"
-    | "failed";
+    | "failed"
+    | "resume-failed";
 
 /** Thrown inside the capture step to abort the recording; `error` says why. */
 class CaptureAborted extends Error {}
@@ -248,6 +249,18 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
     }
 
     /**
+     * Continues a paused meeting; a failure leaves it paused and sets
+     * `error` (the library reports it only through its own error).
+     */
+    async function resumePaused(): Promise<void> {
+        error.value = null;
+        await resumeRecording();
+        if (isPaused.value && !isRecording.value) {
+            error.value ??= "resume-failed";
+        }
+    }
+
+    /**
      * Ends the recording; the audio arrives through {@link start} once the
      * stored chunks are joined.
      */
@@ -287,7 +300,7 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
         start,
         resume,
         pause: pauseRecording,
-        resumePaused: resumeRecording,
+        resumePaused,
         stop,
     };
 }

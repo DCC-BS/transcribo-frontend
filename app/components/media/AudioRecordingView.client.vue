@@ -38,6 +38,8 @@ const debugLog = (msg: string): void => {
 
 const shouldRecord = ref(false);
 const resumeId = ref<string>();
+/** Why the last attempt to continue a stored recording failed. */
+const resumeError = ref<string>();
 const showAbandonedRecordings = ref(false);
 const recorder = ref<InstanceType<typeof AudioRecorder>>();
 
@@ -50,6 +52,29 @@ watchEffect(() => {
             recorder.value?.isPaused,
     );
 });
+
+// a stored recording that could not be continued (e.g. finished in another
+// tab meanwhile): offer the normal controls and the current list again
+watch(
+    () => recorder.value?.isStarting,
+    (starting, wasStarting) => {
+        const r = recorder.value;
+        if (
+            wasStarting &&
+            !starting &&
+            resumeId.value &&
+            r &&
+            !r.isRecording &&
+            !r.isPaused &&
+            !r.isProcessing
+        ) {
+            resumeError.value = r.error || undefined;
+            shouldRecord.value = false;
+            resumeId.value = undefined;
+            emit("storedChanged");
+        }
+    },
+);
 
 /**
  * Takes over the finished recording and hands it to the parent.
@@ -69,6 +94,7 @@ function onRecordingStopped(file: Blob, _: string) {
  */
 function record(sessionId?: string): void {
     showAbandonedRecordings.value = false;
+    resumeError.value = undefined;
     resumeId.value = sessionId;
     shouldRecord.value = true;
 }
@@ -136,6 +162,16 @@ const audioSessionActions = computed(() => [
 
 <template>
     <div class="flex flex-col justify-center items-center">
+        <UAlert
+            v-if="resumeError && !shouldRecord"
+            color="error"
+            variant="subtle"
+            role="alert"
+            class="mb-4"
+            :description="resumeError"
+            close
+            @update:open="resumeError = undefined"
+        />
         <div
             v-if="otherStoredCount > 0 && !shouldRecord"
             class="mb-4"
