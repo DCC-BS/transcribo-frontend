@@ -3,6 +3,8 @@ import {
     type AudioSession,
     isIOS,
     isStandalone,
+    SessionChanged,
+    SessionInUse,
 } from "@dcc-bs/audio-recorder.bs.js/prelude";
 import type {
     AudioRecordingView,
@@ -48,6 +50,7 @@ useRecordingLeaveGuard(busy, finishing, async () => {
 
 const {
     isReady: storedReady,
+    loadFailed: storedLoadFailed,
     abandonedRecording,
     pausedRecording,
     refresh: refreshStored,
@@ -68,7 +71,23 @@ const waitingPausedRecording = computed(() =>
 const pendingStart = ref<"audio" | "meeting">();
 const transcribingPaused = ref(false);
 const transcribeFailed = ref(false);
-const processFailed = ref(false);
+/** An abandoned recording is being marked stopped before it is handed on. */
+const processingStored = ref(false);
+/** Why handing on an abandoned recording failed (an i18n key). */
+const processError = ref<string>();
+const retryingLoad = ref(false);
+
+/** Reads the stored recordings again after a failed first read. */
+async function retryLoadStored(): Promise<void> {
+    retryingLoad.value = true;
+    try {
+        await refreshStored();
+    } catch (e) {
+        appLogger.error(`Reading stored recordings failed: ${e}`);
+    } finally {
+        retryingLoad.value = false;
+    }
+}
 
 /** Safari tabs may lose stored data; set after mount to keep hydration intact. */
 const showInstallHint = ref(false);
@@ -159,14 +178,20 @@ async function onStoredProcessed(
     audio: Blob,
     chunkCount?: number,
 ): Promise<void> {
-    processFailed.value = false;
+    processError.value = undefined;
+    processingStored.value = true;
     try {
         await markAsStopped(sessionId, chunkCount);
     } catch (e) {
         appLogger.error(`Handing on a stored recording failed: ${e}`);
-        processFailed.value = true;
+        processError.value =
+            e instanceof SessionInUse || e instanceof SessionChanged
+                ? "audio.processAbandonedConflict"
+                : "audio.processAbandonedFailed";
         await refreshStored().catch(() => {});
         return;
+    } finally {
+        processingStored.value = false;
     }
     onRecodingComplete(audio);
 }
@@ -263,7 +288,7 @@ const acceptedMedia = [
             />
             <UFileUpload
                 v-model="uploadFile"
-                :disabled="recording || transcribingPaused"
+                :disabled="recording || transcribingPaused || processingStored"
                 :accept="acceptedMedia"
                 icon="i-lucide-file-up"
                 :label="t('pages.index.dropzoneLabel')"
@@ -326,13 +351,27 @@ const acceptedMedia = [
                         @update:open="transcribeFailed = false"
                     />
                     <UAlert
-                        v-if="processFailed"
+                        v-if="processError"
                         color="error"
                         variant="subtle"
                         role="alert"
-                        :description="t('audio.processAbandonedFailed')"
+                        :description="t(processError)"
                         close
-                        @update:open="processFailed = false"
+                        @update:open="processError = undefined"
+                    />
+                    <UAlert
+                        v-if="storedLoadFailed"
+                        color="error"
+                        variant="subtle"
+                        role="alert"
+                        :description="t('recording.storedLoadFailed')"
+                        :actions="[
+                            {
+                                label: t('recording.storedLoadRetry'),
+                                loading: retryingLoad,
+                                onClick: retryLoadStored,
+                            },
+                        ]"
                     />
                     <!-- v-show on the wrappers: the views stay mounted, so
                          their exposed state stays readable -->

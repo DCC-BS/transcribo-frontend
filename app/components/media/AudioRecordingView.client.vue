@@ -145,6 +145,21 @@ const audioSessionActions = computed(() => [
         },
     },
     {
+        label: t("audio.deleteAbandoned"),
+        icon: "i-lucide-trash-2",
+        color: "error",
+        needsAudio: false,
+        // the built-in delete would not tell the parent, which may still
+        // offer the deleted recording as paused
+        handler: async (_sessionId: string, _mp3: Blob, deleteSession: () => Promise<void>) => {
+            try {
+                await deleteSession();
+            } finally {
+                emit("storedChanged");
+            }
+        },
+    },
+    {
         label: t("audio.processAbandoned"),
         icon: "i-lucide-play",
         handler: async (
@@ -199,6 +214,7 @@ const audioSessionActions = computed(() => [
                         <AudioSessionExplorer
                             ref="audioSessionExplorer"
                             :custom-actions="audioSessionActions"
+                            :show-delete-button="false"
                         />
                     </div>
                 </template>

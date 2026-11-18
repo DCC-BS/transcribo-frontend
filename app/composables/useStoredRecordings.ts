@@ -19,6 +19,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
         };
         return {
             isReady: ref(false),
+            loadFailed: ref(false),
             abandonedRecording: ref<AudioSession[] | undefined>(),
             pausedRecording: computed<AudioSession | undefined>(
                 () => undefined,
@@ -31,6 +32,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
 
     const {
         isReady,
+        loadFailed,
         abandonedRecording,
         pausedRecording,
         refresh,
@@ -39,6 +41,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
     } = useAudioSessions(options);
     return {
         isReady,
+        loadFailed,
         abandonedRecording,
         pausedRecording,
         refresh,
