@@ -71,6 +71,10 @@ const transcribingPaused = ref(false);
 const transcribeFailed = ref(false);
 /** An abandoned recording is being marked stopped before it is handed on. */
 const processingStored = ref(false);
+/** A stored recording is being handed on; it must not be continued meanwhile. */
+const handingOn = computed(
+    () => transcribingPaused.value || processingStored.value,
+);
 /**
  * Stored recordings are known, so a paused one cannot be missed (not before
  * the first read, nor after a later read failed), and no stored recording
@@ -138,7 +142,7 @@ function requestStart(kind: "audio" | "meeting"): void {
  * @param session - The stored recording.
  */
 function continueRecording(session: AudioSession): void {
-    if (transcribingPaused.value) {
+    if (handingOn.value) {
         return;
     }
     pendingStart.value = undefined;
@@ -155,7 +159,7 @@ function continueRecording(session: AudioSession): void {
  * @param session - The paused recording.
  */
 async function transcribePaused(session: AudioSession): Promise<void> {
-    if (transcribingPaused.value) {
+    if (handingOn.value) {
         return;
     }
     transcribingPaused.value = true;
@@ -194,6 +198,10 @@ async function onStoredProcessed(
     audio: Blob,
     chunkCount?: number,
 ): Promise<void> {
+    // exported before a recording started: handing it on would end that one
+    if (recording.value) {
+        return;
+    }
     processError.value = undefined;
     processingStored.value = true;
     try {
@@ -304,7 +312,7 @@ const acceptedMedia = [
             />
             <UFileUpload
                 v-model="uploadFile"
-                :disabled="recording || transcribingPaused || processingStored"
+                :disabled="recording || handingOn"
                 :accept="acceptedMedia"
                 icon="i-lucide-file-up"
                 :label="t('pages.index.dropzoneLabel')"
@@ -341,7 +349,7 @@ const acceptedMedia = [
                                 label: t('recording.paused.continue'),
                                 icon: 'i-lucide-play',
                                 color: 'primary',
-                                disabled: transcribingPaused,
+                                disabled: handingOn,
                                 onClick: () =>
                                     continueRecording(waitingPausedRecording!),
                             },
@@ -350,6 +358,7 @@ const acceptedMedia = [
                                 color: 'neutral',
                                 variant: 'subtle',
                                 loading: transcribingPaused,
+                                disabled: processingStored,
                                 onClick: () =>
                                     transcribePaused(waitingPausedRecording!),
                             },
@@ -470,6 +479,7 @@ const acceptedMedia = [
                         color="neutral"
                         variant="subtle"
                         :loading="transcribingPaused"
+                        :disabled="processingStored"
                         @click="transcribePaused(pausedRecording)"
                     >
                         {{ t("recording.paused.transcribe") }}
@@ -478,7 +488,7 @@ const acceptedMedia = [
                         v-if="pausedRecording"
                         color="primary"
                         icon="i-lucide-play"
-                        :disabled="transcribingPaused"
+                        :disabled="handingOn"
                         @click="continueRecording(pausedRecording)"
                     >
                         {{ t("recording.paused.continue") }}
