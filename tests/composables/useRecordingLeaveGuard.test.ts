@@ -3,6 +3,7 @@ import { type EffectScope, effectScope, ref } from "vue";
 
 const routeLeaveGuards: Array<() => boolean | Promise<boolean>> = [];
 const openDialog = vi.fn();
+const closeDialog = vi.fn();
 
 vi.mock("vue-router", () => ({
     onBeforeRouteLeave: (guard: () => boolean | Promise<boolean>) =>
@@ -12,7 +13,7 @@ vi.mock("vue-i18n", () => ({
     useI18n: () => ({ t: (key: string) => key }),
 }));
 vi.mock("../../app/composables/dialog", () => ({
-    useDialog: () => ({ openDialog }),
+    useDialog: () => ({ openDialog, closeDialog }),
 }));
 
 const { useRecordingLeaveGuard } = await import(
@@ -124,5 +125,18 @@ describe("useRecordingLeaveGuard with a separate finishing state", () => {
         isFinishing.value = true;
         openDialog.mockImplementationOnce(({ onClose }) => onClose());
         expect(await routeLeaveGuards[0]?.()).toBe(false);
+    });
+
+    it("answers and closes a moot dialog once finishing is over", async () => {
+        isFinishing.value = true;
+        closeDialog.mockReset();
+        // the dialog is left open: neither callback fires
+        const first = routeLeaveGuards[0]?.();
+
+        isFinishing.value = false;
+        expect(await routeLeaveGuards[0]?.()).toBe(true);
+
+        expect(await first).toBe(false);
+        expect(closeDialog).toHaveBeenCalledOnce();
     });
 });

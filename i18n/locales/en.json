@@ -638,7 +638,8 @@
             "cancel": "Cancel",
             "askTitle": "You have a paused recording",
             "askMessage": "Only one recording can be paused at a time. Continue the paused recording, or transcribe it first and then start a new one.",
-            "installHint": "Tip: add Transcribo to your Home Screen (Share → Add to Home Screen) so paused recordings are kept safely. Safari may delete data of websites that are not opened for a few days."
+            "installHint": "Tip: add Transcribo to your Home Screen (Share → Add to Home Screen) and record there: Safari may delete data of websites that are not opened for a few days. The installed app does not see recordings made in Safari, so continue or transcribe those in Safari first.",
+            "transcribeFailed": "The paused recording could not be prepared for transcription. It is still saved; please try again."
         }
     }
 }

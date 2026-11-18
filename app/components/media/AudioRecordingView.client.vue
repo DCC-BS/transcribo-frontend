@@ -37,12 +37,14 @@ const resumeId = ref<string>();
 const showAbandonedRecordings = ref(false);
 const recorder = ref<InstanceType<typeof AudioRecorder>>();
 
-// in use while the recorder records, holds a pause or joins chunks: a
-// start that fails (no microphone, permission denied) must not leave the
-// parent believing a recording is running
+// in use while the recorder starts, records, holds a pause or joins
+// chunks. A start that fails (no microphone, permission denied) ends
+// `isStarting` without setting anything else, so the parent offers both
+// recorders again
 watchEffect(() => {
     active.value = Boolean(
-        recorder.value?.isRecording ||
+        recorder.value?.isStarting ||
+            recorder.value?.isRecording ||
             recorder.value?.isProcessing ||
             recorder.value?.isPaused,
     );

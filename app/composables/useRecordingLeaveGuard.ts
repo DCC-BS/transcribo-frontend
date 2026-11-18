@@ -31,7 +31,7 @@ export function useRecordingLeaveGuard(
     isFinishing: MaybeRefOrGetter<boolean> = isRecording,
 ): void {
     const { t } = useI18n();
-    const { openDialog } = useDialog();
+    const { openDialog, closeDialog } = useDialog();
 
     // no explicit target: VueUse falls back to `window` only in the
     // browser, so this stays safe during server-side rendering
@@ -50,6 +50,13 @@ export function useRecordingLeaveGuard(
 
     onBeforeRouteLeave(() => {
         if (!toValue(isFinishing)) {
+            // an earlier navigation still asking is moot now: answer it and
+            // take its dialog down
+            if (settlePending) {
+                settlePending(false);
+                settlePending = undefined;
+                closeDialog?.();
+            }
             return true;
         }
         settlePending?.(false);

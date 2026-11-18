@@ -60,6 +60,8 @@ const waitingPausedRecording = computed(() =>
 /** Which recorder asked to start while a recording was paused. */
 const pendingStart = ref<"audio" | "meeting">();
 const transcribingPaused = ref(false);
+/** Joining the paused recording for transcription failed. */
+const transcribeFailed = ref(false);
 
 /**
  * Safari tabs may lose stored recordings; installed apps keep them. Only
@@ -95,6 +97,10 @@ function requestStart(kind: "audio" | "meeting"): void {
  * @param session - The stored recording.
  */
 function continueRecording(session: AudioSession): void {
+    // being joined for transcription: it is about to be handed on
+    if (transcribingPaused.value) {
+        return;
+    }
     pendingStart.value = undefined;
     if (session.source === "meeting") {
         void meetingView.value?.record(session.id);
@@ -110,7 +116,11 @@ function continueRecording(session: AudioSession): void {
  * @param session - The paused recording.
  */
 async function transcribePaused(session: AudioSession): Promise<void> {
+    if (transcribingPaused.value) {
+        return;
+    }
     transcribingPaused.value = true;
+    transcribeFailed.value = false;
     try {
         const audio = await getMp3Blob(session.id);
         await markAsStopped(session.id);
@@ -120,7 +130,9 @@ async function transcribePaused(session: AudioSession): Promise<void> {
             media: new File([audio], `${name}.mp3`, { type: "audio/mpeg" }),
         });
     } catch (e) {
+        // the recording stays paused and can be tried again
         appLogger.error(`Transcribing the paused recording failed: ${e}`);
+        transcribeFailed.value = true;
     } finally {
         transcribingPaused.value = false;
     }
@@ -264,6 +276,7 @@ const acceptedMedia = [
                                 label: t('recording.paused.continue'),
                                 icon: 'i-lucide-play',
                                 color: 'primary',
+                                disabled: transcribingPaused,
                                 onClick: () =>
                                     continueRecording(waitingPausedRecording!),
                             },
@@ -278,9 +291,20 @@ const acceptedMedia = [
                         ]"
                         orientation="vertical"
                     />
-                    <div id="record-audio-control">
+                    <UAlert
+                        v-if="transcribeFailed"
+                        icon="i-lucide-circle-x"
+                        color="error"
+                        variant="subtle"
+                        :description="t('recording.paused.transcribeFailed')"
+                        class="max-w-80"
+                        close
+                        @update:open="transcribeFailed = false"
+                    />
+                    <!-- v-show on the wrappers: the views stay mounted, so
+                         their exposed state stays readable -->
+                    <div v-show="!meetingActive" id="record-audio-control">
                         <AudioRecordingView
-                            v-show="!meetingActive"
                             ref="audioView"
                             v-model:active="audioActive"
                             :abandoned-recording="abandonedRecording"
@@ -292,9 +316,8 @@ const acceptedMedia = [
                             @on-recording-complete="onRecodingComplete"
                         />
                     </div>
-                    <div id="record-meeting-control">
+                    <div v-show="!audioActive" id="record-meeting-control">
                         <MeetingRecordingView
-                            v-show="!audioActive"
                             ref="meetingView"
                             v-model:active="meetingActive"
                             @start-requested="requestStart('meeting')"
@@ -352,6 +375,7 @@ const acceptedMedia = [
                         v-if="pausedRecording"
                         color="primary"
                         icon="i-lucide-play"
+                        :disabled="transcribingPaused"
                         @click="continueRecording(pausedRecording)"
                     >
                         {{ t("recording.paused.continue") }}

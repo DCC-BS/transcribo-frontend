@@ -638,7 +638,8 @@
             "cancel": "Abbrechen",
             "askTitle": "Du hast eine pausierte Aufnahme",
             "askMessage": "Es kann nur eine Aufnahme pausiert sein. Setze die pausierte Aufnahme fort, oder transkribiere sie zuerst und starte danach eine neue.",
-            "installHint": "Tipp: Füge Transcribo zum Home-Bildschirm hinzu (Teilen → Zum Home-Bildschirm), damit pausierte Aufnahmen sicher aufbewahrt werden. Safari kann Daten von Websites löschen, die einige Tage nicht geöffnet wurden."
+            "installHint": "Tipp: Füge Transcribo zum Home-Bildschirm hinzu (Teilen → Zum Home-Bildschirm) und nimm dort auf: Safari kann Daten von Websites löschen, die einige Tage nicht geöffnet wurden. Die installierte App sieht keine Aufnahmen aus Safari, setze diese deshalb zuerst in Safari fort oder transkribiere sie dort.",
+            "transcribeFailed": "Die pausierte Aufnahme konnte nicht für die Transkription vorbereitet werden. Sie ist weiterhin gespeichert; bitte versuche es erneut."
         }
     }
 }
