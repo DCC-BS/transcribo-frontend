@@ -58,7 +58,8 @@ watch(
     () => recorder.value?.isStarting,
     (starting, wasStarting) => {
         const r = recorder.value;
-        if (wasStarting && !starting && resumeId.value && r && !r.isActive) {
+        // any failed start: retries go through the parent's checks again
+        if (wasStarting && !starting && r && !r.isActive) {
             resumeError.value = r.error || undefined;
             shouldRecord.value = false;
             resumeId.value = undefined;
@@ -92,7 +93,9 @@ function record(sessionId?: string): void {
 
 defineExpose({
     /** Reloading or closing the page now would lose audio. */
-    busy: computed(() => Boolean(recorder.value?.isBusy)),
+    busy: computed(() =>
+        Boolean(recorder.value?.isBusy || recorder.value?.pauseSaveFailed),
+    ),
     /** The recording is being joined for upload. */
     finishing: computed(() => Boolean(recorder.value?.isProcessing)),
     record,

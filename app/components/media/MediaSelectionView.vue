@@ -65,22 +65,29 @@ const waitingPausedRecording = computed(() =>
     recording.value ? undefined : pausedRecording.value,
 );
 
-/**
- * Stored recordings are known, so a paused one cannot be missed: not before
- * the first read, nor after a later read failed.
- */
-const canStart = computed(() => storedReady.value && !storedLoadFailed.value);
-/** The first read of the stored recordings is still running. */
-const storedLoading = computed(
-    () => !storedReady.value && !storedLoadFailed.value,
-);
-
 /** Which recorder asked to start while a recording was paused. */
 const pendingStart = ref<"audio" | "meeting">();
 const transcribingPaused = ref(false);
 const transcribeFailed = ref(false);
 /** An abandoned recording is being marked stopped before it is handed on. */
 const processingStored = ref(false);
+/**
+ * Stored recordings are known, so a paused one cannot be missed (not before
+ * the first read, nor after a later read failed), and no stored recording
+ * is being handed on.
+ */
+const canStart = computed(
+    () =>
+        storedReady.value &&
+        !storedLoadFailed.value &&
+        !processingStored.value &&
+        !transcribingPaused.value,
+);
+/** The first read of the stored recordings is still running. */
+const storedLoading = computed(
+    () => !storedReady.value && !storedLoadFailed.value,
+);
+
 /** Why handing on an abandoned recording failed (an i18n key). */
 const processError = ref<string>();
 const retryingLoad = ref(false);

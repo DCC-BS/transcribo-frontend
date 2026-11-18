@@ -60,13 +60,25 @@ export function useRecordingLeaveGuard(
         });
     }
 
+    // the newest navigation; an older one's save result is moot
+    let navigation = 0;
+
     onBeforeRouteLeave(async () => {
+        const current = ++navigation;
         if (toValue(isFinishing)) {
             return ask("leave");
         }
         // also when no longer busy: a pause may still be saving, or its
         // save may have failed already
-        if (saveBeforeLeave && !(await saveBeforeLeave())) {
+        const saved = saveBeforeLeave ? await saveBeforeLeave() : true;
+        if (current !== navigation) {
+            return false;
+        }
+        // Stop may have been pressed while the pause was saved
+        if (toValue(isFinishing)) {
+            return ask("leave");
+        }
+        if (!saved) {
             return ask("leaveUnsaved");
         }
         // an earlier navigation's dialog is moot now

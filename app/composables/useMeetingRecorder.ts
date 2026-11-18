@@ -254,7 +254,13 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
      */
     async function resumePaused(): Promise<void> {
         error.value = null;
-        await resumeRecording();
+        // keeps Stop disabled meanwhile: a stop would cancel the resume
+        isStarting.value = true;
+        try {
+            await resumeRecording();
+        } finally {
+            isStarting.value = false;
+        }
         if (isPaused.value && !isRecording.value) {
             error.value ??= "resume-failed";
         }

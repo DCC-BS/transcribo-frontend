@@ -69,7 +69,7 @@ async function record(resumeId?: string): Promise<void> {
 
 defineExpose({
     /** Reloading or closing the page now would lose audio. */
-    busy: isBusy,
+    busy: computed(() => isBusy.value || pauseSaveFailed.value),
     /** The recording is being joined for upload. */
     finishing: isProcessing,
     record,

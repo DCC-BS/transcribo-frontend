@@ -199,4 +199,40 @@ describe("useRecordingLeaveGuard saving before in-app navigation", () => {
             expect.objectContaining({ title: "recording.leaveUnsaved.title" }),
         );
     });
+
+    it("asks when finishing began while the pause was saved", async () => {
+        isRecording.value = true;
+        let saved: (ok: boolean) => void = () => {};
+        save.mockImplementationOnce(
+            () => new Promise<boolean>((resolve) => (saved = resolve)),
+        );
+        openDialog.mockImplementationOnce(({ onClose }) => onClose());
+
+        const leaving = routeLeaveGuards[0]?.();
+        isFinishing.value = true;
+        saved(true);
+
+        expect(await leaving).toBe(false);
+        expect(openDialog).toHaveBeenLastCalledWith(
+            expect.objectContaining({ title: "recording.leave.title" }),
+        );
+    });
+
+    it("ignores the save result of a superseded navigation", async () => {
+        isRecording.value = true;
+        let firstSaved: (ok: boolean) => void = () => {};
+        save.mockImplementationOnce(
+            () => new Promise<boolean>((resolve) => (firstSaved = resolve)),
+        );
+        save.mockResolvedValueOnce(true);
+
+        const first = routeLeaveGuards[0]?.();
+        const second = routeLeaveGuards[0]?.();
+        expect(await second).toBe(true);
+        firstSaved(false);
+
+        expect(await first).toBe(false);
+        expect(openDialog).not.toHaveBeenCalled();
+    });
 });
+
