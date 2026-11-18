@@ -336,7 +336,8 @@
         "abandonedRecordings": "You have {count} abandoned recordings",
         "showAbandonedRecordings": "Show abandoned recordings",
         "continueAbandoned": "Continue recording",
-        "processAbandoned": "Process"
+        "processAbandoned": "Process",
+        "processAbandonedFailed": "This recording could not be processed: it was continued or is open in another tab. The list has been updated; please try again."
     },
     "languages": {
         "autoDetect": "Auto-detect",

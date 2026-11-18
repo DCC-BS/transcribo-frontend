@@ -45,7 +45,7 @@ const {
     abandonedRecording,
     pausedRecording,
     refresh: refreshStored,
-    getMp3Blob,
+    exportSession,
     markAsStopped,
 } = useStoredRecordings({
     deleteOldSessionsDaysInterval: 30,
@@ -62,6 +62,7 @@ const waitingPausedRecording = computed(() =>
 const pendingStart = ref<"audio" | "meeting">();
 const transcribingPaused = ref(false);
 const transcribeFailed = ref(false);
+const processFailed = ref(false);
 
 /** Safari tabs may lose stored data; set after mount to keep hydration intact. */
 const showInstallHint = ref(false);
@@ -120,9 +121,9 @@ async function transcribePaused(session: AudioSession): Promise<void> {
     transcribingPaused.value = true;
     transcribeFailed.value = false;
     try {
-        const audio = await getMp3Blob(session.id);
-        // refuses if it was continued elsewhere since it was listed
-        await markAsStopped(session.id, session.chunkCount);
+        const { mp3Blob: audio, chunkCount } = await exportSession(session.id);
+        // refuses if it got new audio elsewhere since it was exported
+        await markAsStopped(session.id, chunkCount);
         pendingStart.value = undefined;
         const name = session.source === "meeting" ? "Meeting" : "Aufnahme";
         emit("onMediaSelected", {
@@ -137,12 +138,29 @@ async function transcribePaused(session: AudioSession): Promise<void> {
 }
 
 /**
- * A stored recording was handed on from the abandoned recordings.
+ * Hands on a stored recording picked from the abandoned recordings, once it
+ * is marked stopped: if another tab added audio after the export, the
+ * export is stale and nothing is handed on.
  *
  * @param sessionId - The stored recording.
+ * @param audio - Its exported audio.
+ * @param chunkCount - The number of chunks in `audio`.
  */
-function onStoredProcessed(sessionId: string): void {
-    markAsStopped(sessionId).catch(() => {});
+async function onStoredProcessed(
+    sessionId: string,
+    audio: Blob,
+    chunkCount?: number,
+): Promise<void> {
+    processFailed.value = false;
+    try {
+        await markAsStopped(sessionId, chunkCount);
+    } catch (e) {
+        appLogger.error(`Handing on a stored recording failed: ${e}`);
+        processFailed.value = true;
+        await refreshStored().catch(() => {});
+        return;
+    }
+    onRecodingComplete(audio);
 }
 
 /**
@@ -298,6 +316,15 @@ const acceptedMedia = [
                         class="max-w-80"
                         close
                         @update:open="transcribeFailed = false"
+                    />
+                    <UAlert
+                        v-if="processFailed"
+                        color="error"
+                        variant="subtle"
+                        role="alert"
+                        :description="t('audio.processAbandonedFailed')"
+                        close
+                        @update:open="processFailed = false"
                     />
                     <!-- v-show on the wrappers: the views stay mounted, so
                          their exposed state stays readable -->

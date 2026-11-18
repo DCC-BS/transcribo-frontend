@@ -15,7 +15,13 @@ const emit = defineEmits<{
     /** The record button was pressed; the parent decides via `record`. */
     (e: "startRequested"): void;
     (e: "continueRequested", session: AudioSession): void;
-    (e: "storedProcessed", sessionId: string): void;
+    /** A stored recording to hand on once it is marked stopped. */
+    (
+        e: "storedProcessed",
+        sessionId: string,
+        audio: Blob,
+        chunkCount?: number,
+    ): void;
     /** A recording was paused or stopped: stored recordings changed. */
     (e: "storedChanged"): void;
 }>();
@@ -107,10 +113,14 @@ const audioSessionActions = computed(() => [
     {
         label: t("audio.processAbandoned"),
         icon: "i-lucide-play",
-        handler: async (sessionId: string, mp3Blob: Blob) => {
+        handler: async (
+            sessionId: string,
+            mp3Blob: Blob,
+            _deleteSession: () => Promise<void>,
+            chunkCount?: number,
+        ) => {
             showAbandonedRecordings.value = false;
-            emit("storedProcessed", sessionId);
-            emit("onRecordingComplete", mp3Blob);
+            emit("storedProcessed", sessionId, mp3Blob, chunkCount);
         },
     },
 ]);

@@ -24,7 +24,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
                 () => undefined,
             ),
             refresh: async () => {},
-            getMp3Blob: unavailable,
+            exportSession: unavailable,
             markAsStopped: unavailable,
         };
     }
@@ -34,7 +34,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
         abandonedRecording,
         pausedRecording,
         refresh,
-        getMp3Blob,
+        exportSession,
         markAsStopped,
     } = useAudioSessions(options);
     return {
@@ -42,7 +42,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
         abandonedRecording,
         pausedRecording,
         refresh,
-        getMp3Blob,
+        exportSession,
         markAsStopped,
     };
 }

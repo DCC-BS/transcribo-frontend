@@ -336,7 +336,8 @@
         "abandonedRecordings": "Du hast {count} abgebrochene Aufnahmen.",
         "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen",
         "continueAbandoned": "Aufnahme fortsetzen",
-        "processAbandoned": "Verarbeiten"
+        "processAbandoned": "Verarbeiten",
+        "processAbandonedFailed": "Diese Aufnahme konnte nicht verarbeitet werden: Sie wurde fortgesetzt oder ist in einem anderen Tab geöffnet. Die Liste wurde aktualisiert; bitte versuche es erneut."
     },
     "languages": {
         "autoDetect": "Automatisch erkennen",
