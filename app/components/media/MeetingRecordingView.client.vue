@@ -23,6 +23,7 @@ const {
     isProcessing,
     isPaused,
     isSavingPause,
+    pauseSaveFailed,
     isBusy,
     elapsedSeconds,
     stream,
@@ -113,11 +114,17 @@ const hint = computed(() =>
                     {{ t("audio-recorder.audio.recordingPaused") }}
                 </span>
             </div>
-            <p v-if="isPaused" class="mx-auto max-w-64 text-xs text-muted">
+            <p
+                v-if="isPaused"
+                class="mx-auto max-w-64 text-xs"
+                :class="pauseSaveFailed ? 'text-error' : 'text-muted'"
+            >
                 {{
                     isSavingPause
                         ? t("audio-recorder.audio.savingPause")
-                        : t("audio-recorder.audio.pausedSafely")
+                        : pauseSaveFailed
+                          ? t("audio-recorder.audio.errors.pauseNotSaved")
+                          : t("audio-recorder.audio.pausedSafely")
                 }}
             </p>
             <div v-else class="flex items-center justify-center gap-3">

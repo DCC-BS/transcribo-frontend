@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import type { AudioSession } from "@dcc-bs/audio-recorder.bs.js/prelude";
+import {
+    type AudioSession,
+    isResumable,
+} from "@dcc-bs/audio-recorder.bs.js/prelude";
 import type { AudioRecorder } from "#components";
 
 const props = defineProps<{
@@ -97,8 +100,11 @@ const audioSessionActions = computed(() => [
         needsAudio: false,
         // only one recording may be paused: with one waiting, only it can
         // be continued
+        // a stopped one is a backup and cannot be continued
         visible: (session: AudioSession) =>
-            !props.pausedRecording || props.pausedRecording.id === session.id,
+            isResumable(session) &&
+            (!props.pausedRecording ||
+                props.pausedRecording.id === session.id),
         handler: (sessionId: string) => {
             const session = props.abandonedRecording?.find(
                 (s) => s.id === sessionId,
