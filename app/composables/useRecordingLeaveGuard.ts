@@ -74,11 +74,9 @@ export function useRecordingLeaveGuard(
         if (toValue(isFinishing)) {
             return ask("leave");
         }
-        if (
-            toValue(isRecording) &&
-            saveBeforeLeave &&
-            !(await saveBeforeLeave())
-        ) {
+        // also when no longer busy: a pause may still be saving, or its
+        // save may have failed already
+        if (saveBeforeLeave && !(await saveBeforeLeave())) {
             return ask("leaveUnsaved");
         }
         // an earlier navigation's dialog is moot now

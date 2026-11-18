@@ -108,9 +108,9 @@ defineExpose({
     /** Pauses and stores the recording; false if part of it was not stored. */
     saveForLeave: async (): Promise<boolean> => {
         const r = recorder.value;
-        if (r?.isRecording) {
-            await r.pauseRecording();
-        }
+        // pauses a running recording and joins a pause still being saved;
+        // without either it returns at once
+        await r?.pauseRecording();
         return !r?.pauseSaveFailed;
     },
 });

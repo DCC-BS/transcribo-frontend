@@ -184,8 +184,19 @@ describe("useRecordingLeaveGuard saving before in-app navigation", () => {
         expect(await routeLeaveGuards[0]?.()).toBe(true);
     });
 
-    it("does not save when nothing is recorded", async () => {
+    it("leaves without asking when nothing is recorded", async () => {
+        save.mockResolvedValueOnce(true);
         expect(await routeLeaveGuards[0]?.()).toBe(true);
-        expect(save).not.toHaveBeenCalled();
+        expect(openDialog).not.toHaveBeenCalled();
+    });
+
+    it("asks when an earlier pause already failed to save", async () => {
+        // not busy any more, but the last part is missing
+        save.mockResolvedValueOnce(false);
+        openDialog.mockImplementationOnce(({ onClose }) => onClose());
+        expect(await routeLeaveGuards[0]?.()).toBe(false);
+        expect(openDialog).toHaveBeenLastCalledWith(
+            expect.objectContaining({ title: "recording.leaveUnsaved.title" }),
+        );
     });
 });
