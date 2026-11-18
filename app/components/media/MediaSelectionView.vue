@@ -41,6 +41,7 @@ const finishing = computed(
 useRecordingLeaveGuard(busy, finishing);
 
 const {
+    isReady: storedReady,
     abandonedRecording,
     pausedRecording,
     refresh: refreshStored,
@@ -74,6 +75,10 @@ onMounted(() => {
  * @param kind - The recorder that asked.
  */
 function requestStart(kind: "audio" | "meeting"): void {
+    // until stored recordings are read, a paused one would go unnoticed
+    if (!storedReady.value) {
+        return;
+    }
     if (pausedRecording.value) {
         pendingStart.value = kind;
         return;
@@ -232,7 +237,7 @@ const acceptedMedia = [
             />
             <UFileUpload
                 v-model="uploadFile"
-                :disabled="recording"
+                :disabled="recording || transcribingPaused"
                 :accept="acceptedMedia"
                 icon="i-lucide-file-up"
                 :label="t('pages.index.dropzoneLabel')"

@@ -18,6 +18,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
             throw new Error("Stored recordings exist only in the browser");
         };
         return {
+            isReady: ref(false),
             abandonedRecording: ref<AudioSession[] | undefined>(),
             pausedRecording: computed<AudioSession | undefined>(
                 () => undefined,
@@ -29,6 +30,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
     }
 
     const {
+        isReady,
         abandonedRecording,
         pausedRecording,
         refresh,
@@ -36,6 +38,7 @@ export function useStoredRecordings(options: AudioSessionOptions) {
         markAsStopped,
     } = useAudioSessions(options);
     return {
+        isReady,
         abandonedRecording,
         pausedRecording,
         refresh,
