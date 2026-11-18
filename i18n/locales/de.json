@@ -337,7 +337,7 @@
         "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen",
         "continueAbandoned": "Aufnahme fortsetzen",
         "processAbandoned": "Verarbeiten",
-        "processAbandonedFailed": "Diese Aufnahme konnte nicht verarbeitet werden. Sie ist weiterhin gespeichert; bitte versuche es erneut.",
+        "processAbandonedFailed": "Diese Aufnahme konnte nicht verarbeitet werden. Bitte versuche es erneut.",
         "processAbandonedConflict": "Diese Aufnahme konnte nicht verarbeitet werden: Sie wurde fortgesetzt oder ist in einem anderen Tab geöffnet. Bitte versuche es erneut.",
         "deleteAbandoned": "Löschen"
     },

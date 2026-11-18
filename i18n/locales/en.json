@@ -337,7 +337,7 @@
         "showAbandonedRecordings": "Show abandoned recordings",
         "continueAbandoned": "Continue recording",
         "processAbandoned": "Process",
-        "processAbandonedFailed": "This recording could not be processed. It is still saved; please try again.",
+        "processAbandonedFailed": "This recording could not be processed. Please try again.",
         "processAbandonedConflict": "This recording could not be processed: it was continued or is open in another tab. Please try again.",
         "deleteAbandoned": "Delete"
     },
