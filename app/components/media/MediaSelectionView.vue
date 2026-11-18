@@ -31,9 +31,13 @@ const recording = computed(() => audioActive.value || meetingActive.value);
 const busy = computed(() =>
     Boolean(audioView.value?.busy || meetingView.value?.busy),
 );
-/** A recording is being joined for upload. */
+/** A recording is being joined for upload, or a stored one handed on. */
 const finishing = computed(() =>
-    Boolean(audioView.value?.finishing || meetingView.value?.finishing),
+    Boolean(
+        audioView.value?.finishing ||
+            meetingView.value?.finishing ||
+            handingOn.value,
+    ),
 );
 
 // leaving inside the app pauses and stores a running recording, so the
