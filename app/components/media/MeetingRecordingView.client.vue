@@ -2,9 +2,22 @@
 import { motion } from "motion-v";
 import { formatTime } from "~/utils/time";
 
-const emit = defineEmits<(e: "onRecordingComplete", file: Blob) => void>();
+const props = defineProps<{
+    /** Starting must wait: stored recordings are not read (yet). */
+    blocked?: boolean;
+    /** They are being read right now. */
+    loading?: boolean;
+}>();
 
-/** Lets the parent hide the other recorder while this one is busy. */
+const emit = defineEmits<{
+    (e: "onRecordingComplete", file: Blob): void;
+    /** The record button was pressed; the parent decides via `start`. */
+    (e: "startRequested"): void;
+    /** A recording was paused, stopped or failed: stored recordings changed. */
+    (e: "storedChanged"): void;
+}>();
+
+/** Lets the parent hide the other recorder while this one is in use. */
 const active = defineModel<boolean>("active", { default: false });
 
 const { t } = useI18n();
@@ -15,28 +28,59 @@ const {
     isRecording,
     isStarting,
     isProcessing,
+    isPaused,
+    isSavingPause,
+    pauseSaveFailed,
+    isBusy,
     elapsedSeconds,
     stream,
     error,
     start,
+    resume,
+    pause,
+    resumePaused,
     stop,
 } = useMeetingRecorder((msg) => logger.debug(msg));
 
-// the screen picker and joining the chunks count as busy too, not just the
+// the screen picker, a pause and joining the chunks count too, not just the
 // running recording
 watchEffect(() => {
-    active.value = isRecording.value || isStarting.value || isProcessing.value;
+    active.value =
+        isRecording.value ||
+        isStarting.value ||
+        isProcessing.value ||
+        isPaused.value;
 });
+
+watch(isPaused, () => emit("storedChanged"));
 
 /**
  * Runs a meeting recording and emits the audio once it is stopped.
+ *
+ * @param resumeId - A stored meeting to continue instead of a new one.
  */
-async function record(): Promise<void> {
-    const audio = await start();
+async function record(resumeId?: string): Promise<void> {
+    const audio = await (resumeId ? resume(resumeId) : start());
+    emit("storedChanged");
     if (audio) {
         emit("onRecordingComplete", audio);
     }
 }
+
+defineExpose({
+    /** Reloading or closing the page now would lose audio. */
+    busy: computed(() => isBusy.value || pauseSaveFailed.value),
+    /** The recording is being joined for upload. */
+    finishing: isProcessing,
+    record,
+    /** Pauses and stores the recording; false if part of it was not stored. */
+    saveForLeave: async (): Promise<boolean> => {
+        // pauses a running recording and joins a pause still being saved;
+        // without either it returns at once
+        await pause();
+        return !pauseSaveFailed.value;
+    },
+});
 
 // the button's own hint doubles as the reason it is disabled
 const hint = computed(() =>
@@ -48,14 +92,14 @@ const hint = computed(() =>
 
 <template>
     <div class="flex flex-col items-center gap-2">
-        <template v-if="!isRecording">
+        <template v-if="!isRecording && !isPaused">
             <UButton
                 icon="i-lucide-monitor-speaker"
                 color="neutral"
                 variant="subtle"
-                :loading="isStarting || isProcessing"
-                :disabled="!isSupported"
-                @click="record"
+                :loading="isStarting || isProcessing || props.loading"
+                :disabled="!isSupported || props.blocked"
+                @click="emit('startRequested')"
             >
                 {{ t("meeting.record") }}
             </UButton>
@@ -77,7 +121,26 @@ const hint = computed(() =>
 
         <!-- mirrors the microphone recorder: pulsing state, clock, levels -->
         <div v-else class="space-y-6 text-center">
-            <div class="flex items-center justify-center gap-3">
+            <div v-if="isPaused" class="flex items-center justify-center gap-3">
+                <UIcon name="i-lucide-pause" class="size-4 text-warning" />
+                <span class="text-lg font-medium text-warning">
+                    {{ t("audio-recorder.audio.recordingPaused") }}
+                </span>
+            </div>
+            <p
+                v-if="isPaused"
+                class="mx-auto max-w-64 text-xs"
+                :class="pauseSaveFailed ? 'text-error' : 'text-muted'"
+            >
+                {{
+                    isSavingPause
+                        ? t("audio-recorder.audio.savingPause")
+                        : pauseSaveFailed
+                          ? t("audio-recorder.audio.errors.pauseNotSaved")
+                          : t("audio-recorder.audio.pausedSafely")
+                }}
+            </p>
+            <div v-else class="flex items-center justify-center gap-3">
                 <motion.div
                     class="size-4 rounded-full bg-red-500"
                     :animate="{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }"
@@ -113,19 +176,43 @@ const hint = computed(() =>
             </div>
 
             <div
+                v-if="isRecording"
                 class="rounded-2xl border border-slate-200/30 bg-slate-900/5 p-4"
             >
                 <AudioVisualizer :stream="stream" :is-recording="isRecording" />
             </div>
 
-            <UButton
-                color="secondary"
-                variant="link"
-                icon="i-lucide-square"
-                @click="stop"
-            >
-                {{ t("audio-recorder.audio.stopRecording") }}
-            </UButton>
+            <div class="flex items-center justify-center gap-2">
+                <UButton
+                    v-if="isRecording"
+                    color="neutral"
+                    variant="link"
+                    icon="i-lucide-pause"
+                    @click="pause"
+                >
+                    {{ t("audio-recorder.audio.pauseRecording") }}
+                </UButton>
+                <UButton
+                    v-if="isPaused"
+                    color="primary"
+                    variant="link"
+                    icon="i-lucide-play"
+                    :loading="isStarting"
+                    :disabled="isStarting || isSavingPause"
+                    @click="resumePaused"
+                >
+                    {{ t("audio-recorder.audio.resumeRecording") }}
+                </UButton>
+                <UButton
+                    color="secondary"
+                    variant="link"
+                    icon="i-lucide-square"
+                    :disabled="isStarting"
+                    @click="stop"
+                >
+                    {{ t("audio-recorder.audio.stopRecording") }}
+                </UButton>
+            </div>
         </div>
 
         <p v-if="error" class="max-w-64 text-center text-xs text-error">

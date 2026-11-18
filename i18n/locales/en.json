@@ -334,7 +334,10 @@
         "abandonedRecording": "Recording abandoned at {date}",
         "recover": "Recover",
         "abandonedRecordings": "You have {count} abandoned recordings",
-        "showAbandonedRecordings": "Show abandoned recordings"
+        "showAbandonedRecordings": "Show abandoned recordings",
+        "processAbandoned": "Process",
+        "processAbandonedFailed": "This recording could not be processed. Please try again.",
+        "processAbandonedConflict": "This recording could not be processed: it was continued or is open in another tab. Please try again."
     },
     "languages": {
         "autoDetect": "Auto-detect",
@@ -613,7 +616,8 @@
         "errors": {
             "permission-denied": "Recording was cancelled. Microphone and screen sharing are both required.",
             "no-screen-audio": "The selected screen was shared without sound. Share a tab or window again and tick “Share audio”.",
-            "failed": "The recording could not be started."
+            "failed": "The recording could not be started.",
+            "resume-failed": "The recording could not be continued. It is still paused and saved."
         },
         "unsupported": {
             "browser": "Recording screen audio is not supported in this browser. Use Chrome or Edge on Windows.",
@@ -621,12 +625,27 @@
         }
     },
     "recording": {
-        "inProgressWarning": "Recording in progress: don't reload or close this page, or the recording stops and the last few seconds are lost. You can recover the rest afterwards under “Show abandoned recordings”.",
+        "inProgressWarning": "Recording in progress: don't reload or close this page, or the last few seconds are lost. Pause first: a paused recording is saved and can be continued later.",
         "leave": {
-            "title": "Recording in progress",
-            "message": "If you leave the page now, the recording stops and the last few seconds are lost.",
+            "title": "Recording is being finished",
+            "message": "If you leave the page now, the recording is not uploaded. You can still find it under “Show abandoned recordings”.",
             "confirm": "Leave page",
-            "cancel": "Keep recording"
-        }
+            "cancel": "Stay"
+        },
+        "leaveUnsaved": {
+            "title": "Part of the recording was not saved",
+            "message": "The last part of the recording could not be saved. If you leave now, it is lost; what was saved stays under “Show abandoned recordings”."
+        },
+        "paused": {
+            "title": "Paused recording",
+            "description": "From {date}, {duration} recorded so far.",
+            "continue": "Continue recording",
+            "transcribe": "Transcribe it",
+            "askTitle": "You have a paused recording",
+            "askMessage": "Only one recording can be paused at a time. Continue the paused recording, or transcribe it first and then start a new one.",
+            "installHint": "Tip: add Transcribo to your Home Screen (Share → Add to Home Screen) and record there: Safari may delete data of websites that are not opened for a few days. The installed app does not see recordings made in Safari, so continue or transcribe those in Safari first.",
+            "transcribeFailed": "The paused recording could not be prepared for transcription. It is still saved; please try again."
+        },
+        "storedLoadFailed": "Saved recordings could not be loaded, so recording is not available yet."
     }
 }

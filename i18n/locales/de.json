@@ -334,7 +334,10 @@
         "abandonedRecording": "Aufnahme abgebrochen am {date}",
         "recover": "Wiederherstellen",
         "abandonedRecordings": "Du hast {count} abgebrochene Aufnahmen.",
-        "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen"
+        "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen",
+        "processAbandoned": "Verarbeiten",
+        "processAbandonedFailed": "Diese Aufnahme konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+        "processAbandonedConflict": "Diese Aufnahme konnte nicht verarbeitet werden: Sie wurde fortgesetzt oder ist in einem anderen Tab geöffnet. Bitte versuche es erneut."
     },
     "languages": {
         "autoDetect": "Automatisch erkennen",
@@ -613,7 +616,8 @@
         "errors": {
             "permission-denied": "Die Aufnahme wurde abgebrochen. Mikrofon und Bildschirmfreigabe werden beide benötigt.",
             "no-screen-audio": "Der gewählte Bildschirm wurde ohne Ton geteilt. Teilen Sie einen Tab oder ein Fenster erneut und aktivieren Sie „Ton teilen“.",
-            "failed": "Die Aufnahme konnte nicht gestartet werden."
+            "failed": "Die Aufnahme konnte nicht gestartet werden.",
+            "resume-failed": "Die Aufnahme konnte nicht fortgesetzt werden. Sie ist weiterhin pausiert und gespeichert."
         },
         "unsupported": {
             "browser": "Die Aufnahme des Bildschirmtons wird in diesem Browser nicht unterstützt. Verwenden Sie Chrome oder Edge unter Windows.",
@@ -621,12 +625,27 @@
         }
     },
     "recording": {
-        "inProgressWarning": "Aufnahme läuft: Lade die Seite nicht neu und schliesse sie nicht, sonst bricht die Aufnahme ab und die letzten Sekunden gehen verloren. Den Rest findest du danach unter „Abgebrochene Aufnahmen anzeigen“.",
+        "inProgressWarning": "Aufnahme läuft: Lade die Seite nicht neu und schliesse sie nicht, sonst gehen die letzten Sekunden verloren. Pausiere zuerst: Eine pausierte Aufnahme ist gespeichert und kann später fortgesetzt werden.",
         "leave": {
-            "title": "Aufnahme läuft",
-            "message": "Wenn du die Seite jetzt verlässt, bricht die Aufnahme ab und die letzten Sekunden gehen verloren.",
+            "title": "Aufnahme wird abgeschlossen",
+            "message": "Wenn du die Seite jetzt verlässt, wird die Aufnahme nicht hochgeladen. Du findest sie danach unter „Abgebrochene Aufnahmen anzeigen“.",
             "confirm": "Seite verlassen",
-            "cancel": "Weiter aufnehmen"
-        }
+            "cancel": "Bleiben"
+        },
+        "leaveUnsaved": {
+            "title": "Ein Teil der Aufnahme wurde nicht gespeichert",
+            "message": "Der letzte Teil der Aufnahme konnte nicht gespeichert werden. Wenn du die Seite jetzt verlässt, geht er verloren; das Gespeicherte findest du unter „Abgebrochene Aufnahmen anzeigen“."
+        },
+        "paused": {
+            "title": "Pausierte Aufnahme",
+            "description": "Vom {date}, bisher {duration} aufgenommen.",
+            "continue": "Aufnahme fortsetzen",
+            "transcribe": "Transkribieren",
+            "askTitle": "Du hast eine pausierte Aufnahme",
+            "askMessage": "Es kann nur eine Aufnahme pausiert sein. Setze die pausierte Aufnahme fort, oder transkribiere sie zuerst und starte danach eine neue.",
+            "installHint": "Tipp: Füge Transcribo zum Home-Bildschirm hinzu (Teilen → Zum Home-Bildschirm) und nimm dort auf: Safari kann Daten von Websites löschen, die einige Tage nicht geöffnet wurden. Die installierte App sieht keine Aufnahmen aus Safari, setze diese deshalb zuerst in Safari fort oder transkribiere sie dort.",
+            "transcribeFailed": "Die pausierte Aufnahme konnte nicht für die Transkription vorbereitet werden. Sie ist weiterhin gespeichert; bitte versuche es erneut."
+        },
+        "storedLoadFailed": "Gespeicherte Aufnahmen konnten nicht geladen werden, deshalb ist Aufnehmen noch nicht möglich."
     }
 }

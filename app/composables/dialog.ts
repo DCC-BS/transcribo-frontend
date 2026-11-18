@@ -51,5 +51,10 @@ export function useDialog() {
         _isOpen.value = true;
     }
 
-    return { openDialog };
+    /** Closes the dialog without running either callback. */
+    function closeDialog() {
+        _isOpen.value = false;
+    }
+
+    return { openDialog, closeDialog };
 }
