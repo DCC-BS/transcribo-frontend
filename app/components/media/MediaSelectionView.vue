@@ -67,6 +67,12 @@ const waitingPausedRecording = computed(() =>
     recording.value ? undefined : pausedRecording.value,
 );
 
+/**
+ * Stored recordings are known, so a paused one cannot be missed: not before
+ * the first read, nor after a later read failed.
+ */
+const canStart = computed(() => storedReady.value && !storedLoadFailed.value);
+
 /** Which recorder asked to start while a recording was paused. */
 const pendingStart = ref<"audio" | "meeting">();
 const transcribingPaused = ref(false);
@@ -102,7 +108,7 @@ onMounted(() => {
  */
 function requestStart(kind: "audio" | "meeting"): void {
     // until stored recordings are read, a paused one would go unnoticed
-    if (!storedReady.value) {
+    if (!canStart.value) {
         return;
     }
     if (pausedRecording.value) {
@@ -381,7 +387,7 @@ const acceptedMedia = [
                             v-model:active="audioActive"
                             :abandoned-recording="abandonedRecording"
                             :paused-recording="pausedRecording"
-                            :blocked="!storedReady"
+                            :blocked="!canStart"
                             :loading="!storedReady && !storedLoadFailed"
                             @start-requested="requestStart('audio')"
                             @continue-requested="continueRecording"
@@ -394,7 +400,7 @@ const acceptedMedia = [
                         <MeetingRecordingView
                             ref="meetingView"
                             v-model:active="meetingActive"
-                            :blocked="!storedReady"
+                            :blocked="!canStart"
                             :loading="!storedReady && !storedLoadFailed"
                             @start-requested="requestStart('meeting')"
                             @stored-changed="refreshStored"
