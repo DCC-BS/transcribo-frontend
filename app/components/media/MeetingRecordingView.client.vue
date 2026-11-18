@@ -2,6 +2,13 @@
 import { motion } from "motion-v";
 import { formatTime } from "~/utils/time";
 
+const props = defineProps<{
+    /** Starting must wait: stored recordings are not read (yet). */
+    blocked?: boolean;
+    /** They are being read right now. */
+    loading?: boolean;
+}>();
+
 const emit = defineEmits<{
     (e: "onRecordingComplete", file: Blob): void;
     /** The record button was pressed; the parent decides via `start`. */
@@ -91,8 +98,8 @@ const hint = computed(() =>
                 icon="i-lucide-monitor-speaker"
                 color="neutral"
                 variant="subtle"
-                :loading="isStarting || isProcessing"
-                :disabled="!isSupported"
+                :loading="isStarting || isProcessing || props.loading"
+                :disabled="!isSupported || props.blocked"
                 @click="emit('startRequested')"
             >
                 {{ t("meeting.record") }}

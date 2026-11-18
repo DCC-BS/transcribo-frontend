@@ -8,6 +8,10 @@ import type { AudioRecorder } from "#components";
 const props = defineProps<{
     abandonedRecording?: AudioSession[];
     pausedRecording?: AudioSession;
+    /** Starting must wait: stored recordings are not read (yet). */
+    blocked?: boolean;
+    /** They are being read right now. */
+    loading?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -223,6 +227,8 @@ const audioSessionActions = computed(() => [
         <UButton
             v-if="!shouldRecord"
             icon="i-lucide-mic"
+            :loading="props.loading"
+            :disabled="props.blocked"
             @click="emit('startRequested')"
             >{{ t("pages.index.recordAudio") }}</UButton
         >

@@ -381,6 +381,8 @@ const acceptedMedia = [
                             v-model:active="audioActive"
                             :abandoned-recording="abandonedRecording"
                             :paused-recording="pausedRecording"
+                            :blocked="!storedReady"
+                            :loading="!storedReady && !storedLoadFailed"
                             @start-requested="requestStart('audio')"
                             @continue-requested="continueRecording"
                             @stored-processed="onStoredProcessed"
@@ -392,6 +394,8 @@ const acceptedMedia = [
                         <MeetingRecordingView
                             ref="meetingView"
                             v-model:active="meetingActive"
+                            :blocked="!storedReady"
+                            :loading="!storedReady && !storedLoadFailed"
                             @start-requested="requestStart('meeting')"
                             @stored-changed="refreshStored"
                             @on-recording-complete="onMeetingRecorded"
