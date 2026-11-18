@@ -6,9 +6,7 @@ import {
 import type { AudioRecorder } from "#components";
 
 const props = defineProps<{
-    /** Stored recordings no tab is recording right now. */
     abandonedRecording?: AudioSession[];
-    /** The paused recording, if any: only it may be continued. */
     pausedRecording?: AudioSession;
 }>();
 
@@ -16,9 +14,7 @@ const emit = defineEmits<{
     (e: "onRecordingComplete", file: Blob): void;
     /** The record button was pressed; the parent decides via `record`. */
     (e: "startRequested"): void;
-    /** "Continue recording" was chosen for a stored recording. */
     (e: "continueRequested", session: AudioSession): void;
-    /** A stored recording was handed on for processing. */
     (e: "storedProcessed", sessionId: string): void;
     /** A recording was paused or stopped: stored recordings changed. */
     (e: "storedChanged"): void;
@@ -35,15 +31,11 @@ const debugLog = (msg: string): void => {
 };
 
 const shouldRecord = ref(false);
-/** The stored session the recorder continues, if any. */
 const resumeId = ref<string>();
 const showAbandonedRecordings = ref(false);
 const recorder = ref<InstanceType<typeof AudioRecorder>>();
 
-// in use while the recorder starts, records, holds a pause or joins
-// chunks. A start that fails (no microphone, permission denied) ends
-// `isStarting` without setting anything else, so the parent offers both
-// recorders again
+// a failed start only ends isStarting, so both recorders are offered again
 watchEffect(() => {
     active.value = Boolean(
         recorder.value?.isStarting ||
@@ -96,11 +88,8 @@ const audioSessionActions = computed(() => [
         label: t("audio.continueAbandoned"),
         icon: "i-lucide-mic",
         color: "secondary",
-        // continuing only needs the id, not the joined audio
         needsAudio: false,
-        // only one recording may be paused: with one waiting, only it can
-        // be continued
-        // a stopped one is a backup and cannot be continued
+        // only the paused recording, if there is one; never a stopped backup
         visible: (session: AudioSession) =>
             isResumable(session) &&
             (!props.pausedRecording ||

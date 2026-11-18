@@ -200,11 +200,9 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
     }
 
     /**
-     * Continues a stored meeting (paused, or cut off by a reload): asks for
-     * the screen and microphone again and appends to it.
+     * Continues a stored meeting; asks for screen and microphone again.
      *
      * @param sessionId - The stored meeting.
-     * @returns As {@link start}.
      */
     function resume(sessionId: string): Promise<Blob | undefined> {
         return begin(() => resumeSession(sessionId));
@@ -213,7 +211,7 @@ export function useMeetingRecorder(logger?: (msg: string) => void) {
     /**
      * Runs a start and awaits the whole recording.
      *
-     * @param startCapture - Starts recording: a new or a stored session.
+     * @param startCapture - Starts a new or a stored session.
      */
     async function begin(
         startCapture: () => Promise<void>,

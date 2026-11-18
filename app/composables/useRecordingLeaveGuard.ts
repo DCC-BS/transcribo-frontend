@@ -50,8 +50,7 @@ export function useRecordingLeaveGuard(
 
     onBeforeRouteLeave(() => {
         if (!toValue(isFinishing)) {
-            // an earlier navigation still asking is moot now: answer it and
-            // take its dialog down
+            // an earlier navigation's dialog is moot now
             if (settlePending) {
                 settlePending(false);
                 settlePending = undefined;

@@ -60,21 +60,16 @@ const waitingPausedRecording = computed(() =>
 /** Which recorder asked to start while a recording was paused. */
 const pendingStart = ref<"audio" | "meeting">();
 const transcribingPaused = ref(false);
-/** Joining the paused recording for transcription failed. */
 const transcribeFailed = ref(false);
 
-/**
- * Safari tabs may lose stored recordings; installed apps keep them. Only
- * known in the browser, so set after mounting to keep hydration intact.
- */
+/** Safari tabs may lose stored data; set after mount to keep hydration intact. */
 const showInstallHint = ref(false);
 onMounted(() => {
     showInstallHint.value = isIOS() && !isStandalone();
 });
 
 /**
- * Starts a new recording, unless one is paused: only one may be, so the
- * user is asked to continue or transcribe that one first.
+ * Starts a recording, or asks first if one is paused (only one may be).
  *
  * @param kind - The recorder that asked.
  */
@@ -97,7 +92,6 @@ function requestStart(kind: "audio" | "meeting"): void {
  * @param session - The stored recording.
  */
 function continueRecording(session: AudioSession): void {
-    // being joined for transcription: it is about to be handed on
     if (transcribingPaused.value) {
         return;
     }
@@ -110,8 +104,7 @@ function continueRecording(session: AudioSession): void {
 }
 
 /**
- * Hands the paused recording on for transcription; it no longer counts as
- * paused, so a new recording can start afterwards.
+ * Hands the paused recording on for transcription and marks it stopped.
  *
  * @param session - The paused recording.
  */
@@ -131,7 +124,6 @@ async function transcribePaused(session: AudioSession): Promise<void> {
             media: new File([audio], `${name}.mp3`, { type: "audio/mpeg" }),
         });
     } catch (e) {
-        // the recording stays paused and can be tried again
         appLogger.error(`Transcribing the paused recording failed: ${e}`);
         transcribeFailed.value = true;
     } finally {
@@ -149,7 +141,7 @@ function onStoredProcessed(sessionId: string): void {
 }
 
 /**
- * Describes a stored recording: when it was started and how long it is.
+ * Start time and length of a stored recording.
  *
  * @param session - The stored recording.
  */
