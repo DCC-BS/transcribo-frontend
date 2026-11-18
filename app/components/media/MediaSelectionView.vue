@@ -38,7 +38,13 @@ const finishing = computed(
 
 // leaving inside the app pauses and stores a running recording, so the
 // router only asks while one is being finished
-useRecordingLeaveGuard(busy, finishing);
+useRecordingLeaveGuard(busy, finishing, async () => {
+    const saved = await Promise.all([
+        audioView.value?.saveForLeave() ?? true,
+        meetingView.value?.saveForLeave() ?? true,
+    ]);
+    return saved.every(Boolean);
+});
 
 const {
     isReady: storedReady,
@@ -132,6 +138,8 @@ async function transcribePaused(session: AudioSession): Promise<void> {
     } catch (e) {
         appLogger.error(`Transcribing the paused recording failed: ${e}`);
         transcribeFailed.value = true;
+        // e.g. continued elsewhere meanwhile: show what is stored now
+        await refreshStored().catch(() => {});
     } finally {
         transcribingPaused.value = false;
     }

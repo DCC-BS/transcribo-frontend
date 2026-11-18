@@ -79,6 +79,14 @@ defineExpose({
     /** The recording is being joined for upload. */
     finishing: computed(() => Boolean(recorder.value?.isProcessing)),
     record,
+    /** Pauses and stores the recording; false if part of it was not stored. */
+    saveForLeave: async (): Promise<boolean> => {
+        const r = recorder.value;
+        if (r?.isRecording) {
+            await r.pauseRecording();
+        }
+        return !r?.pauseSaveFailed;
+    },
 });
 
 /** Stored recordings besides the paused one, which has its own banner. */

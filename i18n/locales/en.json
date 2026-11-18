@@ -631,6 +631,10 @@
             "confirm": "Leave page",
             "cancel": "Stay"
         },
+        "leaveUnsaved": {
+            "title": "Part of the recording was not saved",
+            "message": "The last part of the recording could not be saved. If you leave now, it is lost; what was saved stays under “Show abandoned recordings”."
+        },
         "paused": {
             "title": "Paused recording",
             "description": "From {date}, {duration} recorded so far.",

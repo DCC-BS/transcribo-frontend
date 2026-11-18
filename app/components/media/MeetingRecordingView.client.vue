@@ -67,6 +67,13 @@ defineExpose({
     finishing: isProcessing,
     paused: isPaused,
     record,
+    /** Pauses and stores the recording; false if part of it was not stored. */
+    saveForLeave: async (): Promise<boolean> => {
+        if (isRecording.value) {
+            await pause();
+        }
+        return !pauseSaveFailed.value;
+    },
 });
 
 // the button's own hint doubles as the reason it is disabled

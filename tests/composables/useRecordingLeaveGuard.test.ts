@@ -140,3 +140,52 @@ describe("useRecordingLeaveGuard with a separate finishing state", () => {
         expect(closeDialog).toHaveBeenCalledOnce();
     });
 });
+
+describe("useRecordingLeaveGuard saving before in-app navigation", () => {
+    const isRecording = ref(false);
+    const isFinishing = ref(false);
+    const save = vi.fn<() => Promise<boolean>>();
+    let scope: EffectScope;
+
+    beforeEach(() => {
+        isRecording.value = false;
+        isFinishing.value = false;
+        routeLeaveGuards.length = 0;
+        openDialog.mockReset();
+        save.mockReset();
+        scope = effectScope();
+        scope.run(() => useRecordingLeaveGuard(isRecording, isFinishing, save));
+    });
+
+    afterEach(() => scope.stop());
+
+    it("leaves without asking once the recording is saved", async () => {
+        isRecording.value = true;
+        save.mockResolvedValueOnce(true);
+        expect(await routeLeaveGuards[0]?.()).toBe(true);
+        expect(save).toHaveBeenCalledOnce();
+        expect(openDialog).not.toHaveBeenCalled();
+    });
+
+    it("asks when part of the recording could not be saved", async () => {
+        isRecording.value = true;
+        save.mockResolvedValue(false);
+
+        openDialog.mockImplementationOnce(({ onClose }) => onClose());
+        expect(await routeLeaveGuards[0]?.()).toBe(false);
+        expect(openDialog).toHaveBeenLastCalledWith(
+            expect.objectContaining({
+                title: "recording.leaveUnsaved.title",
+                message: "recording.leaveUnsaved.message",
+            }),
+        );
+
+        openDialog.mockImplementationOnce(({ onSubmit }) => onSubmit());
+        expect(await routeLeaveGuards[0]?.()).toBe(true);
+    });
+
+    it("does not save when nothing is recorded", async () => {
+        expect(await routeLeaveGuards[0]?.()).toBe(true);
+        expect(save).not.toHaveBeenCalled();
+    });
+});

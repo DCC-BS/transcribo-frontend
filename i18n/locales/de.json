@@ -631,6 +631,10 @@
             "confirm": "Seite verlassen",
             "cancel": "Bleiben"
         },
+        "leaveUnsaved": {
+            "title": "Ein Teil der Aufnahme wurde nicht gespeichert",
+            "message": "Der letzte Teil der Aufnahme konnte nicht gespeichert werden. Wenn du die Seite jetzt verlässt, geht er verloren; das Gespeicherte findest du unter „Abgebrochene Aufnahmen anzeigen“."
+        },
         "paused": {
             "title": "Pausierte Aufnahme",
             "description": "Vom {date}, bisher {duration} aufgenommen.",
