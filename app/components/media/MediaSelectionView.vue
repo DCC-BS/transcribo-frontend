@@ -352,6 +352,17 @@ const acceptedMedia = [
                 <p v-if="pausedRecording" class="text-sm text-muted">
                     {{ describe(pausedRecording) }}
                 </p>
+                <!-- the alert in the card sits behind this dialog, out of
+                     reach for screen readers while it is open -->
+                <UAlert
+                    v-if="transcribeFailed"
+                    icon="i-lucide-circle-x"
+                    color="error"
+                    variant="subtle"
+                    role="alert"
+                    :description="t('recording.paused.transcribeFailed')"
+                    class="mt-3"
+                />
             </template>
             <template #footer>
                 <div class="flex w-full flex-wrap justify-end gap-2">
