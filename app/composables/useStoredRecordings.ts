@@ -30,22 +30,5 @@ export function useStoredRecordings(options: AudioSessionOptions) {
         };
     }
 
-    const {
-        isReady,
-        loadFailed,
-        abandonedRecording,
-        pausedRecording,
-        refresh,
-        exportSession,
-        markAsStopped,
-    } = useAudioSessions(options);
-    return {
-        isReady,
-        loadFailed,
-        abandonedRecording,
-        pausedRecording,
-        refresh,
-        exportSession,
-        markAsStopped,
-    };
+    return useAudioSessions(options);
 }

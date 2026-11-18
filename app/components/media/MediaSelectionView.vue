@@ -28,14 +28,12 @@ const meetingView = ref<InstanceType<typeof MeetingRecordingView>>();
 /** A recorder is in use (recording, paused or finishing). */
 const recording = computed(() => audioActive.value || meetingActive.value);
 /** Reloading or closing the page now would lose audio. */
-const busy = computed(
-    () => Boolean(audioView.value?.busy) || Boolean(meetingView.value?.busy),
+const busy = computed(() =>
+    Boolean(audioView.value?.busy || meetingView.value?.busy),
 );
 /** A recording is being joined for upload. */
-const finishing = computed(
-    () =>
-        Boolean(audioView.value?.finishing) ||
-        Boolean(meetingView.value?.finishing),
+const finishing = computed(() =>
+    Boolean(audioView.value?.finishing || meetingView.value?.finishing),
 );
 
 // leaving inside the app pauses and stores a running recording, so the
@@ -72,6 +70,10 @@ const waitingPausedRecording = computed(() =>
  * the first read, nor after a later read failed.
  */
 const canStart = computed(() => storedReady.value && !storedLoadFailed.value);
+/** The first read of the stored recordings is still running. */
+const storedLoading = computed(
+    () => !storedReady.value && !storedLoadFailed.value,
+);
 
 /** Which recorder asked to start while a recording was paused. */
 const pendingStart = ref<"audio" | "meeting">();
@@ -156,10 +158,11 @@ async function transcribePaused(session: AudioSession): Promise<void> {
         // refuses if it got new audio elsewhere since it was exported
         await markAsStopped(session.id, chunkCount);
         pendingStart.value = undefined;
-        const name = session.source === "meeting" ? "Meeting" : "Aufnahme";
-        emit("onMediaSelected", {
-            media: new File([audio], `${name}.mp3`, { type: "audio/mpeg" }),
-        });
+        if (session.source === "meeting") {
+            onMeetingRecorded(audio);
+        } else {
+            onRecodingComplete(audio);
+        }
     } catch (e) {
         appLogger.error(`Transcribing the paused recording failed: ${e}`);
         transcribeFailed.value = true;
@@ -373,7 +376,7 @@ const acceptedMedia = [
                         :description="t('recording.storedLoadFailed')"
                         :actions="[
                             {
-                                label: t('recording.storedLoadRetry'),
+                                label: t('common.retry'),
                                 loading: retryingLoad,
                                 onClick: retryLoadStored,
                             },
@@ -388,7 +391,7 @@ const acceptedMedia = [
                             :abandoned-recording="abandonedRecording"
                             :paused-recording="pausedRecording"
                             :blocked="!canStart"
-                            :loading="!storedReady && !storedLoadFailed"
+                            :loading="storedLoading"
                             @start-requested="requestStart('audio')"
                             @continue-requested="continueRecording"
                             @stored-processed="onStoredProcessed"
@@ -401,7 +404,7 @@ const acceptedMedia = [
                             ref="meetingView"
                             v-model:active="meetingActive"
                             :blocked="!canStart"
-                            :loading="!storedReady && !storedLoadFailed"
+                            :loading="storedLoading"
                             @start-requested="requestStart('meeting')"
                             @stored-changed="refreshStored"
                             @on-recording-complete="onMeetingRecorded"
@@ -453,7 +456,7 @@ const acceptedMedia = [
                         variant="ghost"
                         @click="askOpen = false"
                     >
-                        {{ t("recording.paused.cancel") }}
+                        {{ t("ui.cancel") }}
                     </UButton>
                     <UButton
                         v-if="pausedRecording"

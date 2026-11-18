@@ -4,20 +4,10 @@ import { useI18n } from "vue-i18n";
 import { onBeforeRouteLeave } from "vue-router";
 import { useDialog } from "./dialog";
 
-/*
-    Reloading or closing the page mid-recording cuts the recording off: the
-    chunks stored so far survive in IndexedDB and the recording can be
-    continued, but the last seconds were never stored. That can only be
-    intercepted through `beforeunload`, where browsers show their own fixed
-    wording; the in-page warning next to the recorder carries the
-    explanation.
-
-    Navigating inside the app is different: the page stays alive, so the
-    recorder pauses and stores everything first (`saveBeforeLeave`). The
-    router asks with our own dialog only if that fails, or while a
-    recording is being finished (joined for upload): it would end up among
-    the abandoned recordings instead of being uploaded.
-*/
+// A reload or a closed tab loses the last unsaved seconds and can only be
+// caught by `beforeunload`, whose wording browsers fix. In-app navigation
+// saves first (`saveBeforeLeave`) and asks only if that fails or while a
+// recording is being finished for upload.
 /**
  * Asks for confirmation before audio would be lost by leaving the page.
  *
@@ -83,7 +73,7 @@ export function useRecordingLeaveGuard(
         if (settlePending) {
             settlePending(false);
             settlePending = undefined;
-            closeDialog?.();
+            closeDialog();
         }
         return true;
     });

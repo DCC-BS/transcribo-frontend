@@ -72,7 +72,6 @@ defineExpose({
     busy: isBusy,
     /** The recording is being joined for upload. */
     finishing: isProcessing,
-    paused: isPaused,
     record,
     /** Pauses and stores the recording; false if part of it was not stored. */
     saveForLeave: async (): Promise<boolean> => {

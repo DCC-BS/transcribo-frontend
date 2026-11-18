@@ -335,11 +335,9 @@
         "recover": "Wiederherstellen",
         "abandonedRecordings": "Du hast {count} abgebrochene Aufnahmen.",
         "showAbandonedRecordings": "Abgebrochene Aufnahmen anzeigen",
-        "continueAbandoned": "Aufnahme fortsetzen",
         "processAbandoned": "Verarbeiten",
         "processAbandonedFailed": "Diese Aufnahme konnte nicht verarbeitet werden. Bitte versuche es erneut.",
-        "processAbandonedConflict": "Diese Aufnahme konnte nicht verarbeitet werden: Sie wurde fortgesetzt oder ist in einem anderen Tab geöffnet. Bitte versuche es erneut.",
-        "deleteAbandoned": "Löschen"
+        "processAbandonedConflict": "Diese Aufnahme konnte nicht verarbeitet werden: Sie wurde fortgesetzt oder ist in einem anderen Tab geöffnet. Bitte versuche es erneut."
     },
     "languages": {
         "autoDetect": "Automatisch erkennen",
@@ -643,13 +641,11 @@
             "description": "Vom {date}, bisher {duration} aufgenommen.",
             "continue": "Aufnahme fortsetzen",
             "transcribe": "Transkribieren",
-            "cancel": "Abbrechen",
             "askTitle": "Du hast eine pausierte Aufnahme",
             "askMessage": "Es kann nur eine Aufnahme pausiert sein. Setze die pausierte Aufnahme fort, oder transkribiere sie zuerst und starte danach eine neue.",
             "installHint": "Tipp: Füge Transcribo zum Home-Bildschirm hinzu (Teilen → Zum Home-Bildschirm) und nimm dort auf: Safari kann Daten von Websites löschen, die einige Tage nicht geöffnet wurden. Die installierte App sieht keine Aufnahmen aus Safari, setze diese deshalb zuerst in Safari fort oder transkribiere sie dort.",
             "transcribeFailed": "Die pausierte Aufnahme konnte nicht für die Transkription vorbereitet werden. Sie ist weiterhin gespeichert; bitte versuche es erneut."
         },
-        "storedLoadFailed": "Gespeicherte Aufnahmen konnten nicht geladen werden, deshalb ist Aufnehmen noch nicht möglich.",
-        "storedLoadRetry": "Erneut versuchen"
+        "storedLoadFailed": "Gespeicherte Aufnahmen konnten nicht geladen werden, deshalb ist Aufnehmen noch nicht möglich."
     }
 }

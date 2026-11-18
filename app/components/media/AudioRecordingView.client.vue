@@ -49,12 +49,7 @@ const recorder = ref<InstanceType<typeof AudioRecorder>>();
 
 // a failed start only ends isStarting, so both recorders are offered again
 watchEffect(() => {
-    active.value = Boolean(
-        recorder.value?.isStarting ||
-            recorder.value?.isRecording ||
-            recorder.value?.isProcessing ||
-            recorder.value?.isPaused,
-    );
+    active.value = Boolean(recorder.value?.isActive);
 });
 
 // a stored recording that could not be continued (e.g. finished in another
@@ -63,15 +58,7 @@ watch(
     () => recorder.value?.isStarting,
     (starting, wasStarting) => {
         const r = recorder.value;
-        if (
-            wasStarting &&
-            !starting &&
-            resumeId.value &&
-            r &&
-            !r.isRecording &&
-            !r.isPaused &&
-            !r.isProcessing
-        ) {
+        if (wasStarting && !starting && resumeId.value && r && !r.isActive) {
             resumeError.value = r.error || undefined;
             shouldRecord.value = false;
             resumeId.value = undefined;
@@ -129,7 +116,7 @@ const otherStoredCount = computed(
 
 const audioSessionActions = computed(() => [
     {
-        label: t("audio.continueAbandoned"),
+        label: t("recording.paused.continue"),
         icon: "i-lucide-mic",
         color: "secondary",
         needsAudio: false,
@@ -145,21 +132,6 @@ const audioSessionActions = computed(() => [
             if (session) {
                 showAbandonedRecordings.value = false;
                 emit("continueRequested", session);
-            }
-        },
-    },
-    {
-        label: t("audio.deleteAbandoned"),
-        icon: "i-lucide-trash-2",
-        color: "error",
-        needsAudio: false,
-        // the built-in delete would not tell the parent, which may still
-        // offer the deleted recording as paused
-        handler: async (_sessionId: string, _mp3: Blob, deleteSession: () => Promise<void>) => {
-            try {
-                await deleteSession();
-            } finally {
-                emit("storedChanged");
             }
         },
     },
@@ -218,7 +190,7 @@ const audioSessionActions = computed(() => [
                         <AudioSessionExplorer
                             ref="audioSessionExplorer"
                             :custom-actions="audioSessionActions"
-                            :show-delete-button="false"
+                            @deleted="emit('storedChanged')"
                         />
                     </div>
                 </template>
