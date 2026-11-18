@@ -123,7 +123,8 @@ async function transcribePaused(session: AudioSession): Promise<void> {
     transcribeFailed.value = false;
     try {
         const audio = await getMp3Blob(session.id);
-        await markAsStopped(session.id);
+        // refuses if it was continued elsewhere since it was listed
+        await markAsStopped(session.id, session.chunkCount);
         pendingStart.value = undefined;
         const name = session.source === "meeting" ? "Meeting" : "Aufnahme";
         emit("onMediaSelected", {
