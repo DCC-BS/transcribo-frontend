@@ -32,8 +32,13 @@ export default defineNuxtConfig({
         maxConcurrentTranscriptions:
             Number(process.env.NUXT_MAX_CONCURRENT_TRANSCRIPTIONS) || 20,
         public: {
-            logger_bs: {
-                loglevel: process.env.LOG_LEVEL || "debug",
+            logger: {
+                // Override at runtime with NUXT_PUBLIC_LOGGER_LOGLEVEL. Production
+                // images default to info, so an unset runtime var is not debug.
+                loglevel:
+                    process.env.NODE_ENV === "production"
+                        ? "info"
+                        : process.env.LOG_LEVEL || "debug",
             },
         },
         feedback: {
