@@ -49,6 +49,7 @@ type ApiError = {
 ## Requirements
 
 This composable requires:
+
 - Nuxt UI module configured
 - Nuxt i18n module configured (for API error translations)
 - Translation keys in format `api_error.{errorId}` for API errors

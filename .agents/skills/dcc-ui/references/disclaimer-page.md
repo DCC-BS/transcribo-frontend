@@ -30,7 +30,6 @@ The `DisclaimerPage` component provides a full-page disclaimer view that users s
     </template>
 </UiContainer>
 
-
 ## Props
 
 | Prop          | Type     | Required | Description                                                    |

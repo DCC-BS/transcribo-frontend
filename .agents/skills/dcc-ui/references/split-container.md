@@ -112,6 +112,7 @@ The component automatically adapts to screen size:
 ### Layout Structure
 
 Desktop:
+
 ```
 ┌─────────────────────────────────┐
 │         Header Slot             │
@@ -123,6 +124,7 @@ Desktop:
 ```
 
 Mobile:
+
 ```
 ┌─────────────────────────────────┐
 │         Header Slot             │

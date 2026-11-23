@@ -204,6 +204,7 @@ init_logger()
 ```
 
 **Environment Variables:**
+
 - `IS_PROD`: "true" for production (JSON output), "false" for development (console output).
 - `LOG_LEVEL`: Logging level (default: "INFO").
 - `DEV_TRACEBACK_STYLE`: Traceback style in dev mode ("focused" or "rich").
@@ -221,9 +222,11 @@ logger = get_logger()  # Or get anonymous logger
 ```
 
 **Parameters:**
+
 - `name` (str | None): Optional name for the logger, typically `__name__`
 
 **Returns:**
+
 - `BoundLogger`: A structlog bound logger instance
 
 ::: tip Source Code

@@ -58,6 +58,7 @@ published_at: "2024-01-15T10:00:00Z"
 ### File Naming Convention
 
 Name your changelog files consistently, for example:
+
 - `changelog-1.0.0.md`
 - `changelog-1.1.0.md`
 - `changelog-2.0.0.md`
@@ -158,6 +159,7 @@ Example server response:
 ## Version Sorting
 
 Changelogs are automatically sorted by version number (newest first) using semantic versioning comparison. The component intelligently handles version formats like:
+
 - `1.0.0`
 - `1.2.3`
 - `2.0.0-beta.1`

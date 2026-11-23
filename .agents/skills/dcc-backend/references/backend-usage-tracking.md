@@ -135,17 +135,15 @@ usage_tracking.log_event(
 )
 ```
 
-
 ## Configuration
 
 ### HMAC Secret
 
 The HMAC secret should be:
+
 - **Secure**: Use a strong, randomly generated secret
 - **Consistent**: Same secret across all application instances for consistent pseudonymization
 - **Stored securely**: Use environment variables or secret management systems
-
-
 
 ::: tip Source Code
 The full implementation is available on GitHub: [dcc_backend_common/usage_tracking/usage_tracking.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/usage_tracking/usage_tracking.py)

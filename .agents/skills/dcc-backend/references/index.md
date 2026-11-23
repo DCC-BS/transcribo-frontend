@@ -200,6 +200,7 @@ Add code to `dcc-backend-common` when it is:
 ### What Belongs Here
 
 ✅ **Good candidates:**
+
 - FastAPI middleware (authentication, rate limiting, request logging)
 - Base classes and protocols (abstract services, repository patterns)
 - Utility functions (string normalization, date helpers, validation)
@@ -207,6 +208,7 @@ Add code to `dcc-backend-common` when it is:
 - Common API response models
 
 ❌ **Does not belong:**
+
 - Business logic specific to one application
 - Project-specific configuration
 - One-off scripts or experiments

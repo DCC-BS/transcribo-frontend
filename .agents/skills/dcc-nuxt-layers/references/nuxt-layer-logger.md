@@ -363,7 +363,6 @@ Set these environment variables:
 | ------------------ | -------- | --------------------------- | --------------------------------------- |
 | `LOGGER_LAYER_URI` | Yes      | Points to pino-logger layer | `github:DCC-BS/nuxt-layers/pino-logger` |
 
-
 ::: tip Required Dependencies
 For the Pino logger implementation, install the following packages:
 
