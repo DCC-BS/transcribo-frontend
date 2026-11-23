@@ -478,7 +478,6 @@ sudo wget -qO /usr/local/bin/hadolint https://github.com/hadolint/hadolint/relea
 sudo chmod a+x /usr/local/bin/hadolint
 ```
 
-
 ### Usage
 
 - Local CLI: hadolint Dockerfile

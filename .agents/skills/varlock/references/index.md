@@ -9,6 +9,7 @@ skillDescription: "Manages environment variables with the varlock tool: .env.sch
 # Varlock Setup
 
 [Varlock](https://varlock.dev/) is a tool for **AI-safe .env files** that provides:
+
 - **Schemas** - Declarative configuration that serves as single source of truth
 - **Validation** - Catch misconfiguration errors early with clear messages
 - **Type-safety** - Auto-generated TypeScript types from your schema
@@ -46,6 +47,7 @@ We use the varlock [Proton Pass Plguin](https://varlock.dev/plugins/proton-pass/
 ### Validation
 
 Run `bun env:check` to validate environment variables. This command:
+
 1. Logs into `pass-cli`
 2. Runs `varlock load` to validate against schema
 
@@ -87,7 +89,6 @@ Control validation with `APP_MODE`:
 The ci mode will disable automaticaly set some variables, for example it can enable the DUMMY Mode, so testing works on CI.
 :::
 
-
 Example from `.env.schema`:
 
 ```bash
@@ -124,6 +125,7 @@ type CoercedEnvSchema = {
 };
 ```
 The generated types can then be access via
+
 ```typescript
 import { ENV } from "varlock/env";
 

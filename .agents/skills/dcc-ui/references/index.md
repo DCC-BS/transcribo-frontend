@@ -57,6 +57,7 @@ That's it! You can now use common-ui.bs.js in your Nuxt app ✨
 ## Module Features
 
 When using this Nuxt module:
+
 - All components are automatically available globally without imports
 - Internationalization (i18n) integration is automatically configured
 - Design system assets are automatically included

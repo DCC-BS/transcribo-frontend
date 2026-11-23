@@ -104,6 +104,7 @@ NUXT_GITHUB_TOKEN=your_github_token # GitHub token with read & wirte access to i
 ```
 
 the variables are set in the runtime config of nuxt:
+
 ```ts
 runtimeConfig: {
         feedback: {
@@ -230,11 +231,13 @@ interface FeedbackAttachment {
 The API creates a GitHub issue with the following structure:
 
 **Title:**
+
 ```
 [Rating] Feedback from user@example.com
 ```
 
 **Body:**
+
 ```markdown
 ## Feedback Details
 
@@ -257,6 +260,7 @@ The feedback control uses Nuxt UI components for consistent styling:
 ### Built-in Styles
 
 The component uses these Nuxt UI components:
+
 - `UButton` - Submit button and close button
 - `UPopover` - Dropdown container
 - `UTextarea` - Message input

@@ -100,6 +100,7 @@ Display the footer with default DCC branding:
 ```
 
 This displays:
+
 - Animated DCC logo linking to https://www.bs.ch/ki
 - "Datenwissenschaften und KI" text
 - "Developed with ♥ by DCC - Data Competence Center" tagline (hidden on mobile)
@@ -149,7 +150,6 @@ Add version information or social links:
 ### Complete Customization
 
 Override the default branding and use all slots:
-
 
 ```vue
 <template>
@@ -207,6 +207,7 @@ The DataBsFooter uses a flexbox layout with three sections:
 ## Responsive Behavior
 
 On mobile devices (< 640px):
+
 - The organization text in the default left section is hidden
 - Only the logo is visible
 - Content in custom slots should also consider mobile layouts

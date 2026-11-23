@@ -145,6 +145,7 @@ class BaseAgent[DepsType, OutputType](ABC):
 ```
 
 **Type Parameters:**
+
 - `DepsType`: Type for dependency injection passed to the agent (use `None` if not needed)
 - `OutputType`: Expected output type (`str`, Pydantic model, TypedDict, etc.)
 
@@ -199,6 +200,7 @@ result: OutputType = await agent.run(user_prompt="Hello, world!")
 ```
 
 **Features:**
+
 - Returns complete structured output
 - Applies postprocessing to the final result
 - Logs LLM usage statistics (tokens, tool calls, etc.)
@@ -213,12 +215,14 @@ async for chunk in agent.run_stream_text(user_prompt="Hello, world!"):
 ```
 
 **Parameters:**
+
 - `user_prompt`: The input prompt (default: `None`)
 - `deps`: Dependencies for the agent (default: `None`)
 - `delta`: Stream partial tokens (`True`) or full text chunks (`False`, default)
 - `**kwargs`: Additional keyword arguments passed to the agent
 
 **Features:**
+
 - Streams text chunks as they arrive
 - Applies postprocessing to each chunk
 - Useful for chat interfaces and real-time feedback
@@ -240,6 +244,7 @@ result = withDebbuger(agent.run)("Hallo Welt")
 ```
 
 The decorator automatically:
+
 - Logs all agent events with the agent name
 
 ### What Gets Logged
@@ -363,6 +368,7 @@ Full implementation on GitHub: [github.com/DCC-BS/backend-common](https://github
 :::
 
 Files:
+
 - [llm_agent/base_agent.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/base_agent.py)
 - [llm_agent/postprocessing.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/postprocessing.py)
 - [llm_agent/debugging/agent_debugger.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/llm_agent/debugging/agent_debugger.py)

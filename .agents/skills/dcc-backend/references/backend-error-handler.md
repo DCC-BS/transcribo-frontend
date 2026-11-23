@@ -128,6 +128,7 @@ raise api_error_exception(
 ```
 
 **Parameters:**
+
 - `errorId` (str | ApiErrorCodes): Error identifier, defaults to `UNEXPECTED_ERROR`
 - `status` (int): HTTP status code, defaults to 500
 - `debugMessage` (str | None): Optional debug message
@@ -151,6 +152,7 @@ except ValueError as e:
 ```
 
 **Parameters:**
+
 - `exception` (Exception): Original exception to convert
 - `error_id` (str | ApiErrorCodes): Error identifier, defaults to `UNEXPECTED_ERROR`
 - `status_code` (int | None): Optional HTTP status code
@@ -171,6 +173,7 @@ inject_api_error_handler(app)
 ```
 
 The handler:
+
 - Catches `ApiErrorException` and returns its structured response
 - Catches other exceptions and returns a 500 response with `UNEXPECTED_ERROR`
 
@@ -187,6 +190,7 @@ All errors are returned in a consistent JSON format:
 ```
 
 **Response fields:**
+
 - `errorId` (str): Error code from `ApiErrorCodes` or custom string
 - `status` (int): HTTP status code
 - `debugMessage` (string | null): Optional debug information
@@ -201,6 +205,7 @@ All errors are returned in a consistent JSON format:
 
 ::: tip Source Code
 The full implementation is available on GitHub:
+
 - [**init**.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/fastapi_error_handling/__init__.py)
 - [error_codes.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/fastapi_error_handling/error_codes.py)
 - [error_exception.py](https://github.com/DCC-BS/backend-common/blob/main/src/dcc_backend_common/fastapi_error_handling/error_exception.py)

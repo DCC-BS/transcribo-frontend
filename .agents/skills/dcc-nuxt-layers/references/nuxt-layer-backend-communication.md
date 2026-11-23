@@ -92,6 +92,7 @@ export default defineNuxtConfig({
 | `useDummyData` | string | `""`    | Set to `"true"` to use dummy data fetcher instead of real backend |
 
 When `useDummyData` is set to `"true"`, all backend handlers will use the dummy fetcher (if configured) instead of making real HTTP requests. This is useful for:
+
 - Frontend development without a running backend
 - Testing and debugging
 - Offline development
@@ -316,6 +317,7 @@ export default backendHandlerBuilder().withMethod("POST").build("/users");
 ```
 
 **Parameters:**
+
 - `method` - One of: `'INHERIT' | 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS'`
 
 **Default**: `'INHERIT'` - Inherits from the incoming request method
@@ -343,6 +345,7 @@ export default backendHandlerBuilder()
 ```
 
 **Parameters:**
+
 - `fn(options)` - Receives `FetcherOptions<TBody>` containing:
   - `url` - Full URL (API_URL + path)
   - `method` - HTTP method
@@ -385,6 +388,7 @@ export default backendHandlerBuilder()
 ```
 
 **Parameters:**
+
 - `fn(event)` - A function that receives the H3 event and returns the body
   - `event` - H3 event object
   - Returns `Promise<TNewBody>` - The body to send (can transform the type)
@@ -423,6 +427,7 @@ export default backendHandlerBuilder()
 ```
 
 **Parameters:**
+
 - `fn(options)` - A fetcher function that receives `FetcherOptions<TBody>`
   - Returns `Promise<TNewResponse>` - The response from your custom fetcher
 
@@ -447,6 +452,7 @@ Using a custom fetcher changes the response type, which:
 Configure a dummy fetcher that returns mock data instead of making real HTTP requests. This is useful for development and testing when you don't have a backend available.
 
 **Parameters:**
+
 - `dummyData` - Can be:
   - **Static value**: A value or object to return directly
   - **Function**: A function that receives `FetcherOptions<TBody>` and returns mock data
@@ -509,6 +515,7 @@ export default backendHandlerBuilder()
 
 ::: info Note
 Using `withDummyFetcher` removes the following methods from subsequent calls:
+
 - `withBodyProvider` (body type is locked)
 - `withFetcher` (fetcher is already configured)
 - `withDummyFetcher` (dummy fetcher is already configured)
@@ -533,6 +540,7 @@ export default backendHandlerBuilder()
 ```
 
 **Parameters:**
+
 - `fn(response)` - A transformer function
   - `response` - The response from the previous transformation or fetcher
   - Returns `Promise<TMap>` - The transformed response
@@ -565,6 +573,7 @@ export default backendHandlerBuilder().withMethod("GET").build("/users");
 ```
 
 **Parameters:**
+
 - `path` - The backend API endpoint path (relative to `API_URL`). Can be a static string, a function returning a string based on the event, or a string containing dynamic placeholders.
 
 **Dynamic Placeholders**
@@ -574,10 +583,12 @@ export default backendHandlerBuilder().withMethod("GET").build("/users");
 - `[q:paramName]` - Injects a query parameter (e.g., `[q:sort]`).
 
 **Returns:**
+
 - `EventHandler<TRequest, Promise<TResponseTransformed>>` - A H3 event handler
   that can be exported from your server route file
 
 **Behavior:**
+
 1. Parses the URL path (resolving any dynamic placeholders or executing the path function)
 2. Validates that `API_URL` is configured in runtime config
 3. Calls the body provider to get the request body

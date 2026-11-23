@@ -85,6 +85,7 @@ If `confirmationText` and `contentHtml` are not provided, the component will aut
 ```
 
 The default translations used are:
+
 - **`disclaimer.confirmation_text`**: Contains the confirmation text with `{appName}` as a placeholder
 - **`disclaimer.content`**: Contains the full HTML disclaimer content
 

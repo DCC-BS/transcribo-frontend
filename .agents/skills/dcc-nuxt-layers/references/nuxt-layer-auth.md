@@ -62,11 +62,13 @@ export default defineNuxtConfig({
 Set the `AUTH_LAYER_URI` environment variable to choose your implementation:
 
 **For production (Azure AD):**
+
 ```bash
 AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/azure-auth
 ```
 
 **For development (no authentication):**
+
 ```bash
 AUTH_LAYER_URI=github:DCC-BS/nuxt-layers/no-auth
 ```
