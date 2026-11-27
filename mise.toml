@@ -1,8 +1,8 @@
 [tools]
 bun = "1.4.4"
-node = "26.13.0"
+node = "26.13.1"
 pass-cli = "latest"
-"npm:varlock" = "1.24.0"
+"npm:varlock" = "1.25.0"
 usage = "7.3.0"
 
 [plugins]
